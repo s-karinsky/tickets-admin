@@ -23,12 +23,20 @@ export const login = params => async (dispatch) => {
   }
 }
 
+export const logout = async (dispatch) => {
+  const cookies = new Cookies()
+  dispatch(setProfile({ authorized: false }))
+  cookies.remove('token')
+  cookies.remove('u_hash')
+}
+
 export const authorizeByTokens = async (dispatch) => {
   dispatch(setLoading(true))
   const cookies = new Cookies()
   const token = cookies.get('token')
   const u_hash = cookies.get('u_hash')
   if (!token && !u_hash) {
+    dispatch(setLoading(false))
     return false
   }
   const formData = toFormData({ token, u_hash })

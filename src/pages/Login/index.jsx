@@ -2,17 +2,17 @@ import {
   Col,
   Row,
   Button,
-  Checkbox,
   Form,
   Input
 } from 'antd'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { login } from '../../redux/user'
 
 export default function LoginPage() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const isLoading = useSelector(state => state.user.isLoading)
 
   return (
     <Row style={{ height: '100vh' }} justify="center" align="middle">
@@ -45,7 +45,11 @@ export default function LoginPage() {
           </Form.Item>
 
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-            <Button type="primary" htmlType="submit">
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={isLoading}
+            >
               Submit
             </Button>
           </Form.Item>

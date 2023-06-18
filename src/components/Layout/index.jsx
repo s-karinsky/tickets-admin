@@ -1,13 +1,18 @@
-import { UserOutlined } from '@ant-design/icons'
+import { useMemo } from 'react'
+import { UserOutlined, DownOutlined } from '@ant-design/icons'
 import {
-  Col,
-  Row,
-  Button,
+  Avatar,
+  Dropdown,
   Menu,
+  Space,
   Layout,
-  Space
+  Row,
+  Col
 } from 'antd'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useNavigate } from 'react-router-dom'
+import { useSelector, useDispatch } from 'react-redux'
+import { logout } from '../../redux/user'
+import styles from './styles.module.scss'
 
 const { Header, Footer, Sider, Content } = Layout
 
@@ -26,6 +31,21 @@ const items = [
 ]
 
 export default function PageLayout() {
+  const user = useSelector(state => state.user.profile)
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
+
+  const userItems = useMemo(() => ([
+    {
+      label: <a onClick={e => {
+        e.preventDefault()
+        dispatch(logout)
+        navigate('/login')
+      }}>Logout</a>,
+      key: '0',
+    },
+  ]), [dispatch])
+
   return (
     <Layout>
       <Sider>
@@ -36,8 +56,20 @@ export default function PageLayout() {
         />
       </Sider>
       <Layout>
-        <Header style={{ backgroundColor: '#ccc' }}>
-          Test
+        <Header>
+          <Row justify="end">
+            <Col>
+              <Avatar src={user.u_photo} />
+              <Dropdown menu={{ items: userItems }} trigger={['click']}>
+                <a onClick={(e) => e.preventDefault()} className={styles.headerUser}>
+                  <Space>
+                    {user.u_name}
+                    <DownOutlined style={{ fontSize: '10px' }} />
+                  </Space>
+                </a>
+              </Dropdown>
+            </Col>
+          </Row>
         </Header>
         <Content>
           <Outlet />
