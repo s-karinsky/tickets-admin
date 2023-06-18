@@ -9,7 +9,7 @@ import {
   Row,
   Col
 } from 'antd'
-import { Outlet, useNavigate } from 'react-router-dom'
+import { Outlet, useNavigate, Link } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { logout } from '../../redux/user'
 import styles from './styles.module.scss'
@@ -27,7 +27,7 @@ function getItem(label, key, icon, children, type) {
 }
 
 const items = [
-  getItem('Users', '1', <UserOutlined />),
+  getItem(<Link to='/users'>Users</Link>, '1', <UserOutlined />),
 ]
 
 export default function PageLayout() {

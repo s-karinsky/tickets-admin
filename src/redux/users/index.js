@@ -7,7 +7,8 @@ export const usersSlice = createSlice({
     isLoaded: false,
     perPage: 30,
     page: 1,
-    list: []
+    list: [],
+    currentProfile: null,
   },
   reducers: {
     setLoading: (state, action) => {
@@ -24,6 +25,9 @@ export const usersSlice = createSlice({
     },
     setUserList: (state, action) => {
       state.list = action.payload
+    },
+    setCurrentProfile: (state, action) => {
+      state.currentProfile = action.payload
     }
   },
 })
@@ -34,6 +38,7 @@ export const {
   setPage,
   setPerPage,
   setUserList,
+  setCurrentProfile,
 } = usersSlice.actions
 
 export * from './thunk'

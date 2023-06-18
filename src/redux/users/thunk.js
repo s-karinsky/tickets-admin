@@ -1,6 +1,6 @@
 import axios from '../../utils/axios'
 import toFormData from '../../utils/formData'
-import { setLoaded, setLoading, setPage, setUserList } from '.'
+import { setLoaded, setLoading, setCurrentProfile, setUserList } from '.'
 
 export const getUserList = (page, perPage) => async (dispatch) => {
   dispatch(setLoading(true))
@@ -17,5 +17,16 @@ export const getUserList = (page, perPage) => async (dispatch) => {
     console.error(e)
   } finally {
     dispatch(setLoading(false))
+  }
+}
+
+export const getUser = id => async (dispatch) => {
+  try {
+    const res = await axios.postWithAuth(`/user/${id}`)
+    const users = res.data?.data?.user
+    if (!users || !users[id]) return
+    dispatch(setCurrentProfile(users[id]))
+  } catch(e) {
+    console.error(e)
   }
 }

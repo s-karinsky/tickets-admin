@@ -5,6 +5,7 @@ import { Route, Routes, useNavigate, useLocation } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import PageLogin from './pages/Login'
 import PageUsers from './pages/Users'
+import PageUser from './pages/User'
 import Layout from './components/Layout'
 import { authorizeByTokens } from './redux/user'
 import './App.css'
@@ -41,6 +42,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route path="/users" element={<PageUsers />} />
+          <Route path="/users/:id" element={<PageUser />} />
         </Route>
         <Route path="/login" element={<PageLogin />} />
       </Routes>
