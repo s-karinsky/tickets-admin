@@ -3,7 +3,8 @@ import { LoadingOutlined } from '@ant-design/icons'
 import { Row } from 'antd'
 import { Route, Routes, useNavigate, useLocation } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
-import LoginPage from './pages/Login'
+import PageLogin from './pages/Login'
+import PageUsers from './pages/Users'
 import Layout from './components/Layout'
 import { authorizeByTokens } from './redux/user'
 import './App.css'
@@ -38,10 +39,10 @@ function App() {
   return (
     <div className="App">
       <Routes>
-        <Route path="/" Component={Layout}>
-          <Route path="/users" element={<LoginPage />} />
+        <Route path="/" element={<Layout />}>
+          <Route path="/users" element={<PageUsers />} />
         </Route>
-        <Route path="/login" element={<LoginPage />} />
+        <Route path="/login" element={<PageLogin />} />
       </Routes>
     </div>
   )

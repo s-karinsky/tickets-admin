@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { login } from '../../redux/user'
 
-export default function LoginPage() {
+export default function PageLogin() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const isLoading = useSelector(state => state.user.isLoading)

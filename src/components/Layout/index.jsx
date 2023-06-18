@@ -47,30 +47,30 @@ export default function PageLayout() {
   ]), [dispatch])
 
   return (
-    <Layout>
-      <Sider>
-        <Menu
-          defaultSelectedKeys={['1']}
-          theme="dark "
-          items={items}
-        />
-      </Sider>
+    <Layout style={{ minHeight: '100vh' }}>
+      <Header>
+        <Row justify="end">
+          <Col>
+            <Avatar src={user.u_photo} />
+            <Dropdown menu={{ items: userItems }} trigger={['click']}>
+              <a onClick={(e) => e.preventDefault()} className={styles.headerUser}>
+                <Space>
+                  {user.u_name}
+                  <DownOutlined style={{ fontSize: '10px' }} />
+                </Space>
+              </a>
+            </Dropdown>
+          </Col>
+        </Row>
+      </Header>
       <Layout>
-        <Header>
-          <Row justify="end">
-            <Col>
-              <Avatar src={user.u_photo} />
-              <Dropdown menu={{ items: userItems }} trigger={['click']}>
-                <a onClick={(e) => e.preventDefault()} className={styles.headerUser}>
-                  <Space>
-                    {user.u_name}
-                    <DownOutlined style={{ fontSize: '10px' }} />
-                  </Space>
-                </a>
-              </Dropdown>
-            </Col>
-          </Row>
-        </Header>
+        <Sider>
+          <Menu
+            defaultSelectedKeys={['1']}
+            theme="dark "
+            items={items}
+          />
+        </Sider>  
         <Content>
           <Outlet />
         </Content>
