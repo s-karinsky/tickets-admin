@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
-import { Avatar, Col, Row, Tag, Layout } from 'antd'
+import { Avatar, Col, Row, Tag } from 'antd'
 import { getUser } from '../../redux/users'
 import { USER_ROLES, USER_ROLES_COLOR } from '../../consts'
 

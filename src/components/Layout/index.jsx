@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { UserOutlined, DownOutlined } from '@ant-design/icons'
+import { UserOutlined, DownOutlined, UnorderedListOutlined } from '@ant-design/icons'
 import {
   Avatar,
   Dropdown,
@@ -9,12 +9,12 @@ import {
   Row,
   Col
 } from 'antd'
-import { Outlet, useNavigate, Link } from 'react-router-dom'
+import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { logout } from '../../redux/user'
 import styles from './styles.module.scss'
 
-const { Header, Footer, Sider, Content } = Layout
+const { Header, Sider, Content } = Layout
 
 function getItem(label, key, icon, children, type) {
   return {
@@ -27,24 +27,33 @@ function getItem(label, key, icon, children, type) {
 }
 
 const items = [
-  getItem(<Link to='/users'>Users</Link>, '1', <UserOutlined />),
+  getItem(<Link to='/users'>Users</Link>, 'users', <UserOutlined />),
+  getItem(<Link to='/matches'>Matches</Link>, 'matches', <UnorderedListOutlined />)
 ]
 
 export default function PageLayout() {
   const user = useSelector(state => state.user.profile)
   const navigate = useNavigate()
+  const location = useLocation()
   const dispatch = useDispatch()
+
+  const path = location.pathname.split('/')[1]
 
   const userItems = useMemo(() => ([
     {
-      label: <a onClick={e => {
-        e.preventDefault()
-        dispatch(logout)
-        navigate('/login')
-      }}>Logout</a>,
+      label:
+        <a
+          onClick={e => {
+            e.preventDefault()
+            dispatch(logout)
+            navigate('/login')
+          }}
+        >
+          Logout
+        </a>,
       key: '0',
     },
-  ]), [dispatch])
+  ]), [navigate, dispatch])
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -66,7 +75,7 @@ export default function PageLayout() {
       <Layout>
         <Sider>
           <Menu
-            defaultSelectedKeys={['1']}
+            selectedKeys={[path]}
             theme="dark "
             items={items}
           />

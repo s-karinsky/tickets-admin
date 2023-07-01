@@ -1,6 +1,5 @@
 import axios from '../../utils/axios'
-import toFormData from '../../utils/formData'
-import { setLoaded, setLoading, setCurrentProfile, setUserList } from '.'
+import { setLoading, setCurrentProfile, setUserList } from '.'
 
 export const getUserList = (page, perPage) => async (dispatch) => {
   dispatch(setLoading(true))
