@@ -4,6 +4,7 @@ import { Row } from 'antd'
 import { Route, Routes, useNavigate, useLocation } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import PageLogin from './pages/Login'
+import PageMatch from './pages/Match'
 import PageMatches from './pages/Matches'
 import PageUsers from './pages/Users'
 import PageUser from './pages/User'
@@ -45,6 +46,7 @@ function App() {
           <Route path="/users" element={<PageUsers />} />
           <Route path="/users/:id" element={<PageUser />} />
           <Route path="/matches" element={<PageMatches />} />
+          <Route path="/matches/:id" element={<PageMatch />} />
         </Route>
         <Route path="/login" element={<PageLogin />} />
       </Routes>

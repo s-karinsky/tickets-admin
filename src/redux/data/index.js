@@ -5,6 +5,7 @@ export const dataSlice = createSlice({
   initialState: {
     isLoading: false,
     isLoaded: false,
+    isSubmitting: false,
     tournaments: {},
     teams: {},
     stadiums: {},
@@ -16,6 +17,9 @@ export const dataSlice = createSlice({
     },
     setLoaded: (state, action) => {
       state.isLoaded = action.payload
+    },
+    setSubmitting: (state, action) => {
+      state.isSubmitting = action.payload
     },
     setData: (state, action) => {
       ['stadiums', 'schedule', 'teams', 'tournaments'].forEach(name => {
@@ -43,6 +47,7 @@ export const dataSlice = createSlice({
 export const {
   setLoading,
   setLoaded,
+  setSubmitting,
   setData,
   updateData,
 } = dataSlice.actions

@@ -37,6 +37,9 @@ export const getMatch = createSelector(
   state => state.data.stadiums,
   (id, schedule, teams, tournaments, stadiums) => {
     const match = schedule[id]
+    if (!match) {
+      return null
+    }
     return {
       ...match,
       team1: extendTeam(match.team1, teams, stadiums),

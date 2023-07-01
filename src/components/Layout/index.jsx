@@ -1,7 +1,14 @@
-import { useMemo } from 'react'
-import { UserOutlined, DownOutlined, UnorderedListOutlined } from '@ant-design/icons'
+import { useMemo, useState } from 'react'
+import {
+  UserOutlined,
+  DownOutlined,
+  UnorderedListOutlined,
+  MenuUnfoldOutlined,
+  MenuFoldOutlined
+} from '@ant-design/icons'
 import {
   Avatar,
+  Button,
   Dropdown,
   Menu,
   Space,
@@ -32,10 +39,13 @@ const items = [
 ]
 
 export default function PageLayout() {
+  const [ collapsed, setCollapsed ] = useState(false)
   const user = useSelector(state => state.user.profile)
   const navigate = useNavigate()
   const location = useLocation()
   const dispatch = useDispatch()
+
+  const toggleCollapsed = () => setCollapsed(!collapsed)
 
   const path = location.pathname.split('/')[1]
 
@@ -58,7 +68,12 @@ export default function PageLayout() {
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Header>
-        <Row justify="end">
+        <Row justify="space-between">
+          <Col style={{ marginLeft: -30 }}>
+            <Button type="primary" onClick={toggleCollapsed} style={{ marginBottom: 16 }}>
+              {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+            </Button>
+          </Col>
           <Col>
             <Avatar src={user.u_photo} />
             <Dropdown menu={{ items: userItems }} trigger={['click']}>
@@ -73,13 +88,15 @@ export default function PageLayout() {
         </Row>
       </Header>
       <Layout>
-        <Sider>
+        <Sider
+          collapsed={collapsed}
+        >
           <Menu
             selectedKeys={[path]}
-            theme="dark "
+            theme='dark'
             items={items}
           />
-        </Sider>  
+        </Sider>
         <Content>
           <Outlet />
         </Content>

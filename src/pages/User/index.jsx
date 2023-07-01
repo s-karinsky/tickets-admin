@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import { Avatar, Col, Row, Tag } from 'antd'
-import { getUser } from '../../redux/users'
+import { fetchUser } from '../../redux/users'
 import { USER_ROLES, USER_ROLES_COLOR } from '../../consts'
 
 export default function PageUser() {
@@ -11,7 +11,7 @@ export default function PageUser() {
   const { id } = useParams()
 
   useEffect(() => {
-    dispatch(getUser(id))
+    dispatch(fetchUser(id))
   }, [id])
 
   if (!profile) {

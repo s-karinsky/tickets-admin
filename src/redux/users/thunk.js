@@ -1,7 +1,7 @@
 import axios from '../../utils/axios'
 import { setLoading, setCurrentProfile, setUserList } from '.'
 
-export const getUserList = (page, perPage) => async (dispatch) => {
+export const fetchUserList = (page, perPage) => async (dispatch) => {
   dispatch(setLoading(true))
   try {
     const res = await axios.postWithAuth('/user', {
@@ -19,7 +19,7 @@ export const getUserList = (page, perPage) => async (dispatch) => {
   }
 }
 
-export const getUser = id => async (dispatch) => {
+export const fetchUser = id => async (dispatch) => {
   try {
     const res = await axios.postWithAuth(`/user/${id}`)
     const users = res.data?.data?.user

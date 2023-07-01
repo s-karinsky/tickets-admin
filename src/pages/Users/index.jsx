@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 import { Table, Tag } from 'antd'
-import { getUserList, setPage, setPerPage } from '../../redux/users'
+import { fetchUserList, setPage, setPerPage } from '../../redux/users'
 import { USER_ROLES, USER_ROLES_COLOR } from '../../consts'
 
 const columns = [
@@ -34,7 +34,7 @@ export default function PageUsers() {
   const users = useSelector(state => state.users.list)
 
   useEffect(() => {
-    dispatch(getUserList(page, perPage))
+    dispatch(fetchUserList(page, perPage))
   }, [page, perPage])
 
   return (
