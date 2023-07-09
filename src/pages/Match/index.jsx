@@ -44,8 +44,8 @@ export default function PageMatch() {
     team2: match.team2.id,
     date,
     time: date,
-    stadium: match.stadium.id,
-    tournament: match.tournament.id
+    stadium: match.stadium && match.stadium.id,
+    tournament: match.tournament && match.tournament.id
   }
 
   return (
