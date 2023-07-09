@@ -10,25 +10,25 @@ const columns = [
     title: 'Team home',
     dataIndex: 'team1',
     key: 'team1',
-    render: team => team.en
+    render: team => team && team.en
   },
   {
     title: 'Team away',
     dataIndex: 'team2',
     key: 'team2',
-    render: team => team.en
+    render: team => team && team.en
   },
   {
     title: 'Tournament',
     dataIndex: 'tournament',
     key: 'tournament',
-    render: tournament => tournament.en
+    render: tournament => tournament && tournament.en
   },
   {
     title: 'Stadium',
     dataIndex: 'stadium',
     key: 'stadium',
-    render: stadium => stadium.en
+    render: stadium => stadium && stadium.en
   },
   {
     title: 'Date',
