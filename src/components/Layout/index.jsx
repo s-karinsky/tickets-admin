@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import {
+  BarcodeOutlined,
   UserOutlined,
   DownOutlined,
   UnorderedListOutlined,
@@ -33,10 +34,11 @@ function getItem(label, key, icon, children, type) {
   }
 }
 
-const items = [
-  getItem(<Link to='/users'>Users</Link>, 'users', <UserOutlined />),
-  getItem(<Link to='/matches'>Matches</Link>, 'matches', <UnorderedListOutlined />)
-]
+const MENU_ITEMS = {
+  users: getItem(<Link to='/users'>Users</Link>, 'users', <UserOutlined />),
+  matches: getItem(<Link to='/matches'>Matches</Link>, 'matches', <UnorderedListOutlined />),
+  tickets: getItem(<Link to='/tickets'>Tickets</Link>, 'tickets', <BarcodeOutlined />)
+}
 
 export default function PageLayout() {
   const [ collapsed, setCollapsed ] = useState(false)
@@ -44,6 +46,14 @@ export default function PageLayout() {
   const navigate = useNavigate()
   const location = useLocation()
   const dispatch = useDispatch()
+
+  const items = useMemo(() => {
+    if (user.u_role === '4') {
+      return [MENU_ITEMS.users, MENU_ITEMS.matches, MENU_ITEMS.tickets]
+    } else if (user.u_role === '2') {
+      return [MENU_ITEMS.tickets]
+    }
+  }, [user.u_role])
 
   const toggleCollapsed = () => setCollapsed(!collapsed)
 

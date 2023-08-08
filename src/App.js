@@ -6,6 +6,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import PageLogin from './pages/Login'
 import PageMatch from './pages/Match'
 import PageMatches from './pages/Matches'
+import PageTickets from './pages/Tickets'
 import PageUsers from './pages/Users'
 import PageUser from './pages/User'
 import Layout from './components/Layout'
@@ -22,14 +23,14 @@ function App() {
   const isLoginPage = location.pathname === '/login'
 
   useEffect(() => {
-    dispatch(authorizeByTokens).then(isSuccess => {
-      if (!isSuccess) {
+    dispatch(authorizeByTokens).then(role => {
+      if (!role) {
         navigate('/login', { replace: true })
       } else if (isLoginPage) {
-        navigate('/users', { replace: true })
+        navigate(role === '4' ? '/users' : '/tickets', { replace: true })
       }
     })
-  }, [])
+  }, [dispatch, navigate, isLoginPage])
 
   if ((isLoading || !isAuthorized) && !isLoginPage) {
     return (
@@ -47,6 +48,7 @@ function App() {
           <Route path="/users/:id" element={<PageUser />} />
           <Route path="/matches" element={<PageMatches />} />
           <Route path="/matches/:id" element={<PageMatch />} />
+          <Route path="/tickets" element={<PageTickets />} />
         </Route>
         <Route path="/login" element={<PageLogin />} />
       </Routes>

@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Button, Row, Table } from 'antd'
 import { PlusCircleFilled } from '@ant-design/icons'
 import { fetchData, getSchedule } from '../../redux/data'
@@ -45,7 +45,7 @@ export default function PageMatches() {
   const schedule = useSelector(getSchedule)
   useEffect(() => {
     dispatch(fetchData())
-  }, [dispatch])
+  }, [])
 
   return (
     <>

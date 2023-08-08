@@ -1,4 +1,4 @@
-export const API_URL = 'https://ibronevik.ru/taxi/api/v1'
+export const API_URL = 'https://ibronevik.ru/taxi/c/agadir/api/v1'
 
 export const USER_ROLES_COLOR = {
   '1': '#2db7f5',

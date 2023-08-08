@@ -23,8 +23,8 @@ export default function PageLogin() {
           wrapperCol={{ span: 16 }}
           style={{ maxWidth: 600, textAlign: 'left' }}
           initialValues={{ remember: true }}
-          onFinish={values => dispatch(login(values)).then(isSuccess => {
-            if (isSuccess) navigate('/users')
+          onFinish={values => dispatch(login(values)).then(role => {
+            if (role) navigate(role === '4' ? '/users' : '/tickets')
           })}
           autoComplete="off"
         >

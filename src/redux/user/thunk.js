@@ -9,13 +9,13 @@ export const login = params => async (dispatch) => {
     const formData = toFormData({ ...params, type: 'e-mail' })
     const res = await axios.post('/auth', formData)
     const { data } = res
-    if (!data.auth_hash || !['4'].includes(data.auth_user?.u_role)) {
+    if (!data.auth_hash || !['2', '4'].includes(data.auth_user?.u_role)) {
       return false
     }
     
     await dispatch(getToken(data.auth_hash))
     dispatch(setProfile({ ...data.auth_user, authorized: true }))
-    return true
+    return data.auth_user?.u_role
   } catch(e) {
     console.error(e)
   } finally {
@@ -47,7 +47,7 @@ export const authorizeByTokens = async (dispatch) => {
       return false
     }
     dispatch(setProfile({ ...user, authorized: true }))
-    return true
+    return res.data?.auth_user?.u_role
   } catch(e) {
     console.error(e)
   } finally {
