@@ -1,51 +1,43 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
-import { Button, Row, Table } from 'antd'
+import { Button, Row, Space, Card, Typography, List } from 'antd'
 import { PlusCircleFilled } from '@ant-design/icons'
+import { fetchTicketGroups } from '../../redux/tickets'
 import { fetchData, getSchedule } from '../../redux/data'
 
-const columns = [
-  {
-    title: 'Team home',
-    dataIndex: 'team1',
-    key: 'team1',
-    render: team => team && team.en
-  },
-  {
-    title: 'Team away',
-    dataIndex: 'team2',
-    key: 'team2',
-    render: team => team && team.en
-  },
-  {
-    title: 'Tournament',
-    dataIndex: 'tournament',
-    key: 'tournament',
-    render: tournament => tournament && tournament.en
-  },
-  {
-    title: 'Stadium',
-    dataIndex: 'stadium',
-    key: 'stadium',
-    render: stadium => stadium && stadium.en
-  },
-  {
-    title: 'Date',
-    dataIndex: 'datetime',
-    key: 'datetime',
-    render: datetime => datetime
-  }
-]
+function CardTitle(props) {
+  const teams = `${props.team1?.en} vs. ${props.team2?.en}`
+  const tournament = props.tournament?.en
+  return (
+    <>
+      <div>{teams}</div>
+      <Typography.Text type='secondary'>{tournament}</Typography.Text>
+    </>
+  )
+}
 
-export default function PageMatches() {
+export default function PageTickets() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const isLoading = useSelector(state => state.data.isLoading)
   const schedule = useSelector(getSchedule)
+  const groups = useSelector(state => state.tickets.ticketGroups)
+  const isLoading = useSelector(state => state.tickets.isLoading)
   useEffect(() => {
-    dispatch(fetchData())
+    dispatch(fetchTicketGroups)
   }, [])
+  useEffect(() => {
+    if (!schedule.length) {
+      dispatch(fetchData())
+    }
+  }, [schedule])
+
+  const items = useMemo(() =>
+    groups.map(group => ({
+      ...group,
+      match: schedule[group.matchId]
+    }))
+  , [groups, schedule])
 
   return (
     <>
@@ -58,20 +50,26 @@ export default function PageMatches() {
         <Button
           icon={<PlusCircleFilled />}
           type='primary'
-          onClick={() => navigate('/matches/create')}
+          onClick={() => navigate('/matches/add')}
         >
-          Create match
+          Add tickets
         </Button>
       </Row>
-      <Table
-        columns={columns}
-        dataSource={schedule}
-        loading={isLoading}
-        rowKey={({ id }) => id}
-        onRow={record => ({
-            onClick: () => navigate(`/matches/${record.id}`)
-        })}
-      />
+      {items.map(group => (
+        <Space key={group.id}>
+          <Card
+            title={<CardTitle {...group.match} />}
+            onClick={() => navigate(`/tickets/${group.id}`)}
+            hoverable
+          >
+            {group.tickets.map(ticket => (
+              <div>
+                Block <b>{ticket.block}</b>, row <b>{ticket.row}</b>, seat <b>{ticket.seat}</b> — {ticket.price}$
+              </div>
+            ))}
+          </Card>
+        </Space>
+      ))}
     </>
   )
 }
