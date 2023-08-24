@@ -1,21 +1,31 @@
 import { useEffect, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
-import { Button, Row, Space, Card, Typography, List } from 'antd'
+import { Button, Row, Space, Card, Typography, Table } from 'antd'
 import { PlusCircleFilled } from '@ant-design/icons'
 import { fetchTicketGroups } from '../../redux/tickets'
 import { fetchData, getSchedule } from '../../redux/data'
 
-function CardTitle(props) {
-  const teams = `${props.team1?.en} vs. ${props.team2?.en}`
-  const tournament = props.tournament?.en
-  return (
-    <>
-      <div>{teams}</div>
-      <Typography.Text type='secondary'>{tournament}</Typography.Text>
-    </>
-  )
-}
+const columns = [
+  {
+    title: 'Tournament',
+    dataIndex: 'match',
+    key: 'tournament',
+    render: match => match.tournament && match.tournament.en
+  },
+  {
+    title: 'Match',
+    dataIndex: 'match',
+    key: 'match',
+    render: match => `${match.team1.en} — ${match.team2.en}`
+  },
+  {
+    title: 'Tickets',
+    dataIndex: 'tickets',
+    key: 'tickets',
+    render: tickets => `${tickets.length} ${tickets.length === 1 ? 'ticket' : 'tickets'}`
+  }
+]
 
 export default function PageTickets() {
   const dispatch = useDispatch()
@@ -55,21 +65,15 @@ export default function PageTickets() {
           Add tickets
         </Button>
       </Row>
-      {items.map(group => (
-        <Space key={group.id}>
-          <Card
-            title={<CardTitle {...group.match} />}
-            onClick={() => navigate(`/tickets/${group.id}`)}
-            hoverable
-          >
-            {group.tickets.map(ticket => (
-              <div>
-                Block <b>{ticket.block}</b>, row <b>{ticket.row}</b>, seat <b>{ticket.seat}</b> — {ticket.price}$
-              </div>
-            ))}
-          </Card>
-        </Space>
-      ))}
+      <Table
+        columns={columns}
+        dataSource={items}
+        loading={isLoading}
+        rowKey={({ matchId }) => matchId}
+        onRow={record => ({
+            onClick: () => navigate(`/tickets/${record.matchId}`)
+        })}
+      />
     </>
   )
 }
