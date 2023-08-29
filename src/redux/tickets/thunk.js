@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 import axios from '../../utils/axios'
-import { setTicketGroups, setLoading } from '.'
+import { setTicketByMatch, setLoading } from '.'
 
 export const fetchTicketGroups = async (dispatch) => {
   dispatch(setLoading(true))
@@ -53,7 +53,7 @@ export const fetchTicketGroups = async (dispatch) => {
 
     const matchList = Object.values(tripsByMatch).filter(item => item.tickets.length > 0)
 
-    dispatch(setTicketGroups(matchList))
+    dispatch(setTicketByMatch(tripsByMatch))
   } catch (e) {
     console.error(e)
   } finally {

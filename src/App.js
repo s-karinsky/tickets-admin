@@ -30,7 +30,7 @@ function App() {
         navigate(role === '4' ? '/users' : '/tickets', { replace: true })
       }
     })
-  }, [dispatch, navigate, isLoginPage])
+  }, [isLoginPage])
 
   if ((isLoading || !isAuthorized) && !isLoginPage) {
     return (
@@ -48,7 +48,7 @@ function App() {
           <Route path="/users/:id" element={<PageUser />} />
           <Route path="/matches" element={<PageMatches />} />
           <Route path="/matches/:id" element={<PageMatch />} />
-          <Route path="/tickets" element={<PageTickets />} />
+          <Route path="/tickets/:matchId?" element={<PageTickets />} />
         </Route>
         <Route path="/login" element={<PageLogin />} />
       </Routes>

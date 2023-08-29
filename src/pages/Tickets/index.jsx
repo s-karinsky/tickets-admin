@@ -1,9 +1,9 @@
 import { useEffect, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Button, Row, Space, Card, Typography, Table } from 'antd'
 import { PlusCircleFilled } from '@ant-design/icons'
-import { fetchTicketGroups } from '../../redux/tickets'
+import { fetchTicketGroups, getMatchTickets } from '../../redux/tickets'
 import { fetchData, getSchedule } from '../../redux/data'
 
 const columns = [
@@ -30,9 +30,13 @@ const columns = [
 export default function PageTickets() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const params = useParams()
   const schedule = useSelector(getSchedule)
-  const groups = useSelector(state => state.tickets.ticketGroups)
+  const groups = useSelector(getMatchTickets)
   const isLoading = useSelector(state => state.tickets.isLoading)
+
+  const isMatchPage = params.matchId
+
   useEffect(() => {
     dispatch(fetchTicketGroups)
   }, [])
@@ -65,7 +69,7 @@ export default function PageTickets() {
           Add tickets
         </Button>
       </Row>
-      <Table
+      {!isMatchPage && <Table
         columns={columns}
         dataSource={items}
         loading={isLoading}
@@ -73,7 +77,7 @@ export default function PageTickets() {
         onRow={record => ({
             onClick: () => navigate(`/tickets/${record.matchId}`)
         })}
-      />
+      />}
     </>
   )
 }
