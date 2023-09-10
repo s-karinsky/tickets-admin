@@ -1,4 +1,3 @@
-import dayjs from 'dayjs'
 import axios from '../../utils/axios'
 import { setTicketByMatch, setLoading } from '.'
 

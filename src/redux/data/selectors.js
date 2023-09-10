@@ -54,6 +54,27 @@ export const getSchedule = createSelector(
   state => state,
   state => {
     const { schedule } = state.data
+    return Object.keys(schedule).reduce((acc, id) => ({
+      ...acc,
+      [id]: getMatch(state, id)
+    }), {})
+  }
+)
+
+export const getScheduleList = createSelector(
+  state => state,
+  state => {
+    const { schedule } = state.data
     return Object.keys(schedule).map(id => getMatch(state, id))
+  }
+)
+
+export const getStadiumSchemeStatus = createSelector(
+  state => state.data.stadiums,
+  (state, id) => id,
+  (stadiums, id) => {
+    if (stadiums[id].isSchemeLoaded) return 'loading'
+    if (stadiums[id].isSchemeLoaded) return 'loaded'
+    return null
   }
 )

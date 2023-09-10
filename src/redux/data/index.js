@@ -40,6 +40,22 @@ export const dataSlice = createSlice({
         })
         state[name] = { ...state[name], ...obj }
       })
+    },
+    setStadiumScheme: (state, action) => {
+      const { id, scheme } = action.payload
+      if (!state.stadiums || !state.stadiums[id]) return
+      state.stadiums[id].scheme = scheme
+    },
+    setStadiumSchemeStatus: (state, action) => {
+      const { payload = {} } = action
+      const { id, isLoaded, isLoading } = payload
+      if (!state.stadiums || !state.stadiums[id]) return
+      if (isLoaded !== undefined) {
+        state.stadiums[id].isSchemeLoaded = isLoaded
+      }
+      if (isLoading !== undefined) {
+        state.stadiums[id].isSchemeLoading = isLoading
+      }
     }
   },
 })
@@ -50,6 +66,8 @@ export const {
   setSubmitting,
   setData,
   updateData,
+  setStadiumScheme,
+  setStadiumSchemeStatus
 } = dataSlice.actions
 
 export * from './selectors'

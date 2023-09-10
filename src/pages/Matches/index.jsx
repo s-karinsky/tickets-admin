@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { Button, Row, Table } from 'antd'
 import { PlusCircleFilled } from '@ant-design/icons'
-import { fetchData, getSchedule } from '../../redux/data'
+import { fetchData, getScheduleList } from '../../redux/data'
 
 const columns = [
   {
@@ -42,7 +42,7 @@ export default function PageMatches() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const isLoading = useSelector(state => state.data.isLoading)
-  const schedule = useSelector(getSchedule)
+  const schedule = useSelector(getScheduleList)
   useEffect(() => {
     dispatch(fetchData())
   }, [dispatch])

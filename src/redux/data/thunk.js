@@ -1,5 +1,5 @@
 import axios from '../../utils/axios'
-import { setLoading, setLoaded, setSubmitting, updateData, setData } from '.'
+import { setLoading, setLoaded, setSubmitting, updateData, setData, setStadiumScheme, setStadiumSchemeStatus } from '.'
 
 export const fetchData = (params = { fields: 'F', easy: true }) => async (dispatch) => {
   dispatch(setLoading(true))
@@ -26,5 +26,19 @@ export const postData = params => async (dispatch) => {
     console.error(e)
   } finally {
     dispatch(setSubmitting(false))
+  }
+}
+
+export const fetchStadiumScheme = stadiumId => async (dispatch) => {
+  dispatch(setStadiumSchemeStatus({ id: stadiumId, isLoading: true }))
+  try {
+    const { data } = await axios.post(`/data?fields=1&key=${stadiumId}`)
+    const scheme = data.stadiums[stadiumId].scheme
+    dispatch(setStadiumSchemeStatus({ id: stadiumId, isLoading: false, isLoaded: true }))
+    dispatch(setStadiumScheme({ id: stadiumId, scheme }))
+    console.log(data)
+  } catch (e) {
+    dispatch(setStadiumSchemeStatus({ id: stadiumId, isLoading: false }))
+    console.error(e)
   }
 }
