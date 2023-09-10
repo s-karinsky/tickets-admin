@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect, useCallback } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Col, Row, Form, Button, Select, Modal, Tooltip, Input, InputNumber } from 'antd'
 import { PlusCircleFilled, MinusCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
@@ -196,9 +196,7 @@ export default function TicketsForm({
       })
   }, [match])
 
-  const teams = useSelector(state => state.data.teams)
   const tournaments = useSelector(state => state.data.tournaments)
-  const stadiums = useSelector(state => state.data.stadiums)
   const schedule = useSelector(getSchedule)
 
   useEffect(() => {
@@ -223,9 +221,7 @@ export default function TicketsForm({
       .catch(e => console.error(e))
   }, [match])
 
-  const teamsOptions = useMemo(() => getOptions(teams), [teams])
   const tournamentsOptions = useMemo(() => getOptions(tournaments), [tournaments])
-  const stadiumsOptions = useMemo(() => getOptions(stadiums), [stadiums])
   const matchesOptions = useMemo(
     () => Object.values(schedule)
       .filter(item => item.tournament.id === tournamentValue)
