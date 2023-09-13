@@ -61,3 +61,13 @@ export const fetchTicketGroups = async (dispatch) => {
     dispatch(setLoading(false))
   }
 }
+
+export const fetchAllTickets = async (dispatch) => {
+  dispatch(setLoading(true))
+  try {
+    const response = await axios.get('/trip/get')
+    console.log(response)
+  } catch (e) {
+    console.error(e)
+  }
+}
