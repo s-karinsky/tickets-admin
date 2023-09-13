@@ -5,7 +5,7 @@ export const fetchTicketGroups = async (dispatch) => {
   dispatch(setLoading(true))
   try {
     const res = await axios.postWithAuth('/trip')
-    const tripsByMatch = Object.values(res.data?.data?.trip)
+    const tripsByMatch = res.data?.data?.trip ? Object.values(res.data?.data?.trip)
       .filter(trip =>
         trip.t_options &&
         (trip.t_options.price || []).length > 0 &&
@@ -30,10 +30,12 @@ export const fetchTicketGroups = async (dispatch) => {
             Object.keys(seatsSold[block]).forEach(row => {
               if (typeof seatsSold[block][row] !== 'object') return
               Object.keys(seatsSold[block][row]).forEach(seat => {
-                const priceIndex = seatsSold[block][row][seat][0]
+                const seatValues = seatsSold[block][row][seat]
+                const priceIndex = seatValues[0]
+                const soldToUser = seatValues[1] || null
                 if (priceIndex !== 0 && !priceIndex) return
                 const price = prices[priceIndex]
-                const ticket = { tripId: t_id, created: t_create_datetime, block, row, price }
+                const ticket = { tripId: t_id, created: t_create_datetime, block, row, price, soldToUser }
                 if (seat.includes(';')) {
                   const [ rangeStart, rangeEnd ] = seat.split(';').map(Number)
                   for (var i = rangeStart; i <= rangeEnd; i++) {
@@ -47,7 +49,7 @@ export const fetchTicketGroups = async (dispatch) => {
           })
         acc[matchId].tickets = acc[matchId].tickets.concat(tickets)
         return acc
-      }, {})
+      }, {}) : {}
       // .sort((a, b) => dayjs(a.created).isBefore(dayjs(b.created) ? 1 : -1))
 
     const matchList = Object.values(tripsByMatch).filter(item => item.tickets.length > 0)

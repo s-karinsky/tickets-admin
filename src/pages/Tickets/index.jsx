@@ -1,11 +1,14 @@
 import { useEffect, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Button, Row, Table } from 'antd'
+import { Button, Row, Table, Typography } from 'antd'
 import { PlusCircleFilled, CaretLeftFilled } from '@ant-design/icons'
 import TicketsForm from '../../components/TicketsForm'
-import { fetchTicketGroups, getMatchTickets } from '../../redux/tickets'
+import { fetchTicketGroups, fetchAllTickets, getMatchTickets } from '../../redux/tickets'
 import { fetchData, getSchedule } from '../../redux/data'
+import { getIsAdmin } from '../../redux/user'
+
+const { Text } = Typography
 
 const matchColumns = [
   {
@@ -48,6 +51,12 @@ const ticketsColumns = [
     title: 'Price',
     dataIndex: 'price',
     key: 'price'
+  },
+  {
+    title: 'Status',
+    dataIndex: 'soldToUser',
+    key: 'soldToUser',
+    render: user => user ? (<Text type='danger'>Sold</Text>) : (<Text type='success'>Available</Text>)
   }
 ]
 
@@ -98,13 +107,18 @@ export default function PageTickets() {
   const params = useParams()
   const schedule = useSelector(getSchedule)
   const dataLoaded = useSelector(state => state.data.isLoaded)
+  const isAdmin = useSelector(getIsAdmin)
   
   const isAddPage = params.matchId === 'add'
   const isMatchPage = !!params.matchId
   
   useEffect(() => {
-    dispatch(fetchTicketGroups)
-  }, [])
+    if (isAdmin) {
+      dispatch(fetchAllTickets)
+    } else {
+      dispatch(fetchTicketGroups)
+    }
+  }, [isAdmin])
 
   useEffect(() => {
     if (!Object.keys(schedule).length) {
