@@ -1,4 +1,3 @@
-import create from '@ant-design/icons/lib/components/IconFont'
 import { createSelector } from 'reselect'
 import { USER_ROLES } from '../../consts'
 

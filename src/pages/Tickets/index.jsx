@@ -31,35 +31,6 @@ const matchColumns = [
   }
 ]
 
-const ticketsColumns = [
-  {
-    title: 'Block',
-    dataIndex: 'block',
-    key: 'block'
-  },
-  {
-    title: 'Row',
-    dataIndex: 'row',
-    key: 'row'
-  },
-  {
-    title: 'Seat',
-    dataIndex: 'seat',
-    key: 'seat'
-  },
-  {
-    title: 'Price',
-    dataIndex: 'price',
-    key: 'price'
-  },
-  {
-    title: 'Status',
-    dataIndex: 'soldToUser',
-    key: 'soldToUser',
-    render: user => user ? (<Text type='danger'>Sold</Text>) : (<Text type='success'>Available</Text>)
-  }
-]
-
 function MatchList({ schedule }) {
   const navigate = useNavigate()
   const groups = useSelector(getMatchTickets)
@@ -81,21 +52,6 @@ function MatchList({ schedule }) {
       rowKey={({ matchId }) => matchId}
       onRow={record => ({
           onClick: () => navigate(`/tickets/${record.matchId}`)
-      })}
-    />
-  )
-}
-
-function TicketsList({ matchId }) {
-  const { tickets } = useSelector(state => getMatchTickets(state, matchId)) || {}
-
-  return (
-    <Table
-      columns={ticketsColumns}
-      dataSource={tickets}
-      rowKey={({ block, row, seat }) => ([block, row, seat].join(';'))}
-      onRow={record => ({
-          onClick: () => {}
       })}
     />
   )
@@ -141,7 +97,7 @@ export default function PageTickets() {
         >
           Back
         </Button>}
-        {!isMatchPage && <Button
+        {!isMatchPage && !isAdmin && <Button
           icon={<PlusCircleFilled />}
           style={{ marginRight: '10px' }}
           type='primary'
@@ -150,14 +106,16 @@ export default function PageTickets() {
           Add tickets
         </Button>}
       </Row>
-      {!isMatchPage && <MatchList schedule={schedule} />}
+      {!isMatchPage &&
+        <MatchList
+          schedule={schedule}
+        />
+      }
       {isMatchPage && dataLoaded &&
-        <>
-          <TicketsForm
-            matchId={!isAddPage && params.matchId}
-          />
-          {!isAddPage && <TicketsList matchId={params.matchId} />}
-        </>
+        <TicketsForm
+          isAdmin={isAdmin}
+          matchId={!isAddPage && params.matchId}
+        />
       }
     </>
   )

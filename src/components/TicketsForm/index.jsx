@@ -1,26 +1,75 @@
 import { useMemo, useState, useEffect, useCallback } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { Col, Row, Form, Button, Select, Modal, Tooltip, Input, InputNumber } from 'antd'
+import {
+  Col,
+  Row,
+  Form,
+  Button,
+  Select,
+  Modal,
+  Tooltip,
+  Input,
+  InputNumber,
+  Typography,
+  Table
+} from 'antd'
 import { PlusCircleFilled, MinusCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import axios from '../../utils/axios'
 import { capitalizeFirstLetter } from '../../utils/string'
 import { getSchedule, getMatch } from '../../redux/data'
-import { fetchTicketGroups } from '../../redux/tickets'
+import { fetchTicketGroups, getMatchTickets } from '../../redux/tickets'
+
+const { Text } = Typography
+
+const ticketsColumns = [
+  {
+    title: 'Block',
+    dataIndex: 'block',
+    key: 'block'
+  },
+  {
+    title: 'Row',
+    dataIndex: 'row',
+    key: 'row'
+  },
+  {
+    title: 'Seat',
+    dataIndex: 'seat',
+    key: 'seat'
+  },
+  {
+    title: 'Price',
+    dataIndex: 'price',
+    key: 'price'
+  },
+  {
+    title: 'Status',
+    dataIndex: 'soldToUser',
+    key: 'soldToUser',
+    render: user => user ? (<Text type='danger'>Sold</Text>) : (<Text type='success'>Available</Text>)
+  }
+]
 
 const getOptions = obj => Object.values(obj)
   .map(item => ({ label: item.en, value: item.id }))
   .sort((item1, item2) => item1.label > item2.label ? 1 : -1)
 
 function AddTicketsModal({
+  initialValues = {
+    tickets: [{}]
+  },
   isOpen,
+  isMultiple,
   stadiumBlocks,
   onSubmit = () => {},
   hideModal = () => {}
 }) {
   const [ confirmLoading, setConfirmLoading ] = useState(false)
   const [ form ] = Form.useForm()
+  const { isSold, tripId } = initialValues
+  const SeatsInput = tripId ? InputNumber : Input
 
   return (
     <Modal
@@ -46,14 +95,11 @@ function AddTicketsModal({
         form.resetFields()
         hideModal()
       }}
-      destroyOnClose
     >
       <Form
         form={form}
         layout='vertical'
-        initialValues={{
-          tickets: [{}]
-        }}
+        initialValues={initialValues}
       >
         <Form.List name='tickets'>
           {(fields, { add, remove }) => (
@@ -76,6 +122,7 @@ function AddTicketsModal({
                         }
                         options={stadiumBlocks}
                         style={{ width: '100%' }}
+                        disabled={isSold}
                         showSearch
                       />
                     </Form.Item>
@@ -90,6 +137,7 @@ function AddTicketsModal({
                         style={{ width: '100%' }}
                         size='large'
                         min={1}
+                        disabled={isSold}
                       />
                     </Form.Item>
                   </Col>
@@ -103,8 +151,9 @@ function AddTicketsModal({
                       name={[name, 'seats']}
                       rules={[{ required: true, message: 'Please input seats' }]}
                     >
-                      <Input
+                      <SeatsInput
                         size='large'
+                        disabled={isSold}
                       />
                     </Form.Item>
                   </Col>
@@ -117,10 +166,11 @@ function AddTicketsModal({
                       <InputNumber
                         size='large'
                         addonAfter='$'
+                        disabled={isSold}
                       />
                     </Form.Item>
                   </Col>
-                  <Col span={1}>
+                  {isMultiple && <Col span={1}>
                     <MinusCircleOutlined
                       style={{
                         margin: '42px 0 0 10px',
@@ -128,10 +178,10 @@ function AddTicketsModal({
                       }}
                       onClick={() => remove(name)}
                     />
-                  </Col>
+                  </Col>}
                 </Row>
               ))}
-              <Form.Item>
+              {isMultiple && <Form.Item>
                 <Button
                   onClick={() => add()}
                   size='large'
@@ -139,7 +189,7 @@ function AddTicketsModal({
                 >
                   One more block
                 </Button>
-              </Form.Item>
+              </Form.Item>}
             </>
           )}
         </Form.List>
@@ -148,8 +198,24 @@ function AddTicketsModal({
   )
 }
 
+function TicketsList({ matchId, onRowClick = () => {} }) {
+  const { tickets } = useSelector(state => getMatchTickets(state, matchId)) || {}
+
+  return (
+    <Table
+      columns={ticketsColumns}
+      dataSource={tickets}
+      rowKey={({ block, row, seat }) => ([block, row, seat].join(';'))}
+      onRow={record => ({
+          onClick: onRowClick(record)
+      })}
+    />
+  )
+}
+
 export default function TicketsForm({
-  matchId
+  matchId,
+  isAdmin
 }) {
   const navigate = useNavigate()
   const dispatch = useDispatch()
@@ -157,6 +223,7 @@ export default function TicketsForm({
   const [ tournamentValue, setTournamentValue ] = useState(match?.tournament.id)
   const [ stadiumBlocks, setStadiumBlocks ] = useState([])
   const [ isShowModal, setShowModal ] = useState(false)
+  const [ formValues, setFormValues ] = useState()
 
   const initialValues = !matchId ? {} : {
     tournament: match?.tournament.id,
@@ -195,6 +262,21 @@ export default function TicketsForm({
         console.error(e)
       })
   }, [match])
+
+  const handleRowClick = useCallback((record) => () => {
+    if (isAdmin) return
+    setFormValues({
+      tripId: record.tripId,
+      isSold: !!record.soldToUser,
+      tickets: [{
+        block: record.block,
+        row: record.row,
+        seats: record.seat,
+        price: parseInt(record.price)
+      }]
+    })
+    setShowModal(true)
+  }, [isAdmin])
 
   const tournaments = useSelector(state => state.data.tournaments)
   const schedule = useSelector(getSchedule)
@@ -282,7 +364,7 @@ export default function TicketsForm({
             </Form.Item>
           </Col>
         </Row>
-        {stadiumBlocks.length > 0 && 
+        {stadiumBlocks.length > 0 && !isAdmin &&
           <>
             <Row style={{ margin: '20px 0 0 20px' }}>
               <Col>
@@ -298,12 +380,23 @@ export default function TicketsForm({
           </>
         }
       </Form>
-      <AddTicketsModal
-        isOpen={isShowModal}
+      {isShowModal && <AddTicketsModal
+        initialValues={formValues}
         stadiumBlocks={stadiumBlocks}
         onSubmit={handleAddTickets}
-        hideModal={() => setShowModal(false)}
-      />
+        hideModal={() => {
+          setShowModal(false)
+          setFormValues()
+        }}
+        isMultiple={!formValues || !formValues.tripId}
+        isOpen
+      />}
+      {!!matchId &&
+        <TicketsList
+          matchId={matchId}
+          onRowClick={handleRowClick}
+        />
+      }
     </>
   )
 }
