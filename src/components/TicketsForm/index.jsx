@@ -12,12 +12,14 @@ import {
   Input,
   InputNumber,
   Typography,
-  Table
+  Table,
+  Upload
 } from 'antd'
-import { PlusCircleFilled, MinusCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons'
+import { PlusCircleFilled, MinusCircleOutlined, QuestionCircleOutlined, UploadOutlined  } from '@ant-design/icons'
 import dayjs from 'dayjs'
+import InputFile from '../InputFile'
 import axios from '../../utils/axios'
-import { capitalizeFirstLetter } from '../../utils/string'
+import { capitalizeFirstLetter } from '../../utils/utils'
 import { getSchedule, getMatch } from '../../redux/data'
 import { fetchTicketGroups, getMatchTickets } from '../../redux/tickets'
 
@@ -56,6 +58,120 @@ const getOptions = obj => Object.values(obj)
   .map(item => ({ label: item.en, value: item.id }))
   .sort((item1, item2) => item1.label > item2.label ? 1 : -1)
 
+function TicketFormRow({
+  isSold,
+  tripId,
+  name,
+  stadiumBlocks,
+  showRemoveButton,
+  remove,
+  isMultiple
+}) {
+  const [ isSingleSeat, setIsSingleSeat ] = useState(true)
+  const handleChangeSeats = useCallback(e => {
+    if (!e.target) return
+    const { value } = e.target
+    setIsSingleSeat(!value || !!Number(value))
+  }, [])
+
+  const SeatsInput = tripId ? InputNumber : Input
+
+  return (
+    <Row>
+      <Col
+        span={4}
+      >
+        <Form.Item
+          label='Block'
+          name={[name, 'block']}
+          rules={[{ required: true, message: 'Please input block' }]}
+        >
+          <Select
+            size='large'
+            placeholder='Block'
+            filterOption={(input, option) =>
+              (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+            }
+            options={stadiumBlocks}
+            style={{ width: '100%' }}
+            disabled={isSold}
+            showSearch
+          />
+        </Form.Item>
+      </Col>
+      <Col span={3} offset={1}>
+        <Form.Item
+          label='Row'
+          name={[name, 'row']}
+          rules={[{ required: true, message: 'Please input row' }]}
+        >
+          <InputNumber
+            style={{ width: '100%' }}
+            size='large'
+            min={1}
+            disabled={isSold}
+          />
+        </Form.Item>
+      </Col>
+      <Col span={4} offset={1}>
+        <Form.Item
+          label={
+            !tripId ? <Tooltip title='You can enter multiple values separated by commas (1,2,3), or a range of values separated by a hyphen (1-4)'>
+              <span>Seats <QuestionCircleOutlined /></span>
+            </Tooltip> : 'Seats'
+          }
+          name={[name, 'seats']}
+          rules={[{ required: true, message: 'Please input seats' }]}
+        >
+          <SeatsInput
+            size='large'
+            style={{ width: '100%' }}
+            disabled={isSold}
+            onChange={handleChangeSeats}
+          />
+        </Form.Item>
+      </Col>
+      <Col span={4} offset={1}>
+        <Form.Item
+          label='Price'
+          name={[name, 'price']}
+          rules={[{ required: true, message: 'Please input price' }]}
+        >
+          <InputNumber
+            size='large'
+            addonAfter='$'
+            disabled={isSold}
+          />
+        </Form.Item>
+      </Col>
+      <Col span={4} offset={1}>
+        <Form.Item
+          label={
+            <Tooltip title='You can upload file for single seat only. Also you can upload file after creating ticket'>
+              <span>File <QuestionCircleOutlined /></span>
+            </Tooltip>
+          }
+          name={[name, 'file']}
+        > 
+          <InputFile
+            label='Select file'
+            disabled={!isSingleSeat}
+          />
+        </Form.Item>
+      </Col>
+      {isMultiple && <Col span={1}>
+        <MinusCircleOutlined
+          style={{
+            margin: '42px 0 0 10px',
+            visibility: showRemoveButton ? 'visible' : 'hidden'
+          }}
+          onClick={() => remove(name)}
+        />
+      </Col>}
+    </Row>
+  )
+}
+
 function AddTicketsModal({
   initialValues = {
     tickets: [{}]
@@ -69,8 +185,7 @@ function AddTicketsModal({
   const [ confirmLoading, setConfirmLoading ] = useState(false)
   const [ form ] = Form.useForm()
   const { isSold, tripId } = initialValues
-  const SeatsInput = tripId ? InputNumber : Input
-
+  
   return (
     <Modal
       width={800}
@@ -83,7 +198,8 @@ function AddTicketsModal({
         form
           .validateFields()
           .then((values) => {
-            onSubmit(values)
+            console.log(values)
+            //onSubmit(values)
             form.resetFields()
             hideModal()
           })
@@ -105,81 +221,16 @@ function AddTicketsModal({
           {(fields, { add, remove }) => (
             <>
               {fields.map(({ key, name }) => (
-                <Row key={key}>
-                  <Col
-                    span={4}
-                  >
-                    <Form.Item
-                      label='Block'
-                      name={[name, 'block']}
-                      rules={[{ required: true, message: 'Please input block' }]}
-                    >
-                      <Select
-                        size='large'
-                        placeholder='Block'
-                        filterOption={(input, option) =>
-                          (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                        }
-                        options={stadiumBlocks}
-                        style={{ width: '100%' }}
-                        disabled={isSold}
-                        showSearch
-                      />
-                    </Form.Item>
-                  </Col>
-                  <Col span={4} offset={1}>
-                    <Form.Item
-                      label='Row'
-                      name={[name, 'row']}
-                      rules={[{ required: true, message: 'Please input row' }]}
-                    >
-                      <InputNumber
-                        style={{ width: '100%' }}
-                        size='large'
-                        min={1}
-                        disabled={isSold}
-                      />
-                    </Form.Item>
-                  </Col>
-                  <Col span={8} offset={1}>
-                    <Form.Item
-                      label={
-                        <Tooltip title='You can enter multiple values separated by commas (1,2,3), or a range of values separated by a hyphen (1-4)'>
-                          <span>Seats <QuestionCircleOutlined /></span>
-                        </Tooltip>
-                      }
-                      name={[name, 'seats']}
-                      rules={[{ required: true, message: 'Please input seats' }]}
-                    >
-                      <SeatsInput
-                        size='large'
-                        disabled={isSold}
-                      />
-                    </Form.Item>
-                  </Col>
-                  <Col span={4} offset={1}>
-                    <Form.Item
-                      label='Price'
-                      name={[name, 'price']}
-                      rules={[{ required: true, message: 'Please input price' }]}
-                    >
-                      <InputNumber
-                        size='large'
-                        addonAfter='$'
-                        disabled={isSold}
-                      />
-                    </Form.Item>
-                  </Col>
-                  {isMultiple && <Col span={1}>
-                    <MinusCircleOutlined
-                      style={{
-                        margin: '42px 0 0 10px',
-                        visibility: fields.length > 1 ? 'visible' : 'hidden'
-                      }}
-                      onClick={() => remove(name)}
-                    />
-                  </Col>}
-                </Row>
+                <TicketFormRow
+                  key={key}
+                  isSold={isSold}
+                  name={name}
+                  stadiumBlocks={stadiumBlocks}
+                  tripId={tripId}
+                  isMultiple={isMultiple}
+                  showRemoveButton={fields.length > 1}
+                  remove={remove}
+                />
               ))}
               {isMultiple && <Form.Item>
                 <Button
@@ -316,7 +367,7 @@ export default function TicketsForm({
       <Form
         layout='vertical'
         onFinish={values => {
-          
+
         }}
         initialValues={initialValues}
       >
