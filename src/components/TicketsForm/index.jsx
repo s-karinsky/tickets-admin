@@ -12,14 +12,13 @@ import {
   Input,
   InputNumber,
   Typography,
-  Table,
-  Upload
+  Table
 } from 'antd'
-import { PlusCircleFilled, MinusCircleOutlined, QuestionCircleOutlined, UploadOutlined  } from '@ant-design/icons'
+import { PlusCircleFilled, MinusCircleOutlined, QuestionCircleOutlined  } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import InputFile from '../InputFile'
 import axios from '../../utils/axios'
-import { capitalizeFirstLetter } from '../../utils/utils'
+import { capitalizeFirstLetter, toBase64, getFileExt } from '../../utils/utils'
 import { getSchedule, getMatch } from '../../redux/data'
 import { fetchTicketGroups, getMatchTickets } from '../../redux/tickets'
 
@@ -198,8 +197,7 @@ function AddTicketsModal({
         form
           .validateFields()
           .then((values) => {
-            console.log(values)
-            //onSubmit(values)
+            onSubmit(values)
             form.resetFields()
             hideModal()
           })
@@ -281,15 +279,21 @@ export default function TicketsForm({
     match: match?.id
   }
 
-  const handleAddTickets = useCallback((values) => {
+  const handleAddTickets = useCallback(async (values) => {
     const { tickets } = values
     const stadiumId = match.stadium || match.team1?.stadium?.id
+    const files = []
     const t_options = tickets.reduce((acc, ticket, i) => {
-      const { block, row, seats, price } = ticket
+      const { block, row, seats, price, file } = ticket
+
+      if (file) {
+        files.push({ seat: seats, file })
+      }
+
       const key = i + 1
       const prefix = `${stadiumId};${block};${row}`
       acc.price[key] = price
-      seats.replaceAll(' ', '').split(',').forEach(seat => {
+      String(seats).replaceAll(' ', '').split(',').forEach(seat => {
         const range = seat.split('-').map(Number)
         if (range.length === 2) {
           const min = Math.min(...range)
@@ -305,13 +309,27 @@ export default function TicketsForm({
     }, { seats_sold: {}, price: {} })
     const t_start_address = `sc_id\u0000${match.id}`
     const data = JSON.stringify({ t_options, t_start_address })
-    axios.postWithAuth('/trip', { data })
-      .then(() => {
-        dispatch(fetchTicketGroups)
-      })
-      .catch(e => {
-        console.error(e)
-      })
+    
+    try {
+      const { data: resposneData } = await axios.postWithAuth('/trip', { data })
+      const filesBase64 = await Promise.all(files.map(data => toBase64(data.file)))
+      const filesData = filesBase64.map((base64, i) => ({
+        base64,
+        seat: files[i].seat,
+        'extW.dot': getFileExt(files[i].file.name, true)
+      }))
+      const t_id = resposneData.data.t_id
+      await Promise.all(
+        filesData.map(data => {
+          const params = new URLSearchParams()
+          params.append('data', JSON.stringify(data))
+          return axios.postWithAuth(`/trip/get/${t_id}/ticket/write`, params)
+        })
+      )
+      dispatch(fetchTicketGroups)
+    } catch (e) {
+      console.error(e)
+    }
   }, [match])
 
   const handleRowClick = useCallback((record) => () => {

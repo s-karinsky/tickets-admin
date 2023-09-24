@@ -10,9 +10,15 @@ const instance = axios.create({
 instance.postWithAuth = function(url, params) {
   const cookies = new Cookies()
   const data = params || {}
-  data.token = cookies.get('token')
-  data.u_hash = cookies.get('u_hash')
-  const formData = toFormData(data)
+  let formData = data
+  if (data instanceof URLSearchParams) {
+    formData.append('token', cookies.get('token'))
+    formData.append('u_hash', cookies.get('u_hash'))
+  } else {
+    data.token = cookies.get('token')
+    data.u_hash = cookies.get('u_hash')
+    formData = toFormData(data)
+  }
   return instance.post(url, formData)
 }
 
