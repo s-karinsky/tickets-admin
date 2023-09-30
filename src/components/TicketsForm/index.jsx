@@ -19,6 +19,7 @@ import dayjs from 'dayjs'
 import InputFile from '../InputFile'
 import axios from '../../utils/axios'
 import { capitalizeFirstLetter, toBase64, getFileExt } from '../../utils/utils'
+import { getCurrencyList, getDefaultCurrency } from '../../redux/config'
 import { getSchedule, getMatch } from '../../redux/data'
 import { fetchTicketGroups, getMatchTickets } from '../../redux/tickets'
 
@@ -43,7 +44,8 @@ const ticketsColumns = [
   {
     title: 'Price',
     dataIndex: 'price',
-    key: 'price'
+    key: 'price',
+    render: (price, { currency }) => `${price} ${currency || ''}`
   },
   {
     title: 'Status',
@@ -72,8 +74,25 @@ function TicketFormRow({
     const { value } = e.target
     setIsSingleSeat(!value || !!Number(value))
   }, [])
+  const currencyList = useSelector(getCurrencyList)
+  const defaultCurrency = useSelector(getDefaultCurrency)
 
   const SeatsInput = tripId ? InputNumber : Input
+
+  const getCurrencies = name => (
+    <Form.Item name={[name, 'currency']} noStyle>
+      <Select defaultValue={defaultCurrency}>
+        {currencyList.map(currency => (
+          <Select.Option
+            value={currency.code}
+            title={currency.ru}
+          >
+            {currency.code}
+          </Select.Option>
+        ))}
+      </Select>
+    </Form.Item>
+  )
 
   return (
     <Row>
@@ -138,8 +157,8 @@ function TicketFormRow({
         >
           <InputNumber
             size='large'
-            addonAfter='$'
             disabled={isSold}
+            addonAfter={getCurrencies(name)}
           />
         </Form.Item>
       </Col>
@@ -269,6 +288,7 @@ export default function TicketsForm({
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const match = useSelector(state => getMatch(state, matchId))
+  const defaultCurrency = useSelector(getDefaultCurrency)
   const [ tournamentValue, setTournamentValue ] = useState(match?.tournament.id)
   const [ stadiumBlocks, setStadiumBlocks ] = useState([])
   const [ isShowModal, setShowModal ] = useState(false)
@@ -284,15 +304,15 @@ export default function TicketsForm({
     const stadiumId = match.stadium || match.team1?.stadium?.id
     const files = []
     const t_options = tickets.reduce((acc, ticket, i) => {
-      const { block, row, seats, price, file } = ticket
+      const { block, row, seats, price, currency = defaultCurrency, file } = ticket
 
       if (file) {
-        files.push({ seat: seats, file })
+        files.push({ block, row, seat: seats, file })
       }
 
       const key = i + 1
       const prefix = `${stadiumId};${block};${row}`
-      acc.price[key] = price
+      acc.price[key] = !currency ? price : `${price} ${currency }`
       String(seats).replaceAll(' ', '').split(',').forEach(seat => {
         const range = seat.split('-').map(Number)
         if (range.length === 2) {
@@ -315,22 +335,18 @@ export default function TicketsForm({
       const filesBase64 = await Promise.all(files.map(data => toBase64(data.file)))
       const filesData = filesBase64.map((base64, i) => ({
         base64,
-        seat: files[i].seat,
+        seat: `${stadiumId};${files[i].block};${files[i].row};${files[i].seat}`,
         'extW.dot': getFileExt(files[i].file.name, true)
       }))
       const t_id = resposneData.data.t_id
-      await Promise.all(
-        filesData.map(data => {
-          const params = new URLSearchParams()
-          params.append('data', JSON.stringify(data))
-          return axios.postWithAuth(`/trip/get/${t_id}/ticket/write`, params)
-        })
-      )
+      const params = new URLSearchParams()
+      params.append('data', JSON.stringify(filesData))
+      await axios.postWithAuth(`/trip/get/${t_id}/ticket/write`, params)
       dispatch(fetchTicketGroups)
     } catch (e) {
       console.error(e)
     }
-  }, [match])
+  }, [match, defaultCurrency])
 
   const handleRowClick = useCallback((record) => () => {
     if (isAdmin) return
@@ -341,6 +357,7 @@ export default function TicketsForm({
         block: record.block,
         row: record.row,
         seats: record.seat,
+        currency: record.currency,
         price: parseInt(record.price)
       }]
     })

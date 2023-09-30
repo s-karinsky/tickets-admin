@@ -32,7 +32,16 @@ function parseTrips(trips) {
               const soldToUser = seatValues[1] || null
               if (priceIndex !== 0 && !priceIndex) return
               const price = prices[priceIndex]
-              const ticket = { tripId: t_id, created: t_create_datetime, block, row, price, soldToUser }
+              const [ priceValue, priceCurrency ] = price.split(' ')
+              const ticket = {
+                tripId: t_id,
+                created: t_create_datetime,
+                block,
+                row,
+                price: `${parseFloat(priceValue).toFixed(2)}`,
+                currency: priceCurrency,
+                soldToUser
+              }
               if (seat.includes(';')) {
                 const [ rangeStart, rangeEnd ] = seat.split(';').map(Number)
                 for (var i = rangeStart; i <= rangeEnd; i++) {

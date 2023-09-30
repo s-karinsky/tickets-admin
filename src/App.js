@@ -11,6 +11,7 @@ import PageUsers from './pages/Users'
 import PageUser from './pages/User'
 import Layout from './components/Layout'
 import { authorizeByTokens } from './redux/user'
+import { fetchConfig } from './redux/config'
 import './App.css'
 
 
@@ -20,7 +21,12 @@ function App() {
   const location = useLocation()
   const isAuthorized = useSelector(state => state.user.authorized)
   const isLoading = useSelector(state => state.user.isLoading)
+  const isConfigLoaded = useSelector(state => state.config.isLoaded)
   const isLoginPage = location.pathname === '/login'
+
+  useEffect(() => {
+    dispatch(fetchConfig)
+  }, [])
 
   useEffect(() => {
     dispatch(authorizeByTokens).then(role => {
@@ -32,7 +38,7 @@ function App() {
     })
   }, [isLoginPage])
 
-  if ((isLoading || !isAuthorized) && !isLoginPage) {
+  if (!isConfigLoaded || ((isLoading || !isAuthorized) && !isLoginPage)) {
     return (
       <Row style={{ height: '100vh' }} justify="center" align="middle">
         <LoadingOutlined style={{ fontSize: '64px' }} />
