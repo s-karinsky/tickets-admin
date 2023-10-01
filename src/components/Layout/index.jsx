@@ -5,7 +5,8 @@ import {
   DownOutlined,
   UnorderedListOutlined,
   MenuUnfoldOutlined,
-  MenuFoldOutlined
+  MenuFoldOutlined,
+  FileTextOutlined
 } from '@ant-design/icons'
 import {
   Avatar,
@@ -35,6 +36,10 @@ function getItem(label, key, icon, children, type) {
 }
 
 const MENU_ITEMS = {
+  content: getItem('Content', 'content', <FileTextOutlined />, [
+    getItem(<Link to='/content/footer'>Footer</Link>, 'content-footer'),
+    getItem(<Link to='/content/home'>Homepage</Link>, 'content-homepage')
+  ]),
   users: getItem(<Link to='/users'>Users</Link>, 'users', <UserOutlined />),
   matches: getItem(<Link to='/matches'>Matches</Link>, 'matches', <UnorderedListOutlined />),
   tickets: getItem(<Link to='/tickets'>Tickets</Link>, 'tickets', <BarcodeOutlined />)
@@ -49,7 +54,7 @@ export default function PageLayout() {
 
   const items = useMemo(() => {
     if (user.u_role === '4') {
-      return [MENU_ITEMS.users, MENU_ITEMS.matches, MENU_ITEMS.tickets]
+      return [MENU_ITEMS.content, MENU_ITEMS.users, MENU_ITEMS.matches, MENU_ITEMS.tickets]
     } else if (user.u_role === '2') {
       return [MENU_ITEMS.tickets]
     }
@@ -105,6 +110,7 @@ export default function PageLayout() {
             selectedKeys={[path]}
             theme='dark'
             items={items}
+            mode='inline'
           />
         </Sider>
         <Content>

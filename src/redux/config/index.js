@@ -5,6 +5,7 @@ export const configSlice = createSlice({
   initialState: {
     isLoading: false,
     isLoaded: false,
+    isUpdating: false,
     data: {}
   },
   reducers: {
@@ -13,6 +14,9 @@ export const configSlice = createSlice({
     },
     setLoaded: (state, action) => {
       state.isLoaded = action.payload
+    },
+    setUpdating: (state, action) => {
+      state.isUpdating = action.payload
     },
     setConfig: (state, action) => {
       const { payload } = action
@@ -26,6 +30,7 @@ export const configSlice = createSlice({
 export const {
   setLoading,
   setLoaded,
+  setUpdating,
   setConfig
 } = configSlice.actions
 
