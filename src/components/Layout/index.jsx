@@ -6,7 +6,8 @@ import {
   UnorderedListOutlined,
   MenuUnfoldOutlined,
   MenuFoldOutlined,
-  FileTextOutlined
+  FileTextOutlined,
+  TranslationOutlined
 } from '@ant-design/icons'
 import {
   Avatar,
@@ -36,6 +37,7 @@ function getItem(label, key, icon, children, type) {
 }
 
 const MENU_ITEMS = {
+  translations: getItem(<Link to='/translations'>Translations</Link>, 'translations', <TranslationOutlined />),
   content: getItem('Content', 'content', <FileTextOutlined />, [
     getItem(<Link to='/content/footer'>Footer</Link>, 'content-footer'),
     getItem(<Link to='/content/home'>Homepage</Link>, 'content-homepage')
@@ -54,7 +56,12 @@ export default function PageLayout() {
 
   const items = useMemo(() => {
     if (user.u_role === '4') {
-      return [MENU_ITEMS.content, MENU_ITEMS.users, MENU_ITEMS.matches, MENU_ITEMS.tickets]
+      return [
+        MENU_ITEMS.translations,
+        MENU_ITEMS.users,
+        MENU_ITEMS.matches,
+        MENU_ITEMS.tickets
+      ]
     } else if (user.u_role === '2') {
       return [MENU_ITEMS.tickets]
     }

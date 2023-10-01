@@ -6,33 +6,30 @@ import { CheckOutlined, LoadingOutlined } from '@ant-design/icons'
 import { diff } from 'deep-object-diff'
 import { getLang, getLangValue, updateLang } from '../../redux/config'
 
-const LANG_FIELDS_BY_PAGE = {
-  home: [
-    {
-      key: 'match_list_header',
-      title: 'Match list header'
-    },
-    {
-      key: 'filter_reset',
-      title: 'Reset filter button text'
-    },
-    {
-      key: 'tickets_in_stock',
-      title: 'Tickets in stock filter text'
-    },
-    {
-      key: 'filter_tournaments_placeholder',
-      title: 'Filter default tournament text'
-    },
-    {
-      key: 'filter_team_placeholder',
-      title: 'Filter default team'
-    }
-  ]
-}
+const FIELDS = [
+  {
+    key: 'match_list_header',
+    title: 'Match list header'
+  },
+  {
+    key: 'filter_reset',
+    title: 'Reset filter button text'
+  },
+  {
+    key: 'tickets_in_stock',
+    title: 'Tickets in stock filter text'
+  },
+  {
+    key: 'filter_tournaments_placeholder',
+    title: 'Filter default tournament text'
+  },
+  {
+    key: 'filter_team_placeholder',
+    title: 'Filter default team'
+  }
+]
 
-export default function PageContent() {
-  const { page } = useParams()
+export default function PageTranslations() {
   const [ isSaved, setIsSaved ] = useState(true)
   const dispatch = useDispatch()
   const navigate = useNavigate()
@@ -40,22 +37,15 @@ export default function PageContent() {
   const langs = useSelector(getLang)
   const langValues = useSelector(getLangValue)
 
-  const fields = LANG_FIELDS_BY_PAGE[page]
   const initialValues = useMemo(() =>
-    (fields || []).reduce((acc, field) => ({ ...acc, [field.key]: langValues[field.key] }), {})
-  , [langValues, fields])
+    (FIELDS || []).reduce((acc, field) => ({ ...acc, [field.key]: langValues[field.key] }), {})
+  , [langValues, FIELDS])
 
   useEffect(() => {
     if (!isUpdating) {
       setIsSaved(true)
     }
   }, [isUpdating])
-
-  if (!fields) {
-    return (
-      <div>Page not found</div>
-    )
-  }
 
   let saveButtonIcon
   if (isUpdating) saveButtonIcon = <LoadingOutlined />
@@ -97,7 +87,7 @@ export default function PageContent() {
           {isSaved ? 'Saved' : 'Save'}
         </Button>
       </Row>
-      {fields.map(field => (
+      {FIELDS.map(field => (
         <div key={field.key} style={{ margin: '20px 0 0 30px' }}>
           <b>{field.title}</b>
           <Row style={{ marginTop: 10 }}>
