@@ -51,7 +51,10 @@ const getTicketsColumns = (getFile = () => {}) => ([
     title: 'File',
     dataIndex: 'isFile',
     key: 'isFile',
-    render: (isFile, { tripId, seatId }) => isFile && <span onClick={() => getFile(tripId, seatId)}>File</span>
+    render: (isFile, { tripId, seatId }) => isFile && <Typography.Link onClick={e => {
+      e.stopPropagation()
+      getFile(tripId, seatId)
+    }}>File</Typography.Link>
   },
   {
     title: 'Status',
@@ -222,7 +225,7 @@ function AddTicketsModal({
         form
           .validateFields()
           .then((values) => {
-            onSubmit(values)
+            onSubmit(values, tripId)
             form.resetFields()
             hideModal()
           })
@@ -328,7 +331,7 @@ export default function TicketsForm({
     match: match?.id
   }
 
-  const handleAddTickets = useCallback(async (values) => {
+  const handleAddTickets = useCallback(async (values, initialTrip) => {
     const { tickets } = values
     const stadiumId = match.stadium || match.team1?.stadium?.id
     const files = []
@@ -367,7 +370,8 @@ export default function TicketsForm({
         seat: `${stadiumId};${files[i].block};${files[i].row};${files[i].seat}`,
         'extW.dot': getFileExt(files[i].file.name, true)
       }))
-      const t_id = resposneData.data.t_id
+      console.log(resposneData)
+      const t_id = initialTrip || resposneData.data.t_id
       const params = new URLSearchParams()
       params.append('data', JSON.stringify(filesData))
       await axios.postWithAuth(`/trip/get/${t_id}/ticket/write`, params)
