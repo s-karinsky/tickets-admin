@@ -21,11 +21,11 @@ import axios from '../../utils/axios'
 import { capitalizeFirstLetter, toBase64, getFileExt } from '../../utils/utils'
 import { getCurrencyList, getDefaultCurrency } from '../../redux/config'
 import { getSchedule, getMatch } from '../../redux/data'
-import { fetchTicketGroups, getMatchTickets } from '../../redux/tickets'
+import { fetchTicketGroups, fetchTicketsFiles, getMatchTickets } from '../../redux/tickets'
 
 const { Text } = Typography
 
-const ticketsColumns = [
+const getTicketsColumns = (getFile = () => {}) => ([
   {
     title: 'Block',
     dataIndex: 'block',
@@ -48,12 +48,18 @@ const ticketsColumns = [
     render: (price, { currency }) => `${price} ${currency || ''}`
   },
   {
+    title: 'File',
+    dataIndex: 'isFile',
+    key: 'isFile',
+    render: (isFile, { tripId, seatId }) => isFile && <span onClick={() => getFile(tripId, seatId)}>File</span>
+  },
+  {
     title: 'Status',
     dataIndex: 'soldToUser',
     key: 'soldToUser',
     render: user => user ? (<Text type='danger'>Sold</Text>) : (<Text type='success'>Available</Text>)
   }
-]
+])
 
 const getOptions = obj => Object.values(obj)
   .map(item => ({ label: item.en, value: item.id }))
@@ -267,11 +273,34 @@ function AddTicketsModal({
 }
 
 function TicketsList({ matchId, onRowClick = () => {} }) {
+  const dispatch = useDispatch()
+  const match = useSelector(state => getMatch(state, matchId))
   const { tickets } = useSelector(state => getMatchTickets(state, matchId)) || {}
+  const tripsId = useMemo(() =>
+    (tickets || []).map(item => item.tripId).filter((item, i, arr) => arr.indexOf(item) === i)
+  , [tickets])
+
+  useEffect(() => {
+    if (!tripsId.length) return
+    dispatch(fetchTicketsFiles(tripsId))
+  }, [tripsId])
+
+  const getFile = useCallback(async (tripId, seatId) => {
+    const { team1, team2, datetime } = match
+    const [ stadium, block, row, seat ] = seatId.split(';')
+    const resp = await axios.postWithAuth(`/trip/get/${tripId}/ticket/read`, { seat: seatId }, { responseType: 'blob' })
+    const url = window.URL.createObjectURL(new Blob([resp.data]))
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${dayjs(datetime).format('DD-MM-YYYY')} ${team1.en} vs ${team2.en} block ${block} row ${row} seat ${seat}.pdf`
+    document.body.appendChild(link)
+    link.click()
+    link.parentElement.removeChild(link)
+  }, [match])
 
   return (
     <Table
-      columns={ticketsColumns}
+      columns={getTicketsColumns(getFile)}
       dataSource={tickets}
       rowKey={({ block, row, seat }) => ([block, row, seat].join(';'))}
       onRow={record => ({

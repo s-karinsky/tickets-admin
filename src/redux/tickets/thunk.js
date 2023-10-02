@@ -1,5 +1,5 @@
 import axios from '../../utils/axios'
-import { setTicketByMatch, setLoading } from '.'
+import { setTicketByMatch, setLoading, setTicketsFile } from '.'
 
 function parseTrips(trips) {
   return trips ? Object.values(trips)
@@ -9,7 +9,7 @@ function parseTrips(trips) {
       Object.values(trip.t_options.seats_sold || {}).length > 0
     )
     .reduce((acc, trip) => {
-      const { t_id, t_create_datetime, t_start_address, t_options } = trip
+      const { t_id, t_create_datetime, t_start_address, t_options, stadium } = trip
       const matchId = t_start_address.split('sc_id\x00')[1]
       if (!acc[matchId]) {
         acc[matchId] = {
@@ -35,6 +35,7 @@ function parseTrips(trips) {
               const [ priceValue, priceCurrency ] = price.split(' ')
               const ticket = {
                 tripId: t_id,
+                stadium,
                 created: t_create_datetime,
                 block,
                 row,
@@ -45,10 +46,10 @@ function parseTrips(trips) {
               if (seat.includes(';')) {
                 const [ rangeStart, rangeEnd ] = seat.split(';').map(Number)
                 for (var i = rangeStart; i <= rangeEnd; i++) {
-                  tickets.push({ ...ticket, seat: i })
+                  tickets.push({ ...ticket, seat: i, seatId: [stadium, block, row, i].join(';') })
                 }
               } else {
-                tickets.push({ ...ticket, seat })
+                tickets.push({ ...ticket, seat, seatId: [stadium, block, row, seat].join(';') })
               }
             })
           })
@@ -61,7 +62,7 @@ function parseTrips(trips) {
 export const fetchTicketGroups = async (dispatch) => {
   dispatch(setLoading(true))
   try {
-    const res = await axios.postWithAuth('/trip')
+    const res = await axios.postWithAuth('/trip', { lc: 0 })
     const tripsByMatch = parseTrips(res.data?.data?.trip)
     // const matchList = Object.values(tripsByMatch).filter(item => item.tickets.length > 0)
 
@@ -76,7 +77,7 @@ export const fetchTicketGroups = async (dispatch) => {
 export const fetchAllTickets = async (dispatch) => {
   dispatch(setLoading(true))
   try {
-    const res = await axios.postWithAuth('/trip/get')
+    const res = await axios.postWithAuth('/trip/get', { lc: 0 })
     const tripsByMatch = parseTrips(res.data?.data?.trip)
     
     dispatch(setTicketByMatch(tripsByMatch))
@@ -84,5 +85,21 @@ export const fetchAllTickets = async (dispatch) => {
     console.error(e)
   } finally {
     dispatch(setLoading(false))
+  }
+}
+
+export const fetchTicketsFiles = (tripsId) => async (dispatch) => {
+  try {
+    const promises = tripsId.map(trip => axios.postWithAuth(`/trip/get/${trip}/ticket/read`))
+    const files = await Promise.all(promises)
+    const seats = files
+      .reduce((acc, { data }) => ([
+        ...acc,
+        ...data.data?.seats
+      ]), [])
+      .reduce((acc, seatId) => ({ ...acc, [seatId]: true }), {})
+    dispatch(setTicketsFile(seats))
+  } catch (e) {
+    console.error(e)
   }
 }

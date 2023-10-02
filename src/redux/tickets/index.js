@@ -5,7 +5,8 @@ export const ticketsSlice = createSlice({
   initialState: {
     isLoading: false,
     isLoaded: false,
-    ticketsByMatch: {}
+    ticketsByMatch: {},
+    ticketsWithFile: {}
   },
   reducers: {
     setLoading: (state, action) => {
@@ -16,6 +17,11 @@ export const ticketsSlice = createSlice({
     },
     setTicketByMatch: (state, action) => {
       state.ticketsByMatch = action.payload
+    },
+    setTicketsFile: (state, action) => {
+      Object.keys(action.payload).forEach(seatId => {
+        state.ticketsWithFile[seatId] = action.payload[seatId]
+      })
     }
   },
 })
@@ -24,6 +30,7 @@ export const {
   setLoading,
   setLoaded,
   setTicketByMatch,
+  setTicketsFile,
 } = ticketsSlice.actions
 
 export * from './selectors'

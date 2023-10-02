@@ -7,7 +7,7 @@ const instance = axios.create({
   baseURL: API_URL
 })
 
-instance.postWithAuth = function(url, params) {
+instance.postWithAuth = function(url, params, options) {
   const cookies = new Cookies()
   const data = params || {}
   let formData = data
@@ -19,7 +19,7 @@ instance.postWithAuth = function(url, params) {
     data.u_hash = cookies.get('u_hash')
     formData = toFormData(data)
   }
-  return instance.post(url, formData)
+  return instance.post(url, formData, options)
 }
 
 export default instance
