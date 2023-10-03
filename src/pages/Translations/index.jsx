@@ -1,10 +1,19 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState, useEffect, useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Button, Form, Input, Row, Col } from 'antd'
+import { Button, Form, Input, Row, Col, Select } from 'antd'
+import { pickBy, transform, keys } from 'lodash'
 import { CheckOutlined, LoadingOutlined } from '@ant-design/icons'
 import { diff } from 'deep-object-diff'
 import { getLang, getLangValue, updateLang } from '../../redux/config'
+
+const FIELD_NAME_MAP = {
+  match_list_header: 'Match list header',
+  filter_reset: 'Reset filter button text',
+  tickets_in_stock: 'Tickets in stock filter text',
+  filter_tournaments_placeholder: 'Filter default tournament text',
+  filter_team_placeholder: 'Filter default team'
+}
 
 const FIELDS = [
   {
@@ -31,21 +40,35 @@ const FIELDS = [
 
 export default function PageTranslations() {
   const [ isSaved, setIsSaved ] = useState(true)
+  const [ selectedVar, setSelectedVar ] = useState()
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const isUpdating = useSelector(state => state.config.isUpdating)
   const langs = useSelector(getLang)
   const langValues = useSelector(getLangValue)
 
-  const initialValues = useMemo(() =>
-    (FIELDS || []).reduce((acc, field) => ({ ...acc, [field.key]: langValues[field.key] }), {})
-  , [langValues, FIELDS])
-
   useEffect(() => {
     if (!isUpdating) {
       setIsSaved(true)
     }
   }, [isUpdating])
+
+  const handleFinish = useCallback(values => {
+    const changed = transform(
+      pickBy(diff(langValues, values), value => value),
+      (acc, item, key) => {
+        const newItem = pickBy(item, value => value)
+        if (keys(newItem).length) acc[key] = newItem
+        return acc
+      },
+    {})
+    dispatch(updateLang(changed))
+  }, [langValues])
+
+  const varsOptions = Object.keys(langValues).map(value => ({
+    value,
+    label: FIELD_NAME_MAP[value] || value
+  }))
 
   let saveButtonIcon
   if (isUpdating) saveButtonIcon = <LoadingOutlined />
@@ -54,22 +77,8 @@ export default function PageTranslations() {
   return (
     <Form
       layout='vertical'
-      onFinish={values => {
-        const changed = diff(initialValues, values)
-        const update = Object.keys(changed).reduce((res, name) => {
-          const vals = changed[name]
-          const filtered = Object.keys(vals).filter(langId => vals[langId] !== undefined).reduce((acc, langId) => ({
-            ...acc,
-            [langId]: vals[langId]
-          }), {})
-          return Object.values(filtered).length > 0 ? {
-            ...res,
-            [name]: filtered
-          } : res
-        }, {})
-        dispatch(updateLang(update))
-      }}
-      initialValues={initialValues}
+      onFinish={handleFinish}
+      initialValues={langValues}
       onValuesChange={() => setIsSaved(false)}
     >
       <Row
@@ -87,23 +96,35 @@ export default function PageTranslations() {
           {isSaved ? 'Saved' : 'Save'}
         </Button>
       </Row>
-      {FIELDS.map(field => (
-        <div key={field.key} style={{ margin: '20px 0 0 30px' }}>
-          <b>{field.title}</b>
-          <Row style={{ marginTop: 10 }}>
-            {langs.map((lang, i) => (
-              <Col span={5} offset={i ? 1 : 0} key={lang.id}>
-                <Form.Item
-                  label={lang.native}
-                  name={[field.key, lang.id]}
-                >
-                  <Input />
-                </Form.Item>
-              </Col>
-            ))}
-          </Row>
-        </div>
-      ))}
+      <Row style={{ margin: '20px 0 0 30px' }}>
+        <Col span={23}>
+          <Select
+            disabled={isUpdating}
+            options={varsOptions}
+            style={{ width: '100%' }}
+            placeholder='Select variable'
+            onSelect={value => {
+              setSelectedVar(value)
+              setIsSaved(true)
+            }}
+            showSearch
+          >
+
+          </Select>
+        </Col>
+      </Row>
+      {!!selectedVar && !!langValues[selectedVar] && <Row style={{ margin: '20px 0 0 30px' }}>
+        {langs.map((lang, i) => (
+          <Col span={5} offset={i ? 1 : 0} key={lang.id}>
+            <Form.Item
+              label={lang.native}
+              name={[selectedVar, lang.id]}
+            >
+              <Input />
+            </Form.Item>
+          </Col>
+        ))}
+      </Row>}
     </Form>
   )
 }
