@@ -39,8 +39,12 @@ function getItem(label, key, icon, children, type) {
 const MENU_ITEMS = {
   translations: getItem(<Link to='/translations'>Translations</Link>, 'translations', <TranslationOutlined />),
   content: getItem('Content', 'content', <FileTextOutlined />, [
-    getItem(<Link to='/content/footer'>Footer</Link>, 'content-footer'),
-    getItem(<Link to='/content/home'>Homepage</Link>, 'content-homepage')
+    getItem(<Link to='/content/about-us'>About us</Link>, 'about-us'),
+    getItem(<Link to='/content/faq'>FAQ</Link>, 'faq'),
+    getItem(<Link to='/content/news'>News</Link>, 'news'),
+    getItem(<Link to='/content/corporate'>Corporate</Link>, 'corporate'),
+    getItem(<Link to='/content/privacy-policy'>Privacy policy</Link>, 'privacy-policy'),
+    getItem(<Link to='/content/become-a-partner'>Become a partner</Link>, 'become-a-partner')
   ]),
   users: getItem(<Link to='/users'>Users</Link>, 'users', <UserOutlined />),
   matches: getItem(<Link to='/matches'>Matches</Link>, 'matches', <UnorderedListOutlined />),
@@ -58,6 +62,7 @@ export default function PageLayout() {
     if (user.u_role === '4') {
       return [
         MENU_ITEMS.translations,
+        MENU_ITEMS.content,
         MENU_ITEMS.users,
         MENU_ITEMS.matches,
         MENU_ITEMS.tickets
