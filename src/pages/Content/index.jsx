@@ -1,17 +1,29 @@
-import { useMemo, useState, useCallback } from 'react'
+import { useMemo, useState, useCallback, useEffect } from 'react'
 import { Col, Row, Button, Form, Select, Input } from 'antd'
 import { useDispatch, useSelector } from 'react-redux'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import ReactQuill from 'react-quill'
 import { forEach } from 'lodash'
 import { getLang, getLangValue, updateLang } from '../../redux/config'
 import 'react-quill/dist/quill.snow.css'
 
+function TextEditor({ value, onChange }) {
+  return (
+    <ReactQuill
+      theme="snow"
+      value={value || ""}
+      onChange={onChange}
+      style={{ background: '#fff' }}
+    />
+  )
+}
+
 export default function PageContent() {
+  const [ form ] = Form.useForm()
   const { page } = useParams()
   const [ activeLang, setActiveLang ] = useState('1')
   const dispatch = useDispatch()
-  const navigate = useNavigate()
+
   const contentKey = `page_content_${page}`
   const titleKey = `page_title_${page}`
   const langs = useSelector(getLang)
@@ -24,14 +36,19 @@ export default function PageContent() {
     value: lang.id
   })), [langs])
 
+  useEffect(() => {
+    form.resetFields()
+  }, [page])
+
   const handleSubmit = useCallback(values => {
     const obj = {}
-    forEach(values, (value, lang) => {
-      if (value.title !== undefined)
-        obj[titleKey] = { ...obj[titleKey], [lang]: value.title }
-
-      if (value.content !== undefined)
-        obj[contentKey] = { ...obj[titleKey], [lang]: value.content }
+    forEach(values.title, (value, lang) => {
+      if (value === undefined) return
+      obj[titleKey] = { ...obj[titleKey], [lang]: value }
+    })
+    forEach(values.content, (value, lang) => {
+      if (value === undefined) return
+      obj[contentKey] = { ...obj[contentKey], [lang]: value }
     })
     dispatch(updateLang(obj))
   }, [contentKey, titleKey])
@@ -41,6 +58,7 @@ export default function PageContent() {
       layout='vertical'
       initialValues={{ title, content }}
       onFinish={handleSubmit}
+      form={form}
     >
       <Row
         style={{
@@ -88,13 +106,7 @@ export default function PageContent() {
               label='Page content'
               name={['content', lang.value]}
             >
-              <Input.TextArea
-              />
-              {/* <ReactQuill
-                style={{ background: '#fff' }}
-                theme='snow'
-                defaultValue={content[lang.value]}
-              /> */}
+              <TextEditor />
             </Form.Item>
           </Col>
         </Row>

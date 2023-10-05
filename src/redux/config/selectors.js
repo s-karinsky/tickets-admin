@@ -16,8 +16,10 @@ export const getLang = createSelector(
   (langs, key) => key ? langs[key] : Object.values(langs)
 )
 
+const emptyLang = {}
+
 export const getLangValue = createSelector(
   state => state.config.data?.langValues,
   (state, key) => key,
-  (values, key) => key ? (values[key] || {}) : values
+  (values, key) => key ? (values[key] || emptyLang) : values
 )
