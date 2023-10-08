@@ -21,15 +21,16 @@ export const fetchConfig = async (dispatch) => {
   }
 }
 
-export const updateLang = lang_vls => async (disaptch) => {
-  disaptch(setUpdating(true))
+export const updateLang = lang_vls => async (dispatch) => {
+  dispatch(setUpdating(true))
   try {
     await axios.postWithAuth('/data', {
       data: JSON.stringify({ lang_vls })
     })
+    dispatch(fetchConfig)
   } catch (e) {
     console.error(e)
   } finally {
-    disaptch(setUpdating(false))
+    dispatch(setUpdating(false))
   }
 }
