@@ -2,7 +2,7 @@ import { useEffect, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams, useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
-import { Col, Row, Form, Button, Select, DatePicker, TimePicker } from 'antd'
+import { Col, Row, Form, Button, Select, DatePicker, TimePicker, Checkbox } from 'antd'
 import { CaretLeftFilled } from '@ant-design/icons'
 import { fetchData, getMatch, postData } from '../../redux/data'
 
@@ -45,17 +45,18 @@ export default function PageMatch() {
     date,
     time: date,
     stadium: match.stadium && match.stadium.id,
-    tournament: match.tournament && match.tournament.id
+    tournament: match.tournament && match.tournament.id,
+    top: match.top === '1'
   }
 
   return (
     <Form
       layout='vertical'
       onFinish={values => {
-        const { team1, team2, date, time, stadium, tournament } = values
+        const { team1, team2, date, time, stadium, tournament, top } = values
         const datetime = `${date.format('YYYY-MM-DD')} ${time.format('HH:mm:ss')}-07:00`
-        const match = { team1, team2, stadium, tournament, datetime }
-        if (!isNew) match.id  = id
+        const match = { team1, team2, stadium, tournament, datetime, top: top ? '1' : '0' }
+        if (!isNew) match.id = id
         dispatch(postData({ schedule: [match] })).then(() => navigate('/matches'))
       }}
       initialValues={initialValues}
@@ -156,7 +157,6 @@ export default function PageMatch() {
           <Form.Item
             label='Stadium'
             name='stadium'
-            rules={[{ required: true, message: 'Please input your home team' }]}
           >
             <Select
               placeholder='Stadium'
@@ -186,6 +186,16 @@ export default function PageMatch() {
               style={{ width: '100%' }}
               showSearch
             />
+          </Form.Item>
+        </Col>
+      </Row>
+      <Row style={{ margin: '0 20px' }}>
+        <Col span={24}>
+          <Form.Item
+            name='top'
+            valuePropName='checked'
+          >
+            <Checkbox>Top match</Checkbox>
           </Form.Item>
         </Col>
       </Row>

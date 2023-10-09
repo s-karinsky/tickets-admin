@@ -1,11 +1,11 @@
-import { useEffect } from 'react'
+import { useEffect, useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { Button, Row, Table } from 'antd'
+import { Button, Row, Table, Switch } from 'antd'
 import { PlusCircleFilled } from '@ant-design/icons'
-import { fetchData, getScheduleList } from '../../redux/data'
+import { fetchData, getScheduleList, postData } from '../../redux/data'
 
-const columns = [
+const getColumns = ({ onChangeTop = () => {} }) => ([
   {
     title: 'Team home',
     dataIndex: 'team1',
@@ -28,24 +28,42 @@ const columns = [
     title: 'Stadium',
     dataIndex: 'stadium',
     key: 'stadium',
-    render: stadium => stadium && stadium.en
+    render: (stadium, { team1 }) => stadium ? stadium.en : team1?.stadium?.en
   },
   {
     title: 'Date',
     dataIndex: 'datetime',
     key: 'datetime',
     render: datetime => datetime
+  },
+  {
+    title: 'Top match',
+    dataIndex: 'top',
+    key: 'top',
+    render: (top, match) => <Switch
+      onClick={(val, e) => {
+        e.stopPropagation()
+        onChangeTop({ id: match.id, top: val })
+      }}
+      checked={Number(top)}
+    />
   }
-]
+])
 
 export default function PageMatches() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const user = useSelector(state => state.user.profile)
   const isLoading = useSelector(state => state.data.isLoading)
   const schedule = useSelector(getScheduleList)
   useEffect(() => {
     dispatch(fetchData())
   }, [dispatch])
+
+  const handleSwitchTop = useCallback((match) => {
+    const { id, top } = match
+    dispatch(postData({ schedule: [{ id, top: top ? '1' : '0' }] }))
+  }, [])
 
   return (
     <>
@@ -64,12 +82,12 @@ export default function PageMatches() {
         </Button>
       </Row>
       <Table
-        columns={columns}
+        columns={getColumns({ onChangeTop: handleSwitchTop })}
         dataSource={schedule}
         loading={isLoading}
         rowKey={({ id }) => id}
         onRow={record => ({
-            onClick: () => navigate(`/matches/${record.id}`)
+            onClick: () => user.u_role === '4' && navigate(`/matches/${record.id}`)
         })}
       />
     </>

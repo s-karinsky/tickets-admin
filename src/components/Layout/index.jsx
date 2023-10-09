@@ -68,7 +68,10 @@ export default function PageLayout() {
         MENU_ITEMS.tickets
       ]
     } else if (user.u_role === '2') {
-      return [MENU_ITEMS.tickets]
+      return [
+        MENU_ITEMS.matches,
+        MENU_ITEMS.tickets
+      ]
     }
   }, [user.u_role])
 

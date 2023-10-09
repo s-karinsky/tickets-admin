@@ -35,10 +35,8 @@ export const dataSlice = createSlice({
       ['stadiums', 'schedule', 'teams', 'tournaments'].forEach(name => {
         const obj = action.payload[name]
         if (!obj) return
-        Object.keys(obj).forEach(id => {
-          obj[id].id = id
-        })
-        state[name] = { ...state[name], ...obj }
+        const newObj = obj.reduce((acc, item) => ({ ...acc, [item.id]: { ...state[name][item.id], ...item } }), {})
+        state[name] = { ...state[name], ...newObj }
       })
     },
     setStadiumScheme: (state, action) => {
