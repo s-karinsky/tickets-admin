@@ -74,7 +74,7 @@ export default function PageLayout() {
       ]
     } else if (user.u_role === '2') {
       return [
-        MENU_ITEMS.matches,
+        getItem(<Link to='/matches'>Matches</Link>, 'matches', <UnorderedListOutlined />),
         MENU_ITEMS.tickets
       ]
     }
