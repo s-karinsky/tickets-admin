@@ -29,6 +29,11 @@ export const getTeam = createSelector(
   extendTeam
 )
 
+export const getTeams = createSelector(
+  state => state.data.teams,
+  teams => Object.values(teams)
+)
+
 export const getMatch = createSelector(
   (state, matchId) => matchId,
   state => state.data.schedule,

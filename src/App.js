@@ -7,6 +7,7 @@ import PageContent from './pages/Content'
 import PageLogin from './pages/Login'
 import PageMatch from './pages/Match'
 import PageMatches from './pages/Matches'
+import PageTeams from './pages/Teams'
 import PageTickets from './pages/Tickets'
 import PageTranslations from './pages/Translations'
 import PageUsers from './pages/Users'
@@ -58,6 +59,7 @@ function App() {
           <Route path="/users/:id" element={<PageUser />} />
           <Route path="/matches" element={<PageMatches />} />
           <Route path="/matches/:id" element={<PageMatch />} />
+          <Route path="/teams" element={<PageTeams />} />
           <Route path="/tickets/:matchId?" element={<PageTickets />} />
         </Route>
         <Route path="/login" element={<PageLogin />} />
