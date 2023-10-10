@@ -3,7 +3,8 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { Button, Row, Table, Input, Space } from 'antd'
 import { PlusCircleFilled, SearchOutlined } from '@ant-design/icons'
-import { fetchData, getTeams, postData } from '../../redux/data'
+import { fetchData, getTeams } from '../../redux/data'
+import { getCities } from '../../redux/config'
 
 export default function PageTeams() {
   const [ searchText, setSearchText ] = useState('')
@@ -14,6 +15,7 @@ export default function PageTeams() {
   const user = useSelector(state => state.user.profile)
   const isLoading = useSelector(state => state.data.isLoading)
   const teams = useSelector(getTeams)
+  const cities = useSelector(getCities)
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm()
@@ -114,6 +116,12 @@ const columns = [
     key: 'en',
     sorter: (a, b) => a.country.localeCompare(b.country),
     ...getColumnSearchProps('en'),
+  },
+  {
+    title: 'City',
+    dataIndex: 'city',
+    key: 'city',
+    render: cityId => cities[cityId]?.en
   }
 ]
 

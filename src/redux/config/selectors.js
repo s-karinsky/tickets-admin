@@ -16,6 +16,22 @@ export const getLang = createSelector(
   (langs, key) => key ? langs[key] : Object.values(langs)
 )
 
+export const getCity = createSelector(
+  state => state.config.data?.cities,
+  (state, cityId) => cityId,
+  (cities, id) => cities[id]
+)
+
+export const getCities = createSelector(
+  state => state.config.data?.cities,
+  cities => cities
+)
+
+export const getCountries = createSelector(
+  state => state.config.data?.countries,
+  countries => countries
+)
+
 const emptyLang = {}
 
 export const getLangValue = createSelector(
