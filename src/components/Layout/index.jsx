@@ -46,8 +46,10 @@ const MENU_ITEMS = {
     getItem(<Link to='/content/privacy-policy'>Privacy policy</Link>, 'privacy-policy'),
     getItem(<Link to='/content/become-a-partner'>Become a partner</Link>, 'become-a-partner')
   ]),
+  data: getItem('Data', 'data', <UnorderedListOutlined />, [
+    getItem(<Link to='/matches'>Matches</Link>, 'matches')
+  ]),
   users: getItem(<Link to='/users'>Users</Link>, 'users', <UserOutlined />),
-  matches: getItem(<Link to='/matches'>Matches</Link>, 'matches', <UnorderedListOutlined />),
   tickets: getItem(<Link to='/tickets'>Tickets</Link>, 'tickets', <BarcodeOutlined />)
 }
 
@@ -64,7 +66,7 @@ export default function PageLayout() {
         MENU_ITEMS.translations,
         MENU_ITEMS.content,
         MENU_ITEMS.users,
-        MENU_ITEMS.matches,
+        MENU_ITEMS.data,
         MENU_ITEMS.tickets
       ]
     } else if (user.u_role === '2') {
