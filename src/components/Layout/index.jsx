@@ -47,7 +47,8 @@ const MENU_ITEMS = {
     getItem(<Link to='/content/become-a-partner'>Become a partner</Link>, 'become-a-partner')
   ]),
   data: getItem('Data', 'data', <UnorderedListOutlined />, [
-    getItem(<Link to='/matches'>Matches</Link>, 'matches')
+    getItem(<Link to='/matches'>Matches</Link>, 'matches'),
+    getItem(<Link to='/teams'>Teams</Link>, 'teams')
   ]),
   users: getItem(<Link to='/users'>Users</Link>, 'users', <UserOutlined />),
   tickets: getItem(<Link to='/tickets'>Tickets</Link>, 'tickets', <BarcodeOutlined />)
