@@ -27,6 +27,11 @@ export const getTournament = createSelector(
   (id, tournaments) => tournaments[id]
 )
 
+export const getTournamentsList = createSelector(
+  state => state.data.tournaments,
+  tournaments => Object.values(tournaments)
+)
+
 export const getTeam = createSelector(
   (state, teamId) => teamId,
   state => state.data.teams,

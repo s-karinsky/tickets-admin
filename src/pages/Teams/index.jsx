@@ -12,7 +12,6 @@ export default function PageTeams() {
   const searchInput = useRef(null)
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const user = useSelector(state => state.user.profile)
   const isLoading = useSelector(state => state.data.isLoading)
   const teams = useSelector(getTeams)
   const cities = useSelector(getCities)
@@ -153,7 +152,7 @@ const columns = [
         loading={isLoading}
         rowKey={({ id }) => id}
         onRow={record => ({
-            onClick: () => user.u_role === '4' && navigate(`/teams/${record.id}`)
+            onClick: navigate(`/teams/${record.id}`)
         })}
       />
     </>

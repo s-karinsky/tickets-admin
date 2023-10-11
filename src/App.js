@@ -11,6 +11,8 @@ import PageStadium from './pages/Stadium'
 import PageStadiums from './pages/Stadiums'
 import PageTeam from './pages/Team'
 import PageTeams from './pages/Teams'
+import PageTournament from './pages/Tournament'
+import PageTournaments from './pages/Tournaments'
 import PageTickets from './pages/Tickets'
 import PageTranslations from './pages/Translations'
 import PageUsers from './pages/Users'
@@ -66,6 +68,8 @@ function App() {
           <Route path="/teams/:id" element={<PageTeam />} />
           <Route path="/stadiums" element={<PageStadiums />} />
           <Route path="/stadiums/:id" element={<PageStadium />} />
+          <Route path="/tournaments" element={<PageTournaments />} />
+          <Route path="/tournaments/:id" element={<PageTournament />} />
           <Route path="/tickets/:matchId?" element={<PageTickets />} />
         </Route>
         <Route path="/login" element={<PageLogin />} />
