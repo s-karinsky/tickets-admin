@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { Button, Row, Table, Input, Space } from 'antd'
 import { PlusCircleFilled, SearchOutlined } from '@ant-design/icons'
 import { fetchData, getTeams } from '../../redux/data'
-import { getCities } from '../../redux/config'
+import { getCities, getCountries } from '../../redux/config'
 
 export default function PageTeams() {
   const [ searchText, setSearchText ] = useState('')
@@ -16,6 +16,7 @@ export default function PageTeams() {
   const isLoading = useSelector(state => state.data.isLoading)
   const teams = useSelector(getTeams)
   const cities = useSelector(getCities)
+  const countries = useSelector(getCountries)
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm()
@@ -100,8 +101,9 @@ const columns = [
     title: 'Country',
     dataIndex: 'country',
     key: 'country',
-    width: 150,
+    width: 180,
     sorter: (a, b) => a.country.localeCompare(b.country),
+    render: id => countries[id].en
   },
   {
     title: 'Logo',

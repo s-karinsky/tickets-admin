@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Col, Row, Form, Button, Select, Input } from 'antd'
 import { CaretLeftFilled } from '@ant-design/icons'
+import MultilangInput from '../../components/MultilangInput'
 import { fetchData, getTeam, postData } from '../../redux/data'
 import { getCities, getCountries } from '../../redux/config'
 
@@ -38,7 +39,13 @@ export default function PageTeam() {
   }
 
   const initialValues = !team ? {} : {
-    name: team.en,
+    name: {
+      en: team.en,
+      ru: team.ru,
+      ar: team.ar,
+      fr: team.fr,
+      es: team.es
+    },
     country: team.country,
     city: team.city,
     logo: team.logo,
@@ -49,8 +56,8 @@ export default function PageTeam() {
     <Form
       layout='vertical'
       onFinish={values => {
-        const { name, country, city, stadium } = values
-        const team = { en: name, country, city, stadium }
+        const { name: { en, ru, ar, fr, es }, country, city, stadium } = values
+        const team = { en, ru, ar, fr, es, country, city, stadium }
         if (!isNew) team.id = id
         dispatch(postData({ teams: [team] })).then(() => navigate('/teams'))
       }}
@@ -87,7 +94,7 @@ export default function PageTeam() {
             name='name'
             rules={[{ required: true, message: 'Please input team name' }]}
           >
-            <Input
+            <MultilangInput
               size='large'
               placeholder='Name'
               style={{ width: '100%' }}

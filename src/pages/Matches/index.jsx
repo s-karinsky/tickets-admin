@@ -56,9 +56,10 @@ export default function PageMatches() {
   const user = useSelector(state => state.user.profile)
   const isLoading = useSelector(state => state.data.isLoading)
   const schedule = useSelector(getScheduleList)
+  
   useEffect(() => {
     dispatch(fetchData())
-  }, [dispatch])
+  }, [])
 
   const handleSwitchTop = useCallback((match) => {
     const { id, top } = match
