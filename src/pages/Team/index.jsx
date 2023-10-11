@@ -41,15 +41,16 @@ export default function PageTeam() {
     name: team.en,
     country: team.country,
     city: team.city,
-    logo: team.logo
+    logo: team.logo,
+    stadium: team.stadium?.id
   }
 
   return (
     <Form
       layout='vertical'
       onFinish={values => {
-        const { name, country, city } = values
-        const team = { en: name, country, city }
+        const { name, country, city, stadium } = values
+        const team = { en: name, country, city, stadium }
         if (!isNew) team.id = id
         dispatch(postData({ teams: [team] })).then(() => navigate('/teams'))
       }}
@@ -78,7 +79,7 @@ export default function PageTeam() {
       </Row>
       <Row style={{ margin: '20px 20px 0 20px' }}>
         <Col
-          span={8}
+          span={12}
           style={{ padding: '0 10px 0 0' }}
         >
           <Form.Item
@@ -94,8 +95,30 @@ export default function PageTeam() {
           </Form.Item>
         </Col>
         <Col
-          span={8}
+          span={12}
           style={{ padding: '0 0 0 10px' }}
+        >
+          <Form.Item
+            label='Stadium'
+            name='stadium'
+          >
+            <Select
+              size='large'
+              placeholder='Stadium'
+              filterOption={(input, option) =>
+                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+              }
+              options={stadiumsOptions}
+              style={{ width: '100%' }}
+              showSearch
+            />
+          </Form.Item>
+        </Col>
+      </Row>
+      <Row style={{ margin: '20px 20px 0 20px' }}>
+        <Col
+          span={12}
+          style={{ padding: '0 10px 0 0' }}
         >
           <Form.Item
             label='Country'
@@ -115,7 +138,7 @@ export default function PageTeam() {
           </Form.Item>
         </Col>
         <Col
-          span={8}
+          span={12}
           style={{ padding: '0 0 0 10px' }}
         >
           <Form.Item
