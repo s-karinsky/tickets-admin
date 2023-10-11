@@ -16,6 +16,11 @@ export const getStadium = createSelector(
   (id, stadiums) => stadiums[id]
 )
 
+export const getStadiumsList = createSelector(
+  state => state.data.stadiums,
+  stadiums => Object.values(stadiums)
+)
+
 export const getTournament = createSelector(
   (state, tournamentId) => tournamentId,
   state => state.data.tournaments,

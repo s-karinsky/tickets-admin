@@ -49,7 +49,7 @@ const MENU_ITEMS = {
   data: getItem('Data', 'data', <UnorderedListOutlined />, [
     getItem(<Link to='/matches'>Matches</Link>, 'matches'),
     getItem(<Link to='/teams'>Teams</Link>, 'teams'),
-    // getItem(<Link to='/stadiums'>Stadiums</Link>, 'stadiums'),
+    getItem(<Link to='/stadiums'>Stadiums</Link>, 'stadiums'),
     // getItem(<Link to='/tournaments'>Tournaments</Link>, 'tournaments')
   ]),
   users: getItem(<Link to='/users'>Users</Link>, 'users', <UserOutlined />),
