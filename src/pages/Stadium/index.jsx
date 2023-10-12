@@ -3,8 +3,9 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Col, Row, Form, Button, Select, Input } from 'antd'
 import { CaretLeftFilled } from '@ant-design/icons'
+import InputImage from '../../components/InputImage'
 import MultilangInput from '../../components/MultilangInput'
-import { fetchData, getStadium, postData } from '../../redux/data'
+import { fetchData, getStadium, getStadiumSchemeStatus, fetchStadiumScheme, postData } from '../../redux/data'
 import { getCities, getCountries } from '../../redux/config'
 
 const getOptions = obj => Object.values(obj)
@@ -22,9 +23,15 @@ export default function PageStadium() {
   const cities = useSelector(getCities)
   const countries = useSelector(getCountries)
   const stadium = useSelector(state => getStadium(state, id))
+  const schemeStatus = useSelector(state => getStadiumSchemeStatus(state, id))
 
   const countriesOptions = useMemo(() => getOptions(countries), [countries])
   const citiesOptions = useMemo(() => getOptions(cities), [cities])
+
+  useEffect(() => {
+    if (['loading', 'loaded'].includes(schemeStatus)) return
+    dispatch(fetchStadiumScheme(id))
+  }, [schemeStatus, id])
 
   useEffect(() => {
     if (!isLoaded && !isLoading) {
@@ -52,14 +59,15 @@ export default function PageStadium() {
       es: stadium.address_es
     },
     country: stadium.country,
-    city: stadium.city
+    city: stadium.city,
+    scheme_blob: stadium.scheme_blob
   }
 
   return (
     <Form
       layout='vertical'
       onFinish={values => {
-        const { name, address, country, city } = values
+        const { name, address, country, city, scheme_blob } = values
         const stadium = {
           ...name,
           address_en: address.en,
@@ -70,6 +78,7 @@ export default function PageStadium() {
           country,
           city
         }
+        if (scheme_blob) stadium.scheme_blob = scheme_blob
         if (!isNew) stadium.id = id
         dispatch(postData({ stadiums: [stadium] })).then(() => navigate('/stadiums'))
       }}
@@ -164,6 +173,19 @@ export default function PageStadium() {
               style={{ width: '100%' }}
               showSearch
             />
+          </Form.Item>
+        </Col>
+      </Row>
+      <Row style={{ margin: '20px 20px 0 20px' }}>
+        <Col
+          span={24}
+          style={{ padding: '0 10px 0 0' }}
+        >
+          <Form.Item
+            label='Scheme'
+            name='scheme_blob'
+          >
+            <InputImage />
           </Form.Item>
         </Col>
       </Row>

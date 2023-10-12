@@ -33,10 +33,10 @@ export const fetchStadiumScheme = stadiumId => async (dispatch) => {
   dispatch(setStadiumSchemeStatus({ id: stadiumId, isLoading: true }))
   try {
     const { data } = await axios.post(`/data?fields=1&key=${stadiumId}`)
-    const scheme = data.stadiums[stadiumId].scheme
     dispatch(setStadiumSchemeStatus({ id: stadiumId, isLoading: false, isLoaded: true }))
+    const schemeJson = data?.data?.data?.stadiums[stadiumId].scheme
+    const scheme = schemeJson ? JSON.parse(schemeJson.replaceAll('\'', '"')) : null
     dispatch(setStadiumScheme({ id: stadiumId, scheme }))
-    console.log(data)
   } catch (e) {
     dispatch(setStadiumSchemeStatus({ id: stadiumId, isLoading: false }))
     console.error(e)
