@@ -152,7 +152,7 @@ const columns = [
         loading={isLoading}
         rowKey={({ id }) => id}
         onRow={record => ({
-            onClick: navigate(`/teams/${record.id}`)
+            onClick: () => navigate(`/teams/${record.id}`)
         })}
       />
     </>

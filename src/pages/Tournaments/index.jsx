@@ -16,7 +16,6 @@ const columns = [
 export default function PageTournaments() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const user = useSelector(state => state.user.profile)
   const isLoading = useSelector(state => state.data.isLoading)
   const tournaments = useSelector(getTournamentsList)
 
@@ -46,7 +45,7 @@ export default function PageTournaments() {
         loading={isLoading}
         rowKey={({ id }) => id}
         onRow={record => ({
-            onClick: () => user.u_role === '4' && navigate(`/tournaments/${record.id}`)
+            onClick: () => navigate(`/tournaments/${record.id}`)
         })}
       />
     </>
