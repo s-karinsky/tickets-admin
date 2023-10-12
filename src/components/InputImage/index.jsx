@@ -7,10 +7,11 @@ export default function InputImage({
   value,
   onChange = () => {}
 }) {
-  const handleChangeFile = e => toBase64(new Blob([e.file])).then(base64 => onChange(base64))
+  const handleChangeFile = e => toBase64(e.file).then(base64 => onChange(base64))
   return (
     <>
       <Upload
+        accept='image/*'
         beforeUpload={() => false}
         listType='picture'
         onChange={handleChangeFile}
