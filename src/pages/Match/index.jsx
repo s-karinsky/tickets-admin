@@ -54,7 +54,7 @@ export default function PageMatch() {
       layout='vertical'
       onFinish={values => {
         const { team1, team2, date, time, stadium, tournament, top } = values
-        const datetime = `${date.format('YYYY-MM-DD')} ${time.format('HH:mm:ss')}-07:00`
+        const datetime = `${date.format('YYYY-MM-DD')} ${time.format('HH:mm:ss')}+03:00`
         const match = { team1, team2, stadium, tournament, datetime, top: top ? '1' : '0' }
         if (!isNew) match.id = id
         dispatch(postData({ schedule: [match] })).then(() => navigate('/matches'))

@@ -1,3 +1,4 @@
+import { mapValues } from 'lodash'
 import axios from '../../utils/axios'
 import { setLoading, setLoaded, setSubmitting, updateData, setData, setStadiumScheme, setStadiumSchemeStatus } from '.'
 
@@ -6,7 +7,14 @@ export const fetchData = (params = { fields: 'F', easy: true }) => async (dispat
   try {
     const res = await axios.get('/data', { params })
     const data = res.data?.data?.data
-    dispatch(setData(data))
+    const schedule = mapValues(data.schedule, item => {
+      if (!item.datetime) return item
+      return {
+        ...item,
+        datetime: item.datetime.split('+')[0]
+      }
+    })
+    dispatch(setData({ ...data, schedule }))
   } catch(e) {
     console.error(e)
   } finally {
