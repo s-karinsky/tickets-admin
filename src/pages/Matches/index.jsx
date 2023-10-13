@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { Button, Row, Table, Switch } from 'antd'
 import { PlusCircleFilled } from '@ant-design/icons'
+import { getColumnSearchProps } from '../../utils/components'
 import { fetchData, getScheduleList, postData } from '../../redux/data'
 
 const getColumns = ({ onChangeTop = () => {} }) => ([
@@ -10,25 +11,29 @@ const getColumns = ({ onChangeTop = () => {} }) => ([
     title: 'Team home',
     dataIndex: 'team1',
     key: 'team1',
-    render: team => team && team.en
+    render: team => team && team.en,
+    ...getColumnSearchProps('team home', record => record.team1?.en)
   },
   {
     title: 'Team away',
     dataIndex: 'team2',
     key: 'team2',
-    render: team => team && team.en
+    render: team => team && team.en,
+    ...getColumnSearchProps('team away', record => record.team2?.en)
   },
   {
     title: 'Tournament',
     dataIndex: 'tournament',
     key: 'tournament',
-    render: tournament => tournament && tournament.en
+    render: tournament => tournament && tournament.en,
+    ...getColumnSearchProps('tournament', record => record.tournament?.en)
   },
   {
     title: 'Stadium',
     dataIndex: 'stadium',
     key: 'stadium',
-    render: (stadium, { team1 }) => stadium ? stadium.en : team1?.stadium?.en
+    render: (stadium, { team1 }) => stadium ? stadium.en : team1?.stadium?.en,
+    ...getColumnSearchProps('stadium', record => record.stadium?.en || record.team1?.stadium?.en)
   },
   {
     title: 'Date',

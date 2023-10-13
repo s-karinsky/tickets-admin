@@ -3,40 +3,44 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { Button, Row, Table } from 'antd'
 import { PlusCircleFilled } from '@ant-design/icons'
-import { fetchData, getStadiumsList, postData } from '../../redux/data'
-
-const columns = [
-  {
-    title: 'Name',
-    dataIndex: 'en',
-    key: 'en'
-  },
-  {
-    title: 'Country',
-    dataIndex: 'country',
-    key: 'country'
-  },
-  {
-    title: 'Address',
-    dataIndex: 'address_en',
-    key: 'address_en'
-  }
-]
+import { getColumnSearchProps } from '../../utils/components'
+import { fetchData, getStadiumsList } from '../../redux/data'
+import { getCountries } from '../../redux/config'
 
 export default function PageStadiums() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const isLoading = useSelector(state => state.data.isLoading)
   const stadiums = useSelector(getStadiumsList)
+  const countries = useSelector(getCountries)
 
   useEffect(() => {
     dispatch(fetchData())
   }, [])
 
-  const handleSwitchTop = useCallback((match) => {
-    const { id, top } = match
-    dispatch(postData({ schedule: [{ id, top: top ? '1' : '0' }] }))
-  }, [])
+  
+  const columns = [
+    {
+      title: 'Name',
+      dataIndex: 'en',
+      key: 'en',
+      ...getColumnSearchProps('en'),
+    },
+    {
+      title: 'Country',
+      dataIndex: 'country',
+      key: 'country',
+      sorter: (a, b) => a.country.localeCompare(b.country),
+      render: id => countries[id]?.en,
+      ...getColumnSearchProps('country', record => countries[record.country]?.en),
+    },
+    {
+      title: 'Address',
+      dataIndex: 'address_en',
+      key: 'address_en',
+      ...getColumnSearchProps('address_en'),
+    }
+  ]
 
   return (
     <>

@@ -3,13 +3,16 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { Button, Row, Table } from 'antd'
 import { PlusCircleFilled } from '@ant-design/icons'
+import { getColumnSearchProps } from '../../utils/components'
 import { fetchData, getTournamentsList } from '../../redux/data'
 
 const columns = [
   {
     title: 'Name',
     dataIndex: 'en',
-    key: 'en'
+    key: 'en',
+    sorter: (a, b) => a.en.localeCompare(b.en),
+    ...getColumnSearchProps('en')
   }
 ]
 
