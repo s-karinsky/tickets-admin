@@ -113,17 +113,25 @@ function TicketFormRow({
           name={[name, 'block']}
           rules={[{ required: true, message: 'Please input block' }]}
         >
-          <Select
-            size='large'
-            placeholder='Block'
-            filterOption={(input, option) =>
-              (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-            }
-            options={stadiumBlocks}
-            style={{ width: '100%' }}
-            disabled={isSold}
-            showSearch
-          />
+          {stadiumBlocks.length > 0 ? 
+            <Select
+              size='large'
+              placeholder='Block'
+              filterOption={(input, option) =>
+                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+              }
+              options={stadiumBlocks}
+              style={{ width: '100%' }}
+              disabled={isSold}
+              showSearch
+            /> :
+            <Input
+              size='large'
+              placeholder='Block'
+              style={{ width: '100%' }}
+              disabled={isSold}
+            />
+          }
         </Form.Item>
       </Col>
       <Col span={3} offset={1}>
@@ -323,6 +331,7 @@ export default function TicketsForm({
   const defaultCurrency = useSelector(getDefaultCurrency)
   const [ tournamentValue, setTournamentValue ] = useState(match?.tournament.id)
   const [ stadiumBlocks, setStadiumBlocks ] = useState([])
+  const [ stadiumLoaded, setStadiumLoaded ] = useState(false)
   const [ isShowModal, setShowModal ] = useState(false)
   const [ formValues, setFormValues ] = useState()
 
@@ -370,7 +379,6 @@ export default function TicketsForm({
         seat: `${stadiumId};${files[i].block};${files[i].row};${files[i].seat}`,
         'extW.dot': getFileExt(files[i].file.name, true)
       }))
-      console.log(resposneData)
       const t_id = initialTrip || resposneData.data.t_id
       const params = new URLSearchParams()
       params.append('data', JSON.stringify(filesData))
@@ -403,21 +411,27 @@ export default function TicketsForm({
   useEffect(() => {
     if (!match) return
     setStadiumBlocks([])
-    const stadiumId = match.stadium || match.team1?.stadium?.id
+    setStadiumLoaded(false)
+    const stadiumId = match.stadium?.id || match.team1?.stadium?.id
     axios.post(`/data?fields=1&key=${stadiumId}`)
       .then(({ data }) => {
         const { scheme } = data.data.data.stadiums[stadiumId] || {}
-        const jsonScheme = JSON.parse(scheme.replaceAll('\'', '"'))
-        const { sections } = jsonScheme
-        const blocks = Object.keys(sections).map(section => {
-          const label = capitalizeFirstLetter(section.split('-').join(' '))
-          const options = Object.keys(sections[section].blocks).map(block => ({
-            label: block.toUpperCase(),
-            value: block
-          }))
-          return { label, options }
-        })
-        setStadiumBlocks(blocks)
+        try {
+          const jsonScheme = JSON.parse(scheme.replaceAll('\'', '"'))
+          const { sections } = jsonScheme
+          const blocks = Object.keys(sections).map(section => {
+            const label = capitalizeFirstLetter(section.split('-').join(' '))
+            const options = Object.keys(sections[section].blocks).map(block => ({
+              label: block.toUpperCase(),
+              value: block
+            }))
+            return { label, options }
+          })
+          setStadiumBlocks(blocks)
+        } catch (e) {
+          console.error(e)
+        }
+        setStadiumLoaded(true)
       })
       .catch(e => console.error(e))
   }, [match])
@@ -483,7 +497,7 @@ export default function TicketsForm({
             </Form.Item>
           </Col>
         </Row>
-        {stadiumBlocks.length > 0 && !isAdmin &&
+        {stadiumLoaded && !isAdmin &&
           <>
             <Row style={{ margin: '20px 0 0 20px' }}>
               <Col>

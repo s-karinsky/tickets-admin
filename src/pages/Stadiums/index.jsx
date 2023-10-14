@@ -18,7 +18,6 @@ export default function PageStadiums() {
     dispatch(fetchData())
   }, [])
 
-  
   const columns = [
     {
       title: 'Name',
