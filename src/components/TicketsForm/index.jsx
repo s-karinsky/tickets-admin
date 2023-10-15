@@ -362,7 +362,7 @@ export default function TicketsForm({
 
   const handleAddTickets = useCallback(async (values, initialTrip) => {
     const { tickets } = values
-    const stadiumId = match.stadium || match.team1?.stadium?.id
+    const stadiumId = match.stadium?.id || match.team1?.stadium?.id
     const files = []
     const t_options = tickets.reduce((acc, ticket, i) => {
       const { block, row, seats, price, currency = defaultCurrency, file } = ticket
@@ -390,7 +390,7 @@ export default function TicketsForm({
     }, { seats_sold: {}, price: {} })
     const t_start_address = `sc_id\u0000${match.id}`
     const data = JSON.stringify({ t_options, t_start_address })
-    
+
     try {
       const { data: resposneData } = await axios.postWithAuth('/trip', { data })
       const filesBase64 = await Promise.all(files.map(data => toBase64(data.file)))
