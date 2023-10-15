@@ -19,6 +19,7 @@ import dayjs from 'dayjs'
 import InputFile from '../InputFile'
 import axios from '../../utils/axios'
 import { capitalizeFirstLetter, toBase64, getFileExt } from '../../utils/utils'
+import { getColumnSearchProps } from '../../utils/components'
 import { getCurrencyList, getDefaultCurrency } from '../../redux/config'
 import { getSchedule, getMatch } from '../../redux/data'
 import { fetchTicketGroups, fetchTicketsFiles, getMatchTickets } from '../../redux/tickets'
@@ -29,23 +30,31 @@ const getTicketsColumns = (getFile = () => {}) => ([
   {
     title: 'Block',
     dataIndex: 'block',
-    key: 'block'
+    key: 'block',
+    sorter: (a, b) => a.block.localeCompare(b.block),
+    ...getColumnSearchProps('block')
   },
   {
     title: 'Row',
     dataIndex: 'row',
-    key: 'row'
+    key: 'row',
+    sorter: (a, b) => parseInt(a.row) - parseInt(b.row),
+    ...getColumnSearchProps('row')
   },
   {
     title: 'Seat',
     dataIndex: 'seat',
-    key: 'seat'
+    key: 'seat',
+    sorter: (a, b) => parseInt(a.seat) - parseInt(b.seat),
+    ...getColumnSearchProps('seat')
   },
   {
     title: 'Price',
     dataIndex: 'price',
     key: 'price',
-    render: (price, { currency }) => `${price} ${currency || ''}`
+    sorter: (a, b) => parseInt(a.price) - parseInt(b.price),
+    render: (price, { currency }) => `${price} ${currency || ''}`,
+    ...getColumnSearchProps('price')
   },
   {
     title: 'File',
@@ -60,7 +69,18 @@ const getTicketsColumns = (getFile = () => {}) => ([
     title: 'Status',
     dataIndex: 'soldToUser',
     key: 'soldToUser',
-    render: user => user ? (<Text type='danger'>Sold</Text>) : (<Text type='success'>Available</Text>)
+    render: user => user ? (<Text type='danger'>Sold</Text>) : (<Text type='success'>Available</Text>),
+    filters: [
+      {
+        text: 'Available',
+        value: true
+      },
+      {
+        text: 'Sold',
+        value: false
+      }
+    ],
+    onFilter: (value, record) => value ? !record.soldToUser : !!record.soldToUser
   }
 ])
 
