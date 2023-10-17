@@ -11,6 +11,7 @@ import PageStadium from './pages/Stadium'
 import PageStadiums from './pages/Stadiums'
 import PageTeam from './pages/Team'
 import PageTeams from './pages/Teams'
+import PageTemplates from './pages/Templates'
 import PageTournament from './pages/Tournament'
 import PageTournaments from './pages/Tournaments'
 import PageTickets from './pages/Tickets'
@@ -60,6 +61,7 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route path="/translations" element={<PageTranslations />} />
           <Route path="/content/:page" element={<PageContent />} />
+          <Route path="/templates/:page" element={<PageTemplates />} />
           <Route path="/users" element={<PageUsers />} />
           <Route path="/users/:id" element={<PageUser />} />
           <Route path="/matches" element={<PageMatches />} />

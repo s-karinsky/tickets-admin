@@ -7,7 +7,8 @@ import {
   MenuUnfoldOutlined,
   MenuFoldOutlined,
   FileTextOutlined,
-  TranslationOutlined
+  TranslationOutlined,
+  MailOutlined
 } from '@ant-design/icons'
 import {
   Avatar,
@@ -52,6 +53,15 @@ const MENU_ITEMS = {
     getItem(<Link to='/stadiums'>Stadiums</Link>, 'stadiums'),
     getItem(<Link to='/tournaments'>Tournaments</Link>, 'tournaments')
   ]),
+  templates: getItem('E-mail templates', 'templates', <MailOutlined />, [
+    getItem(<Link to='/templates/signup'>Signup</Link>, 'signup'),
+    getItem(<Link to='/templates/booking-in-cart'>Booking tickets in cart</Link>, 'booking-in-cart'),
+    getItem(<Link to='/templates/successful-payment'>Successful payment</Link>, 'successful-payment'),
+    getItem(<Link to='/templates/checking-ticket'>Does the ticket work or not</Link>, 'checking-ticket'),
+    getItem(<Link to='/templates/feedback'>Feedback</Link>, 'feedback'),
+    getItem(<Link to='/templates/restore-password'>Restore password</Link>, 'restore-password'),
+    getItem(<Link to='/templates/tickets-are-in-stock'>Tickets are in stock</Link>, 'tickets-are-in-stock')
+  ]),
   users: getItem(<Link to='/users'>Users</Link>, 'users', <UserOutlined />),
   tickets: getItem(<Link to='/tickets'>Tickets</Link>, 'tickets', <BarcodeOutlined />)
 }
@@ -70,6 +80,7 @@ export default function PageLayout() {
         MENU_ITEMS.content,
         MENU_ITEMS.users,
         MENU_ITEMS.data,
+        MENU_ITEMS.templates,
         MENU_ITEMS.tickets
       ]
     } else if (user.u_role === '2') {

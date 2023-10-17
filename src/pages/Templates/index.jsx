@@ -6,17 +6,15 @@ import { forEach } from 'lodash'
 import Wysiwyg from '../../components/Wysiwyg'
 import { getLang, getLangValue, updateLang } from '../../redux/config'
 
-export default function PageContent() {
+export default function PageTemplates() {
   const [ form ] = Form.useForm()
   const { page } = useParams()
   const [ activeLang, setActiveLang ] = useState('1')
   const dispatch = useDispatch()
 
-  const contentKey = `page_content_${page}`
-  const titleKey = `page_title_${page}`
+  const contentKey = `email_template_${page}`
   const langs = useSelector(getLang)
   const content = useSelector(state => getLangValue(state, contentKey))
-  const title = useSelector(state => getLangValue(state, titleKey))
   const isUpdating = useSelector(state => state.config.isUpdating)
 
   const langsOptions = useMemo(() => langs.map(lang => ({
@@ -30,21 +28,17 @@ export default function PageContent() {
 
   const handleSubmit = useCallback(values => {
     const obj = {}
-    forEach(values.title, (value, lang) => {
-      if (value === undefined) return
-      obj[titleKey] = { ...obj[titleKey], [lang]: value }
-    })
     forEach(values.content, (value, lang) => {
       if (value === undefined) return
       obj[contentKey] = { ...obj[contentKey], [lang]: value }
     })
     dispatch(updateLang(obj))
-  }, [contentKey, titleKey])
+  }, [contentKey])
 
   return (
     <Form
       layout='vertical'
-      initialValues={{ title, content }}
+      initialValues={{ content }}
       onFinish={handleSubmit}
       form={form}
     >
@@ -82,16 +76,7 @@ export default function PageContent() {
         >
           <Col span={22} offset={1}>
             <Form.Item
-              label='Page title'
-              name={['title', lang.value]}
-            >
-              <Input
-              />
-            </Form.Item>
-          </Col>
-          <Col span={22} offset={1}>
-            <Form.Item
-              label='Page content'
+              label='Template'
               name={['content', lang.value]}
             >
               <Wysiwyg />
