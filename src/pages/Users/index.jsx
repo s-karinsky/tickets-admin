@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 import { Table, Tag } from 'antd'
 import { fetchUserList, setPage, setPerPage } from '../../redux/users'
+import { getColumnSearchProps } from '../../utils/components'
 import { USER_ROLES, USER_ROLES_COLOR } from '../../consts'
 
 const columns = [
@@ -10,19 +11,28 @@ const columns = [
     title: 'Name',
     dataIndex: 'u_name',
     key: 'u_name',
-    render: (text, { u_id }) => (<Link to={`/users/${u_id}`}>{text || 'No name'}</Link>)
+    render: (text, { u_id }) => (<Link to={`/users/${u_id}`}>{text || 'No name'}</Link>),
+    sorter: (a, b) => a.en.localeCompare(b.en),
+    ...getColumnSearchProps('u_name')
   },
   {
     title: 'Email',
     dataIndex: 'u_email',
     key: 'u_email',
-    render: text => text || 'No email'
+    render: text => text || 'No email',
+    sorter: (a, b) => a.en.localeCompare(b.en),
+    ...getColumnSearchProps('u_email')
   },
   {
     title: 'Role',
     dataIndex: 'u_role',
     key: 'u_role',
-    render: text => (<Tag color={USER_ROLES_COLOR[text]}>{USER_ROLES[text]}</Tag>)
+    render: text => (<Tag color={USER_ROLES_COLOR[text]}>{USER_ROLES[text]}</Tag>),
+    filters: Object.keys(USER_ROLES).map(id => ({
+      text: USER_ROLES[id],
+      value: id
+    })),
+    onFilter: (value, record) => console.log(record.u_role === value) || record.u_role === value
   }
 ]
 
