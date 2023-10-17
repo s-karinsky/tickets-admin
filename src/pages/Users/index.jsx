@@ -37,7 +37,7 @@ const columns = [
     title: 'Checked seller',
     dataIndex: 'u_check_state',
     key: 'u_check_state',
-    render: state => state === '2' ? <CheckOutlined style={{ color: '#09d934' }} /> : ''
+    render: (state, record) => record.u_role === '2' && state === '2' ? <CheckOutlined style={{ color: '#09d934' }} /> : ''
   }
 ]
 
