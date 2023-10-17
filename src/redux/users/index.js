@@ -3,6 +3,7 @@ import { createSlice } from '@reduxjs/toolkit'
 export const usersSlice = createSlice({
   name: 'users',
   initialState: {
+    isUpdating: false,
     isLoading: false,
     isLoaded: false,
     perPage: 30,
@@ -11,6 +12,9 @@ export const usersSlice = createSlice({
     currentProfile: null,
   },
   reducers: {
+    setUpdating: (state, action) => {
+      state.isUpdating = action.payload
+    },
     setLoading: (state, action) => {
       state.isLoading = action.payload
     },
@@ -28,17 +32,22 @@ export const usersSlice = createSlice({
     },
     setCurrentProfile: (state, action) => {
       state.currentProfile = action.payload
+    },
+    updateCurrentProfile: (state, action) => {
+      state.currentProfile = { ...state.currentProfile, ...action.payload }
     }
   },
 })
 
 export const {
+  setUpdating,
   setLoading,
   setLoaded,
   setPage,
   setPerPage,
   setUserList,
   setCurrentProfile,
+  updateCurrentProfile
 } = usersSlice.actions
 
 export * from './thunk'

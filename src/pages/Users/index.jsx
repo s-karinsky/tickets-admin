@@ -1,9 +1,9 @@
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Table, Tag } from 'antd'
 import { fetchUserList, setPage, setPerPage } from '../../redux/users'
-import { getColumnSearchProps } from '../../utils/components'
+// import { getColumnSearchProps } from '../../utils/components'
 import { USER_ROLES, USER_ROLES_COLOR } from '../../consts'
 
 const columns = [
@@ -11,17 +11,15 @@ const columns = [
     title: 'Name',
     dataIndex: 'u_name',
     key: 'u_name',
-    render: (text, { u_id }) => (<Link to={`/users/${u_id}`}>{text || 'No name'}</Link>),
-    sorter: (a, b) => a.en.localeCompare(b.en),
-    ...getColumnSearchProps('u_name')
+    render: (text, { u_id }) => text || 'No name',
+    // ...getColumnSearchProps('u_name')
   },
   {
     title: 'Email',
     dataIndex: 'u_email',
     key: 'u_email',
     render: text => text || 'No email',
-    sorter: (a, b) => a.en.localeCompare(b.en),
-    ...getColumnSearchProps('u_email')
+    // ...getColumnSearchProps('u_email')
   },
   {
     title: 'Role',
@@ -38,6 +36,7 @@ const columns = [
 
 export default function PageUsers() {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const page = useSelector(state => state.users.page)
   const perPage = useSelector(state => state.users.perPage)
   const isLoading = useSelector(state => state.users.isLoading)
@@ -53,6 +52,9 @@ export default function PageUsers() {
       dataSource={users}
       loading={isLoading}
       rowKey={({ u_id }) => u_id}
+      onRow={record => ({
+        onClick: () => navigate(`/users/${record.u_id}`)
+      })}
       pagination={{
         current: page,
         pageSize: perPage,

@@ -1,5 +1,5 @@
 import axios from '../../utils/axios'
-import { setLoading, setCurrentProfile, setUserList } from '.'
+import { setLoading, setCurrentProfile, updateCurrentProfile, setUserList, setUpdating } from '.'
 
 export const fetchUserList = (page, perPage) => async (dispatch) => {
   dispatch(setLoading(true))
@@ -27,5 +27,19 @@ export const fetchUser = id => async (dispatch) => {
     dispatch(setCurrentProfile(users[id]))
   } catch(e) {
     console.error(e)
+  }
+}
+
+export const updateUser = (id, data) => async (dispatch) => {
+  dispatch(setUpdating(true))
+  try {
+    const res = await axios.postWithAuth(`/user/${id}`, { data: JSON.stringify(data) })
+    if (res.data.status === 'success') {
+      dispatch(updateCurrentProfile(data))
+    }
+  } catch (e) {
+    console.error(e)
+  } finally {
+    dispatch(setUpdating(false))
   }
 }
