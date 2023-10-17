@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Col, Row, Form, Button, Select, Input } from 'antd'
 import { CaretLeftFilled } from '@ant-design/icons'
+import JSONEditor from '../../components/JSONEditor'
 import InputImage from '../../components/InputImage'
 import MultilangInput from '../../components/MultilangInput'
 import { fetchData, getStadium, getStadiumSchemeStatus, fetchStadiumScheme, postData } from '../../redux/data'
@@ -39,7 +40,7 @@ export default function PageStadium() {
     }
   }, [isLoaded, isLoading])
 
-  if (!stadium && !isNew) {
+  if ((!stadium || schemeStatus !== 'loaded') && !isNew) {
     return null
   }
 
@@ -60,14 +61,15 @@ export default function PageStadium() {
     },
     country: stadium.country,
     city: stadium.city,
-    scheme_blob: stadium.scheme_blob
+    scheme_blob: stadium.scheme_blob,
+    scheme: stadium.scheme
   }
 
   return (
     <Form
       layout='vertical'
       onFinish={values => {
-        const { name, address, country, city, scheme_blob } = values
+        const { name, address, country, city, scheme, scheme_blob } = values
         const stadium = {
           ...name,
           address_en: address.en,
@@ -79,6 +81,7 @@ export default function PageStadium() {
           city
         }
         if (scheme_blob) stadium.scheme_blob = scheme_blob
+        if (scheme) stadium.scheme = JSON.stringify(scheme).replaceAll('"', '\'')
         if (!isNew) stadium.id = id
         dispatch(postData({ stadiums: [stadium] })).then(() => navigate('/stadiums'))
       }}
@@ -141,7 +144,6 @@ export default function PageStadium() {
           <Form.Item
             label='Country'
             name='country'
-            rules={[{ required: true, message: 'Please input team country' }]}
           >
             <Select
               size='large'
@@ -182,10 +184,23 @@ export default function PageStadium() {
           style={{ padding: '0 10px 0 0' }}
         >
           <Form.Item
-            label='Scheme'
+            label='Image scheme'
             name='scheme_blob'
           >
             <InputImage />
+          </Form.Item>
+        </Col>
+      </Row>
+      <Row style={{ margin: '20px 20px 0 20px' }}>
+        <Col
+          span={24}
+          style={{ padding: '0 10px 0 0' }}
+        >
+          <Form.Item
+            label='Json scheme'
+            name='scheme'
+          >
+            <JSONEditor />
           </Form.Item>
         </Col>
       </Row>

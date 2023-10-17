@@ -89,7 +89,7 @@ export const getStadiumSchemeStatus = createSelector(
   (state, id) => id,
   (stadiums, id) => {
     if (stadiums[id]) {
-      if (stadiums[id].isSchemeLoaded) return 'loading'
+      if (stadiums[id].isSchemeLoading) return 'loading'
       if (stadiums[id].isSchemeLoaded) return 'loaded'
     }
     return null
