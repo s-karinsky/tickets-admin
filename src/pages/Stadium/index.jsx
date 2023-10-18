@@ -6,6 +6,7 @@ import { CaretLeftFilled } from '@ant-design/icons'
 import JSONEditor from '../../components/JSONEditor'
 import InputImage from '../../components/InputImage'
 import MultilangInput from '../../components/MultilangInput'
+import StadiumScheme from '../../components/StadiumScheme'
 import { fetchData, getStadium, getStadiumSchemeStatus, fetchStadiumScheme, postData } from '../../redux/data'
 import { getCities, getCountries } from '../../redux/config'
 
@@ -193,7 +194,7 @@ export default function PageStadium() {
       </Row>
       <Row style={{ margin: '20px 20px 0 20px' }}>
         <Col
-          span={24}
+          span={12}
           style={{ padding: '0 10px 0 0' }}
         >
           <Form.Item
@@ -201,6 +202,14 @@ export default function PageStadium() {
             name='scheme'
           >
             <JSONEditor />
+          </Form.Item>
+        </Col>
+        <Col span={12}>
+          <Form.Item
+            label='Json scheme preview'
+            name='scheme'
+          >
+            <StadiumScheme />
           </Form.Item>
         </Col>
       </Row>
