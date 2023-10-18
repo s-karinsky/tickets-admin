@@ -1,81 +1,66 @@
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
+import { useQuery } from 'react-query'
 import { Table, Tag } from 'antd'
 import { CheckOutlined } from '@ant-design/icons'
-import { fetchUserList, setPage, setPerPage } from '../../redux/users'
-// import { getColumnSearchProps } from '../../utils/components'
+import axios from '../../utils/axios'
+import { getColumnSearchProps } from '../../utils/components'
 import { USER_ROLES, USER_ROLES_COLOR } from '../../consts'
 
 const columns = [
   {
     title: 'Name',
-    dataIndex: 'u_name',
-    key: 'u_name',
-    render: (text, { u_id }) => text || 'No name',
-    // ...getColumnSearchProps('u_name')
+    dataIndex: 'name',
+    key: 'name',
+    render: (name, { family }) => [name, family].filter(item => item).join(' ') || 'No name',
+    ...getColumnSearchProps('name', record => ([record.name, record.family].join(' ')))
   },
   {
     title: 'Email',
-    dataIndex: 'u_email',
-    key: 'u_email',
-    render: text => text || 'No email',
-    // ...getColumnSearchProps('u_email')
+    dataIndex: 'email',
+    key: 'email',
+    render: email => email || 'No email',
+    ...getColumnSearchProps('email')
   },
   {
     title: 'Role',
-    dataIndex: 'u_role',
-    key: 'u_role',
+    dataIndex: 'id_role',
+    key: 'id_role',
     render: text => (<Tag color={USER_ROLES_COLOR[text]}>{USER_ROLES[text]}</Tag>),
     filters: Object.keys(USER_ROLES).map(id => ({
       text: USER_ROLES[id],
       value: id
     })),
-    onFilter: (value, record) => console.log(record.u_role === value) || record.u_role === value
+    onFilter: (value, record) => record.id_role === value
   },
   {
     title: 'Checked seller',
-    dataIndex: 'u_check_state',
-    key: 'u_check_state',
-    render: (state, record) => record.u_role === '2' && state === '2' ? <CheckOutlined style={{ color: '#09d934' }} /> : ''
+    dataIndex: 'id_verification_status',
+    key: 'id_verification_status',
+    render: (state, record) => record.id_role === '2' && state === '2' ? <CheckOutlined style={{ color: '#09d934' }} /> : ''
   }
 ]
 
 export default function PageUsers() {
-  const dispatch = useDispatch()
   const navigate = useNavigate()
-  const page = useSelector(state => state.users.page)
-  const perPage = useSelector(state => state.users.perPage)
-  const isLoading = useSelector(state => state.users.isLoading)
-  const users = useSelector(state => state.users.list)
 
-  useEffect(() => {
-    dispatch(fetchUserList(page, perPage))
-  }, [page, perPage])
+  const { isLoading, error, data } = useQuery('users', async () => {
+    const response = await axios.postWithAuth('/query/select', {
+      sql: `SELECT id_user,id_role,phone,email,name,family,middle,id_verification_status FROM users WHERE active=1 AND deleted!=1`
+    })
+    return response.data?.data || []
+  })
 
   return (
     <Table
       columns={columns}
-      dataSource={users}
+      dataSource={data}
       loading={isLoading}
-      rowKey={({ u_id }) => u_id}
+      rowKey={({ id_user }) => id_user}
       onRow={record => ({
-        onClick: () => navigate(`/users/${record.u_id}`)
+        onClick: () => navigate(`/users/${record.id_user}`)
       })}
-      pagination={{
-        current: page,
-        pageSize: perPage,
-        pageSizeOptions: [10, 20, 30],
-        showSizeChanger: true,
-        total: 100,
-        onChange: (newPage, newPageSize) => {
-          if (page !== newPage) {
-            dispatch(setPage(newPage))
-          }
-          if (perPage !== newPageSize) 
-          dispatch(setPerPage(newPageSize))
-        }
-      }}
     />
   )
 }
