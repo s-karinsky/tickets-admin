@@ -3,6 +3,7 @@ import { createSlice } from '@reduxjs/toolkit'
 export const dataSlice = createSlice({
   name: 'data',
   initialState: {
+    isFetchingNotifications: false,
     isLoading: false,
     isLoaded: false,
     isSubmitting: false,
@@ -10,6 +11,7 @@ export const dataSlice = createSlice({
     teams: {},
     stadiums: {},
     schedule: {},
+    notifications: [],
   },
   reducers: {
     setLoading: (state, action) => {
@@ -30,6 +32,12 @@ export const dataSlice = createSlice({
         })
         state[name] = obj
       })
+    },
+    setFetchingNotifications: (state, action) => {
+      state.isFetchingNotifications = action.payload
+    },
+    setNotifications: (state, action) => {
+      state.notifications = action.payload
     },
     updateData: (state, action) => {
       ['stadiums', 'schedule', 'teams', 'tournaments'].forEach(name => {
@@ -65,7 +73,9 @@ export const {
   setData,
   updateData,
   setStadiumScheme,
-  setStadiumSchemeStatus
+  setStadiumSchemeStatus,
+  setNotifications,
+  setFetchingNotifications,
 } = dataSlice.actions
 
 export * from './selectors'

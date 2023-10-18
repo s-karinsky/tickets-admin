@@ -8,7 +8,8 @@ import {
   MenuFoldOutlined,
   FileTextOutlined,
   TranslationOutlined,
-  MailOutlined
+  MailOutlined,
+  NotificationOutlined
 } from '@ant-design/icons'
 import {
   Avatar,
@@ -63,7 +64,8 @@ const MENU_ITEMS = {
     getItem(<Link to='/templates/tickets-are-in-stock'>Tickets are in stock</Link>, 'tickets-are-in-stock')
   ]),
   users: getItem(<Link to='/users'>Users</Link>, 'users', <UserOutlined />),
-  tickets: getItem(<Link to='/tickets'>Tickets</Link>, 'tickets', <BarcodeOutlined />)
+  tickets: getItem(<Link to='/tickets'>Tickets</Link>, 'tickets', <BarcodeOutlined />),
+  notifications: getItem(<Link to='/notifications'>Notifications</Link>, 'notifications', <NotificationOutlined />)
 }
 
 export default function PageLayout() {
@@ -81,12 +83,14 @@ export default function PageLayout() {
         MENU_ITEMS.users,
         MENU_ITEMS.data,
         MENU_ITEMS.templates,
-        MENU_ITEMS.tickets
+        MENU_ITEMS.tickets,
+        MENU_ITEMS.notifications
       ]
     } else if (user.u_role === '2') {
       return [
         getItem(<Link to='/matches'>Matches</Link>, 'matches', <UnorderedListOutlined />),
-        MENU_ITEMS.tickets
+        MENU_ITEMS.tickets,
+        MENU_ITEMS.notifications
       ]
     }
   }, [user.u_role])

@@ -1,6 +1,16 @@
 import { mapValues } from 'lodash'
 import axios from '../../utils/axios'
-import { setLoading, setLoaded, setSubmitting, updateData, setData, setStadiumScheme, setStadiumSchemeStatus } from '.'
+import {
+  setLoading,
+  setLoaded,
+  setSubmitting,
+  updateData,
+  setData,
+  setStadiumScheme,
+  setStadiumSchemeStatus,
+  setNotifications,
+  setFetchingNotifications
+} from '.'
 
 export const fetchData = (params = { fields: 'F', easy: true }) => async (dispatch) => {
   dispatch(setLoading(true))
@@ -48,5 +58,20 @@ export const fetchStadiumScheme = stadiumId => async (dispatch) => {
   } catch (e) {
     dispatch(setStadiumSchemeStatus({ id: stadiumId, isLoading: false }))
     console.error(e)
+  }
+}
+
+export const fetchNotifications = async (dispatch) => {
+  dispatch(setFetchingNotifications(true))
+  try {
+    const { data } = await axios.postWithAuth('/query/select', {
+      sql: 'SELECT cart_block.id_user as u_id, cart_block.product as prod, cart_block.property as prop FROM cart_block LEFT JOIN (SELECT schedule.id_schedule FROM schedule LEFT JOIN trip ON trip.from = CAST(CONCAT("sc_id",`schedule`.`id_schedule`) as char) WHERE schedule.active = "1" and schedule.start_datetime >= now()) sc ON sc.`id_schedule` = cart_block.product WHERE sc.`id_schedule` IS NOT NULL'
+    })
+    const notices = (data.data || []).map((item, id) => ({ id, u_id: item.u_id, match_id: item.prod, blocks: (item.prop || '').split(';') }))
+    dispatch(setNotifications(notices))
+  } catch (e) {
+    console.error(e)
+  } finally {
+    dispatch(setFetchingNotifications(false))
   }
 }

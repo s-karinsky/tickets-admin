@@ -95,3 +95,14 @@ export const getStadiumSchemeStatus = createSelector(
     return null
   }
 )
+
+export const getNotifications = createSelector(
+  state => state,
+  state => {
+    const { notifications } = state.data
+    return notifications.map(item => ({
+      ...item,
+      match: getMatch(state, item.match_id)
+    }), {})
+  }
+)
