@@ -1,27 +1,30 @@
 import { useEffect, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Button, Row, Table, Typography } from 'antd'
+import { Button, Row, Table } from 'antd'
 import { PlusCircleFilled, CaretLeftFilled } from '@ant-design/icons'
 import TicketsForm from '../../components/TicketsForm'
 import { fetchTicketGroups, fetchAllTickets, getMatchTickets } from '../../redux/tickets'
 import { fetchData, getSchedule } from '../../redux/data'
 import { getIsAdmin } from '../../redux/user'
-
-const { Text } = Typography
+import { getColumnSearchProps } from '../../utils/components'
 
 const matchColumns = [
   {
     title: 'Tournament',
     dataIndex: 'match',
     key: 'tournament',
-    render: match => match.tournament && match.tournament.en
+    render: match => match.tournament && match.tournament?.en,
+    sorter: (a, b) => a.match?.tournament?.en?.localeCompare(b.match?.tournament?.en),
+    ...getColumnSearchProps('tournament', record => record.match?.tournament?.en)
   },
   {
     title: 'Match',
     dataIndex: 'match',
     key: 'match',
-    render: match => `${match.team1.en} — ${match.team2.en}`
+    render: match => `${match.team1.en} — ${match.team2.en}`,
+    sorter: (a, b) => `${a.match?.team1?.en} — ${a.match?.team2?.en}`.localeCompare(`${b.match?.team1?.en} — ${b.match?.team2?.en}`),
+    ...getColumnSearchProps('match', record => `${record.match?.team1?.en} — ${record.match?.team2?.en}`)
   },
   {
     title: 'Tickets',
