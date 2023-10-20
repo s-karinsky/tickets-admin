@@ -43,7 +43,7 @@ const columns = [
 export default function PageUsers() {
   const navigate = useNavigate()
 
-  const { isLoading, error, data } = useQuery('users', async () => {
+  const { isLoading, data } = useQuery('users', async () => {
     const response = await axios.postWithAuth('/query/select', {
       sql: `SELECT id_user,id_role,phone,email,name,family,middle,id_verification_status FROM users WHERE active=1 AND deleted!=1`
     })

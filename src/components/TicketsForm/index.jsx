@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect, useCallback } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
+import { useQuery } from 'react-query'
 import {
   Col,
   Row,
@@ -26,7 +27,7 @@ import { fetchTicketGroups, fetchTicketsFiles, getMatchTickets } from '../../red
 
 const { Text } = Typography
 
-const getTicketsColumns = (getFile = () => {}) => ([
+const getTicketsColumns = (getFile = () => {}, usersMap = {}) => ([
   {
     title: 'Block',
     dataIndex: 'block',
@@ -81,6 +82,12 @@ const getTicketsColumns = (getFile = () => {}) => ([
       }
     ],
     onFilter: (value, record) => value ? !record.soldToUser : !!record.soldToUser
+  },
+  {
+    title: 'Sold to user',
+    dataIndex: 'soldToUser',
+    key: 'soldToUser',
+    render: uid => [usersMap[uid]?.name, usersMap[uid]?.middle, usersMap[uid]?.family].join(' ')
   }
 ])
 
@@ -316,6 +323,13 @@ function TicketsList({ matchId, onRowClick = () => {} }) {
     dispatch(fetchTicketsFiles(tripsId))
   }, [tripsId])
 
+  const { isLoading: isLoadingUsers, data: usersMap } = useQuery('users', async () => {
+    const response = await axios.postWithAuth('/query/select', {
+      sql: `SELECT id_user,id_role,phone,email,name,family,middle,id_verification_status FROM users WHERE active=1 AND deleted!=1`
+    })
+    return (response.data?.data || []).reduce((acc, item) => ({ ...acc, [item.id_user]: item }), {})
+  })
+
   const getFile = useCallback(async (tripId, seatId) => {
     const { team1, team2, datetime } = match
     const [ stadium, block, row, seat ] = seatId.split(';')
@@ -331,7 +345,7 @@ function TicketsList({ matchId, onRowClick = () => {} }) {
 
   return (
     <Table
-      columns={getTicketsColumns(getFile)}
+      columns={getTicketsColumns(getFile, usersMap)}
       dataSource={tickets}
       rowKey={({ block, row, seat }) => ([block, row, seat].join(';'))}
       onRow={record => ({

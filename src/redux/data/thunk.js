@@ -65,9 +65,20 @@ export const fetchNotifications = async (dispatch) => {
   dispatch(setFetchingNotifications(true))
   try {
     const { data } = await axios.postWithAuth('/query/select', {
-      sql: 'SELECT cart_block.id_user as u_id, cart_block.product as prod, cart_block.property as prop FROM cart_block LEFT JOIN (SELECT schedule.id_schedule FROM schedule LEFT JOIN trip ON trip.from = CAST(CONCAT("sc_id",`schedule`.`id_schedule`) as char) WHERE schedule.active = "1" and schedule.start_datetime >= now()) sc ON sc.`id_schedule` = cart_block.product WHERE sc.`id_schedule` IS NOT NULL'
+      sql: 'SELECT cart_block.id_user as u_id, cart_block.product as prod, cart_block.property as prop, u.name, u.family, u.middle, u.phone FROM cart_block LEFT JOIN (SELECT schedule.id_schedule FROM schedule LEFT JOIN trip ON trip.from = CAST(CONCAT("sc_id",schedule.id_schedule) as char) WHERE schedule.active = "1" and schedule.start_datetime >= now()) sc ON sc.id_schedule = cart_block.product LEFT JOIN users u on u.id_user=cart_block.id_user WHERE sc.id_schedule IS NOT NULL'
     })
-    const notices = (data.data || []).map((item, id) => ({ id, u_id: item.u_id, match_id: item.prod, blocks: (item.prop || '').split(';') }))
+    const notices = (data.data || []).map((item, id) => ({
+      id,
+      u_id: item.u_id,
+      match_id: item.prod,
+      blocks: (item.prop || '').split(';'),
+      user: {
+        id: item.u_id,
+        name: item.name,
+        middle: item.middle,
+        family: item.family
+      }
+    }))
     dispatch(setNotifications(notices))
   } catch (e) {
     console.error(e)
