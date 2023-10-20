@@ -87,7 +87,14 @@ const getTicketsColumns = (getFile = () => {}, usersMap = {}) => ([
     title: 'Sold to user',
     dataIndex: 'soldToUser',
     key: 'soldToUser',
-    render: uid => [usersMap[uid]?.name, usersMap[uid]?.middle, usersMap[uid]?.family].join(' ')
+    render: uid => [usersMap[uid]?.name, usersMap[uid]?.middle, usersMap[uid]?.family].join(' '),
+    sorter: (a, b) => {
+      const u1 = a.soldToUser
+      const u2 = b.soldToUser
+      return [usersMap[u1]?.name, usersMap[u1]?.middle, usersMap[u1]?.family].join(' ').localeCompare(
+        [usersMap[u2]?.name, usersMap[u2]?.middle, usersMap[u2]?.family].join(' ')
+      )
+    }
   }
 ])
 
