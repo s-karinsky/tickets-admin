@@ -8,7 +8,7 @@ export default function JSONEditor({
   const [ text, setText ] = useState('')
 
   useEffect(() => {
-    if (typeof value !== 'object') return
+    if (!value || typeof value !== 'object') return
     setText(JSON.stringify(value, null, '  '))
   }, [])
 

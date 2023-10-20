@@ -5,6 +5,8 @@ import './styles.css'
 export default function StadiumScheme({
   value = {}
 }) {
+  if (!value) return null
+
   const { viewBox, field = {}, sections = {}, text = [] } = value
 
   return (
