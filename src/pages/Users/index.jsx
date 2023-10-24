@@ -12,7 +12,7 @@ const columns = [
     dataIndex: 'name',
     key: 'name',
     render: (name, { family }) => [name, family].filter(item => item).join(' ') || 'No name',
-    ...getColumnSearchProps('name', record => ([record.name, record.family].join(' ')))
+    ...getColumnSearchProps(record => ([record.name, record.family].join(' ')))
   },
   {
     title: 'Email',
