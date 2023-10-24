@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { Button, Row, Table } from 'antd'
@@ -6,7 +6,7 @@ import { PlusCircleFilled } from '@ant-design/icons'
 import { fetchData, getTeams } from '../../redux/data'
 import { getCities, getCountries } from '../../redux/config'
 import { getColumnSearchProps } from '../../utils/components'
-
+import { getOptions } from '../../utils/utils'
 
 export default function PageTeams() {
   const dispatch = useDispatch()
@@ -15,7 +15,10 @@ export default function PageTeams() {
   const teams = useSelector(getTeams)
   const cities = useSelector(getCities)
   const countries = useSelector(getCountries)
-  
+
+  const citiesOptions = useMemo(() => getOptions(Object.values(cities), 'en'), [cities])
+  const countriesOptions = useMemo(() => getOptions(Object.values(countries), 'en'), [countries])
+
   const columns = [
     {
       title: 'Country',
@@ -24,7 +27,7 @@ export default function PageTeams() {
       width: 180,
       sorter: (a, b) => a.country.localeCompare(b.country),
       render: id => countries[id].en,
-      ...getColumnSearchProps('country', record => countries[record.country].en),
+      ...getColumnSearchProps(record => countries[record.country].en, { options: countriesOptions }),
     },
     {
       title: 'Logo',
@@ -45,7 +48,7 @@ export default function PageTeams() {
       dataIndex: 'city',
       key: 'city',
       render: cityId => cities[cityId]?.en,
-      ...getColumnSearchProps('city', record => cities[record.city]?.en),
+      ...getColumnSearchProps(record => cities[record.city]?.en, { options: citiesOptions }),
     }
   ]
 
