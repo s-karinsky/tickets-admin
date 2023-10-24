@@ -1,9 +1,10 @@
-import { useEffect, useCallback } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { Button, Row, Table } from 'antd'
 import { PlusCircleFilled } from '@ant-design/icons'
 import { getColumnSearchProps } from '../../utils/components'
+import { getOptions } from '../../utils/utils'
 import { fetchData, getStadiumsList } from '../../redux/data'
 import { getCountries } from '../../redux/config'
 
@@ -18,6 +19,8 @@ export default function PageStadiums() {
     dispatch(fetchData())
   }, [])
 
+  const countriesOptions = useMemo(() => getOptions(Object.values(countries), 'en'), [countries])
+
   const columns = [
     {
       title: 'Name',
@@ -31,7 +34,7 @@ export default function PageStadiums() {
       key: 'country',
       sorter: (a, b) => a.country.localeCompare(b.country),
       render: id => countries[id]?.en,
-      ...getColumnSearchProps('country', record => countries[record.country]?.en),
+      ...getColumnSearchProps(record => countries[record.country]?.en, { options: countriesOptions }),
     },
     {
       title: 'Address',
