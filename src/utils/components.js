@@ -1,44 +1,24 @@
-import { Button, Space, Input } from 'antd'
 import { SearchOutlined } from '@ant-design/icons'
+import dayjs from 'dayjs'
+import ColumnFilter from '../components/ColumnFilter'
 
-export const getColumnSearchProps = (dataIndex, getValue) => ({
-  filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
-    <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
-      <Input
-        placeholder={`Search ${dataIndex}`}
-        value={selectedKeys[0]}
-        onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-        onPressEnter={() => confirm()}
-        style={{ marginBottom: 8, display: 'block' }}
-      />
-      <Space>
-        <Button
-          type='primary'
-          onClick={() => confirm()}
-          icon={<SearchOutlined />}
-          size='small'
-          style={{ width: 90 }}
-        >
-          Search
-        </Button>
-        <Button
-          onClick={() => {
-            clearFilters && clearFilters()
-            confirm()
-          }}
-          size='small'
-          style={{ width: 90 }}
-        >
-          Reset
-        </Button>
-      </Space>
-    </div>
+export const getColumnSearchProps = (dataIndex, { options = [], type } = {}) => ({
+  filterDropdown: props => (
+    <ColumnFilter
+      {...props}
+      type={type || (options.length > 0 ? 'select' : 'input')}
+      options={options}
+      showSearch
+    />
   ),
   filterIcon: (filtered) => (
     <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />
   ),
   onFilter: (value, record) => {
-    const dataValue = (getValue ? getValue(record) : record[dataIndex]) || ''
+    const dataValue = (typeof dataIndex === 'function' ? dataIndex(record) : record[dataIndex]) || ''
+    if (type === 'date') {
+      return dayjs(dataValue).isSame(value, 'day')
+    }
     return dataValue.toString().toLowerCase().includes((value).toLowerCase())
   }
 })

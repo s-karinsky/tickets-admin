@@ -1,3 +1,5 @@
+import { map, uniq, orderBy } from 'lodash'
+
 export const capitalizeFirstLetter = str => {
   return str[0].toUpperCase() + str.substr(1)
 }
@@ -15,3 +17,6 @@ export const toBase64 = file => new Promise((resolve, reject) => {
   reader.onload = () => resolve(reader.result)
   reader.onerror = reject
 })
+
+export const getOptions = (arr, path) =>
+  orderBy(uniq(map(arr, path))).filter(item => item)
