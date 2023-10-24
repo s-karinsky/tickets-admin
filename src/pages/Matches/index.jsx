@@ -1,59 +1,11 @@
-import { useEffect, useCallback } from 'react'
+import { useMemo, useEffect, useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { Button, Row, Table, Switch } from 'antd'
 import { PlusCircleFilled } from '@ant-design/icons'
 import { getColumnSearchProps } from '../../utils/components'
+import { getOptions } from '../../utils/utils'
 import { fetchData, getScheduleList, postData } from '../../redux/data'
-
-const getColumns = ({ onChangeTop = () => {} }) => ([
-  {
-    title: 'Team home',
-    dataIndex: 'team1',
-    key: 'team1',
-    render: team => team && team.en,
-    ...getColumnSearchProps('team home', record => record.team1?.en)
-  },
-  {
-    title: 'Team away',
-    dataIndex: 'team2',
-    key: 'team2',
-    render: team => team && team.en,
-    ...getColumnSearchProps('team away', record => record.team2?.en)
-  },
-  {
-    title: 'Tournament',
-    dataIndex: 'tournament',
-    key: 'tournament',
-    render: tournament => tournament && tournament.en,
-    ...getColumnSearchProps('tournament', record => record.tournament?.en)
-  },
-  {
-    title: 'Stadium',
-    dataIndex: 'stadium',
-    key: 'stadium',
-    render: (stadium, { team1 }) => stadium ? stadium.en : team1?.stadium?.en,
-    ...getColumnSearchProps('stadium', record => record.stadium?.en || record.team1?.stadium?.en)
-  },
-  {
-    title: 'Date',
-    dataIndex: 'datetime',
-    key: 'datetime',
-    render: datetime => datetime
-  },
-  {
-    title: 'Top match',
-    dataIndex: 'top',
-    key: 'top',
-    render: (top, match) => <Switch
-      onClick={(val, e) => {
-        e.stopPropagation()
-        onChangeTop({ id: match.id, top: val })
-      }}
-      checked={Number(top)}
-    />
-  }
-])
 
 export default function PageMatches() {
   const dispatch = useDispatch()
@@ -70,6 +22,68 @@ export default function PageMatches() {
     const { id, top } = match
     dispatch(postData({ schedule: [{ id, top: top ? '1' : '0' }] }))
   }, [])
+
+  const options = useMemo(() => ({
+    home: getOptions(schedule, 'team1.en'),
+    away: getOptions(schedule, 'team2.en'),
+    tournament: getOptions(schedule, 'tournament.en'),
+    stadium: getOptions(schedule, item => item.stadium?.en || item.team1?.stadium?.en)
+  }), [schedule])
+
+  const columns = [
+    {
+      title: 'Team home',
+      dataIndex: 'team1',
+      key: 'team1',
+      render: team => team && team.en,
+      ...getColumnSearchProps(record => record.team1?.en, { options: options.home })
+    },
+    {
+      title: 'Team away',
+      dataIndex: 'team2',
+      key: 'team2',
+      render: team => team && team.en,
+      ...getColumnSearchProps(record => record.team2?.en, { options: options.away })
+    },
+    {
+      title: 'Tournament',
+      dataIndex: 'tournament',
+      key: 'tournament',
+      render: tournament => tournament && tournament.en,
+      ...getColumnSearchProps(record => record.tournament?.en, { options: options.tournament })
+    },
+    {
+      title: 'Stadium',
+      dataIndex: 'stadium',
+      key: 'stadium',
+      render: (stadium, { team1 }) => stadium ? stadium.en : team1?.stadium?.en,
+      ...getColumnSearchProps(record => record.stadium?.en || record.team1?.stadium?.en, { options: options.stadium })
+    },
+    {
+      title: 'Date',
+      dataIndex: 'datetime',
+      key: 'datetime',
+      render: datetime => datetime,
+      ...getColumnSearchProps('datetime', { type: 'date' })
+    },
+    {
+      title: 'Top match',
+      dataIndex: 'top',
+      key: 'top',
+      render: (top, match) => <Switch
+        onClick={(val, e) => {
+          e.stopPropagation()
+          handleSwitchTop({ id: match.id, top: val })
+        }}
+        checked={Number(top)}
+      />,
+      filters: [{
+        text: 'Only top matches',
+        value: '1'
+      }],
+      onFilter: (value, record) => record.top === value
+    }
+  ]
 
   return (
     <>
@@ -88,7 +102,7 @@ export default function PageMatches() {
         </Button>
       </Row>
       <Table
-        columns={getColumns({ onChangeTop: handleSwitchTop })}
+        columns={columns}
         dataSource={schedule}
         loading={isLoading}
         rowKey={({ id }) => id}
