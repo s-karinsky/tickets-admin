@@ -147,6 +147,7 @@ export default function PageMatch() {
             <TimePicker
               value={date}
               style={{ width: '100%' }}
+              format='HH:mm'
             />
           </Form.Item>
         </Col>
