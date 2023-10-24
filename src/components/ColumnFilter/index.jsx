@@ -20,7 +20,7 @@ export default function ColumnFilter({
     if (!Array.isArray(options)) return
     return options.map(item => item.value ? item : ({ value: item, label: item }))
   }, [options])
-  console.log(selectedKeys)
+
   return (
     <div style={{ padding: 10 }} onKeyDown={e => e.stopPropagation()}>
       <div style={{ minWidth: 200, maxWidth: 300 }}>
