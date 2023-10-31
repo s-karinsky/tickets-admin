@@ -204,7 +204,13 @@ function TicketFormRow({
         <Form.Item
           label='Price'
           name={[name, 'price']}
-          rules={[{ required: true, message: 'Please input price' }]}
+          rules={[{
+            required: true,
+            message: 'Please input price'
+          }, {
+            min: 1,
+            message: 'The price must be positive'
+          }]}
         >
           <InputNumber
             size='large'
