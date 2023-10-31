@@ -1,9 +1,8 @@
-import { useMemo, useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useNavigate, useParams } from 'react-router-dom'
-import { Button, Form, Input, Row, Col, Select } from 'antd'
+import { Button, Form, Input, Row, Col, Select, Divider } from 'antd'
 import { pickBy, transform, keys } from 'lodash'
-import { CheckOutlined, LoadingOutlined } from '@ant-design/icons'
+import { CheckOutlined, LoadingOutlined, PlusCircleOutlined } from '@ant-design/icons'
 import { diff } from 'deep-object-diff'
 import { getLang, getLangValue, updateLang } from '../../redux/config'
 
@@ -15,37 +14,18 @@ const FIELD_NAME_MAP = {
   filter_team_placeholder: 'Filter default team'
 }
 
-const FIELDS = [
-  {
-    key: 'match_list_header',
-    title: 'Match list header'
-  },
-  {
-    key: 'filter_reset',
-    title: 'Reset filter button text'
-  },
-  {
-    key: 'tickets_in_stock',
-    title: 'Tickets in stock filter text'
-  },
-  {
-    key: 'filter_tournaments_placeholder',
-    title: 'Filter default tournament text'
-  },
-  {
-    key: 'filter_team_placeholder',
-    title: 'Filter default team'
-  }
-]
+const CREATE_NAME = '_create'
 
 export default function PageTranslations() {
   const [ isSaved, setIsSaved ] = useState(true)
   const [ selectedVar, setSelectedVar ] = useState()
+  const [ newVarName, setNewVarName ] = useState('')
   const dispatch = useDispatch()
-  const navigate = useNavigate()
   const isUpdating = useSelector(state => state.config.isUpdating)
   const langs = useSelector(getLang)
   const langValues = useSelector(getLangValue)
+
+  const isNew = selectedVar === CREATE_NAME
 
   useEffect(() => {
     if (!isUpdating) {
@@ -54,6 +34,15 @@ export default function PageTranslations() {
   }, [isUpdating])
 
   const handleFinish = useCallback(values => {
+    if (isNew) {
+      if (langValues[newVarName] && !window.confirm('Variable with this name already exist, update?')) {
+        return
+      }
+      dispatch(updateLang(values)).then(() => {
+        setSelectedVar()
+      })
+      return
+    }
     const changed = transform(
       pickBy(diff(langValues, values), value => value),
       (acc, item, key) => {
@@ -63,7 +52,7 @@ export default function PageTranslations() {
       },
     {})
     dispatch(updateLang(changed))
-  }, [langValues])
+  }, [langValues, isNew, newVarName])
 
   const varsOptions = Object.keys(langValues).map(value => ({
     value,
@@ -86,45 +75,72 @@ export default function PageTranslations() {
           borderBottom: '1px solid #ccc',
           padding: '10px'
         }}
+        justify="space-between"
       >
-        <Button
-          type='primary'
-          htmlType='submit'
-          disabled={isUpdating || isSaved}
-          icon={saveButtonIcon}
-        >
-          {isSaved ? 'Saved' : 'Save'}
-        </Button>
+        <Col>
+          <Button
+            type='primary'
+            htmlType='submit'
+            disabled={isUpdating || isSaved}
+            icon={saveButtonIcon}
+          >
+            {isSaved ? 'Saved' : 'Save'}
+          </Button>
+          {isNew && <Button
+            style={{ marginLeft: 10 }}
+            onClick={() => setSelectedVar()}
+          >
+            Cancel
+          </Button>}
+        </Col>
+        {!isNew && <Col>
+          <Button
+            type='primary'
+            icon={<PlusCircleOutlined />}
+            onClick={() => setSelectedVar(CREATE_NAME)}
+          >
+            Create new
+          </Button>
+        </Col>}
       </Row>
       <Row style={{ margin: '20px 0 0 30px' }}>
         <Col span={23}>
-          <Select
-            disabled={isUpdating}
-            options={varsOptions}
-            style={{ width: '100%' }}
-            placeholder='Select variable'
-            onSelect={value => {
-              setSelectedVar(value)
-              setIsSaved(true)
-            }}
-            showSearch
-          >
-
-          </Select>
+          {isNew ?
+            <Input
+              placeholder='Variable name'
+              style={{ width: '100%' }}
+              value={newVarName}
+              onChange={e => setNewVarName(e.target.value)}
+            />
+            : 
+            <Select
+              disabled={isUpdating}
+              options={varsOptions}
+              style={{ width: '100%' }}
+              placeholder='Select variable'
+              onSelect={value => {
+                setSelectedVar(value)
+                setIsSaved(true)
+              }}
+              showSearch
+            />
+          }
         </Col>
       </Row>
-      {!!selectedVar && !!langValues[selectedVar] && <Row style={{ margin: '20px 0 0 30px' }}>
+      {!!selectedVar && (!!langValues[selectedVar] || isNew) && <div style={{ margin: '20px 0 0 30px' }}>
         {langs.map((lang, i) => (
-          <Col span={5} offset={i ? 1 : 0} key={lang.id}>
-            <Form.Item
-              label={lang.native}
-              name={[selectedVar, lang.id]}
-            >
-              <Input />
-            </Form.Item>
-          </Col>
+          <Row key={lang.id}>
+            <Col span={23}>
+              <Form.Item
+                label={lang.native}
+                name={[isNew ? newVarName : selectedVar, lang.id]}
+              >
+                <Input />
+              </Form.Item>
+            </Col>
+          </Row>
         ))}
-      </Row>}
+      </div>}
     </Form>
   )
 }
