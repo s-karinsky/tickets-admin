@@ -19,6 +19,7 @@ import PageTickets from './pages/Tickets'
 import PageTranslations from './pages/Translations'
 import PageUsers from './pages/Users'
 import PageUser from './pages/User'
+import Sendings from './pages/Sendings'
 import Layout from './components/Layout'
 import { authorizeByTokens } from './redux/user'
 import { fetchConfig } from './redux/config'
@@ -75,6 +76,7 @@ function App() {
           <Route path="/tournaments" element={<PageTournaments />} />
           <Route path="/tournaments/:id" element={<PageTournament />} />
           <Route path="/tickets/:matchId?" element={<PageTickets />} />
+          <Route path="/sendings" element={<Sendings />} />
         </Route>
         <Route path="/login" element={<PageLogin />} />
       </Routes>
