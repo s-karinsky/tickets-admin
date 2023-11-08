@@ -20,10 +20,16 @@ import PageTranslations from './pages/Translations'
 import PageUsers from './pages/Users'
 import PageUser from './pages/User'
 import Sendings from './pages/Sendings'
+import Sending from './pages/Sending'
+import SendingCreate from './pages/Sending/SendingCreate'
+import PlaceCreate from './pages/Place/PlaceCreate'
+import Place from './pages/Place'
+import Product from './pages/Product'
 import Layout from './components/Layout'
 import { authorizeByTokens } from './redux/user'
 import { fetchConfig } from './redux/config'
 import './App.css'
+import ProductCreate from './pages/Product/ProductCreate'
 
 
 function App() {
@@ -76,7 +82,13 @@ function App() {
           <Route path="/tournaments" element={<PageTournaments />} />
           <Route path="/tournaments/:id" element={<PageTournament />} />
           <Route path="/tickets/:matchId?" element={<PageTickets />} />
+          <Route path="/sendings/create" element={<SendingCreate />} />
           <Route path="/sendings" element={<Sendings />} />
+          <Route path="/sendings/:id" element={<Sending />} />
+          <Route path="/sendings/:id/create" element={<PlaceCreate />} />
+          <Route path="/sendings/:id/:id" element={<Place />} />
+          <Route path="/sendings/:id/:id/create" element={<ProductCreate />} />
+          <Route path="/sendings/:id/:id/:id" element={<Product />} />
         </Route>
         <Route path="/login" element={<PageLogin />} />
       </Routes>

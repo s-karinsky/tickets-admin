@@ -1,70 +1,21 @@
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Button, Row, Table, Typography, Input, Select } from "antd";
+import { Button, Row, Table, Typography, Input, Select, Checkbox } from "antd";
 import { getSendingsList } from "../../redux/data";
-import { BsArrowRepeat, BsCheck2Circle, BsTrash } from "react-icons/bs";
+import { BsTrash } from "react-icons/bs";
+import { BiInfoCircle, BiEdit } from "react-icons/bi";
+import { AiOutlineMore } from "react-icons/ai";
 import { useState } from "react";
-import { SendingsStatus } from "../../components/SendingsStatus";
 import { DateTableCell } from "../../components/DateTableCell";
 import { FilterModal } from "../../components/FilterModal";
 import { InfoModal } from "../../components/InfoModal";
+import { Property } from "../../components/Property";
 
 const { Title, Link } = Typography;
 
-export default function Sendings() {
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
-    const isLoading = useSelector((state) => state.data.isLoading);
-    //let sendings = useSelector(getSendingsList);
-    let sendings = [
-        {
-            code: 1,
-            date: <DateTableCell date={new Date()} />,
-            transporter: "Александ В.",
-            status: <SendingsStatus status={3} />,
-            "departure-date": <DateTableCell date={new Date()} />,
-            "delivery-date": <DateTableCell date={new Date()} />,
-        },
-        {
-            code: 2,
-            date: <DateTableCell date={new Date()} />,
-            transporter: "рлександ В.",
-            status: <SendingsStatus status={1} />,
-            "departure-date": <DateTableCell date={new Date()} />,
-            "delivery-date": <DateTableCell date={new Date()} />,
-        },
-        {
-            code: 3,
-            date: <DateTableCell date={new Date()} />,
-            transporter: "рлександ В.",
-            status: <SendingsStatus status={2} />,
-            "departure-date": <DateTableCell date={new Date()} />,
-            "delivery-date": <DateTableCell date={new Date()} />,
-        },
-        {
-            code: 5,
-            date: <DateTableCell date={new Date()} />,
-            transporter: "рлександ В.",
-            status: <SendingsStatus status={0} />,
-            "departure-date": <DateTableCell date={"N/H"} />,
-            "delivery-date": <DateTableCell date={new Date()} />,
-        },
-    ];
-
-    sendings = sendings.map((item) => {
-        return {
-            ...item,
-            buttons: (
-                <div style={{ display: "flex", gap: 10 }}>
-                    <BsCheck2Circle size={17} color="green" />
-                    <BsArrowRepeat size={17} color="" />
-                    <BsTrash size={17} color="red" />
-                </div>
-            ),
-        };
-    });
-
-    const props = {
+export default function Sending({
+    id = 1,
+    props = {
         date: [new Date().toLocaleDateString(), "Дата отправки"],
         dateDispatch: [new Date().toLocaleDateString(), "Дата отправки"],
         dateReceipt: [new Date().toLocaleDateString(), "Дата поступления"],
@@ -77,8 +28,62 @@ export default function Sendings() {
             "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s..",
             "Примечание",
         ],
-    };
+    },
+}) {
+    const navigate = useNavigate();
+    const isLoading = useSelector((state) => state.data.isLoading);
     const location = useLocation();
+    //let places = useSelector(getPlacesList);
+    let places = [
+        {
+            code: 1,
+            date: <DateTableCell date={new Date()} />,
+            client: "Александ В.",
+            status: "Не назначено",
+            count: 10,
+            place: 12,
+            rate: 1,
+        },
+        {
+            code: 2,
+            date: <DateTableCell date={new Date()} />,
+            client: "рлександ В.",
+            status: "Выдача со склада → Выдано",
+            count: 23,
+            place: 12,
+            rate: 0,
+        },
+        {
+            code: 3,
+            date: <DateTableCell date={new Date()} />,
+            client: "рлександ В.",
+            status: "Выдача со склада → Выдано",
+            count: 12,
+            place: 12,
+            rate: 1,
+        },
+        {
+            code: 5,
+            date: <DateTableCell date={new Date()} />,
+            client: "рлександ В.",
+            status: "Не назначено",
+            count: 2,
+            place: 12,
+            rate: 12,
+        },
+    ];
+
+    places = places.map((item) => {
+        return {
+            ...item,
+            buttons: (
+                <div style={{ display: "flex", gap: 10 }}>
+                    <BiInfoCircle size={17} color="#141414" />
+                    <AiOutlineMore size={17} color="#141414" />
+                </div>
+            ),
+        };
+    });
     const [filterModalOpen, setFilterModalOpen] = useState(false);
     const [infoModalOpen, setInfoModalOpen] = useState(false);
     const [nextPage, setNextPage] = useState(0);
@@ -94,29 +99,29 @@ export default function Sendings() {
             key: "code",
         },
         {
-            title: "Дата",
-            dataIndex: "date",
-            key: "date",
-        },
-        {
-            title: "Перевозчик",
-            dataIndex: "transporter",
-            key: "transporter",
-        },
-        {
-            title: "Статус",
+            title: "Статус услуги",
             dataIndex: "status",
             key: "status",
         },
         {
-            title: "Дата отправления",
-            dataIndex: "departure-date",
-            key: "departure-date",
+            title: "Место",
+            dataIndex: "place",
+            key: "place",
         },
         {
-            title: "Дата поступления",
-            dataIndex: "delivery-date",
-            key: "delivery-date",
+            title: "Клиент",
+            dataIndex: "client",
+            key: "client",
+        },
+        {
+            title: "Тариф",
+            dataIndex: "rate",
+            key: "rate",
+        },
+        {
+            title: "Количество товара",
+            dataIndex: "count",
+            key: "count",
         },
         {
             title: "",
@@ -141,23 +146,88 @@ export default function Sendings() {
                             level={1}
                             style={{ fontWeight: "700", marginBottom: "0" }}
                         >
-                            Отправки
+                            Отправка{" "}
+                            {location.pathname
+                                .toString()
+                                .split("/")
+                                .slice(-1)
+                                .join("/")}
                         </Title>
-
                         <Link
                             onClick={() => navigate(`/sendings`)}
                             style={{ color: "blue" }}
                         >
-                            Отправка товаров
+                            Отправка товаров <span> </span>
                         </Link>
+                        &gt; Отправка{" "}
+                        {location.pathname
+                            .toString()
+                            .split("/")
+                            .slice(-1)
+                            .join("/")}
                     </Typography>
+                </Row>
+                <Row
+                    style={{
+                        gap: 20,
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        alignItems: "center",
+                    }}
+                >
+                    <Button
+                        style={{
+                            gap: 10,
+                            display: "flex",
+                            alignItems: "center",
+                        }}
+                        type="primary"
+                        size={"large"}
+                    >
+                        Редактировать
+                        <BiEdit size={16} />
+                    </Button>
+                    <Button
+                        size={"large"}
+                        style={{
+                            gap: 10,
+                            display: "flex",
+                            alignItems: "center",
+                        }}
+                        type="primary"
+                        danger
+                    >
+                        Удалить
+                        <BsTrash size={16} />
+                    </Button>
+                </Row>
+                <Row
+                    style={{
+                        display: "flex",
+                        gap: "20px 10px",
+                        borderRadius: 20,
+                        backgroundColor: "#FAFAFA",
+                        padding: 20,
+                        boxShadow: " 0px 2px 4px 0px #00000026",
+                    }}
+                >
+                    {Object.values(props).map((item) => (
+                        <Property title={item[1]} subtitle={item[0]} />
+                    ))}
+                </Row>
+                <Row>
+                    <Title
+                        level={1}
+                        style={{ fontWeight: "700", marginBottom: "0" }}
+                    >
+                        Места
+                    </Title>
                 </Row>
                 <Row>
                     <div
                         style={{
                             display: "flex",
                             justifyContent: "space-between",
-
                             gap: "20px",
                             width: "100%",
                         }}
@@ -212,8 +282,7 @@ export default function Sendings() {
                 </Row>
                 <Table
                     columns={columns}
-                    dataSource={sendings}
-                    loading={isLoading}
+                    dataSource={places}
                     rowKey={({ id }) => id}
                     onRow={(record) => ({
                         onClick: () => {
@@ -222,6 +291,9 @@ export default function Sendings() {
                         },
                     })}
                     style={{ overflow: "scroll" }}
+                    rowSelection={{
+                        type: Checkbox,
+                    }}
                 />
             </div>
             <FilterModal
@@ -234,7 +306,7 @@ export default function Sendings() {
                 isModalOpen={infoModalOpen}
                 content={props}
                 handleCancel={() => setInfoModalOpen(false)}
-                title={`Отправка №${nextPage}`}
+                title={`Место №${nextPage}`}
                 onNextHandle={onNextHandle}
             />
         </>
