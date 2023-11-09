@@ -1,13 +1,14 @@
 import React from "react";
 import { Form, Input, Select, DatePicker } from "antd";
 import TextArea from "antd/es/input/TextArea";
+import { PropertyGap } from "../../pages/Sendings";
 
 export const CreatePlaceInput = () => {
     return (
         <Form
             style={{
                 display: "flex",
-                gap: "20px 10px",
+                gap: `${PropertyGap}px`,
                 flexWrap: "wrap",
                 alignItems: "flex-end",
             }}
@@ -98,10 +99,7 @@ export const CreatePlaceInput = () => {
             <div style={{ position: "relative" }}>
                 <div
                     style={{
-                        position: "absolute",
-                        top: -15,
-                        left: 10,
-                        zIndex: 2,
+                        paddingLeft: 10,
                         color: "#757575",
                     }}
                 >

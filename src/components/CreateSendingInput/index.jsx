@@ -1,10 +1,17 @@
 import React from "react";
 import { Form, Input, Select } from "antd";
 import TextArea from "antd/es/input/TextArea";
+import { PropertyGap } from "../../pages/Sendings";
 
 export const CreateSendingInput = () => {
     return (
-        <Form style={{ display: "flex", gap: "20px 10px", flexWrap: "wrap" }}>
+        <Form
+            style={{
+                display: "flex",
+                gap: `${PropertyGap}px`,
+                flexWrap: "wrap",
+            }}
+        >
             <Select
                 style={{
                     maxWidth: "250px",
@@ -36,16 +43,19 @@ export const CreateSendingInput = () => {
                 addonAfter="Количество мест"
                 placeholder="10"
                 style={{ maxWidth: "250px" }}
+                size={"large"}
             />
             <Input
                 addonAfter="Вес нетто, кг"
                 placeholder="10"
                 style={{ maxWidth: "250px" }}
+                size={"large"}
             />
             <Input
                 addonAfter="Вес брутто, кг"
                 placeholder="10"
                 style={{ maxWidth: "250px" }}
+                size={"large"}
             />
             <TextArea placeholder="Примечание" rows={4} />
         </Form>

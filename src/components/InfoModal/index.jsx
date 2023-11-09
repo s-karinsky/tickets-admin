@@ -6,6 +6,7 @@ import {
     FormOutlined,
 } from "@ant-design/icons";
 import { Property } from "../Property";
+import { PropertyGap } from "../../pages/Sendings";
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
 export const InfoModal = ({
@@ -36,41 +37,21 @@ export const InfoModal = ({
             }
             open={isModalOpen}
             onCancel={handleCancel}
-            footer={
-                !disabled
-                    ? [
-                          <Button
-                              key="1"
-                              type="primary"
-                              style={{ backgroundColor: "rgb(0, 150, 80)" }}
-                              onClick={() => onNextHandle()}
-                          >
-                              Перейти <ArrowRightOutlined />
-                          </Button>,
-                          <Button onClick={onEditHandle} key="2" type="primary">
-                              Редактировать <FormOutlined />
-                          </Button>,
-                          <Button key="3" danger type="primary">
-                              Удалить <DeleteOutlined />
-                          </Button>,
-                      ]
-                    : [
-                          <Button
-                              key="1"
-                              type="primary"
-                              style={{ backgroundColor: "rgb(0, 150, 80)" }}
-                              onClick={() => onNextHandle()}
-                          >
-                              Сохранить <ArrowRightOutlined />
-                          </Button>,
-                      ]
-            }
+            footer={[
+                <Button
+                    key="1"
+                    type="primary"
+                    style={{ backgroundColor: "rgb(0, 150, 80)" }}
+                    onClick={() => handleCancel()}
+                >
+                    Сохранить
+                </Button>,
+            ]}
         >
             <Row
                 style={{
                     display: "flex",
-                    gap: "10px 10px",
-
+                    gap: `${PropertyGap}px`,
                     padding: "20px 0",
                 }}
             >

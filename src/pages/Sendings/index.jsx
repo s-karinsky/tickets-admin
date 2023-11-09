@@ -1,6 +1,16 @@
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Button, Row, Table, Typography, Input, Select, Switch } from "antd";
+import {
+    Button,
+    Row,
+    Table,
+    Typography,
+    Input,
+    Select,
+    Switch,
+    Form,
+    DatePicker,
+} from "antd";
 import { getSendingsList } from "../../redux/data";
 import { BsArrowRepeat, BsCheck2Circle, BsTrash } from "react-icons/bs";
 import { useState } from "react";
@@ -9,6 +19,8 @@ import { DateTableCell } from "../../components/DateTableCell";
 import { FilterModal } from "../../components/FilterModal";
 import { InfoModal } from "../../components/InfoModal";
 
+import TextArea from "antd/es/input/TextArea";
+import CreateSendingModal from "./CreateSendingModal";
 const { Title, Link } = Typography;
 export let PropertyGap = 10;
 export default function Sendings() {
@@ -78,6 +90,8 @@ export default function Sendings() {
             "Примечание",
         ],
     };
+    const [currentSend, setCurrentSend] = useState(0);
+    const [infoModalOpen, setInfoModalOpen] = useState(false);
     const [filterModalOpen, setFilterModalOpen] = useState(false);
 
     const columns = [
@@ -150,7 +164,15 @@ export default function Sendings() {
                             Отправка товаров
                         </Link>
                     </Typography>
-                    <Switch checkedChildren="Авиа" unCheckedChildren="Авто" />
+                    <Switch
+                        style={{
+                            marginBottom: 20,
+                            transform: "scale(140%)",
+                            marginRight: 20,
+                        }}
+                        checkedChildren="Авиа"
+                        unCheckedChildren="Авто"
+                    />
                 </Row>
                 <Row>
                     <div
@@ -203,7 +225,10 @@ export default function Sendings() {
                         </Row>
                         <Button
                             type="primary"
-                            onClick={() => navigate("/sendings/create")}
+                            onClick={() => {
+                                setInfoModalOpen(true);
+                                setCurrentSend(currentSend + 1);
+                            }}
                             size={"large"}
                         >
                             Создать
@@ -229,6 +254,11 @@ export default function Sendings() {
                 handleOk={() => setFilterModalOpen(false)}
                 handleCancel={() => setFilterModalOpen(false)}
                 columns={columns.filter((item) => item.title != "")}
+            />
+            <CreateSendingModal
+                title={`Отправление ${currentSend}`}
+                isModalOpen={infoModalOpen}
+                handleCancel={() => setInfoModalOpen(false)}
             />
         </>
     );

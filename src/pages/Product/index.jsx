@@ -1,12 +1,8 @@
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Button, Row, Table, Typography, Input, Select, Checkbox } from "antd";
-import { getSendingsList } from "../../redux/data";
+import { Button, Row, Typography } from "antd";
 import { BsTrash } from "react-icons/bs";
 import { BiEdit } from "react-icons/bi";
-import { useState } from "react";
-import { DateTableCell } from "../../components/DateTableCell";
-import { FilterModal } from "../../components/FilterModal";
 import { Property } from "../../components/Property";
 import { PropertyGap } from "../Sendings";
 
@@ -58,6 +54,7 @@ export default function Product({
                         display: "flex",
                         justifyContent: "space-between",
                         alignItems: "flex-end",
+                        marginBottom: 20,
                     }}
                 >
                     <Typography>

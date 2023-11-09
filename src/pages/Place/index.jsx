@@ -1,36 +1,36 @@
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button, Row, Table, Typography, Input, Select, Checkbox } from "antd";
-import { getSendingsList } from "../../redux/data";
 import { BsTrash } from "react-icons/bs";
 import { BiInfoCircle, BiEdit } from "react-icons/bi";
 import { AiOutlineMore } from "react-icons/ai";
 import { useState } from "react";
-import { DateTableCell } from "../../components/DateTableCell";
 import { InfoModal } from "../../components/InfoModal";
 import { FilterModal } from "../../components/FilterModal";
 import { Property } from "../../components/Property";
 import { PropertyGap } from "../Sendings";
+import CreatePlaceModal from "../Sending/CreatePlaceModal";
+import CreateProductModal from "./СreateProductModal";
 
 const { Title, Link } = Typography;
 
 export default function Sending({
     id = 1,
     props = {
-        date: [new Date().toLocaleDateString(), "Дата формирования"],
-        client: ["Александр А. А.", "Клиент"],
-        statusPlace: ["Прибыл", "Статус места"],
-        count: [12, "Количество товара"],
-        size: [220, "Размер"],
-        statusService: ["Выдача со склада → Выдано", "Статус услуги"],
-        dateReceipt: [new Date().toLocaleDateString(), "Дата поступления"],
-        rate: ["Экспресс", "Тариф"],
-        paymentType: ["Наличный", "Тип оплаты"],
+        code: ["1", "Код"],
+        name: ["Black&white", "Наименование"],
+        brand: ["Chanel", "Марка"],
+        article: [1, "Артикул"],
+        color: ["Синий", "Цвет"],
+        size: ["XL", "Размер"],
         price: ["200$", "Цена за 1 кг"],
         netWeight: [250, "Вес нетто"],
         grossWeight: [288, "Вес брутто"],
-        sum: ["5000 $", "Сумма товара"],
-        sumToPay: ["1000$", "Сумма к оплате"],
+        sum: ["5000 $", "Сумма"],
+        sertificate: [
+            "123 от 12.12.12 до 12.04.21",
+            "Сертификат/Декларация о соответствии",
+        ],
         note: [
             "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s..",
             "Примечание",
@@ -103,17 +103,10 @@ export default function Sending({
         };
     });
     const [filterModalOpen, setFilterModalOpen] = useState(false);
-    const [infoModalOpen, setInfoModalOpen] = useState(false);
+    const [createProduct, setCreateProduct] = useState(false);
+    const [createPlace, setCreatePlace] = useState(false);
+    const [infoModal, setInfoModal] = useState(false);
     const [nextPage, setNextPage] = useState(0);
-
-    const onEditHandle = () => {
-        let path = location.pathname.split("/").slice(0, -1).join("/");
-        console.log(path);
-        navigate(`${path}/create`);
-    };
-    const onNextHandle = () => {
-        navigate(`${location.pathname}/${nextPage}`);
-    };
 
     const columns = [
         {
@@ -245,6 +238,7 @@ export default function Sending({
                             display: "flex",
                             justifyContent: "flex-end",
                             alignItems: "flex-end",
+                            marginBottom: 20,
                         }}
                     >
                         <Button
@@ -256,13 +250,7 @@ export default function Sending({
                             type="primary"
                             size={"large"}
                             onClick={() => {
-                                setNextPage(
-                                    location.pathname
-                                        .split("/")
-                                        .slice(-1)
-                                        .join("")
-                                );
-                                setInfoModalOpen(true);
+                                setCreatePlace(true);
                             }}
                         >
                             Редактировать
@@ -356,14 +344,7 @@ export default function Sending({
                         </Row>
                         <Button
                             type="primary"
-                            onClick={() =>
-                                navigate(
-                                    `${location.pathname
-                                        .split("/")
-                                        .slice(0, -1)
-                                        .join("")}/create`
-                                )
-                            }
+                            onClick={() => setCreateProduct(true)}
                             size={"large"}
                         >
                             Создать
@@ -377,14 +358,9 @@ export default function Sending({
                     rowKey={({ id }) => id}
                     onRow={(record) => ({
                         onClick: () => {
-                            if (record.code == 1) {
-                                setNextPage(1);
-                                setInfoModalOpen(true);
-                            } else
-                                navigate(`${location.pathname}/${record.code}`);
+                            setNextPage(1);
+                            setInfoModal(true);
                         },
-
-                        //navigate(`${location.pathname}/${record.code}`),
                     })}
                     style={{ overflow: "scroll" }}
                     rowSelection={{
@@ -398,13 +374,21 @@ export default function Sending({
                 handleCancel={() => setFilterModalOpen(false)}
                 columns={columns.filter((item) => item.title != "")}
             />
+            <CreatePlaceModal
+                title={`Место 1`}
+                isModalOpen={createPlace}
+                handleCancel={() => setCreatePlace(false)}
+            />
             <InfoModal
-                isModalOpen={infoModalOpen}
                 content={props}
-                handleCancel={() => setInfoModalOpen(false)}
-                title={`Товар №${nextPage}`}
-                disabled
-                onNextHandle={onNextHandle}
+                title={`Товар 1`}
+                isModalOpen={infoModal}
+                handleCancel={() => setInfoModal(false)}
+            />
+            <CreateProductModal
+                title={`Создать товар`}
+                isModalOpen={createProduct}
+                handleCancel={() => setCreateProduct(false)}
             />
         </>
     );

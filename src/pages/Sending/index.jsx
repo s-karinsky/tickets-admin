@@ -1,17 +1,16 @@
 import { useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button, Row, Table, Typography, Input, Select, Checkbox } from "antd";
-import { getSendingsList } from "../../redux/data";
 import { BsTrash } from "react-icons/bs";
 import { BiInfoCircle, BiEdit } from "react-icons/bi";
 import { AiOutlineMore } from "react-icons/ai";
 import { useState } from "react";
 import { DateTableCell } from "../../components/DateTableCell";
 import { FilterModal } from "../../components/FilterModal";
-import { InfoModal } from "../../components/InfoModal";
 import { Property } from "../../components/Property";
 import { PropertyGap } from "../Sendings";
-
+import CreateSendingModal from "../Sendings/CreateSendingModal";
+import CreatePlaceModal from "./CreatePlaceModal";
 const { Title, Link } = Typography;
 
 export default function Sending({
@@ -87,17 +86,8 @@ export default function Sending({
     });
     const [filterModalOpen, setFilterModalOpen] = useState(false);
     const [infoModalOpen, setInfoModalOpen] = useState(false);
+    const [createPlace, setCreatePlace] = useState(false);
     const [nextPage, setNextPage] = useState(0);
-
-    const onEditHandle = () => {
-        let path = location.pathname.split("/").slice(0, -1).join("");
-
-        navigate(`/${path}/create`);
-    };
-    const onNextHandle = () => {
-        navigate(`${location.pathname}`);
-        setInfoModalOpen(false);
-    };
 
     const columns = [
         {
@@ -186,6 +176,7 @@ export default function Sending({
                             display: "flex",
                             justifyContent: "flex-end",
                             alignItems: "flex-end",
+                            marginBottom: 20,
                         }}
                     >
                         <Button
@@ -297,14 +288,7 @@ export default function Sending({
                         </Row>
                         <Button
                             type="primary"
-                            onClick={() =>
-                                navigate(
-                                    `/sendings/${location.pathname
-                                        .split("/")
-                                        .slice(-1)
-                                        .join("")}/create`
-                                )
-                            }
+                            onClick={() => setCreatePlace(true)}
                             size={"large"}
                         >
                             Создать
@@ -333,13 +317,15 @@ export default function Sending({
                 handleCancel={() => setFilterModalOpen(false)}
                 columns={columns.filter((item) => item.title != "")}
             />
-            <InfoModal
+            <CreatePlaceModal
+                title={`Создать место`}
+                isModalOpen={createPlace}
+                handleCancel={() => setCreatePlace(false)}
+            />
+            <CreateSendingModal
+                title={`Отправление ${nextPage}`}
                 isModalOpen={infoModalOpen}
-                content={props}
                 handleCancel={() => setInfoModalOpen(false)}
-                title={`Отправка №${nextPage}`}
-                onEditHandle={onEditHandle}
-                onNextHandle={onNextHandle}
             />
         </>
     );
