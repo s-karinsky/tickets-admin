@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Button, Row, Table, Typography, Input, Select } from "antd";
+import { Button, Row, Table, Typography, Input, Select, Switch } from "antd";
 import { getSendingsList } from "../../redux/data";
 import { BsArrowRepeat, BsCheck2Circle, BsTrash } from "react-icons/bs";
 import { useState } from "react";
@@ -10,7 +10,7 @@ import { FilterModal } from "../../components/FilterModal";
 import { InfoModal } from "../../components/InfoModal";
 
 const { Title, Link } = Typography;
-
+export let PropertyGap = 10;
 export default function Sendings() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -128,7 +128,13 @@ export default function Sendings() {
                     gap: "20px",
                 }}
             >
-                <Row>
+                <Row
+                    style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-end",
+                    }}
+                >
                     <Typography>
                         <Title
                             level={1}
@@ -144,6 +150,7 @@ export default function Sendings() {
                             Отправка товаров
                         </Link>
                     </Typography>
+                    <Switch checkedChildren="Авиа" unCheckedChildren="Авто" />
                 </Row>
                 <Row>
                     <div
@@ -204,6 +211,7 @@ export default function Sendings() {
                     </div>
                 </Row>
                 <Table
+                    size="small"
                     columns={columns}
                     dataSource={sendings}
                     loading={isLoading}

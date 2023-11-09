@@ -12,7 +12,12 @@ export const Property = ({ title, subtitle }) => {
             </Text>
             <Title
                 level={5}
-                style={{ color: "#000", marginTop: 0, marginBottom: 0 }}
+                style={{
+                    color: "#000",
+                    marginTop: 0,
+                    marginBottom: 0,
+                    lineHeight: "24px",
+                }}
             >
                 {subtitle}
             </Title>

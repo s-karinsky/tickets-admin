@@ -16,6 +16,7 @@ export const InfoModal = ({
     title,
     onNextHandle,
     onEditHandle,
+    disabled,
 }) => {
     return (
         <Modal
@@ -35,27 +36,40 @@ export const InfoModal = ({
             }
             open={isModalOpen}
             onCancel={handleCancel}
-            footer={[
-                <Button
-                    key="1"
-                    type="primary"
-                    style={{ backgroundColor: "rgb(0, 150, 80)" }}
-                    onClick={() => onNextHandle()}
-                >
-                    Перейти <ArrowRightOutlined />
-                </Button>,
-                <Button onClick={onEditHandle} key="2" type="primary">
-                    Редактировать <FormOutlined />
-                </Button>,
-                <Button key="3" danger type="primary">
-                    Удалить <DeleteOutlined />
-                </Button>,
-            ]}
+            footer={
+                !disabled
+                    ? [
+                          <Button
+                              key="1"
+                              type="primary"
+                              style={{ backgroundColor: "rgb(0, 150, 80)" }}
+                              onClick={() => onNextHandle()}
+                          >
+                              Перейти <ArrowRightOutlined />
+                          </Button>,
+                          <Button onClick={onEditHandle} key="2" type="primary">
+                              Редактировать <FormOutlined />
+                          </Button>,
+                          <Button key="3" danger type="primary">
+                              Удалить <DeleteOutlined />
+                          </Button>,
+                      ]
+                    : [
+                          <Button
+                              key="1"
+                              type="primary"
+                              style={{ backgroundColor: "rgb(0, 150, 80)" }}
+                              onClick={() => onNextHandle()}
+                          >
+                              Сохранить <ArrowRightOutlined />
+                          </Button>,
+                      ]
+            }
         >
             <Row
                 style={{
                     display: "flex",
-                    gap: "20px 10px",
+                    gap: "10px 10px",
 
                     padding: "20px 0",
                 }}

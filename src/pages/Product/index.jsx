@@ -8,6 +8,7 @@ import { useState } from "react";
 import { DateTableCell } from "../../components/DateTableCell";
 import { FilterModal } from "../../components/FilterModal";
 import { Property } from "../../components/Property";
+import { PropertyGap } from "../Sendings";
 
 const { Title, Link } = Typography;
 
@@ -51,7 +52,14 @@ export default function Product({
                     gap: "20px",
                 }}
             >
-                <Row>
+                <Row
+                    style={{
+                        gap: 20,
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-end",
+                    }}
+                >
                     <Typography>
                         <Title
                             level={1}
@@ -109,45 +117,54 @@ export default function Product({
                             <span> </span>&gt;<span> </span> Black&White / 00001
                         </div>
                     </Typography>
+                    <Row
+                        style={{
+                            gap: 20,
+                            display: "flex",
+                            justifyContent: "flex-end",
+                            alignItems: "flex-end",
+                        }}
+                    >
+                        <Button
+                            style={{
+                                gap: 10,
+                                display: "flex",
+                                alignItems: "center",
+                            }}
+                            type="primary"
+                            size={"large"}
+                            onClick={() =>
+                                navigate(
+                                    `${location.pathname
+                                        .split("/")
+                                        .slice(0, -1)
+                                        .join("/")}/create`
+                                )
+                            }
+                        >
+                            Редактировать
+                            <BiEdit size={16} />
+                        </Button>
+                        <Button
+                            size={"large"}
+                            style={{
+                                gap: 10,
+                                display: "flex",
+                                alignItems: "center",
+                            }}
+                            type="primary"
+                            danger
+                        >
+                            Удалить
+                            <BsTrash size={16} />
+                        </Button>
+                    </Row>
                 </Row>
+
                 <Row
                     style={{
-                        gap: 20,
                         display: "flex",
-                        justifyContent: "flex-end",
-                        alignItems: "center",
-                    }}
-                >
-                    <Button
-                        style={{
-                            gap: 10,
-                            display: "flex",
-                            alignItems: "center",
-                        }}
-                        type="primary"
-                        size={"large"}
-                    >
-                        Редактировать
-                        <BiEdit size={16} />
-                    </Button>
-                    <Button
-                        size={"large"}
-                        style={{
-                            gap: 10,
-                            display: "flex",
-                            alignItems: "center",
-                        }}
-                        type="primary"
-                        danger
-                    >
-                        Удалить
-                        <BsTrash size={16} />
-                    </Button>
-                </Row>
-                <Row
-                    style={{
-                        display: "flex",
-                        gap: "20px 10px",
+                        gap: `${PropertyGap}px`,
                         borderRadius: 20,
                         backgroundColor: "#FAFAFA",
                         padding: 20,

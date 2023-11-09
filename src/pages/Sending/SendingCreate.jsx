@@ -227,6 +227,7 @@ export const SendingCreate = ({
                 </Row>
 
                 <Table
+                    size="small"
                     columns={columns}
                     dataSource={places}
                     rowKey={({ id }) => id}

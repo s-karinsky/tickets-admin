@@ -10,6 +10,7 @@ import { DateTableCell } from "../../components/DateTableCell";
 import { FilterModal } from "../../components/FilterModal";
 import { InfoModal } from "../../components/InfoModal";
 import { Property } from "../../components/Property";
+import { PropertyGap } from "../Sendings";
 
 const { Title, Link } = Typography;
 
@@ -146,7 +147,14 @@ export default function Sending({
                     gap: "20px",
                 }}
             >
-                <Row>
+                <Row
+                    style={{
+                        gap: 20,
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-end",
+                    }}
+                >
                     <Typography>
                         <Title
                             level={1}
@@ -172,51 +180,55 @@ export default function Sending({
                             .slice(-1)
                             .join("/")}
                     </Typography>
-                </Row>
-                <Row
-                    style={{
-                        gap: 20,
-                        display: "flex",
-                        justifyContent: "flex-end",
-                        alignItems: "center",
-                    }}
-                >
-                    <Button
+                    <Row
                         style={{
-                            gap: 10,
+                            gap: 20,
                             display: "flex",
-                            alignItems: "center",
-                        }}
-                        type="primary"
-                        size={"large"}
-                        onClick={() => {
-                            setNextPage(
-                                location.pathname.split("/").slice(-1).join("")
-                            );
-                            setInfoModalOpen(true);
+                            justifyContent: "flex-end",
+                            alignItems: "flex-end",
                         }}
                     >
-                        Редактировать
-                        <BiEdit size={16} />
-                    </Button>
-                    <Button
-                        size={"large"}
-                        style={{
-                            gap: 10,
-                            display: "flex",
-                            alignItems: "center",
-                        }}
-                        type="primary"
-                        danger
-                    >
-                        Удалить
-                        <BsTrash size={16} />
-                    </Button>
+                        <Button
+                            style={{
+                                gap: 10,
+                                display: "flex",
+                                alignItems: "center",
+                            }}
+                            type="primary"
+                            size={"large"}
+                            onClick={() => {
+                                setNextPage(
+                                    location.pathname
+                                        .split("/")
+                                        .slice(-1)
+                                        .join("")
+                                );
+                                setInfoModalOpen(true);
+                            }}
+                        >
+                            Редактировать
+                            <BiEdit size={16} />
+                        </Button>
+                        <Button
+                            size={"large"}
+                            style={{
+                                gap: 10,
+                                display: "flex",
+                                alignItems: "center",
+                            }}
+                            type="primary"
+                            danger
+                        >
+                            Удалить
+                            <BsTrash size={16} />
+                        </Button>
+                    </Row>
                 </Row>
+
                 <Row
                     style={{
                         display: "flex",
-                        gap: "20px 10px",
+                        gap: `${PropertyGap}px`,
                         borderRadius: 20,
                         backgroundColor: "#FAFAFA",
                         padding: 20,
@@ -308,6 +320,7 @@ export default function Sending({
                             navigate(`${location.pathname}/${record.code}`);
                         },
                     })}
+                    size="small"
                     style={{ overflow: "scroll" }}
                     rowSelection={{
                         type: Checkbox,

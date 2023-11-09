@@ -10,6 +10,7 @@ import { DateTableCell } from "../../components/DateTableCell";
 import { InfoModal } from "../../components/InfoModal";
 import { FilterModal } from "../../components/FilterModal";
 import { Property } from "../../components/Property";
+import { PropertyGap } from "../Sendings";
 
 const { Title, Link } = Typography;
 
@@ -182,7 +183,14 @@ export default function Sending({
                     gap: "20px",
                 }}
             >
-                <Row>
+                <Row
+                    style={{
+                        gap: 20,
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-end",
+                    }}
+                >
                     <Typography>
                         <Title
                             level={1}
@@ -231,51 +239,55 @@ export default function Sending({
                                 .join("/")}
                         </div>
                     </Typography>
-                </Row>
-                <Row
-                    style={{
-                        gap: 20,
-                        display: "flex",
-                        justifyContent: "flex-end",
-                        alignItems: "center",
-                    }}
-                >
-                    <Button
+                    <Row
                         style={{
-                            gap: 10,
+                            gap: 20,
                             display: "flex",
-                            alignItems: "center",
-                        }}
-                        type="primary"
-                        size={"large"}
-                        onClick={() => {
-                            setNextPage(
-                                location.pathname.split("/").slice(-1).join("")
-                            );
-                            setInfoModalOpen(true);
+                            justifyContent: "flex-end",
+                            alignItems: "flex-end",
                         }}
                     >
-                        Редактировать
-                        <BiEdit size={16} />
-                    </Button>
-                    <Button
-                        size={"large"}
-                        style={{
-                            gap: 10,
-                            display: "flex",
-                            alignItems: "center",
-                        }}
-                        type="primary"
-                        danger
-                    >
-                        Удалить
-                        <BsTrash size={16} />
-                    </Button>
+                        <Button
+                            style={{
+                                gap: 10,
+                                display: "flex",
+                                alignItems: "center",
+                            }}
+                            type="primary"
+                            size={"large"}
+                            onClick={() => {
+                                setNextPage(
+                                    location.pathname
+                                        .split("/")
+                                        .slice(-1)
+                                        .join("")
+                                );
+                                setInfoModalOpen(true);
+                            }}
+                        >
+                            Редактировать
+                            <BiEdit size={16} />
+                        </Button>
+                        <Button
+                            size={"large"}
+                            style={{
+                                gap: 10,
+                                display: "flex",
+                                alignItems: "center",
+                            }}
+                            type="primary"
+                            danger
+                        >
+                            Удалить
+                            <BsTrash size={16} />
+                        </Button>
+                    </Row>
                 </Row>
+
                 <Row
                     style={{
                         display: "flex",
-                        gap: "20px 10px",
+                        gap: `${PropertyGap}px`,
                         borderRadius: 20,
                         backgroundColor: "#FAFAFA",
                         padding: 20,
@@ -359,12 +371,17 @@ export default function Sending({
                     </div>
                 </Row>
                 <Table
+                    size="small"
                     columns={columns}
                     dataSource={places}
                     rowKey={({ id }) => id}
                     onRow={(record) => ({
                         onClick: () => {
-                            navigate(`${location.pathname}/${record.code}`);
+                            if (record.code == 1) {
+                                setNextPage(1);
+                                setInfoModalOpen(true);
+                            } else
+                                navigate(`${location.pathname}/${record.code}`);
                         },
 
                         //navigate(`${location.pathname}/${record.code}`),
@@ -386,7 +403,7 @@ export default function Sending({
                 content={props}
                 handleCancel={() => setInfoModalOpen(false)}
                 title={`Товар №${nextPage}`}
-                onEditHandle={onEditHandle}
+                disabled
                 onNextHandle={onNextHandle}
             />
         </>
