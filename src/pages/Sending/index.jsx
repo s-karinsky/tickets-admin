@@ -88,8 +88,14 @@ export default function Sending({
     const [infoModalOpen, setInfoModalOpen] = useState(false);
     const [nextPage, setNextPage] = useState(0);
 
+    const onEditHandle = () => {
+        let path = location.pathname.split("/").slice(0, -1).join("");
+
+        navigate(`/${path}/create`);
+    };
     const onNextHandle = () => {
-        navigate(`${location.pathname}/${nextPage}`);
+        navigate(`${location.pathname}`);
+        setInfoModalOpen(false);
     };
 
     const columns = [
@@ -183,6 +189,12 @@ export default function Sending({
                         }}
                         type="primary"
                         size={"large"}
+                        onClick={() => {
+                            setNextPage(
+                                location.pathname.split("/").slice(-1).join("")
+                            );
+                            setInfoModalOpen(true);
+                        }}
                     >
                         Редактировать
                         <BiEdit size={16} />
@@ -273,7 +285,14 @@ export default function Sending({
                         </Row>
                         <Button
                             type="primary"
-                            onClick={() => navigate("/sendings/create")}
+                            onClick={() =>
+                                navigate(
+                                    `/sendings/${location.pathname
+                                        .split("/")
+                                        .slice(-1)
+                                        .join("")}/create`
+                                )
+                            }
                             size={"large"}
                         >
                             Создать
@@ -286,8 +305,7 @@ export default function Sending({
                     rowKey={({ id }) => id}
                     onRow={(record) => ({
                         onClick: () => {
-                            setNextPage(record.code);
-                            setInfoModalOpen(true);
+                            navigate(`${location.pathname}/${record.code}`);
                         },
                     })}
                     style={{ overflow: "scroll" }}
@@ -306,7 +324,8 @@ export default function Sending({
                 isModalOpen={infoModalOpen}
                 content={props}
                 handleCancel={() => setInfoModalOpen(false)}
-                title={`Место №${nextPage}`}
+                title={`Отправка №${nextPage}`}
+                onEditHandle={onEditHandle}
                 onNextHandle={onNextHandle}
             />
         </>

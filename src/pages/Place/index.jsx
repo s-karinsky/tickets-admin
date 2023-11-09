@@ -105,6 +105,11 @@ export default function Sending({
     const [infoModalOpen, setInfoModalOpen] = useState(false);
     const [nextPage, setNextPage] = useState(0);
 
+    const onEditHandle = () => {
+        let path = location.pathname.split("/").slice(0, -1).join("/");
+        console.log(path);
+        navigate(`${path}/create`);
+    };
     const onNextHandle = () => {
         navigate(`${location.pathname}/${nextPage}`);
     };
@@ -243,6 +248,12 @@ export default function Sending({
                         }}
                         type="primary"
                         size={"large"}
+                        onClick={() => {
+                            setNextPage(
+                                location.pathname.split("/").slice(-1).join("")
+                            );
+                            setInfoModalOpen(true);
+                        }}
                     >
                         Редактировать
                         <BiEdit size={16} />
@@ -264,7 +275,7 @@ export default function Sending({
                 <Row
                     style={{
                         display: "flex",
-                        gap: 50,
+                        gap: "20px 10px",
                         borderRadius: 20,
                         backgroundColor: "#FAFAFA",
                         padding: 20,
@@ -333,7 +344,14 @@ export default function Sending({
                         </Row>
                         <Button
                             type="primary"
-                            onClick={() => navigate("/place/create")}
+                            onClick={() =>
+                                navigate(
+                                    `${location.pathname
+                                        .split("/")
+                                        .slice(0, -1)
+                                        .join("")}/create`
+                                )
+                            }
                             size={"large"}
                         >
                             Создать
@@ -346,8 +364,7 @@ export default function Sending({
                     rowKey={({ id }) => id}
                     onRow={(record) => ({
                         onClick: () => {
-                            setNextPage(record.code);
-                            setInfoModalOpen(true);
+                            navigate(`${location.pathname}/${record.code}`);
                         },
 
                         //navigate(`${location.pathname}/${record.code}`),
@@ -369,6 +386,7 @@ export default function Sending({
                 content={props}
                 handleCancel={() => setInfoModalOpen(false)}
                 title={`Товар №${nextPage}`}
+                onEditHandle={onEditHandle}
                 onNextHandle={onNextHandle}
             />
         </>

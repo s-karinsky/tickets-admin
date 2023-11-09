@@ -78,14 +78,7 @@ export default function Sendings() {
             "Примечание",
         ],
     };
-    const location = useLocation();
     const [filterModalOpen, setFilterModalOpen] = useState(false);
-    const [infoModalOpen, setInfoModalOpen] = useState(false);
-    const [nextPage, setNextPage] = useState(0);
-
-    const onNextHandle = () => {
-        navigate(`${location.pathname}/${nextPage}`);
-    };
 
     const columns = [
         {
@@ -217,8 +210,7 @@ export default function Sendings() {
                     rowKey={({ id }) => id}
                     onRow={(record) => ({
                         onClick: () => {
-                            setNextPage(record.code);
-                            setInfoModalOpen(true);
+                            navigate(`/sendings/${record.code}`);
                         },
                     })}
                     style={{ overflow: "scroll" }}
@@ -229,13 +221,6 @@ export default function Sendings() {
                 handleOk={() => setFilterModalOpen(false)}
                 handleCancel={() => setFilterModalOpen(false)}
                 columns={columns.filter((item) => item.title != "")}
-            />
-            <InfoModal
-                isModalOpen={infoModalOpen}
-                content={props}
-                handleCancel={() => setInfoModalOpen(false)}
-                title={`Отправка №${nextPage}`}
-                onNextHandle={onNextHandle}
             />
         </>
     );

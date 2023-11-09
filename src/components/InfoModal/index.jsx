@@ -15,6 +15,7 @@ export const InfoModal = ({
     content,
     title,
     onNextHandle,
+    onEditHandle,
 }) => {
     return (
         <Modal
@@ -43,7 +44,7 @@ export const InfoModal = ({
                 >
                     Перейти <ArrowRightOutlined />
                 </Button>,
-                <Button key="2" type="primary">
+                <Button onClick={onEditHandle} key="2" type="primary">
                     Редактировать <FormOutlined />
                 </Button>,
                 <Button key="3" danger type="primary">
