@@ -115,13 +115,13 @@ export default function PageLayout() {
     const items = useMemo(() => {
         if (user.u_role === "4") {
             return [
-                MENU_ITEMS.translations,
-                MENU_ITEMS.content,
+                //MENU_ITEMS.translations,
+                //MENU_ITEMS.content,
                 MENU_ITEMS.users,
-                MENU_ITEMS.data,
-                MENU_ITEMS.templates,
-                MENU_ITEMS.tickets,
-                MENU_ITEMS.notifications,
+                //MENU_ITEMS.data,
+                //MENU_ITEMS.templates,
+                //MENU_ITEMS.tickets,
+                //MENU_ITEMS.notifications,
                 MENU_ITEMS.sendings,
             ];
         } else if (user.u_role === "2") {
