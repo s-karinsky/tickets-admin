@@ -1,20 +1,9 @@
 import React from "react";
-import {
-    Typography,
-    Modal,
-    DatePicker,
-    Button,
-    Form,
-    Input,
-} from "antd";
+import { Typography, Modal, DatePicker, Button, Form, Input } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import { PropertyGap } from "../../pages/Sendings";
 const { Title } = Typography;
-export const CreateProductModal = ({
-    isModalOpen,
-    handleCancel,
-    title,
-}) => {
+export const CreateProductModal = ({ isModalOpen, handleCancel, title }) => {
     return (
         <Modal
             style={{ maxWidth: 800 }}

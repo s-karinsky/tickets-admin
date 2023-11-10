@@ -1,10 +1,22 @@
 import { useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Button, Row, Table, Typography, Input, Select, Checkbox } from "antd";
+import {
+    Button,
+    Row,
+    Table,
+    Typography,
+    Input,
+    Select,
+    Checkbox,
+    Form,
+    DatePicker,
+} from "antd";
+import TextArea from "antd/es/input/TextArea";
 import { BsTrash } from "react-icons/bs";
 import { BiInfoCircle, BiEdit } from "react-icons/bi";
 import { AiOutlineMore } from "react-icons/ai";
 import { useState } from "react";
+import { SaveOutlined } from "@ant-design/icons";
 import { InfoModal } from "../../components/InfoModal";
 import { FilterModal } from "../../components/FilterModal";
 import { Property } from "../../components/Property";
@@ -36,6 +48,8 @@ export default function Sending({
             "Примечание",
         ],
     },
+    editHandle,
+    isEditPage,
 }) {
     const navigate = useNavigate();
     const isLoading = useSelector((state) => state.data.isLoading);
@@ -241,34 +255,69 @@ export default function Sending({
                             marginBottom: 20,
                         }}
                     >
-                        <Button
-                            style={{
-                                gap: 10,
-                                display: "flex",
-                                alignItems: "center",
-                            }}
-                            type="primary"
-                            size={"large"}
-                            onClick={() => {
-                                setCreatePlace(true);
-                            }}
-                        >
-                            Редактировать
-                            <BiEdit size={16} />
-                        </Button>
-                        <Button
-                            size={"large"}
-                            style={{
-                                gap: 10,
-                                display: "flex",
-                                alignItems: "center",
-                            }}
-                            type="primary"
-                            danger
-                        >
-                            Удалить
-                            <BsTrash size={16} />
-                        </Button>
+                        {isEditPage ? (
+                            <>
+                                <Button
+                                    style={{
+                                        gap: 10,
+                                        display: "flex",
+                                        alignItems: "center",
+                                    }}
+                                    type="primary"
+                                    size={"large"}
+                                    onClick={() => {
+                                        editHandle(false);
+                                    }}
+                                >
+                                    Сохранить
+                                    <SaveOutlined size={16} />
+                                </Button>
+                                <Button
+                                    size={"large"}
+                                    style={{
+                                        gap: 10,
+                                        display: "flex",
+                                        alignItems: "center",
+                                    }}
+                                    type="primary"
+                                    danger
+                                    onClick={() => editHandle(false)}
+                                >
+                                    Отмена
+                                </Button>
+                            </>
+                        ) : (
+                            <>
+                                <Button
+                                    style={{
+                                        gap: 10,
+                                        display: "flex",
+                                        alignItems: "center",
+                                    }}
+                                    type="primary"
+                                    size={"large"}
+                                    onClick={() => {
+                                        editHandle(true);
+                                    }}
+                                >
+                                    Редактировать
+                                    <BiEdit size={16} />
+                                </Button>
+                                <Button
+                                    size={"large"}
+                                    style={{
+                                        gap: 10,
+                                        display: "flex",
+                                        alignItems: "center",
+                                    }}
+                                    type="primary"
+                                    danger
+                                >
+                                    Удалить
+                                    <BsTrash size={16} />
+                                </Button>
+                            </>
+                        )}
                     </Row>
                 </Row>
 
@@ -282,9 +331,159 @@ export default function Sending({
                         boxShadow: " 0px 2px 4px 0px #00000026",
                     }}
                 >
-                    {Object.values(props).map((item) => (
-                        <Property title={item[1]} subtitle={item[0]} />
-                    ))}
+                    {isEditPage ? (
+                        <Form
+                            style={{
+                                display: "flex",
+                                gap: `${PropertyGap}px`,
+                                flexWrap: "wrap",
+                                alignItems: "flex-end",
+                            }}
+                        >
+                            <Select
+                                style={{
+                                    maxWidth: "250px",
+                                    width: "100%",
+                                    height: "40px",
+                                    lineHeight: "40px",
+                                }}
+                                placeholder="Клиент"
+                                options={[
+                                    { value: "Александр", title: "Aktr" },
+                                    { value: "Владимир", title: "Aktr" },
+                                ]}
+                            />
+                            <Select
+                                style={{
+                                    maxWidth: "250px",
+                                    width: "100%",
+                                    height: "40px",
+                                    lineHeight: "40px",
+                                }}
+                                placeholder="Статус места"
+                                optionFilterProp="children"
+                                options={[
+                                    { value: "В обработке", title: "" },
+                                    { value: "В пути", title: "" },
+                                ]}
+                            />
+                            <Select
+                                style={{
+                                    maxWidth: "250px",
+                                    width: "100%",
+                                    height: "40px",
+                                    lineHeight: "40px",
+                                }}
+                                placeholder="Статус услуги"
+                                optionFilterProp="children"
+                                options={[
+                                    { value: "В обработке", title: "" },
+                                    { value: "Выдано", title: "" },
+                                ]}
+                            />
+                            <Select
+                                style={{
+                                    maxWidth: "250px",
+                                    width: "100%",
+                                    height: "40px",
+                                    lineHeight: "40px",
+                                }}
+                                placeholder="Услуги"
+                                optionFilterProp="children"
+                                options={[
+                                    { value: "В обработке", title: "" },
+                                    { value: "Выдача со склада", title: "" },
+                                ]}
+                            />
+                            <Select
+                                style={{
+                                    maxWidth: "250px",
+                                    width: "100%",
+                                    height: "40px",
+                                    lineHeight: "40px",
+                                }}
+                                placeholder="Тариф"
+                                optionFilterProp="children"
+                                options={[
+                                    { value: "Экспресс", title: "" },
+                                    { value: "Эконом", title: "" },
+                                ]}
+                            />
+                            <Select
+                                style={{
+                                    maxWidth: "250px",
+                                    width: "100%",
+                                    height: "40px",
+                                    lineHeight: "40px",
+                                }}
+                                placeholder="Тип оплаты"
+                                optionFilterProp="children"
+                                options={[
+                                    { value: "Наличный", title: "" },
+                                    { value: "Безналичный", title: "" },
+                                ]}
+                            />
+                            <div style={{ position: "relative" }}>
+                                <div
+                                    style={{
+                                        paddingLeft: 10,
+                                        color: "#757575",
+                                    }}
+                                >
+                                    Дата отправки
+                                </div>
+                                <DatePicker size="large" />
+                            </div>
+                            <Input
+                                addonAfter="Цена за 1 кг, $"
+                                placeholder="10"
+                                size="large"
+                                style={{ maxWidth: "250px" }}
+                            />
+                            <Input
+                                addonAfter="Сумма товара, $"
+                                placeholder="10"
+                                size="large"
+                                style={{ maxWidth: "250px" }}
+                            />
+                            <Input
+                                addonAfter="Сумма оплаты, $"
+                                placeholder="10"
+                                size="large"
+                                style={{ maxWidth: "250px" }}
+                            />
+                            <Input
+                                addonAfter="Размер, см"
+                                placeholder="10"
+                                size="large"
+                                style={{ maxWidth: "250px" }}
+                            />
+                            <Input
+                                addonAfter="Вес нетто, кг"
+                                placeholder="10"
+                                size="large"
+                                style={{ maxWidth: "250px" }}
+                            />
+                            <Input
+                                addonAfter="Вес брутто, кг"
+                                placeholder="10"
+                                size="large"
+                                style={{ maxWidth: "250px" }}
+                            />
+                            <Input
+                                addonAfter="Количество товара"
+                                placeholder="10"
+                                size="large"
+                                style={{ maxWidth: "250px" }}
+                            />
+
+                            <TextArea placeholder="Примечание" rows={4} />
+                        </Form>
+                    ) : (
+                        Object.values(props).map((item) => (
+                            <Property title={item[1]} subtitle={item[0]} />
+                        ))
+                    )}
                 </Row>
                 <Row>
                     <Title
@@ -383,6 +582,31 @@ export default function Sending({
                 content={props}
                 title={`Товар 1`}
                 isModalOpen={infoModal}
+                footer={[
+                    <div className="">
+                        <Button
+                            key="1"
+                            type="primary"
+                            style={{ backgroundColor: "#1677ff" }}
+                            onClick={() => {
+                                setInfoModal(false);
+                                setCreateProduct(true);
+                            }}
+                        >
+                            Редактировать
+                        </Button>
+                        <Button
+                            key="1"
+                            type="primary"
+                            style={{ backgroundColor: "rgb(0, 150, 80)" }}
+                            onClick={() => {
+                                setInfoModal(false);
+                            }}
+                        >
+                            Ок
+                        </Button>
+                    </div>,
+                ]}
                 handleCancel={() => setInfoModal(false)}
             />
             <CreateProductModal

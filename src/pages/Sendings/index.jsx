@@ -1,16 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useLocation } from "react-router-dom";
-import {
-    Button,
-    Row,
-    Table,
-    Typography,
-    Input,
-    Select,
-    Switch,
-    Form,
-    DatePicker,
-} from "antd";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Button, Row, Table, Typography, Input, Select, Switch } from "antd";
 import { getSendingsList } from "../../redux/data";
 import { BsArrowRepeat, BsCheck2Circle, BsTrash } from "react-icons/bs";
 import { useState } from "react";
@@ -23,11 +13,13 @@ import TextArea from "antd/es/input/TextArea";
 import CreateSendingModal from "./CreateSendingModal";
 const { Title, Link } = Typography;
 export let PropertyGap = 10;
-export default function Sendings() {
+export default function Sendings({ editHandle }) {
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const location = useLocation();
     const isLoading = useSelector((state) => state.data.isLoading);
     //let sendings = useSelector(getSendingsList);
+    editHandle(false);
     let sendings = [
         {
             code: 1,
@@ -70,7 +62,7 @@ export default function Sendings() {
                 <div style={{ display: "flex", gap: 10 }}>
                     <BsCheck2Circle size={17} color="green" />
                     <BsArrowRepeat size={17} color="" />
-                    <BsTrash size={17} color="red" />
+                    <BsTrash style={{ marginLeft: 30 }} size={17} color="red" />
                 </div>
             ),
         };
@@ -226,8 +218,8 @@ export default function Sendings() {
                         <Button
                             type="primary"
                             onClick={() => {
-                                setInfoModalOpen(true);
-                                setCurrentSend(currentSend + 1);
+                                editHandle(true);
+                                navigate(location.pathname + `/new`);
                             }}
                             size={"large"}
                         >

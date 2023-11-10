@@ -12,11 +12,7 @@ import {
 import TextArea from "antd/es/input/TextArea";
 import { PropertyGap } from "../../pages/Sendings";
 const { Title } = Typography;
-export const CreatePlaceModal = ({
-    isModalOpen,
-    handleCancel,
-    title,
-}) => {
+export const CreatePlaceModal = ({ isModalOpen, handleCancel, title }) => {
     return (
         <Modal
             style={{ maxWidth: 800 }}
@@ -137,7 +133,7 @@ export const CreatePlaceModal = ({
                             height: "40px",
                             lineHeight: "40px",
                         }}
-                        placeholder="Статус места"
+                        placeholder="Тип оплаты"
                         optionFilterProp="children"
                         options={[
                             { value: "Наличный", title: "" },
@@ -197,6 +193,7 @@ export const CreatePlaceModal = ({
                         size="large"
                         style={{ maxWidth: "250px" }}
                     />
+
                     <TextArea placeholder="Примечание" rows={4} />
                 </Form>
             </Row>

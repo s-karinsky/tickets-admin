@@ -1,6 +1,18 @@
 import { useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Button, Row, Table, Typography, Input, Select, Checkbox } from "antd";
+import {
+    Button,
+    Row,
+    Table,
+    Typography,
+    Input,
+    Select,
+    Checkbox,
+    Form,
+} from "antd";
+
+import TextArea from "antd/es/input/TextArea";
+import { SaveOutlined } from "@ant-design/icons";
 import { BsTrash } from "react-icons/bs";
 import { BiInfoCircle, BiEdit } from "react-icons/bi";
 import { AiOutlineMore } from "react-icons/ai";
@@ -29,6 +41,8 @@ export default function Sending({
             "Примечание",
         ],
     },
+    editHandle,
+    isEditPage,
 }) {
     const navigate = useNavigate();
     const isLoading = useSelector((state) => state.data.isLoading);
@@ -179,40 +193,70 @@ export default function Sending({
                             marginBottom: 20,
                         }}
                     >
-                        <Button
-                            style={{
-                                gap: 10,
-                                display: "flex",
-                                alignItems: "center",
-                            }}
-                            type="primary"
-                            size={"large"}
-                            onClick={() => {
-                                setNextPage(
-                                    location.pathname
-                                        .split("/")
-                                        .slice(-1)
-                                        .join("")
-                                );
-                                setInfoModalOpen(true);
-                            }}
-                        >
-                            Редактировать
-                            <BiEdit size={16} />
-                        </Button>
-                        <Button
-                            size={"large"}
-                            style={{
-                                gap: 10,
-                                display: "flex",
-                                alignItems: "center",
-                            }}
-                            type="primary"
-                            danger
-                        >
-                            Удалить
-                            <BsTrash size={16} />
-                        </Button>
+                        {" "}
+                        {isEditPage ? (
+                            <>
+                                <Button
+                                    style={{
+                                        gap: 10,
+                                        display: "flex",
+                                        alignItems: "center",
+                                    }}
+                                    type="primary"
+                                    size={"large"}
+                                    onClick={() => {
+                                        editHandle(false);
+                                    }}
+                                >
+                                    Сохранить
+                                    <SaveOutlined size={16} />
+                                </Button>
+                                <Button
+                                    size={"large"}
+                                    style={{
+                                        gap: 10,
+                                        display: "flex",
+                                        alignItems: "center",
+                                    }}
+                                    type="primary"
+                                    danger
+                                    onClick={() => editHandle(false)}
+                                >
+                                    Отмена
+                                </Button>
+                            </>
+                        ) : (
+                            <>
+                                <Button
+                                    style={{
+                                        gap: 10,
+                                        display: "flex",
+                                        alignItems: "center",
+                                    }}
+                                    type="primary"
+                                    size={"large"}
+                                    onClick={() => {
+                                        editHandle(true);
+                                    }}
+                                >
+                                    Редактировать
+                                    <BiEdit size={16} />
+                                </Button>
+                                <Button
+                                    size={"large"}
+                                    style={{
+                                        gap: 10,
+                                        display: "flex",
+                                        alignItems: "center",
+                                    }}
+                                    type="primary"
+                                    danger
+                                >
+                                    Удалить
+                                    <BsTrash size={16} />
+                                </Button>
+                            </>
+                        )}
                     </Row>
                 </Row>
 
@@ -226,9 +270,66 @@ export default function Sending({
                         boxShadow: " 0px 2px 4px 0px #00000026",
                     }}
                 >
-                    {Object.values(props).map((item) => (
-                        <Property title={item[1]} subtitle={item[0]} />
-                    ))}
+                    {isEditPage ? (
+                        <Form
+                            style={{
+                                display: "flex",
+                                gap: `${PropertyGap}px`,
+                                flexWrap: "wrap",
+                            }}
+                        >
+                            <Select
+                                style={{
+                                    maxWidth: "250px",
+                                    width: "100%",
+                                    height: "40px",
+                                    lineHeight: "40px",
+                                }}
+                                placeholder="Перевозчик"
+                                options={[
+                                    { value: "Александр", title: "Aktr" },
+                                    { value: "Владимир", title: "Aktr" },
+                                ]}
+                            />
+                            <Select
+                                style={{
+                                    maxWidth: "250px",
+                                    width: "100%",
+                                    height: "40px",
+                                    lineHeight: "40px",
+                                }}
+                                placeholder="Статус"
+                                optionFilterProp="children"
+                                options={[
+                                    { value: "В обработке", title: "" },
+                                    { value: "В пути", title: "" },
+                                ]}
+                            />
+                            <Input
+                                addonAfter="Количество мест"
+                                placeholder="10"
+                                style={{ maxWidth: "250px" }}
+                                size={"large"}
+                            />
+                            <Input
+                                addonAfter="Вес нетто, кг"
+                                placeholder="10"
+                                style={{ maxWidth: "250px" }}
+                                size={"large"}
+                            />
+                            <Input
+                                addonAfter="Вес брутто, кг"
+                                placeholder="10"
+                                style={{ maxWidth: "250px" }}
+                                size={"large"}
+                            />
+                            <TextArea placeholder="Примечание" rows={4} />
+                        </Form>
+                    ) : (
+                        Object.values(props).map((item) => (
+                            <Property title={item[1]} subtitle={item[0]} />
+                        ))
+                    )}
                 </Row>
                 <Row>
                     <Title
@@ -288,7 +389,10 @@ export default function Sending({
                         </Row>
                         <Button
                             type="primary"
-                            onClick={() => setCreatePlace(true)}
+                            onClick={() => {
+                                editHandle(true);
+                                navigate(location.pathname + `/new`);
+                            }}
                             size={"large"}
                         >
                             Создать

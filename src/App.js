@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { LoadingOutlined } from '@ant-design/icons'
 import { Row } from 'antd'
 import { Route, Routes, useNavigate, useLocation } from 'react-router-dom'
@@ -37,6 +37,11 @@ function App() {
   const isLoading = useSelector(state => state.user.isLoading)
   const isConfigLoaded = useSelector(state => state.config.isLoaded)
   const isLoginPage = location.pathname === '/login'
+  const [isEditPage, setEditPage] = useState(false);
+
+  const editHandle = (state) => {
+    setEditPage(state)
+  }
 
   useEffect(() => {
     dispatch(fetchConfig)
@@ -79,9 +84,9 @@ function App() {
           <Route path="/tournaments" element={<PageTournaments />} />
           <Route path="/tournaments/:id" element={<PageTournament />} />
           <Route path="/tickets/:matchId?" element={<PageTickets />} />
-          <Route path="/sendings" element={<Sendings />} />
-          <Route path="/sendings/:id" element={<Sending />} />
-          <Route path="/sendings/:id/:id" element={<Place />} />
+          <Route path="/sendings" element={<Sendings editHandle={editHandle} />} />
+          <Route path="/sendings/:id" element={<Sending editHandle={editHandle} isEditPage={isEditPage} />} />
+          <Route path="/sendings/:id/:id" element={<Place editHandle={editHandle} isEditPage={isEditPage} />} />
           <Route path="/sendings/:id/:id/:id" element={<Product />} />
         </Route>
         <Route path="/login" element={<PageLogin />} />

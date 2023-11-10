@@ -15,6 +15,7 @@ export const InfoModal = ({
     handleCancel,
     content,
     title,
+    footer,
     onNextHandle,
     onEditHandle,
     disabled,
@@ -37,16 +38,20 @@ export const InfoModal = ({
             }
             open={isModalOpen}
             onCancel={handleCancel}
-            footer={[
-                <Button
-                    key="1"
-                    type="primary"
-                    style={{ backgroundColor: "rgb(0, 150, 80)" }}
-                    onClick={() => handleCancel()}
-                >
-                    Сохранить
-                </Button>,
-            ]}
+            footer={
+                footer
+                    ? footer
+                    : [
+                          <Button
+                              key="1"
+                              type="primary"
+                              style={{ backgroundColor: "rgb(0, 150, 80)" }}
+                              onClick={() => handleCancel()}
+                          >
+                              Сохранить
+                          </Button>,
+                      ]
+            }
         >
             <Row
                 style={{
