@@ -7,10 +7,10 @@ import {
     Typography,
     Input,
     Select,
+    DatePicker,
     Checkbox,
     Form,
 } from "antd";
-
 import TextArea from "antd/es/input/TextArea";
 import { SaveOutlined } from "@ant-design/icons";
 import { BsTrash } from "react-icons/bs";
@@ -28,7 +28,8 @@ const { Title, Link } = Typography;
 export default function Sending({
     id = 1,
     props = {
-        date: [new Date().toLocaleDateString(), "Дата отправки"],
+        number: [1, "Номер"],
+        date: [new Date().toLocaleDateString(), "Дата"],
         dateDispatch: [new Date().toLocaleDateString(), "Дата отправки"],
         dateReceipt: [new Date().toLocaleDateString(), "Дата поступления"],
         trasporter: ["Александр А. А.", "Перевозчик"],
@@ -278,6 +279,16 @@ export default function Sending({
                                 flexWrap: "wrap",
                             }}
                         >
+                            <DatePicker
+                                placeholder={["Дата отправки"]}
+                                size="large"
+                                style={{ maxWidth: "250px", width: "100%" }}
+                            />
+                            <DatePicker
+                                placeholder={["Дата поступления"]}
+                                size="large"
+                                style={{ maxWidth: "250px", width: "100%" }}
+                            />
                             <Select
                                 style={{
                                     maxWidth: "250px",

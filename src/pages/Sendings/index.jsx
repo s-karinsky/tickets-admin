@@ -25,7 +25,7 @@ export default function Sendings({ editHandle }) {
             code: 1,
             date: <DateTableCell date={new Date()} />,
             transporter: "Александ В.",
-            status: <SendingsStatus status={3} />,
+            status: <SendingsStatus status={2} />,
             "departure-date": <DateTableCell date={new Date()} />,
             "delivery-date": <DateTableCell date={new Date()} />,
         },
@@ -50,7 +50,7 @@ export default function Sendings({ editHandle }) {
             date: <DateTableCell date={new Date()} />,
             transporter: "рлександ В.",
             status: <SendingsStatus status={0} />,
-            "departure-date": <DateTableCell date={"N/H"} />,
+            "departure-date": <DateTableCell date={""} />,
             "delivery-date": <DateTableCell date={new Date()} />,
         },
     ];
@@ -88,7 +88,7 @@ export default function Sendings({ editHandle }) {
 
     const columns = [
         {
-            title: "Код",
+            title: "Номер",
             dataIndex: "code",
             key: "code",
         },

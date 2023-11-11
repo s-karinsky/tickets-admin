@@ -29,7 +29,11 @@ export const FilterModal = ({
             onCancel={handleCancel}
         >
             <p>Дата создания</p>
-            <RangePicker style={{ width: "100%" }} />
+            <RangePicker
+                placeholder={["От", "До"]}
+                size="large"
+                style={{ width: "100%" }}
+            />
             <Row
                 style={{
                     display: "flex",
@@ -75,9 +79,17 @@ export const FilterModal = ({
                 </div>
             </Row>
             <p>Дата отправки</p>
-            <RangePicker style={{ width: "100%" }} />
+            <RangePicker
+                placeholder={["От", "До"]}
+                size="large"
+                style={{ width: "100%" }}
+            />
             <p>Дата прибытия</p>
-            <RangePicker style={{ width: "100%" }} />
+            <RangePicker
+                placeholder={["От", "До"]}
+                size="large"
+                style={{ width: "100%" }}
+            />
         </Modal>
     );
 };

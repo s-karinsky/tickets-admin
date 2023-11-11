@@ -5,7 +5,7 @@ import { BiHomeAlt } from "react-icons/bi";
 export const SendingsStatus = ({ status = 0 }) => {
     let positionCar = { left: 15, flexDirection: "row" };
     let progress = { width: 0, backgroundColor: "#141414" };
-    let textCar = "В обработке";
+    let textCar = "Формирование";
     switch (status) {
         case 1:
             positionCar = { left: 63, flexDirection: "row-reverse" };
@@ -15,7 +15,7 @@ export const SendingsStatus = ({ status = 0 }) => {
         case 2:
             positionCar = { right: 15, flexDirection: "row-reverse" };
             progress = { width: "100%", backgroundColor: "#009650" };
-            textCar = "Доставлен";
+            textCar = "Поступила";
             break;
         case 3:
             positionCar = { right: 20, flexDirection: "row-reverse" };

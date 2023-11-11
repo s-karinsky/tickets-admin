@@ -62,6 +62,15 @@ export const CreateSendingModal = ({
                         flexWrap: "wrap",
                     }}
                 >
+                    <RangePicker placeholder={["От", "До"]} size="large" />
+                    <RangePicker
+                        placeholder={["От", "До"]}
+                        size="large"
+                        style={{
+                            maxWidth: "250px",
+                            width: "100%",
+                        }}
+                    />
                     <Select
                         style={{
                             maxWidth: "250px",
