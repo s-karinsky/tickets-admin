@@ -279,6 +279,16 @@ export default function Sending({
                                 flexWrap: "wrap",
                             }}
                         >
+                            <Property
+                                title={"Номер"}
+                                subtitle={"1"}
+                                style={{ maxWidth: "250px", width: "100%" }}
+                            />
+                            <Property
+                                title={"Дата"}
+                                subtitle={new Date().toLocaleDateString()}
+                                style={{ maxWidth: "250px", width: "100%" }}
+                            />
                             <DatePicker
                                 placeholder={["Дата отправки"]}
                                 size="large"
