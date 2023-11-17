@@ -12,7 +12,12 @@ import {
     Form,
 } from "antd";
 import TextArea from "antd/es/input/TextArea";
-import { SaveOutlined } from "@ant-design/icons";
+import {
+    SaveOutlined,
+    CopyOutlined,
+    PlusCircleOutlined,
+    CloseCircleOutlined,
+} from "@ant-design/icons";
 import { BsTrash } from "react-icons/bs";
 import { BiInfoCircle, BiEdit } from "react-icons/bi";
 import { AiOutlineMore } from "react-icons/ai";
@@ -53,6 +58,7 @@ export default function Sending({
         {
             code: 1,
             date: <DateTableCell date={new Date()} />,
+            weight: 200,
             client: "Александ В.",
             status: "Не назначено",
             count: 10,
@@ -62,6 +68,7 @@ export default function Sending({
         {
             code: 2,
             date: <DateTableCell date={new Date()} />,
+            weight: 1200,
             client: "рлександ В.",
             status: "Выдача со склада → Выдано",
             count: 23,
@@ -71,6 +78,7 @@ export default function Sending({
         {
             code: 3,
             date: <DateTableCell date={new Date()} />,
+            weight: 20,
             client: "рлександ В.",
             status: "Выдача со склада → Выдано",
             count: 12,
@@ -80,6 +88,7 @@ export default function Sending({
         {
             code: 5,
             date: <DateTableCell date={new Date()} />,
+            weight: 500,
             client: "рлександ В.",
             status: "Не назначено",
             count: 2,
@@ -94,7 +103,13 @@ export default function Sending({
             buttons: (
                 <div style={{ display: "flex", gap: 10 }}>
                     <BiInfoCircle size={17} color="#141414" />
-                    <AiOutlineMore size={17} color="#141414" />
+                    <CopyOutlined size={17} color="#141414" />
+                    <PlusCircleOutlined
+                        size={17}
+                        style={{ color: "#009650" }}
+                    />
+                    <CloseCircleOutlined size={17} style={{ color: "red" }} />
+                    <BsTrash style={{ marginLeft: 30 }} size={17} color="red" />
                 </div>
             ),
         };
@@ -106,14 +121,16 @@ export default function Sending({
 
     const columns = [
         {
-            title: "Код",
+            title: "Номер",
+
+            sorter: (a, b) => a.code - b.code,
             dataIndex: "code",
             key: "code",
         },
         {
-            title: "Статус услуги",
-            dataIndex: "status",
-            key: "status",
+            title: "Клиент",
+            dataIndex: "client",
+            key: "client",
         },
         {
             title: "Место",
@@ -121,10 +138,12 @@ export default function Sending({
             key: "place",
         },
         {
-            title: "Клиент",
-            dataIndex: "client",
-            key: "client",
+            title: "Вес брутто",
+            sorter: (a, b) => a.weight - b.weight,
+            dataIndex: "weight",
+            key: "weight",
         },
+
         {
             title: "Тариф",
             dataIndex: "rate",
@@ -134,6 +153,11 @@ export default function Sending({
             title: "Количество товара",
             dataIndex: "count",
             key: "count",
+        },
+        {
+            title: "Услуга / Статус",
+            dataIndex: "status",
+            key: "status",
         },
         {
             title: "",
@@ -282,26 +306,26 @@ export default function Sending({
                             <Property
                                 title={"Номер"}
                                 subtitle={"1"}
-                                style={{ maxWidth: "250px", width: "100%" }}
+                                style={{ maxWidth: "200px", width: "100%" }}
                             />
                             <Property
                                 title={"Дата"}
                                 subtitle={new Date().toLocaleDateString()}
-                                style={{ maxWidth: "250px", width: "100%" }}
+                                style={{ maxWidth: "200px", width: "100%" }}
                             />
                             <DatePicker
                                 placeholder={["Дата отправки"]}
                                 size="large"
-                                style={{ maxWidth: "250px", width: "100%" }}
+                                style={{ maxWidth: "200px", width: "100%" }}
                             />
                             <DatePicker
                                 placeholder={["Дата поступления"]}
                                 size="large"
-                                style={{ maxWidth: "250px", width: "100%" }}
+                                style={{ maxWidth: "200px", width: "100%" }}
                             />
                             <Select
                                 style={{
-                                    maxWidth: "250px",
+                                    maxWidth: "200px",
                                     width: "100%",
                                     height: "40px",
                                     lineHeight: "40px",
@@ -314,7 +338,7 @@ export default function Sending({
                             />
                             <Select
                                 style={{
-                                    maxWidth: "250px",
+                                    maxWidth: "200px",
                                     width: "100%",
                                     height: "40px",
                                     lineHeight: "40px",
@@ -329,19 +353,19 @@ export default function Sending({
                             <Input
                                 addonAfter="Количество мест"
                                 placeholder="10"
-                                style={{ maxWidth: "250px" }}
+                                style={{ maxWidth: "200px" }}
                                 size={"large"}
                             />
                             <Input
                                 addonAfter="Вес нетто, кг"
                                 placeholder="10"
-                                style={{ maxWidth: "250px" }}
+                                style={{ maxWidth: "200px" }}
                                 size={"large"}
                             />
                             <Input
                                 addonAfter="Вес брутто, кг"
                                 placeholder="10"
-                                style={{ maxWidth: "250px" }}
+                                style={{ maxWidth: "200px" }}
                                 size={"large"}
                             />
                             <TextArea placeholder="Примечание" rows={4} />
@@ -379,26 +403,9 @@ export default function Sending({
                         >
                             <Input
                                 placeholder="Поиск"
-                                style={{ maxWidth: "250px" }}
+                                style={{ maxWidth: "200px" }}
                             />
-                            <Select
-                                style={{
-                                    maxWidth: "250px",
-                                    width: "100%",
-                                    height: "40px",
-                                    lineHeight: "40px",
-                                }}
-                                placeholder="Сортировка"
-                                optionFilterProp="children"
-                                options={columns.map((item) => {
-                                    return item.title !== ""
-                                        ? {
-                                              title: item.dataIndex,
-                                              value: item.title,
-                                          }
-                                        : {};
-                                })}
-                            />
+
                             <Button
                                 type="primary"
                                 size={"large"}
@@ -408,16 +415,44 @@ export default function Sending({
                                 Фильтры
                             </Button>
                         </Row>
-                        <Button
-                            type="primary"
-                            onClick={() => {
-                                editHandle(true);
-                                navigate(location.pathname + `/new`);
+                        <Row
+                            style={{
+                                display: "flex",
+                                gap: "15px",
+                                flexDirection: "row",
+                                justifyContent: "flex-end",
+                                width: "100%",
                             }}
-                            size={"large"}
                         >
-                            Создать
-                        </Button>
+                            {" "}
+                            <Button
+                                type="primary"
+                                onClick={() => {
+                                    editHandle(true);
+                                    navigate(location.pathname + `/new`);
+                                }}
+                                size={"large"}
+                            >
+                                Создать
+                            </Button>
+                            <Button
+                                type="primary"
+                                style={{ backgroundColor: "#009650" }}
+                                size={"large"}
+                            >
+                                Создать счет
+                            </Button>
+                            {/* <Button type="primary" size={"large"}>
+                                Создать услугу
+                            </Button>
+                            <Button
+                                type="primary"
+                                style={{ backgroundColor: "red" }}
+                                size={"large"}
+                            >
+                                Отменить услугу
+                            </Button> */}
+                        </Row>
                     </div>
                 </Row>
                 <Table
@@ -425,8 +460,10 @@ export default function Sending({
                     dataSource={places}
                     rowKey={({ id }) => id}
                     onRow={(record) => ({
-                        onClick: () => {
-                            navigate(`${location.pathname}/${record.code}`);
+                        onClick: (e) => {
+                            if (e.detail === 2) {
+                                navigate(`${location.pathname}/${record.code}`);
+                            }
                         },
                     })}
                     size="small"

@@ -3,7 +3,7 @@ import { Typography } from "antd";
 const { Title, Text } = Typography;
 export const Property = ({ title, subtitle }) => {
     return (
-        <div style={{ minWidth: 200 }}>
+        <div style={{ minWidth: 160 }}>
             <Text
                 level={5}
                 style={{ color: "#757575", marginTop: 0, marginBottom: 0 }}

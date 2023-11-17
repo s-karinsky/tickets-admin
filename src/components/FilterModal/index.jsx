@@ -48,14 +48,18 @@ export const FilterModal = ({
                             maxWidth: "190px",
                             width: "100%",
                         }}
-                        placeholder="Сортировка"
+                        placeholder="Фильтр"
                         optionFilterProp="children"
-                        options={columns.map((item) => {
-                            return {
-                                title: item.dataIndex,
-                                value: item.title,
-                            };
-                        })}
+                        options={[
+                            {
+                                title: "alex",
+                                value: "Александр",
+                            },
+                            {
+                                title: "vlad",
+                                value: "Владимир",
+                            },
+                        ]}
                     />
                 </div>
                 <div style={{ maxWidth: 190, width: "100%" }}>
@@ -65,16 +69,22 @@ export const FilterModal = ({
                             maxWidth: "190px",
                             width: "100%",
                         }}
-                        placeholder="Сортировка"
+                        placeholder="Фильтр"
                         optionFilterProp="children"
-                        options={columns.map((item) => {
-                            return item.title !== ""
-                                ? {
-                                      title: item.dataIndex,
-                                      value: item.title,
-                                  }
-                                : {};
-                        })}
+                        options={[
+                            {
+                                title: 0,
+                                value: "Формирование",
+                            },
+                            {
+                                title: 1,
+                                value: "В пути",
+                            },
+                            {
+                                title: 2,
+                                value: "Поступила",
+                            },
+                        ]}
                     />
                 </div>
             </Row>

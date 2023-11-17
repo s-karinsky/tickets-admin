@@ -26,6 +26,8 @@ export default function Sendings({ editHandle }) {
             date: <DateTableCell date={new Date()} />,
             transporter: "Александ В.",
             status: <SendingsStatus status={2} />,
+            count: 10,
+            weight: 200,
             "departure-date": <DateTableCell date={new Date()} />,
             "delivery-date": <DateTableCell date={new Date()} />,
         },
@@ -34,6 +36,8 @@ export default function Sendings({ editHandle }) {
             date: <DateTableCell date={new Date()} />,
             transporter: "рлександ В.",
             status: <SendingsStatus status={1} />,
+            count: 12,
+            weight: 250,
             "departure-date": <DateTableCell date={new Date()} />,
             "delivery-date": <DateTableCell date={new Date()} />,
         },
@@ -42,6 +46,8 @@ export default function Sendings({ editHandle }) {
             date: <DateTableCell date={new Date()} />,
             transporter: "рлександ В.",
             status: <SendingsStatus status={2} />,
+            count: 22,
+            weight: 350,
             "departure-date": <DateTableCell date={new Date()} />,
             "delivery-date": <DateTableCell date={new Date()} />,
         },
@@ -50,6 +56,8 @@ export default function Sendings({ editHandle }) {
             date: <DateTableCell date={new Date()} />,
             transporter: "рлександ В.",
             status: <SendingsStatus status={0} />,
+            count: 2,
+            weight: 20,
             "departure-date": <DateTableCell date={""} />,
             "delivery-date": <DateTableCell date={new Date()} />,
         },
@@ -89,6 +97,8 @@ export default function Sendings({ editHandle }) {
     const columns = [
         {
             title: "Номер",
+            sorter: (a, b) => a.code - b.code,
+
             dataIndex: "code",
             key: "code",
         },
@@ -106,6 +116,18 @@ export default function Sendings({ editHandle }) {
             title: "Статус",
             dataIndex: "status",
             key: "status",
+        },
+        {
+            title: "Количество мест",
+            dataIndex: "count",
+            sorter: (a, b) => a.count - b.count,
+            key: "count",
+        },
+        {
+            title: "Вес брутто",
+            sorter: (a, b) => a.weight - b.weight,
+            dataIndex: "weight",
+            key: "weight",
         },
         {
             title: "Дата отправления",
@@ -188,24 +210,7 @@ export default function Sendings({ editHandle }) {
                                 placeholder="Поиск"
                                 style={{ maxWidth: "250px" }}
                             />
-                            <Select
-                                style={{
-                                    maxWidth: "250px",
-                                    width: "100%",
-                                    height: "40px",
-                                    lineHeight: "40px",
-                                }}
-                                placeholder="Сортировка"
-                                optionFilterProp="children"
-                                options={columns.map((item) => {
-                                    return item.title !== ""
-                                        ? {
-                                              title: item.dataIndex,
-                                              value: item.title,
-                                          }
-                                        : {};
-                                })}
-                            />
+
                             <Button
                                 type="primary"
                                 size={"large"}
@@ -234,8 +239,10 @@ export default function Sendings({ editHandle }) {
                     loading={isLoading}
                     rowKey={({ id }) => id}
                     onRow={(record) => ({
-                        onClick: () => {
-                            navigate(`/sendings/${record.code}`);
+                        onClick: (e) => {
+                            if (e.detail === 2) {
+                                navigate(`/sendings/${record.code}`);
+                            }
                         },
                     })}
                     style={{ overflow: "scroll" }}
@@ -245,7 +252,7 @@ export default function Sendings({ editHandle }) {
                 isModalOpen={filterModalOpen}
                 handleOk={() => setFilterModalOpen(false)}
                 handleCancel={() => setFilterModalOpen(false)}
-                columns={columns.filter((item) => item.title != "")}
+                columns={columns.filter((item) => item.title !== "")}
             />
             <CreateSendingModal
                 title={`Отправление ${currentSend}`}

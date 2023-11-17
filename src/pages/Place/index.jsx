@@ -16,7 +16,7 @@ import { BsTrash } from "react-icons/bs";
 import { BiInfoCircle, BiEdit } from "react-icons/bi";
 import { AiOutlineMore } from "react-icons/ai";
 import { useState } from "react";
-import { SaveOutlined } from "@ant-design/icons";
+import { SaveOutlined, CopyOutlined } from "@ant-design/icons";
 import { InfoModal } from "../../components/InfoModal";
 import { FilterModal } from "../../components/FilterModal";
 import { Property } from "../../components/Property";
@@ -28,8 +28,27 @@ const { Title, Link } = Typography;
 
 export default function Sending({
     id = 1,
-    props = {
-        code: ["1", "Код"],
+    place = {
+        code: ["1", "Номер"],
+        status: ["Выдача со склада", "Статус / услуга"],
+        place: ["2", "Место"],
+        client: ["Александр", "Клиент"],
+        rate: ["12", "Тариф"],
+        count: [23, "Количество товара"],
+        netWeight: [250, "Вес нетто"],
+        grossWeight: [288, "Вес брутто"],
+        size: ["220см", "Размер"],
+        typePay: ["Наличные", "Тип оплаты"],
+        price: ["200$", "Цена за 1 кг"],
+        sum: ["5000 $", "Сумма оплаты"],
+        sumProduct: ["1000 $", "Сумма товара"],
+        note: [
+            "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s..",
+            "Примечание",
+        ],
+    },
+    product = {
+        code: ["1", "Номер"],
         name: ["Black&white", "Наименование"],
         brand: ["Chanel", "Марка"],
         article: [1, "Артикул"],
@@ -111,7 +130,9 @@ export default function Sending({
             buttons: (
                 <div style={{ display: "flex", gap: 10 }}>
                     <BiInfoCircle size={17} color="#141414" />
-                    <AiOutlineMore size={17} color="#141414" />
+                    {/* <AiOutlineMore size={17} color="#141414" /> */}
+                    <CopyOutlined size={17} color="#141414" />
+                    <BsTrash style={{ marginLeft: 30 }} size={17} color="red" />
                 </div>
             ),
         };
@@ -124,7 +145,8 @@ export default function Sending({
 
     const columns = [
         {
-            title: "Код",
+            title: "Номер",
+            sorter: (a, b) => a.code - b.code,
             dataIndex: "code",
             key: "code",
         },
@@ -480,7 +502,7 @@ export default function Sending({
                             <TextArea placeholder="Примечание" rows={4} />
                         </Form>
                     ) : (
-                        Object.values(props).map((item) => (
+                        Object.values(place).map((item) => (
                             <Property title={item[1]} subtitle={item[0]} />
                         ))
                     )}
@@ -514,24 +536,7 @@ export default function Sending({
                                 placeholder="Поиск"
                                 style={{ maxWidth: "250px" }}
                             />
-                            <Select
-                                style={{
-                                    maxWidth: "250px",
-                                    width: "100%",
-                                    height: "40px",
-                                    lineHeight: "40px",
-                                }}
-                                placeholder="Сортировка"
-                                optionFilterProp="children"
-                                options={columns.map((item) => {
-                                    return item.title !== ""
-                                        ? {
-                                              title: item.dataIndex,
-                                              value: item.title,
-                                          }
-                                        : {};
-                                })}
-                            />
+
                             <Button
                                 type="primary"
                                 size={"large"}
@@ -556,9 +561,11 @@ export default function Sending({
                     dataSource={places}
                     rowKey={({ id }) => id}
                     onRow={(record) => ({
-                        onClick: () => {
-                            setNextPage(1);
-                            setInfoModal(true);
+                        onClick: (e) => {
+                            if (e.detail === 2) {
+                                setNextPage(1);
+                                setInfoModal(true);
+                            }
                         },
                     })}
                     style={{ overflow: "scroll" }}
@@ -579,7 +586,7 @@ export default function Sending({
                 handleCancel={() => setCreatePlace(false)}
             />
             <InfoModal
-                content={props}
+                content={product}
                 title={`Товар 1`}
                 isModalOpen={infoModal}
                 footer={[
