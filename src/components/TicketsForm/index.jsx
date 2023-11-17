@@ -208,6 +208,7 @@ function TicketFormRow({
             required: true,
             message: 'Please input price'
           }, {
+            type: 'number',
             min: 1,
             message: 'The price must be positive'
           }]}

@@ -1,5 +1,5 @@
-import { useSelector } from "react-redux";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useSelector } from 'react-redux'
+import { useNavigate, useLocation } from 'react-router-dom'
 import {
     Button,
     Row,
@@ -24,7 +24,7 @@ import { PropertyGap } from "../Sendings";
 import CreatePlaceModal from "../Sending/CreatePlaceModal";
 import CreateProductModal from "./СreateProductModal";
 
-const { Title, Link } = Typography;
+const { Title, Link } = Typography
 
 export default function Sending({
     id = 1,
@@ -202,302 +202,302 @@ export default function Sending({
         },
     ];
 
-    return (
-        <>
-            <div
-                style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    padding: "0 40px",
-                    gap: "20px",
-                }}
+  return (
+    <>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          padding: '0 40px',
+          gap: '20px',
+        }}
+      >
+        <Row
+          style={{
+            gap: 20,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-end',
+          }}
+        >
+          <Typography>
+            <Title
+              level={1}
+              style={{ fontWeight: '700', marginBottom: '0' }}
             >
-                <Row
-                    style={{
-                        gap: 20,
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "flex-end",
-                    }}
+              Место #
+              {location.pathname
+                .toString()
+                .split('/')
+                .slice(-1)
+                .join('/')}
+            </Title>
+            <div className=''>
+              <Link
+                onClick={() => navigate(`/sendings`)}
+                style={{ color: 'blue' }}
+              >
+                Отправка товаров <span> </span>&gt;
+              </Link>
+              <Link
+                onClick={() =>
+                  navigate(
+                    location.pathname
+                      .toString()
+                      .split('/')
+                      .slice(0, -1)
+                      .join('/')
+                  )
+                }
+                style={{ color: 'blue' }}
+              >
+                <span> </span>Отправка<span> </span>
+                {location.pathname
+                  .toString()
+                  .split('/')
+                  .slice(-2, -1)
+                  .join('/')}
+                <span> </span>
+                &gt;<span> </span>
+              </Link>
+              Место <span> </span>
+              {location.pathname
+                .toString()
+                .split('/')
+                .slice(-1)
+                .join('/')}
+            </div>
+          </Typography>
+          <Row
+            style={{
+              gap: 20,
+              display: 'flex',
+              justifyContent: 'flex-end',
+              alignItems: 'flex-end',
+              marginBottom: 20,
+            }}
+          >
+            {isEditPage ? (
+              <>
+                <Button
+                  style={{
+                    gap: 10,
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                  type='primary'
+                  size={'large'}
+                  onClick={() => {
+                    editHandle(false)
+                  }}
                 >
-                    <Typography>
-                        <Title
-                            level={1}
-                            style={{ fontWeight: "700", marginBottom: "0" }}
-                        >
-                            Место #
-                            {location.pathname
-                                .toString()
-                                .split("/")
-                                .slice(-1)
-                                .join("/")}
-                        </Title>
-                        <div className="">
-                            <Link
-                                onClick={() => navigate(`/sendings`)}
-                                style={{ color: "blue" }}
-                            >
-                                Отправка товаров <span> </span>&gt;
-                            </Link>
-                            <Link
-                                onClick={() =>
-                                    navigate(
-                                        location.pathname
-                                            .toString()
-                                            .split("/")
-                                            .slice(0, -1)
-                                            .join("/")
-                                    )
-                                }
-                                style={{ color: "blue" }}
-                            >
-                                <span> </span>Отправка<span> </span>
-                                {location.pathname
-                                    .toString()
-                                    .split("/")
-                                    .slice(-2, -1)
-                                    .join("/")}
-                                <span> </span>
-                                &gt;<span> </span>
-                            </Link>
-                            Место <span> </span>
-                            {location.pathname
-                                .toString()
-                                .split("/")
-                                .slice(-1)
-                                .join("/")}
-                        </div>
-                    </Typography>
-                    <Row
-                        style={{
-                            gap: 20,
-                            display: "flex",
-                            justifyContent: "flex-end",
-                            alignItems: "flex-end",
-                            marginBottom: 20,
-                        }}
-                    >
-                        {isEditPage ? (
-                            <>
-                                <Button
-                                    style={{
-                                        gap: 10,
-                                        display: "flex",
-                                        alignItems: "center",
-                                    }}
-                                    type="primary"
-                                    size={"large"}
-                                    onClick={() => {
-                                        editHandle(false);
-                                    }}
-                                >
-                                    Сохранить
-                                    <SaveOutlined size={16} />
-                                </Button>
-                                <Button
-                                    size={"large"}
-                                    style={{
-                                        gap: 10,
-                                        display: "flex",
-                                        alignItems: "center",
-                                    }}
-                                    type="primary"
-                                    danger
-                                    onClick={() => editHandle(false)}
-                                >
-                                    Отмена
-                                </Button>
-                            </>
-                        ) : (
-                            <>
-                                <Button
-                                    style={{
-                                        gap: 10,
-                                        display: "flex",
-                                        alignItems: "center",
-                                    }}
-                                    type="primary"
-                                    size={"large"}
-                                    onClick={() => {
-                                        editHandle(true);
-                                    }}
-                                >
-                                    Редактировать
-                                    <BiEdit size={16} />
-                                </Button>
-                                <Button
-                                    size={"large"}
-                                    style={{
-                                        gap: 10,
-                                        display: "flex",
-                                        alignItems: "center",
-                                    }}
-                                    type="primary"
-                                    danger
-                                >
-                                    Удалить
-                                    <BsTrash size={16} />
-                                </Button>
-                            </>
-                        )}
-                    </Row>
-                </Row>
+                  Сохранить
+                  <SaveOutlined size={16} />
+                </Button>
+                <Button
+                  size={'large'}
+                  style={{
+                    gap: 10,
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                  type='primary'
+                  danger
+                  onClick={() => editHandle(false)}
+                >
+                  Отмена
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  style={{
+                    gap: 10,
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                  type='primary'
+                  size={'large'}
+                  onClick={() => {
+                    editHandle(true)
+                  }}
+                >
+                  Редактировать
+                  <BiEdit size={16} />
+                </Button>
+                <Button
+                  size={'large'}
+                  style={{
+                    gap: 10,
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                  type='primary'
+                  danger
+                >
+                  Удалить
+                  <BsTrash size={16} />
+                </Button>
+              </>
+            )}
+          </Row>
+        </Row>
 
-                <Row
-                    style={{
-                        display: "flex",
-                        gap: `${PropertyGap}px`,
-                        borderRadius: 20,
-                        backgroundColor: "#FAFAFA",
-                        padding: 20,
-                        boxShadow: " 0px 2px 4px 0px #00000026",
-                    }}
+        <Row
+          style={{
+            display: 'flex',
+            gap: `${PropertyGap}px`,
+            borderRadius: 20,
+            backgroundColor: '#FAFAFA',
+            padding: 20,
+            boxShadow: ' 0px 2px 4px 0px #00000026',
+          }}
+        >
+          {isEditPage ? (
+            <Form
+              style={{
+                display: 'flex',
+                gap: `${PropertyGap}px`,
+                flexWrap: 'wrap',
+                alignItems: 'flex-end',
+              }}
+            >
+              <Select
+                style={{
+                  maxWidth: '250px',
+                  width: '100%',
+                  height: '40px',
+                  lineHeight: '40px',
+                }}
+                placeholder='Клиент'
+                options={[
+                  { value: 'Александр', title: 'Aktr' },
+                  { value: 'Владимир', title: 'Aktr' },
+                ]}
+              />
+              <Select
+                style={{
+                  maxWidth: '250px',
+                  width: '100%',
+                  height: '40px',
+                  lineHeight: '40px',
+                }}
+                placeholder='Статус места'
+                optionFilterProp='children'
+                options={[
+                  { value: 'В обработке', title: '' },
+                  { value: 'В пути', title: '' },
+                ]}
+              />
+              <Select
+                style={{
+                  maxWidth: '250px',
+                  width: '100%',
+                  height: '40px',
+                  lineHeight: '40px',
+                }}
+                placeholder='Статус услуги'
+                optionFilterProp='children'
+                options={[
+                  { value: 'В обработке', title: '' },
+                  { value: 'Выдано', title: '' },
+                ]}
+              />
+              <Select
+                style={{
+                  maxWidth: '250px',
+                  width: '100%',
+                  height: '40px',
+                  lineHeight: '40px',
+                }}
+                placeholder='Услуги'
+                optionFilterProp='children'
+                options={[
+                  { value: 'В обработке', title: '' },
+                  { value: 'Выдача со склада', title: '' },
+                ]}
+              />
+              <Select
+                style={{
+                  maxWidth: '250px',
+                  width: '100%',
+                  height: '40px',
+                  lineHeight: '40px',
+                }}
+                placeholder='Тариф'
+                optionFilterProp='children'
+                options={[
+                  { value: 'Экспресс', title: '' },
+                  { value: 'Эконом', title: '' },
+                ]}
+              />
+              <Select
+                style={{
+                  maxWidth: '250px',
+                  width: '100%',
+                  height: '40px',
+                  lineHeight: '40px',
+                }}
+                placeholder='Тип оплаты'
+                optionFilterProp='children'
+                options={[
+                  { value: 'Наличный', title: '' },
+                  { value: 'Безналичный', title: '' },
+                ]}
+              />
+              <div style={{ position: 'relative' }}>
+                <div
+                  style={{
+                    paddingLeft: 10,
+                    color: '#757575',
+                  }}
                 >
-                    {isEditPage ? (
-                        <Form
-                            style={{
-                                display: "flex",
-                                gap: `${PropertyGap}px`,
-                                flexWrap: "wrap",
-                                alignItems: "flex-end",
-                            }}
-                        >
-                            <Select
-                                style={{
-                                    maxWidth: "250px",
-                                    width: "100%",
-                                    height: "40px",
-                                    lineHeight: "40px",
-                                }}
-                                placeholder="Клиент"
-                                options={[
-                                    { value: "Александр", title: "Aktr" },
-                                    { value: "Владимир", title: "Aktr" },
-                                ]}
-                            />
-                            <Select
-                                style={{
-                                    maxWidth: "250px",
-                                    width: "100%",
-                                    height: "40px",
-                                    lineHeight: "40px",
-                                }}
-                                placeholder="Статус места"
-                                optionFilterProp="children"
-                                options={[
-                                    { value: "В обработке", title: "" },
-                                    { value: "В пути", title: "" },
-                                ]}
-                            />
-                            <Select
-                                style={{
-                                    maxWidth: "250px",
-                                    width: "100%",
-                                    height: "40px",
-                                    lineHeight: "40px",
-                                }}
-                                placeholder="Статус услуги"
-                                optionFilterProp="children"
-                                options={[
-                                    { value: "В обработке", title: "" },
-                                    { value: "Выдано", title: "" },
-                                ]}
-                            />
-                            <Select
-                                style={{
-                                    maxWidth: "250px",
-                                    width: "100%",
-                                    height: "40px",
-                                    lineHeight: "40px",
-                                }}
-                                placeholder="Услуги"
-                                optionFilterProp="children"
-                                options={[
-                                    { value: "В обработке", title: "" },
-                                    { value: "Выдача со склада", title: "" },
-                                ]}
-                            />
-                            <Select
-                                style={{
-                                    maxWidth: "250px",
-                                    width: "100%",
-                                    height: "40px",
-                                    lineHeight: "40px",
-                                }}
-                                placeholder="Тариф"
-                                optionFilterProp="children"
-                                options={[
-                                    { value: "Экспресс", title: "" },
-                                    { value: "Эконом", title: "" },
-                                ]}
-                            />
-                            <Select
-                                style={{
-                                    maxWidth: "250px",
-                                    width: "100%",
-                                    height: "40px",
-                                    lineHeight: "40px",
-                                }}
-                                placeholder="Тип оплаты"
-                                optionFilterProp="children"
-                                options={[
-                                    { value: "Наличный", title: "" },
-                                    { value: "Безналичный", title: "" },
-                                ]}
-                            />
-                            <div style={{ position: "relative" }}>
-                                <div
-                                    style={{
-                                        paddingLeft: 10,
-                                        color: "#757575",
-                                    }}
-                                >
-                                    Дата отправки
-                                </div>
-                                <DatePicker size="large" />
-                            </div>
-                            <Input
-                                addonAfter="Цена за 1 кг, $"
-                                placeholder="10"
-                                size="large"
-                                style={{ maxWidth: "250px" }}
-                            />
-                            <Input
-                                addonAfter="Сумма товара, $"
-                                placeholder="10"
-                                size="large"
-                                style={{ maxWidth: "250px" }}
-                            />
-                            <Input
-                                addonAfter="Сумма оплаты, $"
-                                placeholder="10"
-                                size="large"
-                                style={{ maxWidth: "250px" }}
-                            />
-                            <Input
-                                addonAfter="Размер, см"
-                                placeholder="10"
-                                size="large"
-                                style={{ maxWidth: "250px" }}
-                            />
-                            <Input
-                                addonAfter="Вес нетто, кг"
-                                placeholder="10"
-                                size="large"
-                                style={{ maxWidth: "250px" }}
-                            />
-                            <Input
-                                addonAfter="Вес брутто, кг"
-                                placeholder="10"
-                                size="large"
-                                style={{ maxWidth: "250px" }}
-                            />
-                            <Input
-                                addonAfter="Количество товара"
-                                placeholder="10"
-                                size="large"
-                                style={{ maxWidth: "250px" }}
-                            />
+                  Дата отправки
+                </div>
+                <DatePicker size='large' />
+              </div>
+              <Input
+                addonAfter='Цена за 1 кг, $'
+                placeholder='10'
+                size='large'
+                style={{ maxWidth: '250px' }}
+              />
+              <Input
+                addonAfter='Сумма товара, $'
+                placeholder='10'
+                size='large'
+                style={{ maxWidth: '250px' }}
+              />
+              <Input
+                addonAfter='Сумма оплаты, $'
+                placeholder='10'
+                size='large'
+                style={{ maxWidth: '250px' }}
+              />
+              <Input
+                addonAfter='Размер, см'
+                placeholder='10'
+                size='large'
+                style={{ maxWidth: '250px' }}
+              />
+              <Input
+                addonAfter='Вес нетто, кг'
+                placeholder='10'
+                size='large'
+                style={{ maxWidth: '250px' }}
+              />
+              <Input
+                addonAfter='Вес брутто, кг'
+                placeholder='10'
+                size='large'
+                style={{ maxWidth: '250px' }}
+              />
+              <Input
+                addonAfter='Количество товара'
+                placeholder='10'
+                size='large'
+                style={{ maxWidth: '250px' }}
+              />
 
                             <TextArea placeholder="Примечание" rows={4} />
                         </Form>
