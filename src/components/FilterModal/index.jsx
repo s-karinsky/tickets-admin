@@ -1,5 +1,5 @@
-import React from "react";
-import { Row, Typography, Select, Modal, DatePicker } from "antd";
+import React from 'react';
+import { Row, Typography, Select, Modal, DatePicker } from 'antd';
 
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
@@ -16,8 +16,8 @@ export const FilterModal = ({
                 <Title
                     level={2}
                     style={{
-                        fontWeight: "700",
-                        marginBottom: "0",
+                        fontWeight: '700',
+                        marginBottom: '0',
                         marginTop: 0,
                     }}
                 >
@@ -30,59 +30,59 @@ export const FilterModal = ({
         >
             <p>Дата создания</p>
             <RangePicker
-                placeholder={["От", "До"]}
-                size="large"
-                style={{ width: "100%" }}
+                placeholder={['От', 'До']}
+                size='large'
+                style={{ width: '100%' }}
             />
             <Row
                 style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    width: "100%",
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    width: '100%',
                 }}
             >
-                <div style={{ maxWidth: 190, width: "100%" }}>
+                <div style={{ maxWidth: 190, width: '100%' }}>
                     <p>Перевозчик</p>
                     <Select
                         style={{
-                            maxWidth: "190px",
-                            width: "100%",
+                            maxWidth: '190px',
+                            width: '100%',
                         }}
-                        placeholder="Фильтр"
-                        optionFilterProp="children"
+                        placeholder='Фильтр'
+                        optionFilterProp='children'
                         options={[
                             {
-                                title: "alex",
-                                value: "Александр",
+                                title: 'alex',
+                                value: 'Александр',
                             },
                             {
-                                title: "vlad",
-                                value: "Владимир",
+                                title: 'vlad',
+                                value: 'Владимир',
                             },
                         ]}
                     />
                 </div>
-                <div style={{ maxWidth: 190, width: "100%" }}>
+                <div style={{ maxWidth: 190, width: '100%' }}>
                     <p>Статус</p>
                     <Select
                         style={{
-                            maxWidth: "190px",
-                            width: "100%",
+                            maxWidth: '190px',
+                            width: '100%',
                         }}
-                        placeholder="Фильтр"
-                        optionFilterProp="children"
+                        placeholder='Фильтр'
+                        optionFilterProp='children'
                         options={[
                             {
                                 title: 0,
-                                value: "Формирование",
+                                value: 'Формирование',
                             },
                             {
                                 title: 1,
-                                value: "В пути",
+                                value: 'В пути',
                             },
                             {
                                 title: 2,
-                                value: "Поступила",
+                                value: 'Поступила',
                             },
                         ]}
                     />
@@ -90,15 +90,15 @@ export const FilterModal = ({
             </Row>
             <p>Дата отправки</p>
             <RangePicker
-                placeholder={["От", "До"]}
-                size="large"
-                style={{ width: "100%" }}
+                placeholder={['От', 'До']}
+                size='large'
+                style={{ width: '100%' }}
             />
             <p>Дата прибытия</p>
             <RangePicker
-                placeholder={["От", "До"]}
-                size="large"
-                style={{ width: "100%" }}
+                placeholder={['От', 'До']}
+                size='large'
+                style={{ width: '100%' }}
             />
         </Modal>
     );

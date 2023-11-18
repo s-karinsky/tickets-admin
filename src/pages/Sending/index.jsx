@@ -1,5 +1,5 @@
-import { useSelector } from "react-redux";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useSelector } from 'react-redux';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
     Button,
     Row,
@@ -10,41 +10,41 @@ import {
     DatePicker,
     Checkbox,
     Form,
-} from "antd";
-import TextArea from "antd/es/input/TextArea";
+} from 'antd';
+import TextArea from 'antd/es/input/TextArea';
 import {
     SaveOutlined,
     CopyOutlined,
     PlusCircleOutlined,
     CloseCircleOutlined,
-} from "@ant-design/icons";
-import { BsTrash } from "react-icons/bs";
-import { BiInfoCircle, BiEdit } from "react-icons/bi";
-import { AiOutlineMore } from "react-icons/ai";
-import { useState } from "react";
-import { DateTableCell } from "../../components/DateTableCell";
-import { FilterModal } from "../../components/FilterModal";
-import { Property } from "../../components/Property";
-import { PropertyGap } from "../Sendings";
-import CreateSendingModal from "../Sendings/CreateSendingModal";
-import CreatePlaceModal from "./CreatePlaceModal";
+} from '@ant-design/icons';
+import { BsTrash } from 'react-icons/bs';
+import { BiInfoCircle, BiEdit } from 'react-icons/bi';
+import { AiOutlineMore } from 'react-icons/ai';
+import { useState } from 'react';
+import { DateTableCell } from '../../components/DateTableCell';
+import { FilterModal } from '../../components/FilterModal';
+import { Property } from '../../components/Property';
+import { PropertyGap } from '../Sendings';
+import CreateSendingModal from '../Sendings/CreateSendingModal';
+import CreatePlaceModal from './CreatePlaceModal';
 const { Title, Link } = Typography;
 
 export default function Sending({
     id = 1,
     props = {
-        number: [1, "Номер"],
-        date: [new Date().toLocaleDateString(), "Дата"],
-        dateDispatch: [new Date().toLocaleDateString(), "Дата отправки"],
-        dateReceipt: [new Date().toLocaleDateString(), "Дата поступления"],
-        trasporter: ["Александр А. А.", "Перевозчик"],
-        status: ["В обработке", "Статус"],
-        countPlaces: [12, "Количество мест"],
-        grossWeight: [288, "Вес брутто"],
-        netWeight: [250, "Вес нетто"],
+        number: [1, 'Номер'],
+        date: [new Date().toLocaleDateString(), 'Дата'],
+        dateDispatch: [new Date().toLocaleDateString(), 'Дата отправки'],
+        dateReceipt: [new Date().toLocaleDateString(), 'Дата поступления'],
+        trasporter: ['Александр А. А.', 'Перевозчик'],
+        status: ['В обработке', 'Статус'],
+        countPlaces: [12, 'Количество мест'],
+        grossWeight: [288, 'Вес брутто'],
+        netWeight: [250, 'Вес нетто'],
         note: [
             "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s..",
-            "Примечание",
+            'Примечание',
         ],
     },
     editHandle,
@@ -59,8 +59,8 @@ export default function Sending({
             code: 1,
             date: <DateTableCell date={new Date()} />,
             weight: 200,
-            client: "Александ В.",
-            status: "Не назначено",
+            client: 'Александ В.',
+            status: 'Не назначено',
             count: 10,
             place: 12,
             rate: 1,
@@ -69,8 +69,8 @@ export default function Sending({
             code: 2,
             date: <DateTableCell date={new Date()} />,
             weight: 1200,
-            client: "рлександ В.",
-            status: "Выдача со склада → Выдано",
+            client: 'рлександ В.',
+            status: 'Выдача со склада → Выдано',
             count: 23,
             place: 12,
             rate: 0,
@@ -79,8 +79,8 @@ export default function Sending({
             code: 3,
             date: <DateTableCell date={new Date()} />,
             weight: 20,
-            client: "рлександ В.",
-            status: "Выдача со склада → Выдано",
+            client: 'рлександ В.',
+            status: 'Выдача со склада → Выдано',
             count: 12,
             place: 12,
             rate: 1,
@@ -89,8 +89,8 @@ export default function Sending({
             code: 5,
             date: <DateTableCell date={new Date()} />,
             weight: 500,
-            client: "рлександ В.",
-            status: "Не назначено",
+            client: 'рлександ В.',
+            status: 'Не назначено',
             count: 2,
             place: 12,
             rate: 12,
@@ -101,15 +101,15 @@ export default function Sending({
         return {
             ...item,
             buttons: (
-                <div style={{ display: "flex", gap: 10 }}>
-                    <BiInfoCircle size={17} color="#141414" />
-                    <CopyOutlined size={17} color="#141414" />
+                <div style={{ display: 'flex', gap: 10 }}>
+                    <BiInfoCircle size={17} color='#141414' />
+                    <CopyOutlined size={17} color='#141414' />
                     <PlusCircleOutlined
                         size={17}
-                        style={{ color: "#009650" }}
+                        style={{ color: '#009650' }}
                     />
-                    <CloseCircleOutlined size={17} style={{ color: "red" }} />
-                    <BsTrash style={{ marginLeft: 30 }} size={17} color="red" />
+                    <CloseCircleOutlined size={17} style={{ color: 'red' }} />
+                    <BsTrash style={{ marginLeft: 30 }} size={17} color='red' />
                 </div>
             ),
         };
@@ -121,48 +121,48 @@ export default function Sending({
 
     const columns = [
         {
-            title: "Номер",
+            title: 'Номер',
 
             sorter: (a, b) => a.code - b.code,
-            dataIndex: "code",
-            key: "code",
+            dataIndex: 'code',
+            key: 'code',
         },
         {
-            title: "Клиент",
-            dataIndex: "client",
-            key: "client",
+            title: 'Клиент',
+            dataIndex: 'client',
+            key: 'client',
         },
         {
-            title: "Место",
-            dataIndex: "place",
-            key: "place",
+            title: 'Место',
+            dataIndex: 'place',
+            key: 'place',
         },
         {
-            title: "Вес брутто",
+            title: 'Вес брутто',
             sorter: (a, b) => a.weight - b.weight,
-            dataIndex: "weight",
-            key: "weight",
+            dataIndex: 'weight',
+            key: 'weight',
         },
 
         {
-            title: "Тариф",
-            dataIndex: "rate",
-            key: "rate",
+            title: 'Тариф',
+            dataIndex: 'rate',
+            key: 'rate',
         },
         {
-            title: "Количество товара",
-            dataIndex: "count",
-            key: "count",
+            title: 'Количество товара',
+            dataIndex: 'count',
+            key: 'count',
         },
         {
-            title: "Услуга / Статус",
-            dataIndex: "status",
-            key: "status",
+            title: 'Услуга / Статус',
+            dataIndex: 'status',
+            key: 'status',
         },
         {
-            title: "",
-            dataIndex: "buttons",
-            key: "buttons",
+            title: '',
+            dataIndex: 'buttons',
+            key: 'buttons',
         },
     ];
 
@@ -170,65 +170,65 @@ export default function Sending({
         <>
             <div
                 style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    padding: "0 40px",
-                    gap: "20px",
+                    display: 'flex',
+                    flexDirection: 'column',
+                    padding: '0 40px',
+                    gap: '20px',
                 }}
             >
                 <Row
                     style={{
                         gap: 20,
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "flex-end",
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'flex-end',
                     }}
                 >
                     <Typography>
                         <Title
                             level={1}
-                            style={{ fontWeight: "700", marginBottom: "0" }}
+                            style={{ fontWeight: '700', marginBottom: '0' }}
                         >
-                            Отправка{" "}
+                            Отправка{' '}
                             {location.pathname
                                 .toString()
-                                .split("/")
+                                .split('/')
                                 .slice(-1)
-                                .join("/")}
+                                .join('/')}
                         </Title>
                         <Link
                             onClick={() => navigate(`/sendings`)}
-                            style={{ color: "blue" }}
+                            style={{ color: 'blue' }}
                         >
                             Отправка товаров <span> </span>
                         </Link>
-                        &gt; Отправка{" "}
+                        &gt; Отправка{' '}
                         {location.pathname
                             .toString()
-                            .split("/")
+                            .split('/')
                             .slice(-1)
-                            .join("/")}
+                            .join('/')}
                     </Typography>
                     <Row
                         style={{
                             gap: 20,
-                            display: "flex",
-                            justifyContent: "flex-end",
-                            alignItems: "flex-end",
+                            display: 'flex',
+                            justifyContent: 'flex-end',
+                            alignItems: 'flex-end',
                             marginBottom: 20,
                         }}
                     >
-                        {" "}
+                        {' '}
                         {isEditPage ? (
                             <>
                                 <Button
                                     style={{
                                         gap: 10,
-                                        display: "flex",
-                                        alignItems: "center",
+                                        display: 'flex',
+                                        alignItems: 'center',
                                     }}
-                                    type="primary"
-                                    size={"large"}
+                                    type='primary'
+                                    size={'large'}
                                     onClick={() => {
                                         editHandle(false);
                                     }}
@@ -237,13 +237,13 @@ export default function Sending({
                                     <SaveOutlined size={16} />
                                 </Button>
                                 <Button
-                                    size={"large"}
+                                    size={'large'}
                                     style={{
                                         gap: 10,
-                                        display: "flex",
-                                        alignItems: "center",
+                                        display: 'flex',
+                                        alignItems: 'center',
                                     }}
-                                    type="primary"
+                                    type='primary'
                                     danger
                                     onClick={() => editHandle(false)}
                                 >
@@ -255,11 +255,11 @@ export default function Sending({
                                 <Button
                                     style={{
                                         gap: 10,
-                                        display: "flex",
-                                        alignItems: "center",
+                                        display: 'flex',
+                                        alignItems: 'center',
                                     }}
-                                    type="primary"
-                                    size={"large"}
+                                    type='primary'
+                                    size={'large'}
                                     onClick={() => {
                                         editHandle(true);
                                     }}
@@ -268,13 +268,13 @@ export default function Sending({
                                     <BiEdit size={16} />
                                 </Button>
                                 <Button
-                                    size={"large"}
+                                    size={'large'}
                                     style={{
                                         gap: 10,
-                                        display: "flex",
-                                        alignItems: "center",
+                                        display: 'flex',
+                                        alignItems: 'center',
                                     }}
-                                    type="primary"
+                                    type='primary'
                                     danger
                                 >
                                     Удалить
@@ -287,88 +287,88 @@ export default function Sending({
 
                 <Row
                     style={{
-                        display: "flex",
+                        display: 'flex',
                         gap: `${PropertyGap}px`,
                         borderRadius: 20,
-                        backgroundColor: "#FAFAFA",
+                        backgroundColor: '#FAFAFA',
                         padding: 20,
-                        boxShadow: " 0px 2px 4px 0px #00000026",
+                        boxShadow: ' 0px 2px 4px 0px #00000026',
                     }}
                 >
                     {isEditPage ? (
                         <Form
                             style={{
-                                display: "flex",
+                                display: 'flex',
                                 gap: `${PropertyGap}px`,
-                                flexWrap: "wrap",
+                                flexWrap: 'wrap',
                             }}
                         >
                             <Property
-                                title={"Номер"}
-                                subtitle={"1"}
-                                style={{ maxWidth: "200px", width: "100%" }}
+                                title={'Номер'}
+                                subtitle={'1'}
+                                style={{ maxWidth: '200px', width: '100%' }}
                             />
                             <Property
-                                title={"Дата"}
+                                title={'Дата'}
                                 subtitle={new Date().toLocaleDateString()}
-                                style={{ maxWidth: "200px", width: "100%" }}
+                                style={{ maxWidth: '200px', width: '100%' }}
                             />
                             <DatePicker
-                                placeholder={["Дата отправки"]}
-                                size="large"
-                                style={{ maxWidth: "200px", width: "100%" }}
+                                placeholder={['Дата отправки']}
+                                size='large'
+                                style={{ maxWidth: '200px', width: '100%' }}
                             />
                             <DatePicker
-                                placeholder={["Дата поступления"]}
-                                size="large"
-                                style={{ maxWidth: "200px", width: "100%" }}
+                                placeholder={['Дата поступления']}
+                                size='large'
+                                style={{ maxWidth: '200px', width: '100%' }}
                             />
                             <Select
                                 style={{
-                                    maxWidth: "200px",
-                                    width: "100%",
-                                    height: "40px",
-                                    lineHeight: "40px",
+                                    maxWidth: '200px',
+                                    width: '100%',
+                                    height: '40px',
+                                    lineHeight: '40px',
                                 }}
-                                placeholder="Перевозчик"
+                                placeholder='Перевозчик'
                                 options={[
-                                    { value: "Александр", title: "Aktr" },
-                                    { value: "Владимир", title: "Aktr" },
+                                    { value: 'Александр', title: 'Aktr' },
+                                    { value: 'Владимир', title: 'Aktr' },
                                 ]}
                             />
                             <Select
                                 style={{
-                                    maxWidth: "200px",
-                                    width: "100%",
-                                    height: "40px",
-                                    lineHeight: "40px",
+                                    maxWidth: '200px',
+                                    width: '100%',
+                                    height: '40px',
+                                    lineHeight: '40px',
                                 }}
-                                placeholder="Статус"
-                                optionFilterProp="children"
+                                placeholder='Статус'
+                                optionFilterProp='children'
                                 options={[
-                                    { value: "В обработке", title: "" },
-                                    { value: "В пути", title: "" },
+                                    { value: 'В обработке', title: '' },
+                                    { value: 'В пути', title: '' },
                                 ]}
                             />
                             <Input
-                                addonAfter="Количество мест"
-                                placeholder="10"
-                                style={{ maxWidth: "200px" }}
-                                size={"large"}
+                                addonAfter='Количество мест'
+                                placeholder='10'
+                                style={{ maxWidth: '200px' }}
+                                size={'large'}
                             />
                             <Input
-                                addonAfter="Вес нетто, кг"
-                                placeholder="10"
-                                style={{ maxWidth: "200px" }}
-                                size={"large"}
+                                addonAfter='Вес нетто, кг'
+                                placeholder='10'
+                                style={{ maxWidth: '200px' }}
+                                size={'large'}
                             />
                             <Input
-                                addonAfter="Вес брутто, кг"
-                                placeholder="10"
-                                style={{ maxWidth: "200px" }}
-                                size={"large"}
+                                addonAfter='Вес брутто, кг'
+                                placeholder='10'
+                                style={{ maxWidth: '200px' }}
+                                size={'large'}
                             />
-                            <TextArea placeholder="Примечание" rows={4} />
+                            <TextArea placeholder='Примечание' rows={4} />
                         </Form>
                     ) : (
                         Object.values(props).map((item) => (
@@ -379,7 +379,7 @@ export default function Sending({
                 <Row>
                     <Title
                         level={1}
-                        style={{ fontWeight: "700", marginBottom: "0" }}
+                        style={{ fontWeight: '700', marginBottom: '0' }}
                     >
                         Места
                     </Title>
@@ -387,29 +387,29 @@ export default function Sending({
                 <Row>
                     <div
                         style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            gap: "20px",
-                            width: "100%",
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            gap: '20px',
+                            width: '100%',
                         }}
                     >
                         <Row
                             style={{
-                                display: "flex",
-                                flexDirection: "row",
-                                gap: "15px",
-                                width: "100%",
+                                display: 'flex',
+                                flexDirection: 'row',
+                                gap: '15px',
+                                width: '100%',
                             }}
                         >
                             <Input
-                                placeholder="Поиск"
-                                style={{ maxWidth: "200px" }}
+                                placeholder='Поиск'
+                                style={{ maxWidth: '200px' }}
                             />
 
                             <Button
-                                type="primary"
-                                size={"large"}
-                                style={{ backgroundColor: "#009650" }}
+                                type='primary'
+                                size={'large'}
+                                style={{ backgroundColor: '#009650' }}
                                 onClick={() => setFilterModalOpen(true)}
                             >
                                 Фильтры
@@ -417,28 +417,28 @@ export default function Sending({
                         </Row>
                         <Row
                             style={{
-                                display: "flex",
-                                gap: "15px",
-                                flexDirection: "row",
-                                justifyContent: "flex-end",
-                                width: "100%",
+                                display: 'flex',
+                                gap: '15px',
+                                flexDirection: 'row',
+                                justifyContent: 'flex-end',
+                                width: '100%',
                             }}
                         >
-                            {" "}
+                            {' '}
                             <Button
-                                type="primary"
+                                type='primary'
                                 onClick={() => {
                                     editHandle(true);
                                     navigate(location.pathname + `/new`);
                                 }}
-                                size={"large"}
+                                size={'large'}
                             >
                                 Создать
                             </Button>
                             <Button
-                                type="primary"
-                                style={{ backgroundColor: "#009650" }}
-                                size={"large"}
+                                type='primary'
+                                style={{ backgroundColor: '#009650' }}
+                                size={'large'}
                             >
                                 Создать счет
                             </Button>
@@ -466,8 +466,8 @@ export default function Sending({
                             }
                         },
                     })}
-                    size="small"
-                    style={{ overflow: "scroll" }}
+                    size='small'
+                    style={{ overflow: 'scroll' }}
                     rowSelection={{
                         type: Checkbox,
                     }}
@@ -477,7 +477,7 @@ export default function Sending({
                 isModalOpen={filterModalOpen}
                 handleOk={() => setFilterModalOpen(false)}
                 handleCancel={() => setFilterModalOpen(false)}
-                columns={columns.filter((item) => item.title != "")}
+                columns={columns.filter((item) => item.title != '')}
             />
             <CreatePlaceModal
                 title={`Создать место`}
