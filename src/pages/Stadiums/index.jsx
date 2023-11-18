@@ -9,71 +9,71 @@ import { fetchData, getStadiumsList } from '../../redux/data';
 import { getCountries } from '../../redux/config';
 
 export default function PageStadiums() {
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
-    const isLoading = useSelector((state) => state.data.isLoading);
-    const stadiums = useSelector(getStadiumsList);
-    const countries = useSelector(getCountries);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const isLoading = useSelector((state) => state.data.isLoading);
+  const stadiums = useSelector(getStadiumsList);
+  const countries = useSelector(getCountries);
 
-    useEffect(() => {
-        dispatch(fetchData());
-    }, []);
+  useEffect(() => {
+    dispatch(fetchData());
+  }, []);
 
-    const countriesOptions = useMemo(
-        () => getOptions(Object.values(countries), 'en'),
-        [countries]
-    );
+  const countriesOptions = useMemo(
+    () => getOptions(Object.values(countries), 'en'),
+    [countries]
+  );
 
-    const columns = [
-        {
-            title: 'Name',
-            dataIndex: 'en',
-            key: 'en',
-            ...getColumnSearchProps('en'),
-        },
-        {
-            title: 'Country',
-            dataIndex: 'country',
-            key: 'country',
-            sorter: (a, b) => a.country.localeCompare(b.country),
-            render: (id) => countries[id]?.en,
-            ...getColumnSearchProps((record) => countries[record.country]?.en, {
-                options: countriesOptions,
-            }),
-        },
-        {
-            title: 'Address',
-            dataIndex: 'address_en',
-            key: 'address_en',
-            ...getColumnSearchProps('address_en'),
-        },
-    ];
+  const columns = [
+    {
+      title: 'Name',
+      dataIndex: 'en',
+      key: 'en',
+      ...getColumnSearchProps('en'),
+    },
+    {
+      title: 'Country',
+      dataIndex: 'country',
+      key: 'country',
+      sorter: (a, b) => a.country.localeCompare(b.country),
+      render: (id) => countries[id]?.en,
+      ...getColumnSearchProps((record) => countries[record.country]?.en, {
+        options: countriesOptions,
+      }),
+    },
+    {
+      title: 'Address',
+      dataIndex: 'address_en',
+      key: 'address_en',
+      ...getColumnSearchProps('address_en'),
+    },
+  ];
 
-    return (
-        <>
-            <Row
-                style={{
-                    borderBottom: '1px solid #ccc',
-                    padding: '10px',
-                }}
-            >
-                <Button
-                    icon={<PlusCircleFilled />}
-                    type='primary'
-                    onClick={() => navigate('/stadiums/create')}
-                >
-                    Create stadium
-                </Button>
-            </Row>
-            <Table
-                columns={columns}
-                dataSource={stadiums}
-                loading={isLoading}
-                rowKey={({ id }) => id}
-                onRow={(record) => ({
-                    onClick: () => navigate(`/stadiums/${record.id}`),
-                })}
-            />
-        </>
-    );
+  return (
+    <>
+      <Row
+        style={{
+          borderBottom: '1px solid #ccc',
+          padding: '10px',
+        }}
+      >
+        <Button
+          icon={<PlusCircleFilled />}
+          type='primary'
+          onClick={() => navigate('/stadiums/create')}
+        >
+          Create stadium
+        </Button>
+      </Row>
+      <Table
+        columns={columns}
+        dataSource={stadiums}
+        loading={isLoading}
+        rowKey={({ id }) => id}
+        onRow={(record) => ({
+          onClick: () => navigate(`/stadiums/${record.id}`),
+        })}
+      />
+    </>
+  );
 }

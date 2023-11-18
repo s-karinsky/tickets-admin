@@ -5,6 +5,6 @@ import { PropertyGap } from '../../pages/Sendings/index';
 
 const { Title } = Typography;
 export const CreateProductInput = () => {
-    return <div className=''>s</div>;
+  return <div className=''>s</div>;
 };
 export default CreateProductInput;
