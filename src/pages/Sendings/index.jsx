@@ -19,8 +19,6 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
   let sendings = (data || []).map((item) => {
     return {
       ...item,
-      date: <DateTableCell date={new Date(item.date)} />,
-      status: <SendingsStatus status={item.status} />,
       'departure-date': <DateTableCell date={new Date(item.departure)} />,
       'delivery-date': <DateTableCell date={new Date(item.delivery)} />,
       buttons: (
@@ -49,7 +47,6 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
     {
       title: 'Номер',
       sorter: (a, b) => a.code - b.code,
-
       dataIndex: 'code',
       key: 'code',
     },
@@ -57,16 +54,21 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
       title: 'Дата',
       dataIndex: 'date',
       key: 'date',
+      render: date => <DateTableCell date={new Date(date)} />,
+      sorter: (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
     },
     {
       title: 'Перевозчик',
       dataIndex: 'transporter',
       key: 'transporter',
+      sorter: (a, b) => a.transporter.localeCompare(b.transporter)
     },
     {
       title: 'Статус',
       dataIndex: 'status',
       key: 'status',
+      render: status => <SendingsStatus status={status} />,
+      sorter: (a, b) => a.status - b.status
     },
     {
       title: 'Количество мест',
@@ -84,11 +86,13 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
       title: 'Дата отправления',
       dataIndex: 'departure-date',
       key: 'departure-date',
+      sorter: (a, b) => new Date(a.departure).getTime() - new Date(b.departure).getTime()
     },
     {
       title: 'Дата поступления',
       dataIndex: 'delivery-date',
       key: 'delivery-date',
+      sorter: (a, b) => new Date(a.delivery).getTime() - new Date(b.delivery).getTime()
     },
     {
       title: '',
