@@ -73,7 +73,7 @@ export default function Sending({
   const location = useLocation()
   const { sendingId } = useParams()
 
-  const { isLoading, data } = useQuery(['sending', sendingId], getSendingById(sendingId))
+  const { isLoading, data, refetch } = useQuery(['sending', sendingId], getSendingById(sendingId))
 
   const isNew = sendingId === 'create'
   const isEditPage = isNew || searchParams.get('edit') !== null
@@ -209,9 +209,10 @@ export default function Sending({
       await axios.postWithAuth('/query/insert/', { sql })
       navigate('/sendings')
     } else {
-      const update = keys.slice(1).map((key, i) => `${key.replaceAll('`', '')} = ${strValues[i + 1]}`).join(', ')
+      const update = keys.slice(1).map((key, i) => `${key} = ${strValues[i + 1]}`).join(', ')
       sql = `UPDATE trip SET ${update} WHERE id_trip=${sendingId}`
       await axios.postWithAuth('/query/update/', { sql })
+      await refetch()
       setSearchParams({})
     }
   }, [sendingId])
