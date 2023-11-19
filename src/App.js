@@ -37,11 +37,7 @@ function App() {
   const isLoading = useSelector(state => state.user.isLoading)
   const isConfigLoaded = useSelector(state => state.config.isLoaded)
   const isLoginPage = location.pathname === '/login'
-  const [isEditPage, setEditPage] = useState(false);
-
-  const editHandle = (state) => {
-    setEditPage(state)
-  }
+  const [ isSendingAir, setIsSendingAir ] = useState(false)
 
   useEffect(() => {
     dispatch(fetchConfig)
@@ -85,9 +81,9 @@ function App() {
           <Route path="/tournaments/:id" element={<PageTournament />} />
           <Route path="/tickets/:matchId?" element={<PageTickets />} />
 
-          <Route path="/sendings" element={<Sendings />} />
-          <Route path="/sendings/:sendingId" element={<Sending />} />
-          <Route path="/sendings/:id/:id" element={<Place editHandle={editHandle} isEditPage={isEditPage} />} />
+          <Route path="/sendings" element={<Sendings isSendingAir={isSendingAir} setIsSendingAir={setIsSendingAir} />} />
+          <Route path="/sendings/:sendingId" element={<Sending isSendingAir={isSendingAir} />} />
+          <Route path="/sendings/:sendingId/:placeId" element={<Place />} />
           <Route path="/sendings/:id/:id/:id" element={<Product />} />
         </Route>
         <Route path="/login" element={<PageLogin />} />

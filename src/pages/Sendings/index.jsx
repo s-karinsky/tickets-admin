@@ -10,11 +10,11 @@ import { getSendings, deleteSendingById } from '../../utils/api'
 
 const { Title, Link } = Typography
 export let PropertyGap = 10
-export default function Sendings() {
+export default function Sendings({ isSendingAir, setIsSendingAir }) {
   const navigate = useNavigate()
   const location = useLocation()
 
-  const { isLoading, data, refetch } = useQuery('sendings', getSendings)
+  const { isLoading, data, refetch } = useQuery(['sendings', { isAir: isSendingAir }], getSendings(isSendingAir))
 
   let sendings = (data || []).map((item) => {
     return {
@@ -137,6 +137,8 @@ export default function Sendings() {
             }}
             checkedChildren='Авиа'
             unCheckedChildren='Авто'
+            checked={isSendingAir}
+            onChange={setIsSendingAir}
           />
         </Row>
         <Row>

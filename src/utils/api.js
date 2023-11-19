@@ -1,16 +1,18 @@
 import dayjs from 'dayjs'
 import axios from './axios'
 
-export const getSendings = async () => {
-  const response = await axios.postWithAuth('/query/select', { sql: 'SELECT * FROM trip' })
+export const getSendings = isAir => async () => {
+  const response = await axios.postWithAuth('/query/select', { sql: `SELECT * FROM trip WHERE \`to\`='${Number(isAir)}'` })
   const data = response.data?.data || []
   return data.map(item => {
     let json
     try {
-      json = JSON.parse(item.json)
+      json = JSON.parse(item.json.replaceAll("\n", ''))
     } catch (e) {
+      console.warn(e)
       json = {}
     }
+
     return {
       id: item.id_trip,
       code: item.from,
@@ -34,7 +36,7 @@ export const getSendingById = sendingId => async () => {
     const response = await axios.postWithAuth('/query/select', { sql: `SELECT * FROM trip WHERE id_trip=${sendingId}` })
     const item = (response.data?.data || [])[0] || {}
     try {
-      item.json = JSON.parse(item.json)
+      item.json = JSON.parse(item.json.replaceAll("\n", ''))
     } catch (e) {
       console.warn('Bad sending json')
     }
@@ -48,4 +50,8 @@ export const getSendingById = sendingId => async () => {
 export const deleteSendingById = sendingId => async () => {
   const response = await axios.postWithAuth('/query/delete', { sql: `DELETE FROM trip WHERE id_trip=${sendingId}` })
   return response
+}
+
+export const getPlaceById = placeId => async () => {
+  return {}
 }

@@ -1,5 +1,5 @@
-import { useSelector } from 'react-redux';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useParams, useSearchParams } from 'react-router-dom'
+import { useQuery, useQueries } from 'react-query'
 import {
   Button,
   Row,
@@ -10,21 +10,22 @@ import {
   Checkbox,
   Form,
   DatePicker,
-} from 'antd';
-import TextArea from 'antd/es/input/TextArea';
-import { BsTrash } from 'react-icons/bs';
-import { BiInfoCircle, BiEdit } from 'react-icons/bi';
-import { AiOutlineMore } from 'react-icons/ai';
-import { useState } from 'react';
-import { SaveOutlined, CopyOutlined } from '@ant-design/icons';
-import { InfoModal } from '../../components/InfoModal';
-import { FilterModal } from '../../components/FilterModal';
-import { Property } from '../../components/Property';
-import { PropertyGap } from '../Sendings';
-import CreatePlaceModal from '../Sending/CreatePlaceModal';
-import CreateProductModal from './СreateProductModal';
+} from 'antd'
+import TextArea from 'antd/es/input/TextArea'
+import { BsTrash } from 'react-icons/bs'
+import { BiInfoCircle, BiEdit } from 'react-icons/bi'
+import { useState } from 'react'
+import { SaveOutlined, CopyOutlined } from '@ant-design/icons'
+import { InfoModal } from '../../components/InfoModal'
+import { FilterModal } from '../../components/FilterModal'
+import { Property } from '../../components/Property'
+import { PropertyGap } from '../Sendings'
+import CreatePlaceModal from '../Sending/CreatePlaceModal'
+import CreateProductModal from './СreateProductModal'
+import { getSendingById, getPlaceById } from '../../utils/api'
+import { SENDING_STATUS } from '../../consts'
 
-const { Title, Link } = Typography;
+const { Title, Link } = Typography
 
 export default function Sending({
   id = 1,
@@ -67,13 +68,26 @@ export default function Sending({
       'Примечание',
     ],
   },
-  editHandle,
-  isEditPage,
 }) {
-  const navigate = useNavigate();
-  const isLoading = useSelector((state) => state.data.isLoading);
-  const location = useLocation();
-  //let places = useSelector(getPlacesList);
+  const navigate = useNavigate()
+  const location = useLocation()
+  const [ searchParams, setSearchParams ] = useSearchParams()
+  const { sendingId, placeId } = useParams()
+
+  const [ sendingData, placeData ] = useQueries( [
+    {
+      queryKey: ['sending', sendingId],
+      queryFn: getSendingById(sendingId)
+    },
+    {
+      queryKey: ['place', placeId],
+      queryFn: getPlaceById(placeId)
+    }
+  ])
+
+  const isNew = placeId === 'create'
+  const isEditPage = isNew || searchParams.get('edit') !== null
+  
   let places = [
     {
       code: 1,
@@ -123,7 +137,7 @@ export default function Sending({
       sum: 20,
       price: 10,
     },
-  ];
+  ]
   places = places.map((item) => {
     return {
       ...item,
@@ -135,13 +149,13 @@ export default function Sending({
           <BsTrash style={{ marginLeft: 30 }} size={17} color='red' />
         </div>
       ),
-    };
-  });
-  const [filterModalOpen, setFilterModalOpen] = useState(false);
-  const [createProduct, setCreateProduct] = useState(false);
-  const [createPlace, setCreatePlace] = useState(false);
-  const [infoModal, setInfoModal] = useState(false);
-  const [nextPage, setNextPage] = useState(0);
+    }
+  })
+  const [filterModalOpen, setFilterModalOpen] = useState(false)
+  const [createProduct, setCreateProduct] = useState(false)
+  const [createPlace, setCreatePlace] = useState(false)
+  const [infoModal, setInfoModal] = useState(false)
+  const [nextPage, setNextPage] = useState(0)
 
   const columns = [
     {
@@ -200,7 +214,9 @@ export default function Sending({
       dataIndex: 'buttons',
       key: 'buttons',
     },
-  ];
+  ]
+
+  const placeTitle = isNew ? 'Новое место' : location.pathname.toString().split('/').slice(-1).join('/')
 
   return (
     <>
@@ -225,12 +241,7 @@ export default function Sending({
               level={1}
               style={{ fontWeight: '700', marginBottom: '0' }}
             >
-              Место #
-              {location.pathname
-                .toString()
-                .split('/')
-                .slice(-1)
-                .join('/')}
+              {isNew ? placeTitle : `Место ${placeTitle}`}
             </Title>
             <div className=''>
               <Link
@@ -260,12 +271,7 @@ export default function Sending({
                 <span> </span>
                 &gt;<span> </span>
               </Link>
-              Место <span> </span>
-              {location.pathname
-                .toString()
-                .split('/')
-                .slice(-1)
-                .join('/')}
+              {isNew ? placeTitle : `Место ${placeTitle}`}
             </div>
           </Typography>
           <Row
@@ -288,7 +294,7 @@ export default function Sending({
                   type='primary'
                   size={'large'}
                   onClick={() => {
-                    editHandle(false);
+                    // editHandle(false)
                   }}
                 >
                   Сохранить
@@ -303,7 +309,7 @@ export default function Sending({
                   }}
                   type='primary'
                   danger
-                  onClick={() => editHandle(false)}
+                  onClick={() => {}/* editHandle(false) */}
                 >
                   Отмена
                 </Button>
@@ -319,7 +325,7 @@ export default function Sending({
                   type='primary'
                   size={'large'}
                   onClick={() => {
-                    editHandle(true);
+                    // editHandle(true)
                   }}
                 >
                   Редактировать
@@ -355,151 +361,181 @@ export default function Sending({
         >
           {isEditPage ? (
             <Form
-              style={{
-                display: 'flex',
-                gap: `${PropertyGap}px`,
-                flexWrap: 'wrap',
-                alignItems: 'flex-end',
-              }}
+              style={{ display: 'block', width: '100%' }}
+              layout='vertical'
+              size='large'
             >
-              <Select
+              <div
                 style={{
-                  maxWidth: '250px',
-                  width: '100%',
-                  height: '40px',
-                  lineHeight: '40px',
+                  display: 'flex',
+                  gap: '20px',
+                  flexWrap: 'wrap',
                 }}
-                placeholder='Клиент'
-                options={[
-                  { value: 'Александр', title: 'Aktr' },
-                  { value: 'Владимир', title: 'Aktr' },
-                ]}
-              />
-              <Select
-                style={{
-                  maxWidth: '250px',
-                  width: '100%',
-                  height: '40px',
-                  lineHeight: '40px',
-                }}
-                placeholder='Статус места'
-                optionFilterProp='children'
-                options={[
-                  { value: 'В обработке', title: '' },
-                  { value: 'В пути', title: '' },
-                ]}
-              />
-              <Select
-                style={{
-                  maxWidth: '250px',
-                  width: '100%',
-                  height: '40px',
-                  lineHeight: '40px',
-                }}
-                placeholder='Статус услуги'
-                optionFilterProp='children'
-                options={[
-                  { value: 'В обработке', title: '' },
-                  { value: 'Выдано', title: '' },
-                ]}
-              />
-              <Select
-                style={{
-                  maxWidth: '250px',
-                  width: '100%',
-                  height: '40px',
-                  lineHeight: '40px',
-                }}
-                placeholder='Услуги'
-                optionFilterProp='children'
-                options={[
-                  { value: 'В обработке', title: '' },
-                  { value: 'Выдача со склада', title: '' },
-                ]}
-              />
-              <Select
-                style={{
-                  maxWidth: '250px',
-                  width: '100%',
-                  height: '40px',
-                  lineHeight: '40px',
-                }}
-                placeholder='Тариф'
-                optionFilterProp='children'
-                options={[
-                  { value: 'Экспресс', title: '' },
-                  { value: 'Эконом', title: '' },
-                ]}
-              />
-              <Select
-                style={{
-                  maxWidth: '250px',
-                  width: '100%',
-                  height: '40px',
-                  lineHeight: '40px',
-                }}
-                placeholder='Тип оплаты'
-                optionFilterProp='children'
-                options={[
-                  { value: 'Наличный', title: '' },
-                  { value: 'Безналичный', title: '' },
-                ]}
-              />
-              <div style={{ position: 'relative' }}>
-                <div
-                  style={{
-                    paddingLeft: 10,
-                    color: '#757575',
-                  }}
+              >
+                <Form.Item
+                  label='Клиент'
+                  name='client'
                 >
-                  Дата отправки
-                </div>
-                <DatePicker size='large' />
+                  <Select
+                    style={{ width: 200 }}
+                    options={[
+                      { value: 'Александр', title: 'Aktr' },
+                      { value: 'Владимир', title: 'Aktr' },
+                    ]}
+                  />
+                </Form.Item>
+                <Form.Item
+                  label='Место'
+                  name='place'
+                >
+                  <Input
+                  />
+                </Form.Item>
+                <Form.Item
+                  label='Статус места'
+                  name='status'
+                >
+                  <Select
+                    style={{ width: 200 }}
+                    optionFilterProp='children'
+                    options={SENDING_STATUS.map((name, i) => ({ label: name, value: i }))}
+                    disabled
+                  />
+                </Form.Item>
+                <Form.Item
+                  label='Статус услуги'
+                  name='service_status'
+                >
+                  <Select
+                    style={{ width: 200 }}
+                    optionFilterProp='children'
+                    options={[
+                      { value: 'В обработке', title: '' },
+                      { value: 'Выдано', title: '' },
+                    ]}
+                  />
+                </Form.Item>
+                <Form.Item
+                  label='Услуги'
+                  name='services'
+                >
+                  <Select
+                    style={{ width: 200 }}
+                    optionFilterProp='children'
+                    options={[
+                      { value: 'В обработке', title: '' },
+                      { value: 'Выдача со склада', title: '' },
+                    ]}
+                  />
+                </Form.Item>
+                <Form.Item
+                  label='Тариф'
+                  name='tarif'
+                >
+                  <Select
+                    style={{ width: 200 }}
+                    optionFilterProp='children'
+                    options={[
+                      { value: 'Экспресс', title: '' },
+                      { value: 'Эконом', title: '' },
+                    ]}
+                  />
+                </Form.Item>
+                <Form.Item
+                  label='Тип оплаты'
+                  name='pay_type'
+                >
+                  <Select
+                    style={{ width: 200 }}
+                    optionFilterProp='children'
+                    options={[
+                      { value: 'Наличный', title: '' },
+                      { value: 'Безналичный', title: '' },
+                    ]}
+                  />
+                </Form.Item>
+                {/* <div style={{ position: 'relative' }}>
+                  <div
+                    style={{
+                      paddingLeft: 10,
+                      color: '#757575',
+                    }}
+                  >
+                    Дата отправки
+                  </div>
+                  <DatePicker size='large' />
+                </div> */}
+                <Form.Item
+                  label='Цена за 1 кг'
+                  name='pay_kg'
+                >
+                  <Input
+                    addonAfter='$'
+                    style={{ maxWidth: '250px' }}
+                  />
+                </Form.Item>
+                <Form.Item
+                  label='Сумма товара'
+                  name='items_sum'
+                >
+                  <Input
+                    addonAfter='$'
+                    style={{ maxWidth: '250px' }}
+                  />
+                </Form.Item>
+                <Form.Item
+                  label='Сумма оплаты'
+                  name='pay_sum'
+                >
+                  <Input
+                    addonAfter='$'
+                    style={{ maxWidth: '250px' }}
+                  />
+                </Form.Item>
+                <Form.Item
+                  label='Размер'
+                  name='size'
+                >
+                  <Input
+                    addonAfter='см'
+                    style={{ maxWidth: '250px' }}
+                  />
+                </Form.Item>
+                <Form.Item
+                  label='Вес нетто'
+                  name='net_weight'
+                >
+                  <Input
+                    addonAfter='кг'
+                    style={{ maxWidth: '250px' }}
+                    disabled
+                  />
+                </Form.Item>
+                <Form.Item
+                  label='Вес брутто'
+                  name='gross_weight'
+                >
+                  <Input
+                    addonAfter='кг'
+                    style={{ maxWidth: '250px' }}
+                  />
+                </Form.Item>
+                <Form.Item
+                  label='Количество товара'
+                  name='count'
+                >
+                  <Input
+                    style={{ maxWidth: '250px' }}
+                    disabled
+                  />
+                </Form.Item>
               </div>
-              <Input
-                addonAfter='Цена за 1 кг, $'
-                placeholder='10'
-                size='large'
-                style={{ maxWidth: '250px' }}
-              />
-              <Input
-                addonAfter='Сумма товара, $'
-                placeholder='10'
-                size='large'
-                style={{ maxWidth: '250px' }}
-              />
-              <Input
-                addonAfter='Сумма оплаты, $'
-                placeholder='10'
-                size='large'
-                style={{ maxWidth: '250px' }}
-              />
-              <Input
-                addonAfter='Размер, см'
-                placeholder='10'
-                size='large'
-                style={{ maxWidth: '250px' }}
-              />
-              <Input
-                addonAfter='Вес нетто, кг'
-                placeholder='10'
-                size='large'
-                style={{ maxWidth: '250px' }}
-              />
-              <Input
-                addonAfter='Вес брутто, кг'
-                placeholder='10'
-                size='large'
-                style={{ maxWidth: '250px' }}
-              />
-              <Input
-                addonAfter='Количество товара'
-                placeholder='10'
-                size='large'
-                style={{ maxWidth: '250px' }}
-              />
-
-              <TextArea placeholder='Примечание' rows={4} />
+              <Form.Item
+                label='Примечание'
+                name='note'
+              >
+                <TextArea rows={4} />
+              </Form.Item>
             </Form>
           ) : (
             Object.values(place).map((item) => (
@@ -563,8 +599,8 @@ export default function Sending({
           onRow={(record) => ({
             onClick: (e) => {
               if (e.detail === 2) {
-                setNextPage(1);
-                setInfoModal(true);
+                setNextPage(1)
+                setInfoModal(true)
               }
             },
           })}
@@ -596,8 +632,8 @@ export default function Sending({
               type='primary'
               style={{ backgroundColor: '#1677ff' }}
               onClick={() => {
-                setInfoModal(false);
-                setCreateProduct(true);
+                setInfoModal(false)
+                setCreateProduct(true)
               }}
             >
               Редактировать
@@ -607,7 +643,7 @@ export default function Sending({
               type='primary'
               style={{ backgroundColor: 'rgb(0, 150, 80)' }}
               onClick={() => {
-                setInfoModal(false);
+                setInfoModal(false)
               }}
             >
               Ок
@@ -622,5 +658,5 @@ export default function Sending({
         handleCancel={() => setCreateProduct(false)}
       />
     </>
-  );
+  )
 }

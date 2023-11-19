@@ -50,22 +50,7 @@ const propLabels = {
 }
 
 export default function Sending({
-  id = 1,
-  props = {
-    number: [1, 'Номер'],
-    date: [new Date().toLocaleDateString(), 'Дата'],
-    dateDispatch: [new Date().toLocaleDateString(), 'Дата отправки'],
-    dateReceipt: [new Date().toLocaleDateString(), 'Дата поступления'],
-    trasporter: ['Александр А. А.', 'Перевозчик'],
-    status: ['В обработке', 'Статус'],
-    countPlaces: [12, 'Количество мест'],
-    grossWeight: [288, 'Вес брутто'],
-    netWeight: [250, 'Вес нетто'],
-    note: [
-      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s..",
-      'Примечание',
-    ],
-  },
+  isSendingAir
 }) {
   const [ form ] = Form.useForm()
   const [ searchParams, setSearchParams ] = useSearchParams()
@@ -194,10 +179,11 @@ export default function Sending({
   const sendingTitle = `Отправка ${location.pathname.toString().split('/').slice(-1).join('/')}`
 
   const handleSubmit = useCallback(async (values) => {
-    const keys = ['`id_trip`', '`from`', '`start_datetime`', '`complete_datetime`', '`create_datetime`', '`json`']
+    const keys = ['`id_trip`', '`from`', '`to`', '`start_datetime`', '`complete_datetime`', '`create_datetime`', '`json`']
     const strValues = [
       'NULL',
       `'${values.from}'`,
+      `'${Number(isSendingAir)}'`,
       `'${dayjs(values.start_datetime).format('YYYY-MM-DD')}'`,
       `'${dayjs(values.complete_datetime).format('YYYY-MM-DD')}'`,
       `'${dayjs(values.create_datetime).format('YYYY-MM-DD')}'`,
@@ -215,7 +201,7 @@ export default function Sending({
       await refetch()
       setSearchParams({})
     }
-  }, [sendingId])
+  }, [sendingId, isSendingAir])
 
   return (
     <>
@@ -526,7 +512,7 @@ export default function Sending({
                 type='primary'
                 onClick={() => {
                   // editHandle(true)
-                  navigate(location.pathname + `/new`)
+                  navigate(location.pathname + `/create`)
                 }}
                 size={'large'}
               >
