@@ -1,34 +1,37 @@
-import { useSelector } from 'react-redux';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux'
+import { useNavigate, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import {
   Button,
   Row,
   Table,
   Typography,
   Input,
+  InputNumber,
   Select,
   DatePicker,
   Checkbox,
   Form,
-} from 'antd';
-import TextArea from 'antd/es/input/TextArea';
+} from 'antd'
+import TextArea from 'antd/es/input/TextArea'
 import {
   SaveOutlined,
   CopyOutlined,
   PlusCircleOutlined,
   CloseCircleOutlined,
-} from '@ant-design/icons';
-import { BsTrash } from 'react-icons/bs';
-import { BiInfoCircle, BiEdit } from 'react-icons/bi';
-import { AiOutlineMore } from 'react-icons/ai';
-import { useState } from 'react';
-import { DateTableCell } from '../../components/DateTableCell';
-import { FilterModal } from '../../components/FilterModal';
-import { Property } from '../../components/Property';
-import { PropertyGap } from '../Sendings';
-import CreateSendingModal from '../Sendings/CreateSendingModal';
-import CreatePlaceModal from './CreatePlaceModal';
-const { Title, Link } = Typography;
+} from '@ant-design/icons'
+import dayjs from 'dayjs'
+import { BsTrash } from 'react-icons/bs'
+import { BiInfoCircle, BiEdit } from 'react-icons/bi'
+import { useState } from 'react'
+import { DateTableCell } from '../../components/DateTableCell'
+import { FilterModal } from '../../components/FilterModal'
+import { Property } from '../../components/Property'
+import { PropertyGap } from '../Sendings'
+import CreateSendingModal from '../Sendings/CreateSendingModal'
+import CreatePlaceModal from './CreatePlaceModal'
+import axios from '../../utils/axios'
+
+const { Title, Link } = Typography
 
 export default function Sending({
   id = 1,
@@ -47,13 +50,18 @@ export default function Sending({
       'Примечание',
     ],
   },
-  editHandle,
-  isEditPage,
 }) {
-  const navigate = useNavigate();
-  const isLoading = useSelector((state) => state.data.isLoading);
-  const location = useLocation();
-  //let places = useSelector(getPlacesList);
+  const [ form ] = Form.useForm()
+  const [ searchParams, setSearchParams ] = useSearchParams()
+  const navigate = useNavigate()
+  const isLoading = useSelector((state) => state.data.isLoading)
+  const location = useLocation()
+  const { sendingId } = useParams()
+
+  const isNew = sendingId === 'create'
+  const isEditPage = isNew || searchParams.get('edit') !== null
+
+  //let places = useSelector(getPlacesList)
   let places = [
     {
       code: 1,
@@ -95,7 +103,7 @@ export default function Sending({
       place: 12,
       rate: 12,
     },
-  ];
+  ]
 
   places = places.map((item) => {
     return {
@@ -112,12 +120,12 @@ export default function Sending({
           <BsTrash style={{ marginLeft: 30 }} size={17} color='red' />
         </div>
       ),
-    };
-  });
-  const [filterModalOpen, setFilterModalOpen] = useState(false);
-  const [infoModalOpen, setInfoModalOpen] = useState(false);
-  const [createPlace, setCreatePlace] = useState(false);
-  const [nextPage, setNextPage] = useState(0);
+    }
+  })
+  const [filterModalOpen, setFilterModalOpen] = useState(false)
+  const [infoModalOpen, setInfoModalOpen] = useState(false)
+  const [createPlace, setCreatePlace] = useState(false)
+  const [nextPage, setNextPage] = useState(0)
 
   const columns = [
     {
@@ -164,7 +172,9 @@ export default function Sending({
       dataIndex: 'buttons',
       key: 'buttons',
     },
-  ];
+  ]
+
+  const sendingTitle = `Отправка ${location.pathname.toString().split('/').slice(-1).join('/')}`
 
   return (
     <>
@@ -189,12 +199,7 @@ export default function Sending({
               level={1}
               style={{ fontWeight: '700', marginBottom: '0' }}
             >
-              Отправка{' '}
-              {location.pathname
-                .toString()
-                .split('/')
-                .slice(-1)
-                .join('/')}
+              {isNew ? 'Новая отправка' : sendingTitle}
             </Title>
             <Link
               onClick={() => navigate(`/sendings`)}
@@ -202,12 +207,8 @@ export default function Sending({
             >
               Отправка товаров <span> </span>
             </Link>
-            &gt; Отправка{' '}
-            {location.pathname
-              .toString()
-              .split('/')
-              .slice(-1)
-              .join('/')}
+            &gt; 
+            {isNew ? ' Создать отправку' : sendingTitle}
           </Typography>
           <Row
             style={{
@@ -230,7 +231,7 @@ export default function Sending({
                   type='primary'
                   size={'large'}
                   onClick={() => {
-                    editHandle(false);
+                    form.submit()
                   }}
                 >
                   Сохранить
@@ -245,7 +246,7 @@ export default function Sending({
                   }}
                   type='primary'
                   danger
-                  onClick={() => editHandle(false)}
+                  onClick={() => setSearchParams({})}
                 >
                   Отмена
                 </Button>
@@ -261,7 +262,7 @@ export default function Sending({
                   type='primary'
                   size={'large'}
                   onClick={() => {
-                    editHandle(true);
+                    navigate('?edit')
                   }}
                 >
                   Редактировать
@@ -297,78 +298,137 @@ export default function Sending({
         >
           {isEditPage ? (
             <Form
-              style={{
-                display: 'flex',
-                gap: `${PropertyGap}px`,
-                flexWrap: 'wrap',
+              style={{ display: 'block', width: '100%' }}
+              layout='vertical'
+              size='large'
+              form={form}
+              onFinish={async (values) => {
+                const keys = ['`id_trip`', '`from`', '`start_datetime`', '`complete_datetime`', '`create_datetime`', '`json`']
+                const strValues = [
+                  'NULL',
+                  values.from,
+                  `'${dayjs(values.start_datetime).format('YYYY-MM-DD')}'`,
+                  `'${dayjs(values.complete_datetime).format('YYYY-MM-DD')}'`,
+                  `'${dayjs(values.create_datetime).format('YYYY-MM-DD')}'`,
+                  `'${JSON.stringify(values.json)}'`
+                ]
+                const sql = `INSERT INTO trip (${keys.join(',')}) VALUES (${strValues.join(',')})`
+                await axios.postWithAuth('/query/insert/', { sql })
+                await axios.postWithAuth('/query/select', { sql: 'SELECT * FROM trip' })
               }}
             >
-              <Property
-                title={'Номер'}
-                subtitle={'1'}
-                style={{ maxWidth: '200px', width: '100%' }}
-              />
-              <Property
-                title={'Дата'}
-                subtitle={new Date().toLocaleDateString()}
-                style={{ maxWidth: '200px', width: '100%' }}
-              />
-              <DatePicker
-                placeholder={['Дата отправки']}
-                size='large'
-                style={{ maxWidth: '200px', width: '100%' }}
-              />
-              <DatePicker
-                placeholder={['Дата поступления']}
-                size='large'
-                style={{ maxWidth: '200px', width: '100%' }}
-              />
-              <Select
+              <div
                 style={{
-                  maxWidth: '200px',
-                  width: '100%',
-                  height: '40px',
-                  lineHeight: '40px',
+                  display: 'flex',
+                  gap: '20px',
+                  flexWrap: 'wrap',
                 }}
-                placeholder='Перевозчик'
-                options={[
-                  { value: 'Александр', title: 'Aktr' },
-                  { value: 'Владимир', title: 'Aktr' },
-                ]}
-              />
-              <Select
+              >
+                <Form.Item
+                  label='Номер'
+                  name='from'
+                >
+                  <Input
+                    defaultValue='1'
+                    style={{ width: 60 }}
+                  />
+                </Form.Item>
+                <Form.Item
+                  label='Дата'
+                  name='create_datetime'
+                >
+                  <DatePicker
+                    style={{ width: 150 }}
+                    defaultValue={dayjs()}
+                    format='DD.MM.YYYY'
+                  />
+                </Form.Item>
+                <Form.Item
+                  label='Дата отправки'
+                  name='start_datetime'
+                >
+                  <DatePicker
+                    style={{ width: 150 }}
+                    placeholder='Выберите дату'
+                    format='DD.MM.YYYY'
+                  />
+                </Form.Item>
+                <Form.Item
+                  label='Дата поступления'
+                  name='complete_datetime'
+                >
+                  <DatePicker
+                    style={{ width: 150 }}
+                    placeholder='Выберите дату'
+                    format='DD.MM.YYYY'
+                  />
+                </Form.Item>
+                <Form.Item
+                  label='Количество мест'
+                  name={['json', 'count_places']}
+                >
+                  <InputNumber
+                    style={{ width: 120 }}
+                  />
+                </Form.Item>
+                <Form.Item
+                  label='Вес нетто'
+                  name={['json', 'net_weight']}
+                >
+                  <InputNumber
+                    style={{ width: 120 }}
+                    addonAfter='кг'
+                  />
+                </Form.Item>
+                <Form.Item
+                  label='Вес брутто'
+                  name={['json', 'gross_weight']}
+                >
+                  <InputNumber
+                    style={{ width: 120 }}
+                    addonAfter='кг'
+                  />
+                </Form.Item>
+              </div>
+              <div
                 style={{
-                  maxWidth: '200px',
-                  width: '100%',
-                  height: '40px',
-                  lineHeight: '40px',
+                  display: 'flex',
+                  gap: '20px',
+                  flexWrap: 'wrap',
                 }}
-                placeholder='Статус'
-                optionFilterProp='children'
-                options={[
-                  { value: 'В обработке', title: '' },
-                  { value: 'В пути', title: '' },
-                ]}
-              />
-              <Input
-                addonAfter='Количество мест'
-                placeholder='10'
-                style={{ maxWidth: '200px' }}
-                size={'large'}
-              />
-              <Input
-                addonAfter='Вес нетто, кг'
-                placeholder='10'
-                style={{ maxWidth: '200px' }}
-                size={'large'}
-              />
-              <Input
-                addonAfter='Вес брутто, кг'
-                placeholder='10'
-                style={{ maxWidth: '200px' }}
-                size={'large'}
-              />
-              <TextArea placeholder='Примечание' rows={4} />
+              >
+                <Form.Item
+                  label='Перевозчик'
+                  name={['json', 'trasporter']}
+                >
+                  <Select
+                    style={{ width: '400px' }}
+                    options={[
+                      { value: 'Александр', title: 'Aktr' },
+                      { value: 'Владимир', title: 'Aktr' },
+                    ]}
+                  />
+                </Form.Item>
+                <Form.Item
+                  label='Статус'
+                  name={['json', 'status']}
+                >
+                  <Select
+                    style={{ width: '200px' }}
+                    optionFilterProp='children'
+                    options={[
+                      { value: 'В обработке', title: '' },
+                      { value: 'В пути', title: '' },
+                    ]}
+                  />
+                </Form.Item>
+              </div>
+              <Form.Item
+                label='Примечание'
+                name={['json', 'note']}
+              >
+                <TextArea rows={4} />
+              </Form.Item>
             </Form>
           ) : (
             Object.values(props).map((item) => (
@@ -428,8 +488,8 @@ export default function Sending({
               <Button
                 type='primary'
                 onClick={() => {
-                  editHandle(true);
-                  navigate(location.pathname + `/new`);
+                  // editHandle(true)
+                  navigate(location.pathname + `/new`)
                 }}
                 size={'large'}
               >
@@ -462,7 +522,7 @@ export default function Sending({
           onRow={(record) => ({
             onClick: (e) => {
               if (e.detail === 2) {
-                navigate(`${location.pathname}/${record.code}`);
+                navigate(`${location.pathname}/${record.code}`)
               }
             },
           })}
@@ -490,5 +550,5 @@ export default function Sending({
         handleCancel={() => setInfoModalOpen(false)}
       />
     </>
-  );
+  )
 }

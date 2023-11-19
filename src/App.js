@@ -84,8 +84,9 @@ function App() {
           <Route path="/tournaments" element={<PageTournaments />} />
           <Route path="/tournaments/:id" element={<PageTournament />} />
           <Route path="/tickets/:matchId?" element={<PageTickets />} />
-          <Route path="/sendings" element={<Sendings editHandle={editHandle} />} />
-          <Route path="/sendings/:id" element={<Sending editHandle={editHandle} isEditPage={isEditPage} />} />
+
+          <Route path="/sendings" element={<Sendings />} />
+          <Route path="/sendings/:sendingId" element={<Sending />} />
           <Route path="/sendings/:id/:id" element={<Place editHandle={editHandle} isEditPage={isEditPage} />} />
           <Route path="/sendings/:id/:id/:id" element={<Product />} />
         </Route>
