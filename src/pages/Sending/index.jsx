@@ -314,7 +314,6 @@ export default function Sending({
                 ]
                 const sql = `INSERT INTO trip (${keys.join(',')}) VALUES (${strValues.join(',')})`
                 await axios.postWithAuth('/query/insert/', { sql })
-                await axios.postWithAuth('/query/select', { sql: 'SELECT * FROM trip' })
               }}
             >
               <div
@@ -399,7 +398,7 @@ export default function Sending({
               >
                 <Form.Item
                   label='Перевозчик'
-                  name={['json', 'trasporter']}
+                  name={['json', 'transporter']}
                 >
                   <Select
                     style={{ width: '400px' }}
@@ -415,10 +414,11 @@ export default function Sending({
                 >
                   <Select
                     style={{ width: '200px' }}
-                    optionFilterProp='children'
                     options={[
-                      { value: 'В обработке', title: '' },
-                      { value: 'В пути', title: '' },
+                      { value: 0, label: 'Формирование' },
+                      { value: 1, label: 'В пути' },
+                      { value: 2, label: 'Поступила' },
+                      { value: 3, label: 'Приостановлена' },
                     ]}
                   />
                 </Form.Item>

@@ -1,71 +1,29 @@
-import { useDispatch, useSelector } from 'react-redux';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Button, Row, Table, Typography, Input, Select, Switch } from 'antd';
-import { getSendingsList } from '../../redux/data';
-import { BsArrowRepeat, BsCheck2Circle, BsTrash } from 'react-icons/bs';
-import { useState } from 'react';
-import { SendingsStatus } from '../../components/SendingsStatus';
-import { DateTableCell } from '../../components/DateTableCell';
-import { FilterModal } from '../../components/FilterModal';
-import { InfoModal } from '../../components/InfoModal';
+import { useLocation, useNavigate } from 'react-router-dom'
+import { Button, Row, Table, Typography, Input, Switch } from 'antd'
+import { useQuery } from 'react-query'
+import { BsArrowRepeat, BsCheck2Circle, BsTrash } from 'react-icons/bs'
+import { useState } from 'react'
+import { SendingsStatus } from '../../components/SendingsStatus'
+import { DateTableCell } from '../../components/DateTableCell'
+import { FilterModal } from '../../components/FilterModal'
+import CreateSendingModal from './CreateSendingModal'
+import { getSendings } from '../../utils/api'
 
-import TextArea from 'antd/es/input/TextArea';
-import CreateSendingModal from './CreateSendingModal';
-const { Title, Link } = Typography;
-export let PropertyGap = 10;
-export default function Sendings({ editHandle }) {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const isLoading = useSelector((state) => state.data.isLoading);
-  //let sendings = useSelector(getSendingsList);
-  editHandle(false);
-  let sendings = [
-    {
-      code: 1,
-      date: <DateTableCell date={new Date()} />,
-      transporter: 'Александ В.',
-      status: <SendingsStatus status={2} />,
-      count: 10,
-      weight: 200,
-      'departure-date': <DateTableCell date={new Date()} />,
-      'delivery-date': <DateTableCell date={new Date()} />,
-    },
-    {
-      code: 2,
-      date: <DateTableCell date={new Date()} />,
-      transporter: 'рлександ В.',
-      status: <SendingsStatus status={1} />,
-      count: 12,
-      weight: 250,
-      'departure-date': <DateTableCell date={new Date()} />,
-      'delivery-date': <DateTableCell date={new Date()} />,
-    },
-    {
-      code: 3,
-      date: <DateTableCell date={new Date()} />,
-      transporter: 'рлександ В.',
-      status: <SendingsStatus status={2} />,
-      count: 22,
-      weight: 350,
-      'departure-date': <DateTableCell date={new Date()} />,
-      'delivery-date': <DateTableCell date={new Date()} />,
-    },
-    {
-      code: 5,
-      date: <DateTableCell date={new Date()} />,
-      transporter: 'рлександ В.',
-      status: <SendingsStatus status={0} />,
-      count: 2,
-      weight: 20,
-      'departure-date': <DateTableCell date={''} />,
-      'delivery-date': <DateTableCell date={new Date()} />,
-    },
-  ];
+const { Title, Link } = Typography
+export let PropertyGap = 10
+export default function Sendings() {
+  const navigate = useNavigate()
+  const location = useLocation()
 
-  sendings = sendings.map((item) => {
+  const { isLoading, data } = useQuery('sendings', getSendings)
+
+  let sendings = data.map((item) => {
     return {
       ...item,
+      date: <DateTableCell date={new Date(item.date)} />,
+      status: <SendingsStatus status={item.status} />,
+      'departure-date': <DateTableCell date={new Date(item.departure)} />,
+      'delivery-date': <DateTableCell date={new Date(item.delivery)} />,
       buttons: (
         <div style={{ display: 'flex', gap: 10 }}>
           <BsCheck2Circle size={17} color='green' />
@@ -73,8 +31,8 @@ export default function Sendings({ editHandle }) {
           <BsTrash style={{ marginLeft: 30 }} size={17} color='red' />
         </div>
       ),
-    };
-  });
+    }
+  })
 
   const props = {
     date: [new Date().toLocaleDateString(), 'Дата отправки'],
@@ -89,10 +47,10 @@ export default function Sendings({ editHandle }) {
       "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s..",
       'Примечание',
     ],
-  };
-  const [currentSend, setCurrentSend] = useState(0);
-  const [infoModalOpen, setInfoModalOpen] = useState(false);
-  const [filterModalOpen, setFilterModalOpen] = useState(false);
+  }
+  const [currentSend, setCurrentSend] = useState(0)
+  const [infoModalOpen, setInfoModalOpen] = useState(false)
+  const [filterModalOpen, setFilterModalOpen] = useState(false)
 
   const columns = [
     {
@@ -144,7 +102,7 @@ export default function Sendings({ editHandle }) {
       dataIndex: 'buttons',
       key: 'buttons',
     },
-  ];
+  ]
 
   return (
     <>
@@ -223,8 +181,7 @@ export default function Sendings({ editHandle }) {
             <Button
               type='primary'
               onClick={() => {
-                editHandle(true);
-                navigate(location.pathname + `/new`);
+                navigate(location.pathname + `/create`)
               }}
               size={'large'}
             >
@@ -241,11 +198,10 @@ export default function Sendings({ editHandle }) {
           onRow={(record) => ({
             onClick: (e) => {
               if (e.detail === 2) {
-                navigate(`/sendings/${record.code}`);
+                navigate(`/sendings/${record.code}`)
               }
             },
           })}
-          style={{ overflow: 'scroll' }}
         />
       </div>
       <FilterModal
@@ -260,5 +216,5 @@ export default function Sendings({ editHandle }) {
         handleCancel={() => setInfoModalOpen(false)}
       />
     </>
-  );
+  )
 }
