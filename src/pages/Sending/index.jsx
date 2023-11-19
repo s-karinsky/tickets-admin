@@ -1,4 +1,4 @@
-import { useSelector } from 'react-redux'
+import { useState, useCallback } from 'react'
 import { useNavigate, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import {
   Button,
@@ -20,9 +20,10 @@ import {
   CloseCircleOutlined,
 } from '@ant-design/icons'
 import dayjs from 'dayjs'
+import { get as _get } from 'lodash'
+import { useQuery } from 'react-query'
 import { BsTrash } from 'react-icons/bs'
 import { BiInfoCircle, BiEdit } from 'react-icons/bi'
-import { useState } from 'react'
 import { DateTableCell } from '../../components/DateTableCell'
 import { FilterModal } from '../../components/FilterModal'
 import { Property } from '../../components/Property'
@@ -30,8 +31,23 @@ import { PropertyGap } from '../Sendings'
 import CreateSendingModal from '../Sendings/CreateSendingModal'
 import CreatePlaceModal from './CreatePlaceModal'
 import axios from '../../utils/axios'
+import { getSendingById, deleteSendingById } from '../../utils/api'
+import { SENDING_STATUS } from '../../consts'
 
 const { Title, Link } = Typography
+
+const propLabels = {
+  from: 'Номер',
+  create_datetime: 'Дата',
+  start_datetime: 'Дата отправки',
+  complete_datetime: 'Дата поступления',
+  'json.transporter': 'Перевозчик',
+  'json.status': 'Статус',
+  'json.count_places': 'Количество мест',
+  'json.gross_weight': 'Вес брутто',
+  'json.net_weight': 'Вес нетто',
+  'json.note': 'Примечание'
+}
 
 export default function Sending({
   id = 1,
@@ -54,9 +70,10 @@ export default function Sending({
   const [ form ] = Form.useForm()
   const [ searchParams, setSearchParams ] = useSearchParams()
   const navigate = useNavigate()
-  const isLoading = useSelector((state) => state.data.isLoading)
   const location = useLocation()
   const { sendingId } = useParams()
+
+  const { isLoading, data } = useQuery(['sending', sendingId], getSendingById(sendingId))
 
   const isNew = sendingId === 'create'
   const isEditPage = isNew || searchParams.get('edit') !== null
@@ -176,6 +193,29 @@ export default function Sending({
 
   const sendingTitle = `Отправка ${location.pathname.toString().split('/').slice(-1).join('/')}`
 
+  const handleSubmit = useCallback(async (values) => {
+    const keys = ['`id_trip`', '`from`', '`start_datetime`', '`complete_datetime`', '`create_datetime`', '`json`']
+    const strValues = [
+      'NULL',
+      `'${values.from}'`,
+      `'${dayjs(values.start_datetime).format('YYYY-MM-DD')}'`,
+      `'${dayjs(values.complete_datetime).format('YYYY-MM-DD')}'`,
+      `'${dayjs(values.create_datetime).format('YYYY-MM-DD')}'`,
+      `'${JSON.stringify(values.json)}'`
+    ]
+    let sql
+    if (sendingId === 'create') {
+      sql = `INSERT INTO trip (${keys.join(',')}) VALUES (${strValues.join(',')})`
+      await axios.postWithAuth('/query/insert/', { sql })
+      navigate('/sendings')
+    } else {
+      const update = keys.slice(1).map((key, i) => `${key.replaceAll('`', '')} = ${strValues[i + 1]}`).join(', ')
+      sql = `UPDATE trip SET ${update} WHERE id_trip=${sendingId}`
+      await axios.postWithAuth('/query/update/', { sql })
+      setSearchParams({})
+    }
+  }, [sendingId])
+
   return (
     <>
       <div
@@ -246,7 +286,7 @@ export default function Sending({
                   }}
                   type='primary'
                   danger
-                  onClick={() => setSearchParams({})}
+                  onClick={() => isNew ? navigate('/sendings') : setSearchParams({})}
                 >
                   Отмена
                 </Button>
@@ -276,6 +316,10 @@ export default function Sending({
                     alignItems: 'center',
                   }}
                   type='primary'
+                  onClick={() => {
+                    if (!window.confirm('Delete sending?')) return
+                    deleteSendingById(sendingId)().then(() => navigate('/sendings'))
+                  }}
                   danger
                 >
                   Удалить
@@ -296,25 +340,14 @@ export default function Sending({
             boxShadow: ' 0px 2px 4px 0px #00000026',
           }}
         >
-          {isEditPage ? (
+          {isEditPage && !isLoading ? (
             <Form
               style={{ display: 'block', width: '100%' }}
               layout='vertical'
               size='large'
               form={form}
-              onFinish={async (values) => {
-                const keys = ['`id_trip`', '`from`', '`start_datetime`', '`complete_datetime`', '`create_datetime`', '`json`']
-                const strValues = [
-                  'NULL',
-                  values.from,
-                  `'${dayjs(values.start_datetime).format('YYYY-MM-DD')}'`,
-                  `'${dayjs(values.complete_datetime).format('YYYY-MM-DD')}'`,
-                  `'${dayjs(values.create_datetime).format('YYYY-MM-DD')}'`,
-                  `'${JSON.stringify(values.json)}'`
-                ]
-                const sql = `INSERT INTO trip (${keys.join(',')}) VALUES (${strValues.join(',')})`
-                await axios.postWithAuth('/query/insert/', { sql })
-              }}
+              initialValues={data}
+              onFinish={handleSubmit}
             >
               <div
                 style={{
@@ -328,7 +361,6 @@ export default function Sending({
                   name='from'
                 >
                   <Input
-                    defaultValue='1'
                     style={{ width: 60 }}
                   />
                 </Form.Item>
@@ -431,9 +463,13 @@ export default function Sending({
               </Form.Item>
             </Form>
           ) : (
-            Object.values(props).map((item) => (
-              <Property title={item[1]} subtitle={item[0]} />
-            ))
+            Object.keys(propLabels).map(key => {
+              const label = propLabels[key]
+              const val = _get(data, key)
+              let show = val instanceof dayjs ? val.format('DD.MM.YYYY') : val
+              if (key === 'json.status') show = SENDING_STATUS[show]
+              return <Property title={label} subtitle={show} />
+            })
           )}
         </Row>
         <Row>

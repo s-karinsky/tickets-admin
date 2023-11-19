@@ -6,8 +6,7 @@ import { useState } from 'react'
 import { SendingsStatus } from '../../components/SendingsStatus'
 import { DateTableCell } from '../../components/DateTableCell'
 import { FilterModal } from '../../components/FilterModal'
-import CreateSendingModal from './CreateSendingModal'
-import { getSendings } from '../../utils/api'
+import { getSendings, deleteSendingById } from '../../utils/api'
 
 const { Title, Link } = Typography
 export let PropertyGap = 10
@@ -15,9 +14,9 @@ export default function Sendings() {
   const navigate = useNavigate()
   const location = useLocation()
 
-  const { isLoading, data } = useQuery('sendings', getSendings)
+  const { isLoading, data, refetch } = useQuery('sendings', getSendings)
 
-  let sendings = data.map((item) => {
+  let sendings = (data || []).map((item) => {
     return {
       ...item,
       date: <DateTableCell date={new Date(item.date)} />,
@@ -28,28 +27,22 @@ export default function Sendings() {
         <div style={{ display: 'flex', gap: 10 }}>
           <BsCheck2Circle size={17} color='green' />
           <BsArrowRepeat size={17} color='' />
-          <BsTrash style={{ marginLeft: 30 }} size={17} color='red' />
+          <BsTrash
+            style={{ marginLeft: 30, cursor: 'pointer' }}
+            size={17}
+            color='red'
+            onClick={() => {
+              if (!window.confirm('Delete sending?')) return
+              deleteSendingById(item.id)().then(() => {
+                refetch()
+              })
+            }}
+          />
         </div>
       ),
     }
   })
 
-  const props = {
-    date: [new Date().toLocaleDateString(), 'Дата отправки'],
-    dateDispatch: [new Date().toLocaleDateString(), 'Дата отправки'],
-    dateReceipt: [new Date().toLocaleDateString(), 'Дата поступления'],
-    trasporter: ['Александр А. А.', 'Перевозчик'],
-    status: ['В обработке', 'Статус'],
-    countPlaces: [12, 'Количество мест'],
-    grossWeight: [288, 'Вес брутто'],
-    netWeight: [250, 'Вес нетто'],
-    note: [
-      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s..",
-      'Примечание',
-    ],
-  }
-  const [currentSend, setCurrentSend] = useState(0)
-  const [infoModalOpen, setInfoModalOpen] = useState(false)
   const [filterModalOpen, setFilterModalOpen] = useState(false)
 
   const columns = [
@@ -198,7 +191,7 @@ export default function Sendings() {
           onRow={(record) => ({
             onClick: (e) => {
               if (e.detail === 2) {
-                navigate(`/sendings/${record.code}`)
+                navigate(`/sendings/${record.id}`)
               }
             },
           })}
@@ -209,11 +202,6 @@ export default function Sendings() {
         handleOk={() => setFilterModalOpen(false)}
         handleCancel={() => setFilterModalOpen(false)}
         columns={columns.filter((item) => item.title !== '')}
-      />
-      <CreateSendingModal
-        title={`Отправление ${currentSend}`}
-        isModalOpen={infoModalOpen}
-        handleCancel={() => setInfoModalOpen(false)}
       />
     </>
   )

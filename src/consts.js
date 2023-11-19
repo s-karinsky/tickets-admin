@@ -11,3 +11,5 @@ export const USER_ROLES = {
   '2': 'Seller',
   '4': 'Admin'
 }
+
+export const SENDING_STATUS = ['Формирование', 'В пути', 'Поступила', 'Приостановлен']

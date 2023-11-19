@@ -1,3 +1,4 @@
+import dayjs from 'dayjs'
 import axios from './axios'
 
 export const getSendings = async () => {
@@ -11,7 +12,8 @@ export const getSendings = async () => {
       json = {}
     }
     return {
-      code: item.id_trip,
+      id: item.id_trip,
+      code: item.from,
       date: item.create_datetime,
       transporter: json.transporter,
       status: json.status,
@@ -21,4 +23,29 @@ export const getSendings = async () => {
       delivery: item.complete_datetime
     }
   })
+}
+
+export const getSendingById = sendingId => async () => {
+  if (sendingId === 'create') {
+    const response = await axios.postWithAuth('/query/select', { sql: `SELECT max(int('from')) FROM trip WHERE YEAR(create_datetime) = YEAR('${dayjs().format('YYYY-MM-DD')}')` })
+    console.log(response)
+    return {}
+  } else {
+    const response = await axios.postWithAuth('/query/select', { sql: `SELECT * FROM trip WHERE id_trip=${sendingId}` })
+    const item = (response.data?.data || [])[0] || {}
+    try {
+      item.json = JSON.parse(item.json)
+    } catch (e) {
+      console.warn('Bad sending json')
+    }
+    item.create_datetime = dayjs(item.create_datetime)
+    item.start_datetime = dayjs(item.start_datetime)
+    item.complete_datetime = dayjs(item.complete_datetime)
+    return item
+  }
+}
+
+export const deleteSendingById = sendingId => async () => {
+  const response = await axios.postWithAuth('/query/delete', { sql: `DELETE FROM trip WHERE id_trip=${sendingId}` })
+  return response
 }
