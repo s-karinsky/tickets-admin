@@ -52,6 +52,44 @@ export const deleteSendingById = sendingId => async () => {
   return response
 }
 
+export const getPlacesBySendingId = sendingId => async () => {
+  const sql = `SELECT * FROM dataset WHERE ref_tip='sending' AND id_ref=${sendingId}`
+  const response = await axios.postWithAuth('/query/select', { sql })
+  const data = response.data?.data || []
+  return data.map(item => {
+    let json
+    try {
+      json = JSON.parse(item.pole)
+    } catch (e) {
+      json = {}
+    }
+    return {
+      ...item,
+      ...json
+    }
+  })
+}
+
 export const getPlaceById = placeId => async () => {
-  return {}
+  if (placeId === 'create') {
+    return {}
+  }
+  const sql = `SELECT * FROM dataset WHERE id=${placeId}`
+  const response = await axios.postWithAuth('/query/select', { sql })
+  const data = (response.data?.data || [])[0]
+  let json
+  try {
+    json = JSON.parse(data.pole)
+  } catch (e) {
+    json = {}
+  }
+  return {
+    ...data,
+    ...json
+  }
+}
+
+export const deletePlaceById = placeId => async () => {
+  const response = await axios.postWithAuth('/query/delete', { sql: `DELETE FROM dataset WHERE id=${placeId}` })
+  return response
 }

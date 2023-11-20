@@ -12,3 +12,5 @@ export const getIsSeller = createSelector(
   getUserRole,
   role => USER_ROLES[role] === 'Seller'
 )
+
+export const getUserProfile = state => state.user.profile

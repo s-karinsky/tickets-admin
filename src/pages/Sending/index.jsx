@@ -21,7 +21,7 @@ import {
 } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import { get as _get } from 'lodash'
-import { useQuery } from 'react-query'
+import { useQueries } from 'react-query'
 import { BsTrash } from 'react-icons/bs'
 import { BiInfoCircle, BiEdit } from 'react-icons/bi'
 import { DateTableCell } from '../../components/DateTableCell'
@@ -31,7 +31,7 @@ import { PropertyGap } from '../Sendings'
 import CreateSendingModal from '../Sendings/CreateSendingModal'
 import CreatePlaceModal from './CreatePlaceModal'
 import axios from '../../utils/axios'
-import { getSendingById, deleteSendingById } from '../../utils/api'
+import { getSendingById, deleteSendingById, getPlacesBySendingId, deletePlaceById } from '../../utils/api'
 import { SENDING_STATUS } from '../../consts'
 
 const { Title, Link } = Typography
@@ -58,13 +58,21 @@ export default function Sending({
   const location = useLocation()
   const { sendingId } = useParams()
 
-  const { isLoading, data, refetch } = useQuery(['sending', sendingId], getSendingById(sendingId))
+  const [ { isLoading, data, refetch }, places ] = useQueries([
+    {
+      queryKey: ['sending', sendingId],
+      queryFn: getSendingById(sendingId)
+    },
+    {
+      queryKey: ['places', sendingId],
+      queryFn: getPlacesBySendingId(sendingId)
+    }
+  ])
 
   const isNew = sendingId === 'create'
   const isEditPage = isNew || searchParams.get('edit') !== null
 
-  //let places = useSelector(getPlacesList)
-  let places = [
+  let placess = [
     {
       code: 1,
       date: <DateTableCell date={new Date()} />,
@@ -107,7 +115,7 @@ export default function Sending({
     },
   ]
 
-  places = places.map((item) => {
+  const placesData = (places.data || []).map((item) => {
     return {
       ...item,
       buttons: (
@@ -119,7 +127,17 @@ export default function Sending({
             style={{ color: '#009650' }}
           />
           <CloseCircleOutlined size={17} style={{ color: 'red' }} />
-          <BsTrash style={{ marginLeft: 30 }} size={17} color='red' />
+          <BsTrash
+            style={{ marginLeft: 30, cursor: 'pointer' }} 
+            size={17}
+            color='red'
+            onClick={() => {
+              if (!window.confirm('Delete place?')) return
+              deletePlaceById(item.id)().then(() => {
+                places.refetch()
+              })
+            }}
+          />
         </div>
       ),
     }
@@ -132,10 +150,9 @@ export default function Sending({
   const columns = [
     {
       title: 'Номер',
-
-      sorter: (a, b) => a.code - b.code,
-      dataIndex: 'code',
-      key: 'code',
+      dataIndex: 'id',
+      key: 'id',
+      sorter: (a, b) => a.id - b.id,
     },
     {
       title: 'Клиент',
@@ -149,15 +166,14 @@ export default function Sending({
     },
     {
       title: 'Вес брутто',
-      sorter: (a, b) => a.weight - b.weight,
-      dataIndex: 'weight',
-      key: 'weight',
+      dataIndex: 'gross_weight',
+      key: 'gross_weight',
+      sorter: (a, b) => a.gross_weight - b.gross_weight,
     },
-
     {
       title: 'Тариф',
-      dataIndex: 'rate',
-      key: 'rate',
+      dataIndex: 'tarif',
+      key: 'tarif',
     },
     {
       title: 'Количество товара',
@@ -540,12 +556,13 @@ export default function Sending({
         </Row>
         <Table
           columns={columns}
-          dataSource={places}
+          isLoading={places.isLoading}
+          dataSource={placesData}
           rowKey={({ id }) => id}
           onRow={(record) => ({
             onClick: (e) => {
               if (e.detail === 2) {
-                navigate(`${location.pathname}/${record.code}`)
+                navigate(`${location.pathname}/${record.id}`)
               }
             },
           })}

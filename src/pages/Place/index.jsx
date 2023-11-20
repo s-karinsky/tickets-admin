@@ -1,3 +1,4 @@
+import { useCallback, useState } from 'react'
 import { useNavigate, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { useQuery, useQueries } from 'react-query'
 import {
@@ -11,43 +12,45 @@ import {
   Form,
   DatePicker,
 } from 'antd'
+import { useSelector } from 'react-redux'
 import TextArea from 'antd/es/input/TextArea'
 import { BsTrash } from 'react-icons/bs'
 import { BiInfoCircle, BiEdit } from 'react-icons/bi'
-import { useState } from 'react'
 import { SaveOutlined, CopyOutlined } from '@ant-design/icons'
+import { get as _get } from 'lodash'
+import dayjs from 'dayjs'
 import { InfoModal } from '../../components/InfoModal'
 import { FilterModal } from '../../components/FilterModal'
 import { Property } from '../../components/Property'
 import { PropertyGap } from '../Sendings'
 import CreatePlaceModal from '../Sending/CreatePlaceModal'
 import CreateProductModal from './СreateProductModal'
-import { getSendingById, getPlaceById } from '../../utils/api'
+import { getSendingById, getPlaceById, deletePlaceById } from '../../utils/api'
 import { SENDING_STATUS } from '../../consts'
+import { getUserProfile } from '../../redux/user'
+import { sqlInsert, sqlUpdate } from '../../utils/sql'
+import axios from '../../utils/axios'
 
 const { Title, Link } = Typography
 
+const propLabels = {
+  id: 'Номер',
+  status: 'Статус / услуга',
+  place: 'Место',
+  client: 'Клиент',
+  tarif: 'Тариф',
+  count: 'Количество',
+  net_weight: 'Вес нетто',
+  gross_weight: 'Вес брутто',
+  size: 'Размер',
+  pay_type: 'Тип оплаты',
+  pay_kg: 'Цена за 1 кг',
+  pay_sum: 'Сумма оплаты',
+  items_sum: 'Сумма товара',
+  note: 'Примечание'
+}
+
 export default function Sending({
-  id = 1,
-  place = {
-    code: ['1', 'Номер'],
-    status: ['Выдача со склада', 'Статус / услуга'],
-    place: ['2', 'Место'],
-    client: ['Александр', 'Клиент'],
-    rate: ['12', 'Тариф'],
-    count: [23, 'Количество товара'],
-    netWeight: [250, 'Вес нетто'],
-    grossWeight: [288, 'Вес брутто'],
-    size: ['220см', 'Размер'],
-    typePay: ['Наличные', 'Тип оплаты'],
-    price: ['200$', 'Цена за 1 кг'],
-    sum: ['5000 $', 'Сумма оплаты'],
-    sumProduct: ['1000 $', 'Сумма товара'],
-    note: [
-      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s..",
-      'Примечание',
-    ],
-  },
   product = {
     code: ['1', 'Номер'],
     name: ['Black&white', 'Наименование'],
@@ -71,10 +74,12 @@ export default function Sending({
 }) {
   const navigate = useNavigate()
   const location = useLocation()
+  const user = useSelector(getUserProfile)
   const [ searchParams, setSearchParams ] = useSearchParams()
   const { sendingId, placeId } = useParams()
+  const [ form ] = Form.useForm()
 
-  const [ sendingData, placeData ] = useQueries( [
+  const [ sendingData, placeData ] = useQueries([
     {
       queryKey: ['sending', sendingId],
       queryFn: getSendingById(sendingId)
@@ -87,6 +92,14 @@ export default function Sending({
 
   const isNew = placeId === 'create'
   const isEditPage = isNew || searchParams.get('edit') !== null
+
+  const initialPlace = {
+    status: sendingData.data?.json?.status,
+    net_weight: 0,
+    gross_weight: 0,
+    count: 0,
+    ...placeData.data
+  }
   
   let places = [
     {
@@ -218,6 +231,26 @@ export default function Sending({
 
   const placeTitle = isNew ? 'Новое место' : location.pathname.toString().split('/').slice(-1).join('/')
 
+  const handleSubmit = useCallback(async (values) => {
+    const params = {
+      tip: 'place',
+      id_ref: Number(sendingId),
+      ref_tip: 'sending',
+      pole: JSON.stringify(values),
+      creator_id: Number(user.u_id),
+      editor_id: Number(user.u_id),
+      status: 0
+    }
+    if (placeId === 'create') {
+      await axios.postWithAuth('/query/insert', { sql: sqlInsert('dataset', params) })
+      navigate(`/sendings/${sendingId}`)
+    } else {
+      await axios.postWithAuth('/query/update', { sql: sqlUpdate('dataset', params, `id=${placeId}`) })
+      placeData.refetch()
+      setSearchParams()
+    }
+  }, [sendingId, placeId, user])
+
   return (
     <>
       <div
@@ -293,9 +326,7 @@ export default function Sending({
                   }}
                   type='primary'
                   size={'large'}
-                  onClick={() => {
-                    // editHandle(false)
-                  }}
+                  onClick={() => form.submit()}
                 >
                   Сохранить
                   <SaveOutlined size={16} />
@@ -309,7 +340,7 @@ export default function Sending({
                   }}
                   type='primary'
                   danger
-                  onClick={() => {}/* editHandle(false) */}
+                  onClick={() => setSearchParams()}
                 >
                   Отмена
                 </Button>
@@ -324,9 +355,7 @@ export default function Sending({
                   }}
                   type='primary'
                   size={'large'}
-                  onClick={() => {
-                    // editHandle(true)
-                  }}
+                  onClick={() => navigate('?edit')}
                 >
                   Редактировать
                   <BiEdit size={16} />
@@ -339,6 +368,12 @@ export default function Sending({
                     alignItems: 'center',
                   }}
                   type='primary'
+                  onClick={() => {
+                    if (!window.confirm('Delete place?')) return
+                    deletePlaceById(placeId)().then(() => {
+                      navigate(`/sendings/${sendingId}`)
+                    })
+                  }}
                   danger
                 >
                   Удалить
@@ -359,11 +394,14 @@ export default function Sending({
             boxShadow: ' 0px 2px 4px 0px #00000026',
           }}
         >
-          {isEditPage ? (
+          {isEditPage && !sendingData.isLoading && !placeData.isLoading ? (
             <Form
               style={{ display: 'block', width: '100%' }}
               layout='vertical'
               size='large'
+              initialValues={initialPlace}
+              onFinish={handleSubmit}
+              form={form}
             >
               <div
                 style={{
@@ -389,6 +427,7 @@ export default function Sending({
                   name='place'
                 >
                   <Input
+
                   />
                 </Form.Item>
                 <Form.Item
@@ -518,6 +557,7 @@ export default function Sending({
                   <Input
                     addonAfter='кг'
                     style={{ maxWidth: '250px' }}
+                    disabled
                   />
                 </Form.Item>
                 <Form.Item
@@ -538,9 +578,12 @@ export default function Sending({
               </Form.Item>
             </Form>
           ) : (
-            Object.values(place).map((item) => (
-              <Property title={item[1]} subtitle={item[0]} />
-            ))
+            Object.keys(propLabels).map(key => {
+              const label = propLabels[key]
+              const val = _get(placeData.data, key)
+              let show = val instanceof dayjs ? val.format('DD.MM.YYYY') : val
+              return <Property title={label} subtitle={show} />
+            })
           )}
         </Row>
         <Row>
