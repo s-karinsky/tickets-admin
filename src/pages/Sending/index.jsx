@@ -436,7 +436,7 @@ export default function Sending({
               >
                 {isEditPage ?
                   <TextArea rows={4} /> :
-                  <div style={{ fontSize: 16, width: 150 }}>
+                  <div style={{ fontSize: 16 }}>
                     {data.json?.note}
                   </div>
                 }

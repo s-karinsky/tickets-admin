@@ -394,7 +394,7 @@ export default function Sending({
             boxShadow: ' 0px 2px 4px 0px #00000026',
           }}
         >
-          {isEditPage && !sendingData.isLoading && !placeData.isLoading ? (
+          {!sendingData.isLoading && !placeData.isLoading && (
             <Form
               style={{ display: 'block', width: '100%' }}
               layout='vertical'
@@ -414,84 +414,115 @@ export default function Sending({
                   label='Клиент'
                   name='client'
                 >
-                  <Select
-                    style={{ width: 200 }}
-                    options={[
-                      { value: 'Александр', title: 'Aktr' },
-                      { value: 'Владимир', title: 'Aktr' },
-                    ]}
-                  />
+                  {isEditPage ?
+                    <Select
+                      style={{ width: 200 }}
+                      options={[
+                        { value: 'Александр', title: 'Aktr' },
+                        { value: 'Владимир', title: 'Aktr' },
+                      ]}
+                    /> :
+                    <div style={{ fontSize: 16, width: 200 }}>
+                      {initialPlace.client}
+                    </div>
+                  }
                 </Form.Item>
                 <Form.Item
                   label='Место'
                   name='place'
                 >
                   <Input
-
+                    bordered={isEditPage}
+                    readOnly={!isEditPage}
                   />
                 </Form.Item>
                 <Form.Item
                   label='Статус места'
                   name='status'
                 >
-                  <Select
-                    style={{ width: 200 }}
-                    optionFilterProp='children'
-                    options={SENDING_STATUS.map((name, i) => ({ label: name, value: i }))}
-                    disabled
-                  />
+                  {isEditPage ?
+                    <Select
+                      style={{ width: 200 }}
+                      optionFilterProp='children'
+                      options={SENDING_STATUS.map((name, i) => ({ label: name, value: i }))}
+                      disabled
+                    /> :
+                    <div style={{ fontSize: 16, width: 200 }}>
+                      {SENDING_STATUS[initialPlace.status]}
+                    </div>
+                  }
                 </Form.Item>
                 <Form.Item
                   label='Статус услуги'
                   name='service_status'
                 >
-                  <Select
-                    style={{ width: 200 }}
-                    optionFilterProp='children'
-                    options={[
-                      { value: 'В обработке', title: '' },
-                      { value: 'Выдано', title: '' },
-                    ]}
-                  />
+                  {isEditPage ?
+                    <Select
+                      style={{ width: 200 }}
+                      optionFilterProp='children'
+                      options={[
+                        { value: 'В обработке', title: '' },
+                        { value: 'Выдано', title: '' },
+                      ]}
+                    /> :
+                    <div style={{ fontSize: 16, width: 200 }}>
+                      {initialPlace.service_status}
+                    </div>
+                  }
                 </Form.Item>
                 <Form.Item
                   label='Услуги'
                   name='services'
                 >
-                  <Select
-                    style={{ width: 200 }}
-                    optionFilterProp='children'
-                    options={[
-                      { value: 'В обработке', title: '' },
-                      { value: 'Выдача со склада', title: '' },
-                    ]}
-                  />
+                  {isEditPage ?
+                    <Select
+                      style={{ width: 200 }}
+                      optionFilterProp='children'
+                      options={[
+                        { value: 'В обработке', title: '' },
+                        { value: 'Выдача со склада', title: '' },
+                      ]}
+                    /> :
+                    <div style={{ fontSize: 16, width: 200 }}>
+                      {initialPlace.services}
+                    </div>
+                  }
                 </Form.Item>
                 <Form.Item
                   label='Тариф'
                   name='tarif'
                 >
-                  <Select
-                    style={{ width: 200 }}
-                    optionFilterProp='children'
-                    options={[
-                      { value: 'Экспресс', title: '' },
-                      { value: 'Эконом', title: '' },
-                    ]}
-                  />
+                  {isEditPage ?
+                    <Select
+                      style={{ width: 200 }}
+                      optionFilterProp='children'
+                      options={[
+                        { value: 'Экспресс', title: '' },
+                        { value: 'Эконом', title: '' },
+                      ]}
+                    /> :
+                    <div style={{ fontSize: 16, width: 200 }}>
+                      {initialPlace.tarif}
+                    </div>
+                  }
                 </Form.Item>
                 <Form.Item
                   label='Тип оплаты'
                   name='pay_type'
                 >
-                  <Select
-                    style={{ width: 200 }}
-                    optionFilterProp='children'
-                    options={[
-                      { value: 'Наличный', title: '' },
-                      { value: 'Безналичный', title: '' },
-                    ]}
-                  />
+                  {isEditPage ?
+                    <Select
+                      style={{ width: 200 }}
+                      optionFilterProp='children'
+                      options={[
+                        { value: 'Наличный', title: '' },
+                        { value: 'Безналичный', title: '' },
+                      ]}
+                    /> :
+                    <div style={{ fontSize: 16, width: 200 }}>
+                      {initialPlace.pay_type}
+                    </div>
+                  }
                 </Form.Item>
                 {/* <div style={{ position: 'relative' }}>
                   <div
@@ -509,8 +540,10 @@ export default function Sending({
                   name='pay_kg'
                 >
                   <Input
-                    addonAfter='$'
-                    style={{ maxWidth: '250px' }}
+                    addonAfter={isEditPage && '$'}
+                    style={{ width: 200 }}
+                    bordered={isEditPage}
+                    readOnly={!isEditPage}
                   />
                 </Form.Item>
                 <Form.Item
@@ -518,8 +551,10 @@ export default function Sending({
                   name='items_sum'
                 >
                   <Input
-                    addonAfter='$'
-                    style={{ maxWidth: '250px' }}
+                    addonAfter={isEditPage && '$'}
+                    style={{ width: 200 }}
+                    bordered={isEditPage}
+                    readOnly={!isEditPage}
                   />
                 </Form.Item>
                 <Form.Item
@@ -527,8 +562,10 @@ export default function Sending({
                   name='pay_sum'
                 >
                   <Input
-                    addonAfter='$'
-                    style={{ maxWidth: '250px' }}
+                    addonAfter={isEditPage && '$'}
+                    style={{ width: 200 }}
+                    bordered={isEditPage}
+                    readOnly={!isEditPage}
                   />
                 </Form.Item>
                 <Form.Item
@@ -536,8 +573,10 @@ export default function Sending({
                   name='size'
                 >
                   <Input
-                    addonAfter='см'
-                    style={{ maxWidth: '250px' }}
+                    addonAfter={isEditPage && 'см'}
+                    style={{ width: 200 }}
+                    bordered={isEditPage}
+                    readOnly={!isEditPage}
                   />
                 </Form.Item>
                 <Form.Item
@@ -545,9 +584,11 @@ export default function Sending({
                   name='net_weight'
                 >
                   <Input
-                    addonAfter='кг'
-                    style={{ maxWidth: '250px' }}
-                    disabled
+                    addonAfter={isEditPage && 'кг'}
+                    style={{ width: 200 }}
+                    disabled={isEditPage}
+                    bordered={isEditPage}
+                    readOnly={!isEditPage}
                   />
                 </Form.Item>
                 <Form.Item
@@ -555,9 +596,11 @@ export default function Sending({
                   name='gross_weight'
                 >
                   <Input
-                    addonAfter='кг'
-                    style={{ maxWidth: '250px' }}
-                    disabled
+                    addonAfter={isEditPage && 'кг'}
+                    style={{ width: 200 }}
+                    disabled={isEditPage}
+                    bordered={isEditPage}
+                    readOnly={!isEditPage}
                   />
                 </Form.Item>
                 <Form.Item
@@ -565,8 +608,10 @@ export default function Sending({
                   name='count'
                 >
                   <Input
-                    style={{ maxWidth: '250px' }}
-                    disabled
+                    style={{ width: 200 }}
+                    disabled={isEditPage}
+                    bordered={isEditPage}
+                    readOnly={!isEditPage}
                   />
                 </Form.Item>
               </div>
@@ -574,17 +619,22 @@ export default function Sending({
                 label='Примечание'
                 name='note'
               >
-                <TextArea rows={4} />
+                {isEditPage ?
+                  <TextArea rows={4} /> :
+                  <div style={{ fontSize: 16 }}>
+                    {initialPlace.note}
+                  </div>
+                }
               </Form.Item>
             </Form>
-          ) : (
+          )/*  : (
             Object.keys(propLabels).map(key => {
               const label = propLabels[key]
               const val = _get(placeData.data, key)
               let show = val instanceof dayjs ? val.format('DD.MM.YYYY') : val
               return <Property title={label} subtitle={show} />
             })
-          )}
+          ) */}
         </Row>
         <Row>
           <Title
