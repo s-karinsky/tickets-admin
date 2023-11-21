@@ -24,9 +24,7 @@ import { get as _get } from 'lodash'
 import { useQueries } from 'react-query'
 import { BsTrash } from 'react-icons/bs'
 import { BiInfoCircle, BiEdit } from 'react-icons/bi'
-import { DateTableCell } from '../../components/DateTableCell'
 import { FilterModal } from '../../components/FilterModal'
-import { Property } from '../../components/Property'
 import { PropertyGap } from '../Sendings'
 import CreateSendingModal from '../Sendings/CreateSendingModal'
 import CreatePlaceModal from './CreatePlaceModal'
@@ -35,19 +33,6 @@ import { getSendingById, deleteSendingById, getPlacesBySendingId, deletePlaceByI
 import { SENDING_STATUS } from '../../consts'
 
 const { Title, Link } = Typography
-
-const propLabels = {
-  from: 'Номер',
-  create_datetime: 'Дата',
-  start_datetime: 'Дата отправки',
-  complete_datetime: 'Дата поступления',
-  'json.transporter': 'Перевозчик',
-  'json.status': 'Статус',
-  'json.count_places': 'Количество мест',
-  'json.gross_weight': 'Вес брутто',
-  'json.net_weight': 'Вес нетто',
-  'json.note': 'Примечание'
-}
 
 export default function Sending({
   isSendingAir
@@ -71,49 +56,6 @@ export default function Sending({
 
   const isNew = sendingId === 'create'
   const isEditPage = isNew || searchParams.get('edit') !== null
-
-  let placess = [
-    {
-      code: 1,
-      date: <DateTableCell date={new Date()} />,
-      weight: 200,
-      client: 'Александ В.',
-      status: 'Не назначено',
-      count: 10,
-      place: 12,
-      rate: 1,
-    },
-    {
-      code: 2,
-      date: <DateTableCell date={new Date()} />,
-      weight: 1200,
-      client: 'рлександ В.',
-      status: 'Выдача со склада → Выдано',
-      count: 23,
-      place: 12,
-      rate: 0,
-    },
-    {
-      code: 3,
-      date: <DateTableCell date={new Date()} />,
-      weight: 20,
-      client: 'рлександ В.',
-      status: 'Выдача со склада → Выдано',
-      count: 12,
-      place: 12,
-      rate: 1,
-    },
-    {
-      code: 5,
-      date: <DateTableCell date={new Date()} />,
-      weight: 500,
-      client: 'рлександ В.',
-      status: 'Не назначено',
-      count: 2,
-      place: 12,
-      rate: 12,
-    },
-  ]
 
   const placesData = (places.data || []).map((item) => {
     return {
@@ -343,7 +285,7 @@ export default function Sending({
             boxShadow: ' 0px 2px 4px 0px #00000026',
           }}
         >
-          {isEditPage && !isLoading ? (
+          {!isLoading && (
             <Form
               style={{ display: 'block', width: '100%' }}
               layout='vertical'
@@ -365,37 +307,51 @@ export default function Sending({
                 >
                   <Input
                     style={{ width: 60 }}
+                    bordered={isEditPage}
+                    readOnly={!isEditPage}
                   />
                 </Form.Item>
                 <Form.Item
                   label='Дата'
                   name='create_datetime'
                 >
-                  <DatePicker
-                    style={{ width: 150 }}
-                    defaultValue={dayjs()}
-                    format='DD.MM.YYYY'
-                  />
+                  {isEditPage ?
+                    <DatePicker
+                      style={{ width: 150 }}
+                      format='DD.MM.YYYY'
+                    /> :
+                    <div style={{ fontSize: 16, width: 150 }}>
+                      {data.create_datetime?.format('DD.MM.YYYY')}
+                    </div>
+                  }
                 </Form.Item>
                 <Form.Item
                   label='Дата отправки'
                   name='start_datetime'
                 >
-                  <DatePicker
-                    style={{ width: 150 }}
-                    placeholder='Выберите дату'
-                    format='DD.MM.YYYY'
-                  />
+                  {isEditPage ?
+                    <DatePicker
+                      style={{ width: 150 }}
+                      format='DD.MM.YYYY'
+                    /> :
+                    <div style={{ fontSize: 16, width: 150 }}>
+                      {data.start_datetime?.format('DD.MM.YYYY')}
+                    </div>
+                  }
                 </Form.Item>
                 <Form.Item
                   label='Дата поступления'
                   name='complete_datetime'
                 >
-                  <DatePicker
-                    style={{ width: 150 }}
-                    placeholder='Выберите дату'
-                    format='DD.MM.YYYY'
-                  />
+                  {isEditPage ?
+                    <DatePicker
+                      style={{ width: 150 }}
+                      format='DD.MM.YYYY'
+                    /> :
+                    <div style={{ fontSize: 16, width: 150 }}>
+                      {data.complete_datetime?.format('DD.MM.YYYY')}
+                    </div>
+                  }
                 </Form.Item>
                 <Form.Item
                   label='Количество мест'
@@ -403,6 +359,8 @@ export default function Sending({
                 >
                   <InputNumber
                     style={{ width: 120 }}
+                    bordered={isEditPage}
+                    readOnly={!isEditPage}
                   />
                 </Form.Item>
                 <Form.Item
@@ -411,7 +369,9 @@ export default function Sending({
                 >
                   <InputNumber
                     style={{ width: 120 }}
-                    addonAfter='кг'
+                    addonAfter={isEditPage && 'кг'}
+                    bordered={isEditPage}
+                    readOnly={!isEditPage}
                   />
                 </Form.Item>
                 <Form.Item
@@ -420,7 +380,9 @@ export default function Sending({
                 >
                   <InputNumber
                     style={{ width: 120 }}
-                    addonAfter='кг'
+                    addonAfter={isEditPage && 'кг'}
+                    bordered={isEditPage}
+                    readOnly={!isEditPage}
                   />
                 </Form.Item>
               </div>
@@ -435,44 +397,51 @@ export default function Sending({
                   label='Перевозчик'
                   name={['json', 'transporter']}
                 >
-                  <Select
-                    style={{ width: '400px' }}
-                    options={[
-                      { value: 'Александр', title: 'Aktr' },
-                      { value: 'Владимир', title: 'Aktr' },
-                    ]}
-                  />
+                  {isEditPage ?
+                    <Select
+                      style={{ width: '400px' }}
+                      options={[
+                        { value: 'Александр', title: 'Aktr' },
+                        { value: 'Владимир', title: 'Aktr' },
+                      ]}
+                    /> :
+                    <div style={{ fontSize: 16, width: 400 }}>
+                      {data.json?.transporter}
+                    </div>
+                  }
                 </Form.Item>
                 <Form.Item
                   label='Статус'
                   name={['json', 'status']}
                 >
-                  <Select
-                    style={{ width: '200px' }}
-                    options={[
-                      { value: 0, label: 'Формирование' },
-                      { value: 1, label: 'В пути' },
-                      { value: 2, label: 'Поступила' },
-                      { value: 3, label: 'Приостановлена' },
-                    ]}
-                  />
+                  {isEditPage ?
+                    <Select
+                      style={{ width: '200px' }}
+                      options={[
+                        { value: 0, label: 'Формирование' },
+                        { value: 1, label: 'В пути' },
+                        { value: 2, label: 'Поступила' },
+                        { value: 3, label: 'Приостановлена' },
+                      ]}
+                    /> :
+                    <div style={{ fontSize: 16, width: 150 }}>
+                      {SENDING_STATUS[data.json?.status]}
+                    </div>
+                  }
                 </Form.Item>
               </div>
               <Form.Item
                 label='Примечание'
                 name={['json', 'note']}
               >
-                <TextArea rows={4} />
+                {isEditPage ?
+                  <TextArea rows={4} /> :
+                  <div style={{ fontSize: 16, width: 150 }}>
+                    {data.json?.note}
+                  </div>
+                }
               </Form.Item>
             </Form>
-          ) : (
-            Object.keys(propLabels).map(key => {
-              const label = propLabels[key]
-              const val = _get(data, key)
-              let show = val instanceof dayjs ? val.format('DD.MM.YYYY') : val
-              if (key === 'json.status') show = SENDING_STATUS[show]
-              return <Property title={label} subtitle={show} />
-            })
           )}
         </Row>
         <Row>
