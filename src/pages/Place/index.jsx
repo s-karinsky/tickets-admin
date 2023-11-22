@@ -25,7 +25,7 @@ import { Property } from '../../components/Property'
 import { PropertyGap } from '../Sendings'
 import CreatePlaceModal from '../Sending/CreatePlaceModal'
 import CreateProductModal from './СreateProductModal'
-import { getSendingById, getPlaceById, deletePlaceById } from '../../utils/api'
+import { getSendingById, getPlaceById, deletePlaceById, getProductsByPlaceId } from '../../utils/api'
 import { SENDING_STATUS } from '../../consts'
 import { getUserProfile } from '../../redux/user'
 import { sqlInsert, sqlUpdate } from '../../utils/sql'
@@ -79,7 +79,7 @@ export default function Sending({
   const { sendingId, placeId } = useParams()
   const [ form ] = Form.useForm()
 
-  const [ sendingData, placeData ] = useQueries([
+  const [ sendingData, placeData, productsData ] = useQueries([
     {
       queryKey: ['sending', sendingId],
       queryFn: getSendingById(sendingId)
@@ -87,6 +87,10 @@ export default function Sending({
     {
       queryKey: ['place', placeId],
       queryFn: getPlaceById(placeId)
+    },
+    {
+      queryKey: ['products', placeId],
+      queryFn: getProductsByPlaceId(placeId)
     }
   ])
 
@@ -165,7 +169,7 @@ export default function Sending({
     }
   })
   const [filterModalOpen, setFilterModalOpen] = useState(false)
-  const [createProduct, setCreateProduct] = useState(false)
+  const [editProduct, setEditProduct] = useState(false)
   const [createPlace, setCreatePlace] = useState(false)
   const [infoModal, setInfoModal] = useState(false)
   const [nextPage, setNextPage] = useState(0)
@@ -173,9 +177,9 @@ export default function Sending({
   const columns = [
     {
       title: 'Номер',
+      dataIndex: 'id',
+      key: 'id',
       sorter: (a, b) => a.code - b.code,
-      dataIndex: 'code',
-      key: 'code',
     },
     {
       title: 'Наименование',
@@ -184,8 +188,8 @@ export default function Sending({
     },
     {
       title: 'Марка',
-      dataIndex: 'brand',
-      key: 'brand',
+      dataIndex: 'label',
+      key: 'label',
     },
     {
       title: 'Артикул',
@@ -201,11 +205,6 @@ export default function Sending({
       title: 'Размер',
       dataIndex: 'size',
       key: 'size',
-    },
-    {
-      title: 'Вес нетто',
-      dataIndex: 'weight',
-      key: 'weight',
     },
     {
       title: 'Количество',
@@ -677,7 +676,7 @@ export default function Sending({
             </Row>
             <Button
               type='primary'
-              onClick={() => setCreateProduct(true)}
+              onClick={() => setEditProduct(true)}
               size={'large'}
             >
               Создать
@@ -687,13 +686,14 @@ export default function Sending({
         <Table
           size='small'
           columns={columns}
-          dataSource={places}
+          isLoading={productsData.isLoading}
+          dataSource={productsData.data}
           rowKey={({ id }) => id}
           onRow={(record) => ({
             onClick: (e) => {
               if (e.detail === 2) {
                 setNextPage(1)
-                setInfoModal(true)
+                setEditProduct(record.id)
               }
             },
           })}
@@ -726,7 +726,7 @@ export default function Sending({
               style={{ backgroundColor: '#1677ff' }}
               onClick={() => {
                 setInfoModal(false)
-                setCreateProduct(true)
+                setEditProduct(true)
               }}
             >
               Редактировать
@@ -746,9 +746,14 @@ export default function Sending({
         handleCancel={() => setInfoModal(false)}
       />
       <CreateProductModal
-        title={`Создать товар`}
-        isModalOpen={createProduct}
-        handleCancel={() => setCreateProduct(false)}
+        title='Создать товар'
+        isModalOpen={!!editProduct}
+        handleCancel={() => {
+          setEditProduct(false)
+          productsData.refetch()
+        }}
+        placeId={placeId}
+        userId={user.u_id}
       />
     </>
   )

@@ -93,3 +93,22 @@ export const deletePlaceById = placeId => async () => {
   const response = await axios.postWithAuth('/query/delete', { sql: `DELETE FROM dataset WHERE id=${placeId}` })
   return response
 }
+
+export const getProductsByPlaceId = placeId => async () => {
+  const response = await axios.postWithAuth('/query/select', {
+    sql: `SELECT * FROM dataset WHERE id_ref=${placeId} AND ref_tip='place'`
+  })
+  const data = response.data?.data || []
+  return data.map(item => {
+    let json
+    try {
+      json = JSON.parse(item.pole)
+    } catch (e) {
+      json = {}
+    }
+    return {
+      ...item,
+      ...json
+    }
+  })
+}

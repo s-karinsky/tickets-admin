@@ -3,3 +3,28 @@ body {
   margin: 0;
   padding: 0;
 }
+
+.ant-form-item {
+  margin-bottom: 0;
+}
+
+.ant-form-large .ant-form-item .ant-form-item-label {
+  padding: 8px 0 4px;
+}
+
+.ant-form-large .ant-form-item .ant-form-item-label>label {
+  height: 20px;
+}
+
+.ant-form fieldset {
+  display: block;
+  border-radius: 8px;
+  border: 1px solid #d9d9d9;
+}
+
+.ant-form fieldset > legend {
+  border: none;
+  padding: 0 5px;
+  width: auto;
+  margin-bottom: 10px;
+}
