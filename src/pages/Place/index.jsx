@@ -25,7 +25,7 @@ import { Property } from '../../components/Property'
 import { PropertyGap } from '../Sendings'
 import CreatePlaceModal from '../Sending/CreatePlaceModal'
 import CreateProductModal from './СreateProductModal'
-import { getSendingById, getPlaceById, deletePlaceById, getProductsByPlaceId } from '../../utils/api'
+import { getSendingById, getPlaceById, deletePlaceById, getProductsByPlaceId, deleteProductById } from '../../utils/api'
 import { SENDING_STATUS } from '../../consts'
 import { getUserProfile } from '../../redux/user'
 import { sqlInsert, sqlUpdate } from '../../utils/sql'
@@ -104,58 +104,8 @@ export default function Sending({
     count: 0,
     ...placeData.data
   }
-  
-  let places = [
-    {
-      code: 1,
-      count: 2,
-      name: 'Black&White',
-      brand: 'Channel',
-      article: '001',
-      color: 'blue',
-      size: 'XL',
-      weight: 20,
-      sum: 20,
-      price: 10,
-    },
-    {
-      code: 2,
-      count: 2,
-      name: 'Black&White',
-      brand: 'Channel',
-      article: '001',
-      color: 'blue',
-      size: 'XL',
-      weight: 20,
-      sum: 20,
-      price: 10,
-    },
-    {
-      code: 3,
-      count: 2,
-      name: 'Black&White',
-      brand: 'Channel',
-      article: '001',
-      color: 'blue',
-      size: 'XL',
-      weight: 20,
-      sum: 20,
-      price: 10,
-    },
-    {
-      code: 5,
-      count: 2,
-      name: 'Black&White',
-      brand: 'Channel',
-      article: '001',
-      color: 'blue',
-      size: 'XL',
-      weight: 20,
-      sum: 20,
-      price: 10,
-    },
-  ]
-  places = places.map((item) => {
+
+  const places = (productsData.data || []).map((item) => {
     return {
       ...item,
       buttons: (
@@ -163,15 +113,23 @@ export default function Sending({
           <BiInfoCircle size={17} color='#141414' />
           {/* <AiOutlineMore size={17} color="#141414" /> */}
           <CopyOutlined size={17} color='#141414' />
-          <BsTrash style={{ marginLeft: 30 }} size={17} color='red' />
+          <BsTrash
+            style={{ marginLeft: 30, cursor: 'pointer' }}
+            size={17}
+            color='red'
+            onClick={() => {
+              if (!window.confirm('Delete product?')) return
+              deleteProductById(item.id).then(() => {
+                productsData.refetch()
+              })
+            }}
+          />
         </div>
       ),
     }
   })
   const [filterModalOpen, setFilterModalOpen] = useState(false)
   const [editProduct, setEditProduct] = useState(false)
-  const [createPlace, setCreatePlace] = useState(false)
-  const [infoModal, setInfoModal] = useState(false)
   const [nextPage, setNextPage] = useState(0)
 
   const columns = [
@@ -687,13 +645,13 @@ export default function Sending({
           size='small'
           columns={columns}
           isLoading={productsData.isLoading}
-          dataSource={productsData.data}
+          dataSource={places}
           rowKey={({ id }) => id}
           onRow={(record) => ({
             onClick: (e) => {
               if (e.detail === 2) {
                 setNextPage(1)
-                setEditProduct(record.id)
+                setEditProduct(record)
               }
             },
           })}
@@ -709,44 +667,8 @@ export default function Sending({
         handleCancel={() => setFilterModalOpen(false)}
         columns={columns.filter((item) => item.title != '')}
       />
-      <CreatePlaceModal
-        title={`Место 1`}
-        isModalOpen={createPlace}
-        handleCancel={() => setCreatePlace(false)}
-      />
-      <InfoModal
-        content={product}
-        title={`Товар 1`}
-        isModalOpen={infoModal}
-        footer={[
-          <div className=''>
-            <Button
-              key='1'
-              type='primary'
-              style={{ backgroundColor: '#1677ff' }}
-              onClick={() => {
-                setInfoModal(false)
-                setEditProduct(true)
-              }}
-            >
-              Редактировать
-            </Button>
-            <Button
-              key='1'
-              type='primary'
-              style={{ backgroundColor: 'rgb(0, 150, 80)' }}
-              onClick={() => {
-                setInfoModal(false)
-              }}
-            >
-              Ок
-            </Button>
-          </div>,
-        ]}
-        handleCancel={() => setInfoModal(false)}
-      />
-      <CreateProductModal
-        title='Создать товар'
+      {!!editProduct && <CreateProductModal
+        title={editProduct === true ? 'Создать товар' : 'Редактировать товар'}
         isModalOpen={!!editProduct}
         handleCancel={() => {
           setEditProduct(false)
@@ -754,7 +676,8 @@ export default function Sending({
         }}
         placeId={placeId}
         userId={user.u_id}
-      />
+        product={editProduct}
+      />}
     </>
   )
 }

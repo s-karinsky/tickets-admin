@@ -112,3 +112,8 @@ export const getProductsByPlaceId = placeId => async () => {
     }
   })
 }
+
+export const deleteProductById = async (productId) => {
+  const response = await axios.postWithAuth('/query/delete', { sql: `DELETE FROM dataset WHERE id=${productId}` })
+  return response
+}

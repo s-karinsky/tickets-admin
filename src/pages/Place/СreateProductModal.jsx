@@ -1,13 +1,19 @@
 import React from 'react'
 import { Typography, Modal, DatePicker, Button, Form, Input, InputNumber, Checkbox } from 'antd'
 import TextArea from 'antd/es/input/TextArea'
+import dayjs from 'dayjs'
 import { PropertyGap } from '../../pages/Sendings'
-import { sqlInsert } from '../../utils/sql'
+import { sqlInsert, sqlUpdate } from '../../utils/sql'
 import axios from '../../utils/axios'
 const { Title } = Typography
 
-export const CreateProductModal = ({ isModalOpen, handleCancel, title, placeId, userId }) => {
+export const CreateProductModal = ({ isModalOpen, handleCancel, title, placeId, userId, product = {} }) => {
   const [ form ] = Form.useForm()
+  const initialValues = {
+    ...product,
+    cert_start_date: product.cert_start_date ? dayjs(product.cert_start_date) : undefined,
+    cert_end_date: product.cert_end_date ? dayjs(product.cert_end_date) : undefined
+  }
   return (
     <Modal
       width={700}
@@ -48,16 +54,24 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, title, placeId, 
         size='large'
         layout='vertical'
         form={form}
+        initialValues={initialValues}
         onFinish={async (values) => {
-          const params = {
-            tip: 'product',
-            id_ref: placeId,
-            ref_tip: 'place',
-            pole: JSON.stringify(values),
-            creator_id: userId,
-            editor_id: userId
+          if (product === true) {
+            const params = {
+              tip: 'product',
+              id_ref: placeId,
+              ref_tip: 'place',
+              pole: JSON.stringify(values),
+              creator_id: userId,
+              editor_id: userId
+            }
+            await axios.postWithAuth('/query/insert', { sql: sqlInsert('dataset', params ) })
+          } else {
+            const params = {
+              pole: JSON.stringify(values)
+            }
+            await axios.postWithAuth('/query/udpate', { sql: sqlUpdate('dataset', params, `id=${product.id}`) })
           }
-          await axios.postWithAuth('/query/insert', { sql: sqlInsert('dataset', params ) })
           handleCancel()
         }}
       >
