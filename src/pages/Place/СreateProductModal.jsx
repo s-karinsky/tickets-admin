@@ -70,7 +70,7 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, title, placeId, 
             const params = {
               pole: JSON.stringify(values)
             }
-            await axios.postWithAuth('/query/udpate', { sql: sqlUpdate('dataset', params, `id=${product.id}`) })
+            await axios.postWithAuth('/query/update', { sql: sqlUpdate('dataset', params, `id=${product.id}`) })
           }
           handleCancel()
         }}

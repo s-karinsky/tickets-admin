@@ -98,11 +98,11 @@ export default function Sending({
   const isEditPage = isNew || searchParams.get('edit') !== null
 
   const initialPlace = {
+    ...placeData.data,
     status: sendingData.data?.json?.status,
-    net_weight: 0,
-    gross_weight: 0,
-    count: 0,
-    ...placeData.data
+    net_weight: (productsData.data || []).reduce((sum, item) => sum + item.net_weight || 0, 0),
+    gross_weight: (productsData.data || []).reduce((sum, item) => sum + item.gross_weight || 0, 0),
+    count: (productsData.data || []).reduce((sum, item) => sum + item.count || 0, 0)
   }
 
   const places = (productsData.data || []).map((item) => {

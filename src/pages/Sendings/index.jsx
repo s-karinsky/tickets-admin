@@ -23,7 +23,7 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
       'delivery-date': <DateTableCell date={new Date(item.delivery)} />,
       buttons: (
         <div style={{ display: 'flex', gap: 10 }}>
-          <BsCheck2Circle size={17} color='green' />
+          {/* <BsCheck2Circle size={17} color='green' /> */}
           <BsArrowRepeat size={17} color='' />
           <BsTrash
             style={{ marginLeft: 30, cursor: 'pointer' }}
