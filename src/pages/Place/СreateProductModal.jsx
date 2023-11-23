@@ -123,6 +123,23 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, title, placeId, 
 
           />
         </Form.Item>
+
+        <Form.Item
+          label='Вес брутто'
+          name='gross_weight'
+        >
+          <InputNumber
+            addonAfter='кг'
+          />
+        </Form.Item>
+        <Form.Item
+          label='Вес нетто'
+          name='net_weight'
+        >
+          <InputNumber
+            addonAfter='кг'
+          />
+        </Form.Item>
         <div style={{ flexBasis: '100%' }} />
         <fieldset style={{ display: 'flex', gap: 10, margin: '0 -10px' }}>
           <legend>Обувь</legend>
