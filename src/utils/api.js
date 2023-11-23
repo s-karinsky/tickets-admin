@@ -1,8 +1,9 @@
 import dayjs from 'dayjs'
 import axios from './axios'
+import { sqlUpdate } from './sql'
 
 export const getSendings = isAir => async () => {
-  const response = await axios.postWithAuth('/query/select', { sql: `SELECT * FROM trip WHERE \`to\`='${Number(isAir)}'` })
+  const response = await axios.postWithAuth('/query/select', { sql: `SELECT * FROM trip WHERE \`to\`='${Number(isAir)}' AND canceled=0` })
   const data = response.data?.data || []
   return data.map(item => {
     let json
@@ -48,12 +49,12 @@ export const getSendingById = sendingId => async () => {
 }
 
 export const deleteSendingById = sendingId => async () => {
-  const response = await axios.postWithAuth('/query/delete', { sql: `DELETE FROM trip WHERE id_trip=${sendingId}` })
+  const response = await axios.postWithAuth('/query/update', { sql: sqlUpdate('trip', { canceled: 1 }, `id_trip=${sendingId}`) })
   return response
 }
 
 export const getPlacesBySendingId = sendingId => async () => {
-  const sql = `SELECT * FROM dataset WHERE ref_tip='sending' AND id_ref=${sendingId}`
+  const sql = `SELECT * FROM dataset WHERE ref_tip='sending' AND id_ref=${sendingId} AND status=0`
   const response = await axios.postWithAuth('/query/select', { sql })
   const data = response.data?.data || []
   return data.map(item => {
@@ -90,13 +91,13 @@ export const getPlaceById = placeId => async () => {
 }
 
 export const deletePlaceById = placeId => async () => {
-  const response = await axios.postWithAuth('/query/delete', { sql: `DELETE FROM dataset WHERE id=${placeId}` })
+  const response = await axios.postWithAuth('/query/update', { sql: sqlUpdate('dataset', { status: 1 }, `id=${placeId}`) })
   return response
 }
 
 export const getProductsByPlaceId = placeId => async () => {
   const response = await axios.postWithAuth('/query/select', {
-    sql: `SELECT * FROM dataset WHERE id_ref=${placeId} AND ref_tip='place'`
+    sql: `SELECT * FROM dataset WHERE id_ref=${placeId} AND ref_tip='place' AND status=0`
   })
   const data = response.data?.data || []
   return data.map(item => {
@@ -114,6 +115,6 @@ export const getProductsByPlaceId = placeId => async () => {
 }
 
 export const deleteProductById = async (productId) => {
-  const response = await axios.postWithAuth('/query/delete', { sql: `DELETE FROM dataset WHERE id=${productId}` })
+  const response = await axios.postWithAuth('/query/update', { sql: sqlUpdate('dataset', { status: 1 }, `id=${productId}`) })
   return response
 }
