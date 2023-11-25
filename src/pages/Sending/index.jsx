@@ -340,6 +340,23 @@ export default function Sending({
                   }
                 </Form.Item>
                 <Form.Item
+                  label='Перевозчик'
+                  name={['json', 'transporter']}
+                >
+                  {isEditPage ?
+                    <Select
+                      style={{ width: '200px' }}
+                      options={[
+                        { value: 'Александр', title: 'Aktr' },
+                        { value: 'Владимир', title: 'Aktr' },
+                      ]}
+                    /> :
+                    <div style={{ fontSize: 16, width: 400 }}>
+                      {data.json?.transporter}
+                    </div>
+                  }
+                </Form.Item>
+                <Form.Item
                   label='Дата поступления'
                   name='complete_datetime'
                 >
@@ -353,82 +370,65 @@ export default function Sending({
                     </div>
                   }
                 </Form.Item>
-                <Form.Item
-                  label='Количество мест'
-                  name={['json', 'count_places']}
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '20px',
+                    flexWrap: 'wrap',
+                  }}
                 >
-                  <InputNumber
-                    style={{ width: 120 }}
-                    bordered={isEditPage}
-                    readOnly={!isEditPage}
-                  />
-                </Form.Item>
-                <Form.Item
-                  label='Вес нетто'
-                  name={['json', 'net_weight']}
-                >
-                  <InputNumber
-                    style={{ width: 120 }}
-                    addonAfter={isEditPage && 'кг'}
-                    bordered={isEditPage}
-                    readOnly={!isEditPage}
-                  />
-                </Form.Item>
-                <Form.Item
-                  label='Вес брутто'
-                  name={['json', 'gross_weight']}
-                >
-                  <InputNumber
-                    style={{ width: 120 }}
-                    addonAfter={isEditPage && 'кг'}
-                    bordered={isEditPage}
-                    readOnly={!isEditPage}
-                  />
-                </Form.Item>
-              </div>
-              <div
-                style={{
-                  display: 'flex',
-                  gap: '20px',
-                  flexWrap: 'wrap',
-                }}
-              >
-                <Form.Item
-                  label='Перевозчик'
-                  name={['json', 'transporter']}
-                >
-                  {isEditPage ?
-                    <Select
-                      style={{ width: '400px' }}
-                      options={[
-                        { value: 'Александр', title: 'Aktr' },
-                        { value: 'Владимир', title: 'Aktr' },
-                      ]}
-                    /> :
-                    <div style={{ fontSize: 16, width: 400 }}>
-                      {data.json?.transporter}
-                    </div>
-                  }
-                </Form.Item>
-                <Form.Item
-                  label='Статус'
-                  name={['json', 'status']}
-                >
-                  {isEditPage ?
-                    <Select
-                      style={{ width: '200px' }}
-                      options={[
-                        { value: 0, label: 'Формирование' },
-                        { value: 1, label: 'В пути' },
-                        { value: 2, label: 'Поступила' },
-                        { value: 3, label: 'Приостановлена' },
-                      ]}
-                    /> :
-                    <div style={{ fontSize: 16, width: 150 }}>
-                      {SENDING_STATUS[data.json?.status]}
-                    </div>
-                  }
-                </Form.Item>
+                  <Form.Item
+                    label='Количество мест'
+                    name={['json', 'count_places']}
+                  >
+                    <InputNumber
+                      style={{ width: 120 }}
+                      bordered={isEditPage}
+                      readOnly={!isEditPage}
+                    />
+                  </Form.Item>
+                  <Form.Item
+                    label='Вес нетто'
+                    name={['json', 'net_weight']}
+                  >
+                    <InputNumber
+                      style={{ width: 120 }}
+                      addonAfter={isEditPage && 'кг'}
+                      bordered={isEditPage}
+                      readOnly={!isEditPage}
+                    />
+                  </Form.Item>
+                  <Form.Item
+                    label='Вес брутто'
+                    name={['json', 'gross_weight']}
+                  >
+                    <InputNumber
+                      style={{ width: 120 }}
+                      addonAfter={isEditPage && 'кг'}
+                      bordered={isEditPage}
+                      readOnly={!isEditPage}
+                    />
+                  </Form.Item>
+                  <Form.Item
+                    label='Статус'
+                    name={['json', 'status']}
+                  >
+                    {isEditPage ?
+                      <Select
+                        style={{ width: '200px' }}
+                        options={[
+                          { value: 0, label: 'Формирование' },
+                          { value: 1, label: 'В пути' },
+                          { value: 2, label: 'Поступила' },
+                          { value: 3, label: 'Приостановлена' },
+                        ]}
+                      /> :
+                      <div style={{ fontSize: 16, width: 150 }}>
+                        {SENDING_STATUS[data.json?.status]}
+                      </div>
+                    }
+                  </Form.Item>
+                </div>
               </div>
               <Form.Item
                 label='Примечание'
