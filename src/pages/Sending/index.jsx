@@ -69,13 +69,13 @@ export default function Sending({
         ...item,
         buttons: (
           <div style={{ display: 'flex', gap: 10 }}>
-            <BiInfoCircle size={17} color='#141414' />
+            {/* <BiInfoCircle size={17} color='#141414' /> */}
             <CopyOutlined size={17} color='#141414' />
-            <PlusCircleOutlined
+            {/* <PlusCircleOutlined
               size={17}
               style={{ color: '#009650' }}
             />
-            <CloseCircleOutlined size={17} style={{ color: 'red' }} />
+            <CloseCircleOutlined size={17} style={{ color: 'red' }} /> */}
             <BsTrash
               style={{ marginLeft: 30, cursor: 'pointer' }} 
               size={17}
