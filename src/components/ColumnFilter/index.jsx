@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
-import { Button, Calendar, Input, Select } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
+import { useMemo } from 'react'
+import { Button, Calendar, Input, InputNumber, Select } from 'antd'
+import { SearchOutlined } from '@ant-design/icons'
 
 export default function ColumnFilter({
   placeholder = 'Search',
@@ -13,15 +13,18 @@ export default function ColumnFilter({
   clearFilters,
   close,
 }) {
-  const isInput = type === 'input';
-  const isSelect = type === 'select';
-  const isDate = type === 'date';
+  const isInput = type === 'input'
+  const isSelect = type === 'select'
+  const isDate = type === 'date'
+  const isNumber = type === 'number'
   const selectOptions = useMemo(() => {
-    if (!Array.isArray(options)) return;
+    if (!Array.isArray(options)) return
     return options.map((item) =>
-      item.value ? item : { value: item, label: item }
-    );
-  }, [options]);
+      item.value !== undefined ? item : { value: item, label: item }
+    )
+  }, [options])
+
+  const selectValue = (selectOptions.find(item => item.value === selectedKeys[0]) || {}).label
 
   return (
     <div style={{ padding: 10 }} onKeyDown={(e) => e.stopPropagation()}>
@@ -39,15 +42,23 @@ export default function ColumnFilter({
             style={{ width: '100%', marginBottom: 8 }}
           />
         )}
+        {isNumber && (
+          <InputNumber
+            placeholder={placeholder}
+            value={selectedKeys[0]}
+            onChange={num => setSelectedKeys(num ? [num] : [])}
+            onPressEnter={() => confirm()}
+            style={{ width: '100%', marginBottom: 8 }}
+          />
+        )}
         {isSelect && (
           <Select
             placeholder={placeholder}
-            value={selectedKeys[0]}
+            value={selectValue}
             onChange={(value) =>
-              setSelectedKeys(value ? [String(value)] : [])
+              setSelectedKeys(value !== undefined ? [String(value)] : [])
             }
             onSelect={() => confirm()}
-            onPressEnter={() => confirm()}
             filterOption={(input, option) =>
               (option?.label ?? '')
                 .toLowerCase()
@@ -67,7 +78,7 @@ export default function ColumnFilter({
         )}
       </div>
       <div>
-        {(isInput || isDate) && (
+        {(isInput || isNumber || isDate) && (
           <Button
             type='primary'
             onClick={() => confirm()}
@@ -80,8 +91,8 @@ export default function ColumnFilter({
         )}
         <Button
           onClick={() => {
-            clearFilters && clearFilters();
-            confirm();
+            clearFilters && clearFilters()
+            confirm()
           }}
           size='small'
           style={{ width: '100%' }}
@@ -90,5 +101,5 @@ export default function ColumnFilter({
         </Button>
       </div>
     </div>
-  );
+  )
 }

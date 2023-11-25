@@ -19,6 +19,6 @@ export const getColumnSearchProps = (dataIndex, { options = [], type } = {}) => 
     if (type === 'date') {
       return dayjs(dataValue).isSame(value, 'day')
     }
-    return dataValue.toString().toLowerCase().includes((value).toLowerCase())
+    return dataValue.toString().toLowerCase().includes(String(value).toLowerCase())
   }
 })
