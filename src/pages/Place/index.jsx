@@ -1,23 +1,21 @@
 import { useCallback, useState } from 'react'
 import { useNavigate, useLocation, useParams, useSearchParams } from 'react-router-dom'
-import { useQuery, useQueries } from 'react-query'
+import { useQueries } from 'react-query'
 import {
   Button,
   Row,
   Table,
   Typography,
   Input,
-  Select,
   Checkbox,
   Form,
 } from 'antd'
 import { useSelector } from 'react-redux'
-import TextArea from 'antd/es/input/TextArea'
+import dayjs from 'dayjs'
 import { BsTrash } from 'react-icons/bs'
 import { BiInfoCircle, BiEdit } from 'react-icons/bi'
 import { SaveOutlined, CopyOutlined } from '@ant-design/icons'
 import { get as _get } from 'lodash'
-import { FilterModal } from '../../components/FilterModal'
 import { PropertyGap } from '../Sendings'
 import CreateProductModal from './СreateProductModal'
 import FormField from '../../components/FormField'
@@ -25,6 +23,7 @@ import { getSendingById, getPlaceById, deletePlaceById, getProductsByPlaceId, de
 import { SENDING_STATUS } from '../../consts'
 import { getUserProfile } from '../../redux/user'
 import { sqlInsert, sqlUpdate } from '../../utils/sql'
+import { getColumnSearchProps } from '../../utils/components'
 import axios from '../../utils/axios'
 
 const { Title, Link } = Typography
@@ -54,6 +53,9 @@ export default function Sending() {
   const { sendingId, placeId } = useParams()
   const [ form ] = Form.useForm()
 
+  const [ search, setSearch ] = useState('')
+  const [ editProduct, setEditProduct ] = useState(false)
+
   const [ sendingData, placeData, productsData ] = useQueries([
     {
       queryKey: ['sending', sendingId],
@@ -80,32 +82,37 @@ export default function Sending() {
     count: (productsData.data || []).reduce((sum, item) => sum + item.count || 0, 0)
   }
 
-  const places = (productsData.data || []).map((item) => {
-    return {
-      ...item,
-      buttons: (
-        <div style={{ display: 'flex', gap: 10 }}>
-          <BiInfoCircle size={17} color='#141414' />
-          {/* <AiOutlineMore size={17} color="#141414" /> */}
-          <CopyOutlined size={17} color='#141414' />
-          <BsTrash
-            style={{ marginLeft: 30, cursor: 'pointer' }}
-            size={17}
-            color='red'
-            onClick={() => {
-              if (!window.confirm('Delete product?')) return
-              deleteProductById(item.id).then(() => {
-                productsData.refetch()
-              })
-            }}
-          />
-        </div>
-      ),
-    }
-  })
-  const [filterModalOpen, setFilterModalOpen] = useState(false)
-  const [editProduct, setEditProduct] = useState(false)
-  const [nextPage, setNextPage] = useState(0)
+  const places = (productsData.data || [])
+    .filter(item => {
+      if (!search) return true
+      const str = Object.values(item).map(
+        val => typeof(val) ==='string' && val.length >= 10 && dayjs(val).isValid() ? dayjs(val).format('DD.MM.YYYY') : val
+      ).join(';').toLowerCase()
+      return str.includes(search.toLowerCase())
+    })
+    .map((item) => {
+      return {
+        ...item,
+        buttons: (
+          <div style={{ display: 'flex', gap: 10 }}>
+            {/* <BiInfoCircle size={17} color='#141414' /> */}
+            {/* <AiOutlineMore size={17} color="#141414" /> */}
+            <CopyOutlined size={17} color='#141414' />
+            <BsTrash
+              style={{ marginLeft: 30, cursor: 'pointer' }}
+              size={17}
+              color='red'
+              onClick={() => {
+                if (!window.confirm('Delete product?')) return
+                deleteProductById(item.id).then(() => {
+                  productsData.refetch()
+                })
+              }}
+            />
+          </div>
+        ),
+      }
+    })
 
   const columns = [
     {
@@ -118,41 +125,49 @@ export default function Sending() {
       title: 'Наименование',
       dataIndex: 'name',
       key: 'name',
+      ...getColumnSearchProps('name')
     },
     {
       title: 'Марка',
       dataIndex: 'label',
       key: 'label',
+      ...getColumnSearchProps('label')
     },
     {
       title: 'Артикул',
       dataIndex: 'article',
       key: 'article',
+      ...getColumnSearchProps('article')
     },
     {
       title: 'Цвет',
       dataIndex: 'color',
       key: 'color',
+      ...getColumnSearchProps('color')
     },
     {
       title: 'Размер',
       dataIndex: 'size',
       key: 'size',
+      ...getColumnSearchProps('size')
     },
     {
       title: 'Количество',
       dataIndex: 'count',
       key: 'count',
+      ...getColumnSearchProps('count', { type: 'number' })
     },
     {
       title: 'Цена',
       dataIndex: 'price',
       key: 'price',
+      ...getColumnSearchProps('price', { type: 'number' })
     },
     {
       title: 'Сумма',
       dataIndex: 'sum',
       key: 'sum',
+      ...getColumnSearchProps('sum', { type: 'number' })
     },
     {
       title: '',
@@ -512,17 +527,10 @@ export default function Sending() {
             >
               <Input
                 placeholder='Поиск'
-                style={{ maxWidth: '250px' }}
+                style={{ width: 300 }}
+                value={search}
+                onChange={e => setSearch(e.target.value)}
               />
-
-              <Button
-                type='primary'
-                size={'large'}
-                style={{ backgroundColor: '#009650' }}
-                onClick={() => setFilterModalOpen(true)}
-              >
-                Фильтры
-              </Button>
             </Row>
             <Button
               type='primary'
@@ -542,7 +550,6 @@ export default function Sending() {
           onRow={(record) => ({
             onClick: (e) => {
               if (e.detail === 2) {
-                setNextPage(1)
                 setEditProduct(record)
               }
             },
@@ -553,12 +560,6 @@ export default function Sending() {
           }}
         />
       </div>
-      <FilterModal
-        isModalOpen={filterModalOpen}
-        handleOk={() => setFilterModalOpen(false)}
-        handleCancel={() => setFilterModalOpen(false)}
-        columns={columns.filter((item) => item.title != '')}
-      />
       {!!editProduct && <CreateProductModal
         title={editProduct === true ? 'Создать товар' : 'Редактировать товар'}
         isModalOpen={!!editProduct}
