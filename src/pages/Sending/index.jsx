@@ -465,16 +465,22 @@ export default function Sending({
                 >
                   Создать
                 </Button>
-                {/* <Button type="primary" size={"large"}>
-                                  Создать услугу
-                              </Button>
-                              <Button
-                                  type="primary"
-                                  style={{ backgroundColor: "red" }}
-                                  size={"large"}
-                              >
-                                  Отменить услугу
-                              </Button> */}
+                <Button
+                  type='primary'
+                  size='large'
+                  title='Функция в разработке'
+                  disabled
+                >
+                  Создать услугу
+                </Button>
+                <Button
+                  type='primary'
+                  size='large'
+                  title='Функция в разработке'
+                  disabled
+                >
+                    Отменить услугу
+                </Button>
               </Row>
             </div>
           </Row>
