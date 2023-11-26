@@ -25,6 +25,7 @@ import { useQueries } from 'react-query'
 import { BsTrash } from 'react-icons/bs'
 import { BiInfoCircle, BiEdit } from 'react-icons/bi'
 import { PropertyGap } from '../Sendings'
+import FormField from '../../components/FormField'
 import axios from '../../utils/axios'
 import { getSendingById, deleteSendingById, getPlacesBySendingId, deletePlaceById } from '../../utils/api'
 import { getColumnSearchProps } from '../../utils/components'
@@ -310,75 +311,48 @@ export default function Sending({
                 flexWrap: 'wrap',
               }}
             >
-              <Form.Item
+              <FormField
                 label='Номер'
                 name='from'
-              >
-                <Input
-                  style={{ width: 60 }}
-                  bordered={isEditPage}
-                  readOnly={!isEditPage}
-                />
-              </Form.Item>
-              <Form.Item
+                style={{ width: 60 }}
+                isEdit={isEditPage}
+              />
+              <FormField
+                type='date'
                 label='Дата'
                 name='create_datetime'
-              >
-                {isEditPage ?
-                  <DatePicker
-                    style={{ width: 150 }}
-                    format='DD.MM.YYYY'
-                  /> :
-                  <div style={{ fontSize: 16, width: 150 }}>
-                    {data.create_datetime?.format('DD.MM.YYYY')}
-                  </div>
-                }
-              </Form.Item>
-              <Form.Item
+                style={{ width: 150 }}
+                isEdit={isEditPage}
+                text={data.create_datetime?.format('DD.MM.YYYY')}
+              />
+              <FormField
+                type='date'
                 label='Дата отправки'
                 name='start_datetime'
-              >
-                {isEditPage ?
-                  <DatePicker
-                    style={{ width: 150 }}
-                    format='DD.MM.YYYY'
-                  /> :
-                  <div style={{ fontSize: 16, width: 150 }}>
-                    {data.start_datetime?.format('DD.MM.YYYY')}
-                  </div>
-                }
-              </Form.Item>
-              <Form.Item
+                style={{ width: 150 }}
+                isEdit={isEditPage}
+                text={data.start_datetime?.format('DD.MM.YYYY')}
+              />
+              <FormField
+                type='select'
                 label='Перевозчик'
                 name={['json', 'transporter']}
-              >
-                {isEditPage ?
-                  <Select
-                    style={{ width: '200px' }}
-                    options={[
-                      { value: 'Александр', title: 'Aktr' },
-                      { value: 'Владимир', title: 'Aktr' },
-                    ]}
-                  /> :
-                  <div style={{ fontSize: 16, width: 400 }}>
-                    {data.json?.transporter}
-                  </div>
-                }
-              </Form.Item>
-              <Form.Item
+                style={{ width: 200 }}
+                isEdit={isEditPage}
+                options={[
+                  { value: 'Александр', title: 'Aktr' },
+                  { value: 'Владимир', title: 'Aktr' },
+                ]}
+                text={data.json?.transporter}
+              />
+              <FormField
+                type='date'
                 label='Дата поступления'
                 name='complete_datetime'
-              >
-                {isEditPage ?
-                  <DatePicker
-                    style={{ width: 150 }}
-                    format='DD.MM.YYYY'
-                  /> :
-                  <div style={{ fontSize: 16, width: 150 }}>
-                    {data.complete_datetime?.format('DD.MM.YYYY')}
-                  </div>
-                }
-              </Form.Item>
+                style={{ width: 150 }}
+                isEdit={isEditPage}
+                text={data.complete_datetime?.format('DD.MM.YYYY')}
+              />
               <div
                 style={{
                   display: 'flex',
@@ -386,70 +360,54 @@ export default function Sending({
                   flexWrap: 'wrap',
                 }}
               >
-                <Form.Item
+                <FormField
+                  type='number'
                   label='Количество мест'
                   name={['json', 'count_places']}
-                >
-                  <InputNumber
-                    style={{ width: 120 }}
-                    bordered={isEditPage}
-                    readOnly={!isEditPage}
-                  />
-                </Form.Item>
-                <Form.Item
+                  style={{ width: 120 }}
+                  isEdit={isEditPage}
+                  text={data.complete_datetime?.format('DD.MM.YYYY')}
+                />
+                <FormField
+                  type='number'
                   label='Вес нетто'
                   name={['json', 'net_weight']}
-                >
-                  <InputNumber
-                    style={{ width: 120 }}
-                    addonAfter={isEditPage && 'кг'}
-                    bordered={isEditPage}
-                    readOnly={!isEditPage}
-                  />
-                </Form.Item>
-                <Form.Item
+                  style={{ width: 120 }}
+                  isEdit={isEditPage}
+                  addonAfter={isEditPage && 'кг'}
+                />
+                <FormField
+                  type='number'
                   label='Вес брутто'
                   name={['json', 'gross_weight']}
-                >
-                  <InputNumber
-                    style={{ width: 120 }}
-                    addonAfter={isEditPage && 'кг'}
-                    bordered={isEditPage}
-                    readOnly={!isEditPage}
-                  />
-                </Form.Item>
-                <Form.Item
+                  style={{ width: 120 }}
+                  isEdit={isEditPage}
+                  addonAfter={isEditPage && 'кг'}
+                />
+                <FormField
+                  type='select'
                   label='Статус'
                   name={['json', 'status']}
-                >
-                  {isEditPage ?
-                    <Select
-                      style={{ width: '200px' }}
-                      options={[
-                        { value: 0, label: 'Формирование' },
-                        { value: 1, label: 'В пути' },
-                        { value: 2, label: 'Поступила' },
-                        { value: 3, label: 'Приостановлена' },
-                      ]}
-                    /> :
-                    <div style={{ fontSize: 16, width: 150 }}>
-                      {SENDING_STATUS[data.json?.status]}
-                    </div>
-                  }
-                </Form.Item>
+                  style={{ width: 200 }}
+                  isEdit={isEditPage}
+                  options={[
+                    { value: 0, label: 'Формирование' },
+                    { value: 1, label: 'В пути' },
+                    { value: 2, label: 'Поступила' },
+                    { value: 3, label: 'Приостановлена' },
+                  ]}
+                  text={SENDING_STATUS[data.json?.status]}
+                />
               </div>
             </div>
-            <Form.Item
+            <FormField
+              type='textarea'
               label='Примечание'
               name={['json', 'note']}
-            >
-              {isEditPage ?
-                <TextArea rows={4} /> :
-                <div style={{ fontSize: 16 }}>
-                  {data.json?.note}
-                </div>
-              }
-            </Form.Item>
+              isEdit={isEditPage}
+              text={data.json?.note}
+              rows={4}
+            />
           </Form>
         )}
       </Row>
@@ -506,13 +464,6 @@ export default function Sending({
                   size={'large'}
                 >
                   Создать
-                </Button>
-                <Button
-                  type='primary'
-                  style={{ backgroundColor: '#009650' }}
-                  size={'large'}
-                >
-                  Создать счет
                 </Button>
                 {/* <Button type="primary" size={"large"}>
                                   Создать услугу

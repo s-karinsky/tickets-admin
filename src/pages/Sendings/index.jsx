@@ -193,6 +193,15 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
           >
             Создать
           </Button>
+          <Button
+            type='primary'
+            // style={{ backgroundColor: '#009650' }}
+            size='large'
+            title='Функция в разработке'
+            disabled
+          >
+            Создать счет
+          </Button>
         </div>
       </Row>
       <Table

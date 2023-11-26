@@ -10,7 +10,6 @@ import {
   Select,
   Checkbox,
   Form,
-  DatePicker,
 } from 'antd'
 import { useSelector } from 'react-redux'
 import TextArea from 'antd/es/input/TextArea'
@@ -18,13 +17,10 @@ import { BsTrash } from 'react-icons/bs'
 import { BiInfoCircle, BiEdit } from 'react-icons/bi'
 import { SaveOutlined, CopyOutlined } from '@ant-design/icons'
 import { get as _get } from 'lodash'
-import dayjs from 'dayjs'
-import { InfoModal } from '../../components/InfoModal'
 import { FilterModal } from '../../components/FilterModal'
-import { Property } from '../../components/Property'
 import { PropertyGap } from '../Sendings'
-import CreatePlaceModal from '../Sending/CreatePlaceModal'
 import CreateProductModal from './СreateProductModal'
+import FormField from '../../components/FormField'
 import { getSendingById, getPlaceById, deletePlaceById, getProductsByPlaceId, deleteProductById } from '../../utils/api'
 import { SENDING_STATUS } from '../../consts'
 import { getUserProfile } from '../../redux/user'
@@ -50,28 +46,7 @@ const propLabels = {
   note: 'Примечание'
 }
 
-export default function Sending({
-  product = {
-    code: ['1', 'Номер'],
-    name: ['Black&white', 'Наименование'],
-    brand: ['Chanel', 'Марка'],
-    article: [1, 'Артикул'],
-    color: ['Синий', 'Цвет'],
-    size: ['XL', 'Размер'],
-    price: ['200$', 'Цена за 1 кг'],
-    netWeight: [250, 'Вес нетто'],
-    grossWeight: [288, 'Вес брутто'],
-    sum: ['5000 $', 'Сумма'],
-    sertificate: [
-      '123 от 12.12.12 до 12.04.21',
-      'Сертификат/Декларация о соответствии',
-    ],
-    note: [
-      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s..",
-      'Примечание',
-    ],
-  },
-}) {
+export default function Sending() {
   const navigate = useNavigate()
   const location = useLocation()
   const user = useSelector(getUserProfile)
@@ -367,231 +342,148 @@ export default function Sending({
                   flexWrap: 'wrap',
                 }}
               >
-                <Form.Item
+                <FormField
+                  type='select'
                   label='Клиент'
                   name='client'
-                >
-                  {isEditPage ?
-                    <Select
-                      style={{ width: 200 }}
-                      options={[
-                        { value: 'Александр', title: 'Aktr' },
-                        { value: 'Владимир', title: 'Aktr' },
-                      ]}
-                    /> :
-                    <div style={{ fontSize: 16, width: 200 }}>
-                      {initialPlace.client}
-                    </div>
-                  }
-                </Form.Item>
-                <Form.Item
+                  style={{ width: 200 }}
+                  options={[
+                    { value: 'Александр', title: 'Aktr' },
+                    { value: 'Владимир', title: 'Ak2tr' },
+                  ]}
+                  text={initialPlace.client}
+                  isEdit={isEditPage}
+                />
+                <FormField
                   label='Место'
                   name='place'
-                >
-                  <Input
-                    bordered={isEditPage}
-                    readOnly={!isEditPage}
-                  />
-                </Form.Item>
-                <Form.Item
+                  isEdit={isEditPage}
+                />
+                <FormField
+                  type='select'
                   label='Статус места'
                   name='status'
-                >
-                  {isEditPage ?
-                    <Select
-                      style={{ width: 200 }}
-                      optionFilterProp='children'
-                      options={SENDING_STATUS.map((name, i) => ({ label: name, value: i }))}
-                      disabled
-                    /> :
-                    <div style={{ fontSize: 16, width: 200 }}>
-                      {SENDING_STATUS[initialPlace.status]}
-                    </div>
-                  }
-                </Form.Item>
-                <Form.Item
+                  style={{ width: 200 }}
+                  isEdit={isEditPage}
+                  options={SENDING_STATUS.map((name, i) => ({ label: name, value: i }))}
+                  text={SENDING_STATUS[initialPlace.status]}
+                  disabled
+                />
+                <FormField 
+                  type='select'
                   label='Статус услуги'
                   name='service_status'
-                >
-                  {isEditPage ?
-                    <Select
-                      style={{ width: 200 }}
-                      optionFilterProp='children'
-                      options={[
-                        { value: 'В обработке', title: '' },
-                        { value: 'Выдано', title: '' },
-                      ]}
-                    /> :
-                    <div style={{ fontSize: 16, width: 200 }}>
-                      {initialPlace.service_status}
-                    </div>
-                  }
-                </Form.Item>
-                <Form.Item
+                  style={{ width: 200 }}
+                  options={[
+                    { value: 'В обработке', title: '' },
+                    { value: 'Выдано', title: '' },
+                  ]}
+                  text={initialPlace.service_status}
+                  isEdit={isEditPage}
+                />
+                <FormField
+                  type='select'
                   label='Услуги'
                   name='services'
-                >
-                  {isEditPage ?
-                    <Select
-                      style={{ width: 200 }}
-                      optionFilterProp='children'
-                      options={[
-                        { value: 'В обработке', title: '' },
-                        { value: 'Выдача со склада', title: '' },
-                      ]}
-                    /> :
-                    <div style={{ fontSize: 16, width: 200 }}>
-                      {initialPlace.services}
-                    </div>
-                  }
-                </Form.Item>
-                <Form.Item
+                  style={{ width: 200 }}
+                  options={[
+                    { value: 'В обработке', title: '' },
+                    { value: 'Выдача со склада', title: '' },
+                  ]}
+                  text={initialPlace.services}
+                  isEdit={isEditPage}
+                />
+                <FormField 
+                  type='select'
                   label='Тариф'
                   name='tarif'
-                >
-                  {isEditPage ?
-                    <Select
-                      style={{ width: 200 }}
-                      optionFilterProp='children'
-                      options={[
-                        { value: 'Экспресс', title: '' },
-                        { value: 'Эконом', title: '' },
-                      ]}
-                    /> :
-                    <div style={{ fontSize: 16, width: 200 }}>
-                      {initialPlace.tarif}
-                    </div>
-                  }
-                </Form.Item>
-                <Form.Item
+                  style={{ width: 200 }}
+                  options={[
+                    { value: 'Экспресс', title: '' },
+                    { value: 'Эконом', title: '' },
+                  ]}
+                  text={initialPlace.tarif}
+                  isEdit={isEditPage}
+                />
+                <FormField
+                  type='select'
                   label='Тип оплаты'
                   name='pay_type'
-                >
-                  {isEditPage ?
-                    <Select
-                      style={{ width: 200 }}
-                      optionFilterProp='children'
-                      options={[
-                        { value: 'Наличный', title: '' },
-                        { value: 'Безналичный', title: '' },
-                      ]}
-                    /> :
-                    <div style={{ fontSize: 16, width: 200 }}>
-                      {initialPlace.pay_type}
-                    </div>
-                  }
-                </Form.Item>
-                {/* <div style={{ position: 'relative' }}>
-                  <div
-                    style={{
-                      paddingLeft: 10,
-                      color: '#757575',
-                    }}
-                  >
-                    Дата отправки
-                  </div>
-                  <DatePicker size='large' />
-                </div> */}
-                <Form.Item
+                  style={{ width: 200 }}
+                  options={[
+                    { value: 'Наличный', title: '' },
+                    { value: 'Безналичный', title: '' },
+                  ]}
+                  text={initialPlace.pay_type}
+                  isEdit={isEditPage}
+                />
+                <FormField
+                  type='number'
                   label='Цена за 1 кг'
                   name='pay_kg'
-                >
-                  <Input
-                    addonAfter={isEditPage && '$'}
-                    style={{ width: 200 }}
-                    bordered={isEditPage}
-                    readOnly={!isEditPage}
-                  />
-                </Form.Item>
-                <Form.Item
+                  addonAfter={isEditPage && '$'}
+                  style={{ width: 200 }}
+                  isEdit={isEditPage}
+                />
+                <FormField
+                  type='number'
                   label='Сумма товара'
                   name='items_sum'
-                >
-                  <Input
-                    addonAfter={isEditPage && '$'}
-                    style={{ width: 200 }}
-                    bordered={isEditPage}
-                    readOnly={!isEditPage}
-                  />
-                </Form.Item>
-                <Form.Item
+                  addonAfter={isEditPage && '$'}
+                  style={{ width: 200 }}
+                  isEdit={isEditPage}  
+                />
+                <FormField
+                  type='number'
                   label='Сумма оплаты'
                   name='pay_sum'
-                >
-                  <Input
-                    addonAfter={isEditPage && '$'}
-                    style={{ width: 200 }}
-                    bordered={isEditPage}
-                    readOnly={!isEditPage}
-                  />
-                </Form.Item>
-                <Form.Item
+                  addonAfter={isEditPage && '$'}
+                  style={{ width: 200 }}
+                  isEdit={isEditPage}  
+                />
+                <FormField
+                  type='number'
                   label='Размер'
                   name='size'
-                >
-                  <Input
-                    addonAfter={isEditPage && 'см'}
-                    style={{ width: 200 }}
-                    bordered={isEditPage}
-                    readOnly={!isEditPage}
-                  />
-                </Form.Item>
-                <Form.Item
+                  addonAfter={isEditPage && 'см'}
+                  style={{ width: 200 }}
+                  isEdit={isEditPage}  
+                />
+                <FormField
+                  type='number'
                   label='Вес нетто'
                   name='net_weight'
-                >
-                  <Input
-                    addonAfter={isEditPage && 'кг'}
-                    style={{ width: 200 }}
-                    disabled={isEditPage}
-                    bordered={isEditPage}
-                    readOnly={!isEditPage}
-                  />
-                </Form.Item>
-                <Form.Item
+                  addonAfter={isEditPage && 'кг'}
+                  style={{ width: 200 }}
+                  isEdit={isEditPage}
+                  disabled={isEditPage}
+                />
+                <FormField
+                  type='number'
                   label='Вес брутто'
                   name='gross_weight'
-                >
-                  <Input
-                    addonAfter={isEditPage && 'кг'}
-                    style={{ width: 200 }}
-                    disabled={isEditPage}
-                    bordered={isEditPage}
-                    readOnly={!isEditPage}
-                  />
-                </Form.Item>
-                <Form.Item
+                  addonAfter={isEditPage && 'кг'}
+                  style={{ width: 200 }}
+                  isEdit={isEditPage}
+                  disabled={isEditPage}
+                />
+                <FormField
+                  type='number'
                   label='Количество товара'
                   name='count'
-                >
-                  <Input
-                    style={{ width: 200 }}
-                    disabled={isEditPage}
-                    bordered={isEditPage}
-                    readOnly={!isEditPage}
-                  />
-                </Form.Item>
+                  style={{ width: 200 }}
+                  isEdit={isEditPage}
+                  disabled={isEditPage}
+                />
               </div>
-              <Form.Item
+              <FormField
+                type='textarea'
                 label='Примечание'
                 name='note'
-              >
-                {isEditPage ?
-                  <TextArea rows={4} /> :
-                  <div style={{ fontSize: 16 }}>
-                    {initialPlace.note}
-                  </div>
-                }
-              </Form.Item>
+                text={initialPlace.note}
+              />
             </Form>
-          )/*  : (
-            Object.keys(propLabels).map(key => {
-              const label = propLabels[key]
-              const val = _get(placeData.data, key)
-              let show = val instanceof dayjs ? val.format('DD.MM.YYYY') : val
-              return <Property title={label} subtitle={show} />
-            })
-          ) */}
+          )}
         </Row>
         <Row>
           <Title
