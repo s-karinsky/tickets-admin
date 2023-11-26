@@ -28,3 +28,12 @@ body {
   width: auto;
   margin-bottom: 10px;
 }
+
+.ant-picker .ant-picker-input > input {
+  text-align: center;
+}
+
+.ant-input-number-input:not(:disabled) {
+  text-align: right !important;
+  padding-right: 24px !important;
+}
