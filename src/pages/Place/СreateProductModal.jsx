@@ -1,14 +1,15 @@
-import React from 'react'
-import { Typography, Modal, DatePicker, Button, Form, Input, InputNumber, Checkbox } from 'antd'
-import TextArea from 'antd/es/input/TextArea'
+import { useState } from 'react'
+import { Row, Col, Typography, Modal, Button, Form, Checkbox } from 'antd'
 import dayjs from 'dayjs'
 import { PropertyGap } from '../../pages/Sendings'
+import FormField from '../../components/FormField'
 import { sqlInsert, sqlUpdate } from '../../utils/sql'
 import axios from '../../utils/axios'
 const { Title } = Typography
 
 export const CreateProductModal = ({ isModalOpen, handleCancel, title, placeId, userId, product = {} }) => {
-  const [ form ] = Form.useForm()
+  const [form] = Form.useForm()
+  const [isEdit, setIsEdit] = useState(product === true)
   const initialValues = {
     ...product,
     cert_start_date: product.cert_start_date ? dayjs(product.cert_start_date) : undefined,
@@ -18,22 +19,38 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, title, placeId, 
     <Modal
       width={700}
       title={
-        <Title
-          level={2}
-          style={{
-            fontWeight: '700',
-            marginBottom: '0',
-            marginTop: 0,
-          }}
-        >
-          {title}
-        </Title>
+        <Row>
+          <Col>
+            <Title
+              level={2}
+              style={{
+                fontWeight: '700',
+                marginBottom: '0',
+                marginTop: 0,
+              }}
+            >
+              {product === true ? 'Создать товар' : (isEdit ? 'Редактировать товар' : 'Просмотр товара')}
+            </Title>
+          </Col>
+          {!isEdit && <Col>
+            <Button style={{ margin: '6px 0 0 20px' }} onClick={() => setIsEdit(true)}>
+              Редактировать
+            </Button>
+          </Col>}
+        </Row>
       }
       open={isModalOpen}
       onCancel={handleCancel}
-      footer={[
+      footer={isEdit ? [
         <Button
           key='1'
+          onClick={() => handleCancel()}
+          danger
+        >
+          Отмена
+        </Button>,
+        <Button
+          key='2'
           type='primary'
           style={{ backgroundColor: 'rgb(0, 150, 80)' }}
           onClick={() => {
@@ -42,7 +59,7 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, title, placeId, 
         >
           Сохранить
         </Button>,
-      ]}
+      ] : null}
     >
       <Form
         style={{
@@ -65,7 +82,7 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, title, placeId, 
               creator_id: userId,
               editor_id: userId
             }
-            await axios.postWithAuth('/query/insert', { sql: sqlInsert('dataset', params ) })
+            await axios.postWithAuth('/query/insert', { sql: sqlInsert('dataset', params) })
           } else {
             const params = {
               pole: JSON.stringify(values)
@@ -75,173 +92,124 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, title, placeId, 
           handleCancel()
         }}
       >
-        <Form.Item
+        <FormField
+          isEdit={isEdit}
           label='Наименование'
           name='name'
-        >
-          <Input
-
-          />
-        </Form.Item>
-        <Form.Item
+        />
+        <FormField
+          isEdit={isEdit}
           label='Марка'
           name='label'
-        >
-          <Input
-
-          />
-        </Form.Item>
-        <Form.Item
+        />
+        <FormField
+          isEdit={isEdit}
           label='Артикул'
           name='article'
-        >
-          <Input
-
-          />
-        </Form.Item>
-        <Form.Item
+        />
+        <FormField
+          isEdit={isEdit}
           label='Цвет'
           name='color'
-        >
-          <Input
-
-          />
-        </Form.Item>
-        <Form.Item
+        />
+        <FormField
+          isEdit={isEdit}
           label='Размер'
           name='size'
-        >
-          <Input
-
-          />
-        </Form.Item>
-        <Form.Item
+        />
+        <FormField
+          isEdit={isEdit}
           label='Состав/материал'
           name='material'
-        >
-          <Input
-
-          />
-        </Form.Item>
-
-        <Form.Item
-          label='Вес брутто'
-          name='gross_weight'
-        >
-          <InputNumber
-            addonAfter='кг'
-          />
-        </Form.Item>
-        <Form.Item
+        />
+        <FormField
+          isEdit={isEdit}
+          type='number'
           label='Вес нетто'
           name='net_weight'
-        >
-          <InputNumber
-            addonAfter='кг'
-          />
-        </Form.Item>
+          addonAfter={isEdit && 'кг'}
+        />
         <div style={{ flexBasis: '100%' }} />
         <fieldset style={{ display: 'flex', gap: 10, margin: '0 -10px' }}>
           <legend>Обувь</legend>
-          <Form.Item
+          <FormField
+            isEdit={isEdit}
             label='Верх'
             name='shoes_top'
-          >
-            <Input
-
-            />
-          </Form.Item>
-          <Form.Item
+          />
+          <FormField
+            isEdit={isEdit}
             label='Подкладка'
             name='shoes_und'
-          >
-            <Input
-
-            />
-          </Form.Item>
-          <Form.Item
+          />
+          <FormField
+            isEdit={isEdit}
             label='Низ'
             name='shoes_bottom'
-          >
-            <Input
-
-            />
-          </Form.Item>
+          />
         </fieldset>
         <div style={{ flexBasis: '100%' }} />
         <fieldset style={{ display: 'flex', gap: 10, margin: '0 -10px' }}>
           <legend>Сертификат/Декларация о соответствии</legend>
-          <Form.Item
+          <FormField
+            isEdit={isEdit}
             label='Номер'
             name='cert_number'
-          >
-            <Input
-
-            />
-          </Form.Item>
-          <Form.Item
+          />
+          <FormField
+            isEdit={isEdit}
+            type='date'
             label='Дата начала'
             name='cert_start_date'
-          >
-            <DatePicker
-              placeholder='Выберите дату'
-              format='DD.MM.YYYY'
-              style={{ width: 204.4 }}
-            />
-          </Form.Item>
-          <Form.Item
+            style={{ width: 204.4 }}
+          />
+          <FormField
+            isEdit={isEdit}
+            type='date'
             label='Дата окончания'
             name='cert_end_date'
-          >
-            <DatePicker
-              placeholder='Выберите дату'
-              format='DD.MM.YYYY'
-              style={{ width: 204.4 }}
-            />
-          </Form.Item>
+            style={{ width: 204.4 }}
+          />
         </fieldset>
-        <Form.Item
+        <FormField
+          isEdit={isEdit}
+          type='number'
           label='Количество'
           name='count'
-        >
-          <InputNumber
-            style={{ width: 204.4 }}
-          />
-        </Form.Item>
-        <Form.Item
+          style={{ width: 204.4 }}
+        />
+        <FormField
+          isEdit={isEdit}
+          type='number'
           label='Цена'
           name='price'
-        >
-          <InputNumber
-            addonAfter='$'
-            style={{ width: 204.4 }}
-          />
-        </Form.Item>
-        <Form.Item
+          addonAfter={isEdit && '$'}
+          style={{ width: 204.4 }}
+        />
+        <FormField
+          isEdit={isEdit}
+          type='number'
           label='Сумма'
           name='sum'
-        >
-          <InputNumber
-            addonAfter='$'
-            style={{ width: 204.4 }}
-          />
-        </Form.Item>
+          addonAfter={isEdit && '$'}
+          style={{ width: 204.4 }}
+        />
         <div style={{ flexBasis: '100%' }} />
         <Form.Item
           name='mark'
         >
-          <Checkbox>Маркировка ЧЗ</Checkbox>
+          <Checkbox disabled={!isEdit}>Маркировка ЧЗ</Checkbox>
         </Form.Item>
         <div style={{ flexBasis: '100%' }} />
-        <Form.Item
-          label='Примечание'
-          name='note'
-          style={{ flexGrow: 1 }}
-        >
-          <TextArea
+        <div style={{ flexGrow: 1 }}>
+          <FormField
+            isEdit={isEdit}
+            type='textarea'
+            label='Примечание'
+            name='note'
             rows={4}
           />
-        </Form.Item>
+        </div>
       </Form>
     </Modal>
   )

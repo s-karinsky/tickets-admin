@@ -4,7 +4,7 @@ export default function FormField({
   label,
   name,
   type,
-  isEdit,
+  isEdit = true,
   text,
   ...rest
 }) {
