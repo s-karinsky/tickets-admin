@@ -23,16 +23,20 @@ export const getSendings = isAir => async () => {
       count: json.count_places,
       weight: json.gross_weight,
       departure: item.start_datetime,
-      delivery: item.complete_datetime
+      delivery: item.complete_datetime,
+      json
     }
   })
 }
 
 export const getSendingById = sendingId => async () => {
   if (sendingId === 'create') {
-    const response = await axios.postWithAuth('/query/select', { sql: `SELECT max(int('from')) FROM trip WHERE YEAR(create_datetime) = YEAR('${dayjs().format('YYYY-MM-DD')}')` })
-    console.log(response)
-    return {}
+    // const response = await axios.postWithAuth('/query/select', { sql: `SELECT max(int('from')) FROM trip WHERE YEAR(create_datetime) = YEAR('${dayjs().format('YYYY-MM-DD')}')` })
+    return {
+      json: {
+        status: 0
+      }
+    }
   } else {
     const response = await axios.postWithAuth('/query/select', { sql: `SELECT * FROM trip WHERE id_trip=${sendingId}` })
     const item = (response.data?.data || [])[0] || {}

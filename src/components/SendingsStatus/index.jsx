@@ -1,83 +1,33 @@
 import React from 'react'
-import { BsBox, BsTruck } from 'react-icons/bs';
+import { BsBox, BsTruck } from 'react-icons/bs'
 import { BiHomeAlt } from 'react-icons/bi'
+import './styles.css'
 
-export const SendingsStatus = ({ status = 0 }) => {
-  let positionCar = { left: 15, flexDirection: 'row' }
-  let progress = { width: 0, backgroundColor: '#141414' }
-  let textCar = 'Формирование'
-  switch (status) {
-    case 1:
-      positionCar = { left: 63, flexDirection: 'row-reverse' }
-      progress = { width: '50%', backgroundColor: '#4D89FF' }
-      textCar = 'В пути'
-      break
-    case 2:
-      positionCar = { right: 15, flexDirection: 'row-reverse' }
-      progress = { width: '100%', backgroundColor: '#009650' }
-      textCar = 'Поступила'
-      break
-    case 3:
-      positionCar = { right: 20, flexDirection: 'row-reverse' }
-      progress = { width: '90%', backgroundColor: '#FF3030' }
-      textCar = 'Приостановлен'
-      break
-    default:
-      break
-  }
+export const SendingsStatus = ({ status = 0, onClick = () => false }) => {
+  const text = ['Формирование', 'В пути', 'Поступила', 'Приостановлен']
+  const statusClasses = ['creating', 'progress', 'done', 'pause']
+
   return (
-    <div style={{ width: '200px', minHeight: 24 }}>
-      <div
-        style={{
-          position: 'relative',
-          display: 'flex',
-          alignItems: 'flex-start',
-          justifyContent: 'space-between',
-        }}
-      >
+    <div
+      className={`sending-status sending-status_${statusClasses[status]} ${status <= 1 ? 'sending-status_active' : ''}`}
+      onClick={onClick}
+    >
+      <div className='sending-status__preview'>
         <BsBox size={14} />
-
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 5,
-            ...positionCar,
-          }}
-        >
+        <div className='sending-status__car'>
           <BsTruck size={14} />
-          <div
-            style={{
-              fontSize: 11,
-              lineHeight: '13px',
-              fontWeight: 500,
-              color: progress.backgroundColor,
-            }}
-          >
-            {textCar}
+          <div className='sending-status__text'>
+            {text[status]}
           </div>
         </div>
+        {status <= 1 && <div className='sending-status__hover-text'>
+          Изменить на «{text[status + 1]}»
+        </div>}
 
         <BiHomeAlt size={14} />
       </div>
-      <div
-        style={{
-          width: '100%',
-          height: 5,
-          borderRadius: 2,
-          backgroundColor: '#D9D9D9',
-          marginTop: 5,
-        }}
-      >
-        <div
-          style={{
-            height: 5,
-            borderRadius: 2,
-            ...progress,
-          }}
-        ></div>
+      <div className='sending-status__progress'>
+        <div className='sending-status__progress-line'></div>
       </div>
     </div>
   )

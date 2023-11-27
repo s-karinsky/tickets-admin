@@ -390,12 +390,8 @@ export default function Sending({
                   name={['json', 'status']}
                   style={{ width: 200 }}
                   isEdit={isEditPage}
-                  options={[
-                    { value: 0, label: 'Формирование' },
-                    { value: 1, label: 'В пути' },
-                    { value: 2, label: 'Поступила' },
-                    { value: 3, label: 'Приостановлена' },
-                  ]}
+                  disabled={isEditPage}
+                  options={SENDING_STATUS.map((label, value) => ({ label, value }))}
                   text={SENDING_STATUS[data.json?.status]}
                 />
               </div>

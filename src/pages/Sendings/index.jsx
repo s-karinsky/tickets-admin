@@ -1,13 +1,15 @@
+import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Button, Row, Table, Typography, Input, Switch } from 'antd'
+import { Button, Row, Table, Typography, Input, Switch, Modal, DatePicker } from 'antd'
 import { useQuery } from 'react-query'
 import dayjs from 'dayjs'
 import { BsArrowRepeat, BsCheck2Circle, BsTrash } from 'react-icons/bs'
-import { useState } from 'react'
 import { SendingsStatus } from '../../components/SendingsStatus'
 import { DateTableCell } from '../../components/DateTableCell'
+import axios from '../../utils/axios'
 import { getSendings, deleteSendingById } from '../../utils/api'
 import { getColumnSearchProps } from '../../utils/components'
+import { sqlUpdate } from '../../utils/sql'
 import { SENDING_STATUS } from '../../consts'
 
 const { Title, Link } = Typography
@@ -52,6 +54,25 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
       }
     })
 
+  const handleClickStatus = (item) => {
+    Modal.confirm({
+      title: 'Введите дату изменения статуса',
+      content: <DatePicker
+        size='large'
+        style={{ width: 'calc(100% - 30px)'}}
+        defaultValue={dayjs()}
+        format='DD.MM.YYYY'
+      />,
+      width: 350,
+      onOk: async () => {
+        const json = item.json
+        json.status += 1
+      await axios.postWithAuth('/query/update', { sql: sqlUpdate('trip', { json: JSON.stringify(json) }, `id_trip=${item.id}`) })
+        refetch()
+      }
+    })
+  }
+
   const columns = [
     {
       title: 'Номер',
@@ -78,7 +99,10 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
       title: 'Статус',
       dataIndex: 'status',
       key: 'status',
-      render: status => <SendingsStatus status={status} />,
+      render: (status, record) => <SendingsStatus
+        status={status}
+        onClick={status <= 1 ? () => handleClickStatus(record) : undefined}
+      />,
       sorter: (a, b) => a.status - b.status,
       ...getColumnSearchProps(record => record.status + 1, { options: SENDING_STATUS.map((label, value) => ({ value: value + 1, label })) })
     },
