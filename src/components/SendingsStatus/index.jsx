@@ -9,7 +9,7 @@ export const SendingsStatus = ({ status = 0, onClick = () => false }) => {
 
   return (
     <div
-      className={`sending-status sending-status_${statusClasses[status]} ${status <= 1 ? 'sending-status_active' : ''}`}
+      className={`sending-status sending-status_${statusClasses[status]} sending-status_active`}
       onClick={onClick}
     >
       <div className='sending-status__preview'>
@@ -20,9 +20,9 @@ export const SendingsStatus = ({ status = 0, onClick = () => false }) => {
             {text[status]}
           </div>
         </div>
-        {status <= 1 && <div className='sending-status__hover-text'>
-          Изменить на «{text[status + 1]}»
-        </div>}
+        <div className='sending-status__hover-text'>
+          Изменить статус
+        </div>
 
         <BiHomeAlt size={14} />
       </div>

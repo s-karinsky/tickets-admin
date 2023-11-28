@@ -80,6 +80,11 @@
   width: 100%;
   background-color: #009650;
 }
+.sending-status_done:hover .sending-status__progress-line {
+  width: 50%;
+  background-color: #4D89FF;
+}
+
 
 .sending-status_pause .sending-status__car {
   right: 20px;

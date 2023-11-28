@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Button, Row, Table, Typography, Input, Switch, Modal, DatePicker } from 'antd'
+import { Button, Row, Table, Typography, Input, Switch, Modal, DatePicker, Select } from 'antd'
 import { useQuery } from 'react-query'
 import dayjs from 'dayjs'
 import { BsArrowRepeat, BsCheck2Circle, BsTrash } from 'react-icons/bs'
@@ -18,6 +18,10 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
   const navigate = useNavigate()
   const location = useLocation()
 
+  const [ showStatusModal, setShowStatusModal ] = useState(false)
+  const [ statusModalValue, setStatusModalValue ] = useState()
+  const [ statusModalDate, setStatusModalDate ] = useState()
+  const [ statusModalItem, setStatusModalItem ] = useState()
   const [ search, setSearch ] = useState('')
   const { isLoading, data, refetch } = useQuery(['sendings', { isAir: isSendingAir }], getSendings(isSendingAir))
 
@@ -35,9 +39,18 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
         'departure-date': <DateTableCell date={new Date(item.departure)} />,
         'delivery-date': <DateTableCell date={new Date(item.delivery)} />,
         buttons: (
-          <div style={{ display: 'flex', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             {/* <BsCheck2Circle size={17} color='green' /> */}
             {/* <BsArrowRepeat size={17} color='' /> */}
+            <Button
+              type='primary'
+              size='small'
+              style={{ marginTop: 5 }}
+              title='Функция в разработке'
+              disabled
+            >
+              Создать счет
+            </Button>
             <BsTrash
               style={{ cursor: 'pointer' }}
               size={17}
@@ -55,30 +68,19 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
     })
 
   const handleClickStatus = (item) => {
-    Modal.confirm({
-      title: 'Введите дату изменения статуса',
-      content: <DatePicker
-        size='large'
-        style={{ width: 'calc(100% - 30px)'}}
-        defaultValue={dayjs()}
-        format='DD.MM.YYYY'
-      />,
-      width: 350,
-      onOk: async () => {
-        const json = item.json
-        json.status += 1
-      await axios.postWithAuth('/query/update', { sql: sqlUpdate('trip', { json: JSON.stringify(json) }, `id_trip=${item.id}`) })
-        refetch()
-      }
-    })
+    setStatusModalValue(item.status)
+    setStatusModalItem(item)
+    setStatusModalDate(dayjs())
+    setShowStatusModal(true)
   }
 
   const columns = [
     {
       title: 'Номер',
-      sorter: (a, b) => a.code - b.code,
       dataIndex: 'code',
       key: 'code',
+      align: 'right',
+      sorter: (a, b) => a.code - b.code,
     },
     {
       title: 'Дата',
@@ -101,7 +103,7 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
       key: 'status',
       render: (status, record) => <SendingsStatus
         status={status}
-        onClick={status <= 1 ? () => handleClickStatus(record) : undefined}
+        onClick={() => handleClickStatus(record)}
       />,
       sorter: (a, b) => a.status - b.status,
       ...getColumnSearchProps(record => record.status + 1, { options: SENDING_STATUS.map((label, value) => ({ value: value + 1, label })) })
@@ -109,15 +111,17 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
     {
       title: 'Количество мест',
       dataIndex: 'count',
-      sorter: (a, b) => a.count - b.count,
       key: 'count',
+      align: 'right',
+      sorter: (a, b) => a.count - b.count,
       ...getColumnSearchProps('count', { type: 'number' })
     },
     {
       title: 'Вес брутто',
-      sorter: (a, b) => a.weight - b.weight,
       dataIndex: 'weight',
       key: 'weight',
+      align: 'right',
+      sorter: (a, b) => a.weight - b.weight,
       ...getColumnSearchProps('weight', { type: 'number' })
     },
     {
@@ -217,15 +221,6 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
           >
             Создать
           </Button>
-          <Button
-            type='primary'
-            // style={{ backgroundColor: '#009650' }}
-            size='large'
-            title='Функция в разработке'
-            disabled
-          >
-            Создать счет
-          </Button>
         </div>
       </Row>
       <Table
@@ -242,6 +237,38 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
           },
         })}
       />
+      <Modal
+        title='Изменить статус отправки'
+        open={showStatusModal}
+        width={300}
+        onOk={() => {
+          if (!statusModalItem) return
+          const json = statusModalItem.json
+          json.status = statusModalValue
+          axios.postWithAuth('/query/update', { sql: sqlUpdate('trip', { json: JSON.stringify(json) }, `id_trip=${statusModalItem.id}`) })
+            .then(() => {
+              refetch()
+              setShowStatusModal(false)
+            })
+        }}
+        onCancel={() => setShowStatusModal(false)}
+      >
+        <DatePicker
+          size='large'
+          value={statusModalDate}
+          onChange={val => setStatusModalDate(val)}
+          format='DD.MM.YYYY'
+          style={{ width: '100%' }}
+        />
+        <br />
+        <Select
+          style={{ width: '100%', marginTop: 10 }}
+          size='large'
+          options={SENDING_STATUS.map((label, value) => ({ label, value }))}
+          value={statusModalValue}
+          onChange={val => setStatusModalValue(val)}
+        />
+      </Modal>
     </div>
   )
 }
