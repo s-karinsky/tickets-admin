@@ -119,6 +119,7 @@ export default function Sending() {
       title: 'Номер',
       dataIndex: 'id',
       key: 'id',
+      align: 'right',
       sorter: (a, b) => a.code - b.code,
     },
     {
@@ -149,24 +150,28 @@ export default function Sending() {
       title: 'Размер',
       dataIndex: 'size',
       key: 'size',
+      align: 'right',
       ...getColumnSearchProps('size')
     },
     {
       title: 'Количество',
       dataIndex: 'count',
       key: 'count',
+      align: 'right',
       ...getColumnSearchProps('count', { type: 'number' })
     },
     {
       title: 'Цена',
       dataIndex: 'price',
       key: 'price',
+      align: 'right',
       ...getColumnSearchProps('price', { type: 'number' })
     },
     {
       title: 'Сумма',
       dataIndex: 'sum',
       key: 'sum',
+      align: 'right',
       ...getColumnSearchProps('sum', { type: 'number' })
     },
     {

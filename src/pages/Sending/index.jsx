@@ -98,6 +98,7 @@ export default function Sending({
       title: 'Номер',
       dataIndex: 'id',
       key: 'id',
+      align: 'right',
       sorter: (a, b) => a.id - b.id,
     },
     {
@@ -116,6 +117,7 @@ export default function Sending({
       title: 'Вес брутто',
       dataIndex: 'gross_weight',
       key: 'gross_weight',
+      align: 'right',
       sorter: (a, b) => a.gross_weight - b.gross_weight,
       ...getColumnSearchProps('gross_weight', { type: 'number' })
     },
@@ -129,6 +131,7 @@ export default function Sending({
       title: 'Количество товара',
       dataIndex: 'count',
       key: 'count',
+      align: 'right',
       ...getColumnSearchProps('count', { type: 'number' })
     },
     {
