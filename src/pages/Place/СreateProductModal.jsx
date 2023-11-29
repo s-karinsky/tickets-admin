@@ -5,12 +5,14 @@ import { PropertyGap } from '../../pages/Sendings'
 import FormField from '../../components/FormField'
 import { sqlInsert, sqlUpdate } from '../../utils/sql'
 import axios from '../../utils/axios'
+import { required, numberRange } from '../../utils/validationRules'
 const { Title } = Typography
 
-export const CreateProductModal = ({ isModalOpen, handleCancel, title, placeId, userId, product = {} }) => {
+export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId, maxNum, product = {} }) => {
   const [form] = Form.useForm()
   const [isEdit, setIsEdit] = useState(product === true)
   const initialValues = {
+    number: maxNum + 1,
     ...product,
     cert_start_date: product.cert_start_date ? dayjs(product.cert_start_date) : undefined,
     cert_end_date: product.cert_end_date ? dayjs(product.cert_end_date) : undefined
@@ -66,7 +68,7 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, title, placeId, 
           display: 'flex',
           gap: `${PropertyGap}px`,
           flexWrap: 'wrap',
-          alignItems: 'flex-end',
+          alignItems: 'flex-start',
         }}
         size='large'
         layout='vertical'
@@ -93,9 +95,18 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, title, placeId, 
         }}
       >
         <FormField
+          type='number'
+          isEdit={isEdit}
+          label='Номер'
+          name='number'
+          style={{ width: 204.4 }}
+          rules={[...required(), numberRange({ min: maxNum + 1 })]}
+        />
+        <FormField
           isEdit={isEdit}
           label='Наименование'
           name='name'
+          rules={required()}
         />
         <FormField
           isEdit={isEdit}
@@ -128,6 +139,7 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, title, placeId, 
           label='Вес нетто'
           name='net_weight'
           addonAfter={isEdit && 'кг'}
+          rules={[...required(), ...numberRange({ min: 1, max: 99999 })]}
         />
         <div style={{ flexBasis: '100%' }} />
         <fieldset style={{ display: 'flex', gap: 10, margin: '0 -10px' }}>
@@ -177,6 +189,7 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, title, placeId, 
           label='Количество'
           name='count'
           style={{ width: 204.4 }}
+          rules={[...required(), ...numberRange({ min: 1, max: 99999 })]}
         />
         <FormField
           isEdit={isEdit}

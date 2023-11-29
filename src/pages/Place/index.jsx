@@ -24,6 +24,7 @@ import { SENDING_STATUS } from '../../consts'
 import { getUserProfile } from '../../redux/user'
 import { sqlInsert, sqlUpdate } from '../../utils/sql'
 import { getColumnSearchProps } from '../../utils/components'
+import { required, numberRange } from '../../utils/validationRules'
 import axios from '../../utils/axios'
 
 const { Title, Link } = Typography
@@ -82,6 +83,8 @@ export default function Sending() {
     count: (productsData.data || []).reduce((sum, item) => sum + item.count || 0, 0)
   }
 
+  const maxNum = (productsData.data || []).reduce((max, item) => Math.max(item.number, max), 1)
+
   const places = (productsData.data || [])
     .filter(item => {
       if (!search) return true
@@ -117,8 +120,8 @@ export default function Sending() {
   const columns = [
     {
       title: 'Номер',
-      dataIndex: 'id',
-      key: 'id',
+      dataIndex: 'number',
+      key: 'number',
       align: 'right',
       sorter: (a, b) => a.code - b.code,
     },
@@ -373,11 +376,13 @@ export default function Sending() {
                   ]}
                   text={initialPlace.client}
                   isEdit={isEditPage}
+                  rules={required()}
                 />
                 <FormField
                   label='Место'
                   name='place'
                   isEdit={isEditPage}
+                  rules={required()}
                 />
                 <FormField
                   type='select'
@@ -387,6 +392,7 @@ export default function Sending() {
                   isEdit={isEditPage}
                   options={SENDING_STATUS.map((name, i) => ({ label: name, value: i }))}
                   text={SENDING_STATUS[initialPlace.status]}
+                  rules={required()}
                   disabled
                 />
                 <FormField 
@@ -424,6 +430,7 @@ export default function Sending() {
                   ]}
                   text={initialPlace.tarif}
                   isEdit={isEditPage}
+                  rules={required()}
                 />
                 <FormField
                   type='select'
@@ -436,6 +443,7 @@ export default function Sending() {
                   ]}
                   text={initialPlace.pay_type}
                   isEdit={isEditPage}
+                  rules={required()}
                 />
                 <FormField
                   type='number'
@@ -462,12 +470,12 @@ export default function Sending() {
                   isEdit={isEditPage}  
                 />
                 <FormField
-                  type='number'
                   label='Размер'
                   name='size'
                   addonAfter={isEditPage && 'см'}
                   style={{ width: 200 }}
                   isEdit={isEditPage}  
+                  rules={required()}
                 />
                 <FormField
                   type='number'
@@ -477,6 +485,7 @@ export default function Sending() {
                   style={{ width: 200 }}
                   isEdit={isEditPage}
                   disabled={isEditPage}
+                  rules={[...required(), ...numberRange({ min: 0, max: 99999 })]}
                 />
                 <FormField
                   type='number'
@@ -486,6 +495,7 @@ export default function Sending() {
                   style={{ width: 200 }}
                   isEdit={isEditPage}
                   disabled={isEditPage}
+                  rules={[...required(), ...numberRange({ min: 0, max: 99999 })]}
                 />
                 <FormField
                   type='number'
@@ -494,6 +504,7 @@ export default function Sending() {
                   style={{ width: 200 }}
                   isEdit={isEditPage}
                   disabled={isEditPage}
+                  rules={[...required(), ...numberRange({ min: 0, max: 99999 })]}
                 />
               </div>
               <FormField
@@ -575,6 +586,7 @@ export default function Sending() {
         placeId={placeId}
         userId={user.u_id}
         product={editProduct}
+        maxNum={maxNum}
       />}
     </>
   )
