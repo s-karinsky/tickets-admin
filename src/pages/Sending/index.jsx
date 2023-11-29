@@ -316,7 +316,7 @@ export default function Sending({
                 type='number'
                 style={{ width: 120 }}
                 isEdit={isEditPage}
-                rules={required()}
+                rules={[...required(), ...numberRange({ min: data.from })]}
               />
               <FormField
                 type='date'

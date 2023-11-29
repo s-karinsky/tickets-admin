@@ -1,4 +1,5 @@
 import dayjs from 'dayjs'
+import { get as _get } from 'lodash'
 import axios from './axios'
 import { sqlUpdate } from './sql'
 
@@ -31,8 +32,11 @@ export const getSendings = isAir => async () => {
 
 export const getSendingById = sendingId => async () => {
   if (sendingId === 'create') {
-    // const response = await axios.postWithAuth('/query/select', { sql: `SELECT max(int('from')) FROM trip WHERE YEAR(create_datetime) = YEAR('${dayjs().format('YYYY-MM-DD')}')` })
+    const response = await axios.postWithAuth('/query/select', { sql: `SELECT max(\`from\`) FROM trip WHERE YEAR(create_datetime) = YEAR('${dayjs().format('YYYY-MM-DD')}')` })
+    const data = response.data?.data || []
+    const number = parseInt(_get(data, [0, 'max(`from`)'])) || 0
     return {
+      from: number + 1,
       json: {
         status: 0
       }
