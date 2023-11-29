@@ -37,3 +37,11 @@ body {
   text-align: right !important;
   padding-right: 24px !important;
 }
+
+.ant-table-cell-row-hover {
+  background: #d3e7ff !important;
+}
+
+.active-row > .ant-table-cell {
+  background: #86b8ff !important;
+}

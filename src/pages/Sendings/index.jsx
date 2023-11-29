@@ -22,6 +22,7 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
   const [ statusModalValue, setStatusModalValue ] = useState()
   const [ statusModalDate, setStatusModalDate ] = useState()
   const [ statusModalItem, setStatusModalItem ] = useState()
+  const [ activeRow, setActiveRow ] = useState()
   const [ search, setSearch ] = useState('')
   const { isLoading, data, refetch } = useQuery(['sendings', { isAir: isSendingAir }], getSendings(isSendingAir))
 
@@ -229,10 +230,13 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
         dataSource={sendings}
         loading={isLoading}
         rowKey={({ id }) => id}
-        onRow={(record) => ({
+        rowClassName={(r, index) => index === activeRow ? 'active-row' : ''}
+        onRow={(record, index) => ({
           onClick: (e) => {
             if (e.detail === 2) {
               navigate(`/sendings/${record.id}`)
+            } else {
+              setActiveRow(index)
             }
           },
         })}
