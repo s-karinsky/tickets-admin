@@ -6,6 +6,7 @@ export default function FormField({
   type,
   isEdit = true,
   text,
+  rules,
   ...rest
 }) {
   let child = null
@@ -58,7 +59,8 @@ export default function FormField({
     <Form.Item
       label={label}
       name={name}
-      style={{ fontWeight: 'bold' }}
+      style={{ fontWeight: 'bold', width: rest.style?.width }}
+      rules={isEdit ? rules : undefined}
     >
       {child}
     </Form.Item>

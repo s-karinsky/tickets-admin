@@ -6,18 +6,13 @@ import {
   Table,
   Typography,
   Input,
-  InputNumber,
-  Select,
-  DatePicker,
   Checkbox,
   Form,
 } from 'antd'
 import TextArea from 'antd/es/input/TextArea'
 import {
   SaveOutlined,
-  CopyOutlined,
-  PlusCircleOutlined,
-  CloseCircleOutlined,
+  CopyOutlined
 } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import { get as _get } from 'lodash'
@@ -29,6 +24,7 @@ import FormField from '../../components/FormField'
 import axios from '../../utils/axios'
 import { getSendingById, deleteSendingById, getPlacesBySendingId, deletePlaceById } from '../../utils/api'
 import { getColumnSearchProps } from '../../utils/components'
+import { required, numberRange } from '../../utils/validationRules'
 import { SENDING_STATUS } from '../../consts'
 
 const { Title, Link } = Typography
@@ -317,8 +313,10 @@ export default function Sending({
               <FormField
                 label='Номер'
                 name='from'
-                style={{ width: 60 }}
+                type='number'
+                style={{ width: 120 }}
                 isEdit={isEditPage}
+                rules={required()}
               />
               <FormField
                 type='date'
@@ -327,6 +325,7 @@ export default function Sending({
                 style={{ width: 150 }}
                 isEdit={isEditPage}
                 text={data.create_datetime?.format('DD.MM.YYYY')}
+                rules={required()}
               />
               <FormField
                 type='date'
@@ -347,6 +346,7 @@ export default function Sending({
                   { value: 'Владимир', title: 'Aktr' },
                 ]}
                 text={data.json?.transporter}
+                rules={required()}
               />
               <FormField
                 type='date'
@@ -365,11 +365,12 @@ export default function Sending({
               >
                 <FormField
                   type='number'
-                  label='Количество мест'
+                  label='Количество'
                   name={['json', 'count_places']}
                   style={{ width: 120 }}
                   isEdit={isEditPage}
                   text={data.complete_datetime?.format('DD.MM.YYYY')}
+                  rules={[...required(), ...numberRange({ min: 1, max: 99999 })]}
                 />
                 <FormField
                   type='number'
@@ -378,6 +379,7 @@ export default function Sending({
                   style={{ width: 120 }}
                   isEdit={isEditPage}
                   addonAfter={isEditPage && 'кг'}
+                  rules={[...required(), ...numberRange({ min: 1, max: 99999 })]}
                 />
                 <FormField
                   type='number'
@@ -386,6 +388,7 @@ export default function Sending({
                   style={{ width: 120 }}
                   isEdit={isEditPage}
                   addonAfter={isEditPage && 'кг'}
+                  rules={[...required(), ...numberRange({ min: 1, max: 99999 })]}
                 />
                 <FormField
                   type='select'
@@ -396,6 +399,7 @@ export default function Sending({
                   disabled={isEditPage}
                   options={SENDING_STATUS.map((label, value) => ({ label, value }))}
                   text={SENDING_STATUS[data.json?.status]}
+                  rules={required()}
                 />
               </div>
             </div>
