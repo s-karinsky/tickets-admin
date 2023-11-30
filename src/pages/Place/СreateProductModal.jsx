@@ -10,7 +10,8 @@ const { Title } = Typography
 
 export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId, maxNum, isSumDisabled, product = {} }) => {
   const [ form ] = Form.useForm()
-  const [ isEdit, setIsEdit ] = useState(product === true)
+  const isNew = product === true
+  const [ isEdit, setIsEdit ] = useState(isNew)
   const initialValues = {
     number: maxNum + 1,
     ...product,
@@ -100,7 +101,7 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
           label='Номер'
           name='number'
           style={{ width: 204.4 }}
-          rules={[...required(), numberRange({ min: maxNum + 1 })]}
+          rules={[...required()].concat(isNew ? numberRange({ min: maxNum + 1 }) : [])}
         />
         <FormField
           isEdit={isEdit}
