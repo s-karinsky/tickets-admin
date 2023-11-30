@@ -101,7 +101,32 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
           label='Номер'
           name='number'
           style={{ width: 204.4 }}
-          rules={[...required()].concat(isNew ? numberRange({ min: maxNum + 1 }) : [])}
+          rules={
+            [
+              ...required(),
+              () => ({
+                validator(_, id) {
+                  if (!isNew && id === parseInt(initialValues.number)) return Promise.resolve()
+                  return axios.postWithAuth('/query/select', { sql: `SELECT * FROM dataset WHERE id_ref=${placeId} AND ref_tip="place"`})
+                    .then(res => {
+                      let isFound
+                      (res.data?.data || []).map(item => {
+                        try {
+                          const json = JSON.parse(item.pole)
+                          if (id === parseInt(json.number)) {
+                            isFound = true
+                          }
+                        } catch (e) {
+                          console.warn('Bad product item')
+                        }
+                      })
+                      return isFound ? Promise.reject('Товар с таким номером уже существует') : Promise.resolve()
+                    })
+                },
+              })
+            ]
+              //.concat(isNew ? numberRange({ min: maxNum + 1 }) : [])
+          }
         />
         <FormField
           isEdit={isEdit}
