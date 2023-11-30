@@ -33,7 +33,7 @@ body {
   text-align: center;
 }
 
-.ant-input-number-input:not(:disabled) {
+.ant-input-number-input {
   text-align: right !important;
   padding-right: 24px !important;
 }

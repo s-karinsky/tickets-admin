@@ -13,7 +13,7 @@ import {
 import { useSelector } from 'react-redux'
 import dayjs from 'dayjs'
 import { BsTrash } from 'react-icons/bs'
-import { BiInfoCircle, BiEdit } from 'react-icons/bi'
+import { BiEdit } from 'react-icons/bi'
 import { SaveOutlined, CopyOutlined } from '@ant-design/icons'
 import { get as _get } from 'lodash'
 import { PropertyGap } from '../Sendings'
@@ -29,23 +29,6 @@ import axios from '../../utils/axios'
 
 const { Title, Link } = Typography
 
-const propLabels = {
-  id: 'Номер',
-  status: 'Статус / услуга',
-  place: 'Место',
-  client: 'Клиент',
-  tarif: 'Тариф',
-  count: 'Количество',
-  net_weight: 'Вес нетто',
-  gross_weight: 'Вес брутто',
-  size: 'Размер',
-  pay_type: 'Тип оплаты',
-  pay_kg: 'Цена за 1 кг',
-  pay_sum: 'Сумма оплаты',
-  items_sum: 'Сумма товара',
-  note: 'Примечание'
-}
-
 export default function Sending() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -56,6 +39,7 @@ export default function Sending() {
 
   const [ search, setSearch ] = useState('')
   const [ editProduct, setEditProduct ] = useState(false)
+  const [ activeRow, setActiveRow ] = useState()
 
   const [ sendingData, placeData, productsData ] = useQueries([
     {
@@ -561,12 +545,15 @@ export default function Sending() {
           size='small'
           columns={columns}
           isLoading={productsData.isLoading}
+          rowClassName={(r, index) => index === activeRow ? 'active-row' : ''}
           dataSource={places}
           rowKey={({ id }) => id}
-          onRow={(record) => ({
+          onRow={(record, index) => ({
             onClick: (e) => {
               if (e.detail === 2) {
                 setEditProduct(record)
+              } else {
+                setActiveRow(index)
               }
             },
           })}

@@ -9,7 +9,6 @@ import {
   Checkbox,
   Form,
 } from 'antd'
-import TextArea from 'antd/es/input/TextArea'
 import {
   SaveOutlined,
   CopyOutlined
@@ -18,7 +17,7 @@ import dayjs from 'dayjs'
 import { get as _get } from 'lodash'
 import { useQueries } from 'react-query'
 import { BsTrash } from 'react-icons/bs'
-import { BiInfoCircle, BiEdit } from 'react-icons/bi'
+import { BiEdit } from 'react-icons/bi'
 import { PropertyGap } from '../Sendings'
 import FormField from '../../components/FormField'
 import axios from '../../utils/axios'
@@ -38,6 +37,7 @@ export default function Sending({
   const location = useLocation()
   const { sendingId } = useParams()
   const [ search, setSearch ] = useState('')
+  const [ activeRow, setActiveRow ] = useState()
 
   const [ { isLoading, data, refetch }, places ] = useQueries([
     {
@@ -491,19 +491,19 @@ export default function Sending({
             columns={columns}
             isLoading={places.isLoading}
             dataSource={placesData}
+            rowClassName={(r, index) => index === activeRow ? 'active-row' : ''}
             rowKey={({ id }) => id}
-            onRow={(record) => ({
+            onRow={(record, index) => ({
               onClick: (e) => {
                 if (e.detail === 2) {
                   navigate(`${location.pathname}/${record.id}`)
+                } else {
+                  setActiveRow(index)
                 }
               },
             })}
             size='small'
             style={{ overflow: 'scroll' }}
-            rowSelection={{
-              type: Checkbox,
-            }}
           />
         </>
       }
