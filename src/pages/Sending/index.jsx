@@ -316,7 +316,21 @@ export default function Sending({
                 type='number'
                 style={{ width: 120 }}
                 isEdit={isEditPage}
-                rules={[...required()].concat(isNew ? numberRange({ min: data.from }) : [])}
+                rules={
+                  [
+                    ...required(),
+                    () => ({
+                      validator(_, id) {
+                        if (!isNew && id === parseInt(data.from)) return Promise.resolve()
+                        return axios.postWithAuth('/query/select', { sql: `SELECT * FROM trip WHERE \`from\`=${id} AND canceled=0`})
+                          .then(res => {
+                            const resData = res.data?.data || []
+                            return resData.length > 0 ? Promise.reject(new Error('Отправка с таким номером уже существует')) : Promise.resolve()
+                          })
+                      },
+                    })
+                  ]
+                }
               />
               <FormField
                 type='date'
