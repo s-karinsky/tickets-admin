@@ -37,6 +37,7 @@ export const getSendingById = sendingId => async () => {
     const number = parseInt(_get(data, [0, 'max(`from`)'])) || 0
     return {
       from: number + 1,
+      create_datetime: dayjs(),
       json: {
         status: 0
       }

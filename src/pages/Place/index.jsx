@@ -376,13 +376,12 @@ export default function Sending() {
                 />
                 <FormField
                   type='select'
-                  label='Статус места'
+                  label={<><sup>ƒ</sup>&nbsp;Статус места</>}
                   name='status'
                   style={{ width: 200 }}
                   isEdit={isEditPage}
                   options={SENDING_STATUS.map((name, i) => ({ label: name, value: i }))}
                   text={SENDING_STATUS[initialPlace.status]}
-                  rules={required()}
                   disabled
                 />
                 <FormField 
@@ -473,34 +472,34 @@ export default function Sending() {
                 />
                 <FormField
                   type='number'
-                  label='Вес нетто'
+                  label={<><sup>∑</sup>&nbsp;Вес нетто</>}
                   name='net_weight'
                   addonAfter={isEditPage && 'кг'}
                   style={{ width: 200 }}
                   isEdit={isEditPage}
                   disabled={isEditPage}
-                  rules={[...required(), ...numberRange({ min: 0, max: 99999 })]}
+                  rules={numberRange({ min: 0, max: 99999 })}
                   formatter={(val) => Number(val).toFixed(3)}
                 />
                 <FormField
                   type='number'
-                  label='Вес брутто'
+                  label={<><sup>∑</sup>&nbsp;Вес брутто</>}
                   name='gross_weight'
                   addonAfter={isEditPage && 'кг'}
                   style={{ width: 200 }}
                   isEdit={isEditPage}
                   disabled={isEditPage}
-                  rules={[...required(), ...numberRange({ min: 0, max: 99999 })]}
+                  rules={numberRange({ min: 0, max: 99999 })}
                   formatter={(val) => Number(val).toFixed(3)}
                 />
                 <FormField
                   type='number'
-                  label='Количество товара'
+                  label={<><sup>∑</sup>&nbsp;Количество товара</>}
                   name='count'
                   style={{ width: 200 }}
                   isEdit={isEditPage}
                   disabled={isEditPage}
-                  rules={[...required(), ...numberRange({ min: 0, max: 99999 })]}
+                  rules={numberRange({ min: 0, max: 99999 })}
                 />
               </div>
               <FormField

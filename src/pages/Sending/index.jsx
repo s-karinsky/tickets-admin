@@ -388,34 +388,33 @@ export default function Sending({
                 />
                 <FormField
                   type='number'
-                  label='Вес нетто'
+                  label={<><sup>∑</sup>&nbsp;Вес нетто</>}
                   name={['json', 'net_weight']}
                   style={{ width: 120 }}
                   isEdit={isEditPage}
                   addonAfter={isEditPage && 'кг'}
-                  rules={[...required(), ...numberRange({ min: 1, max: 99999 })]}
+                  rules={numberRange({ min: 1, max: 99999 })}
                   formatter={(val) => Number(val).toFixed(3)}
                 />
                 <FormField
                   type='number'
-                  label='Вес брутто'
+                  label={<><sup>∑</sup>&nbsp;Вес брутто</>}
                   name={['json', 'gross_weight']}
                   style={{ width: 120 }}
                   isEdit={isEditPage}
                   addonAfter={isEditPage && 'кг'}
-                  rules={[...required(), ...numberRange({ min: 1, max: 99999 })]}
+                  rules={numberRange({ min: 1, max: 99999 })}
                   formatter={(val) => Number(val).toFixed(3)}
                 />
                 <FormField
                   type='select'
-                  label='Статус'
+                  label={<><sup>ƒ</sup>&nbsp;Статус</>}
                   name={['json', 'status']}
                   style={{ width: 200 }}
                   isEdit={isEditPage}
                   disabled={isEditPage}
                   options={SENDING_STATUS.map((label, value) => ({ label, value }))}
                   text={SENDING_STATUS[data.json?.status]}
-                  rules={required()}
                 />
               </div>
             </div>
