@@ -8,9 +8,9 @@ import axios from '../../utils/axios'
 import { required, numberRange } from '../../utils/validationRules'
 const { Title } = Typography
 
-export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId, maxNum, product = {} }) => {
-  const [form] = Form.useForm()
-  const [isEdit, setIsEdit] = useState(product === true)
+export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId, maxNum, isSumDisabled, product = {} }) => {
+  const [ form ] = Form.useForm()
+  const [ isEdit, setIsEdit ] = useState(product === true)
   const initialValues = {
     number: maxNum + 1,
     ...product,
@@ -140,6 +140,7 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
           name='net_weight'
           addonAfter={isEdit && 'кг'}
           rules={[...required(), ...numberRange({ min: 1, max: 99999 })]}
+          formatter={(val) => Number(val).toFixed(3)}
         />
         <div style={{ flexBasis: '100%' }} />
         <fieldset style={{ display: 'flex', gap: 10, margin: '0 -10px' }}>
@@ -198,6 +199,8 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
           name='price'
           addonAfter={isEdit && '$'}
           style={{ width: 204.4 }}
+          disabled={isSumDisabled}
+          formatter={(val) => Number(val).toFixed(2)}
         />
         <FormField
           isEdit={isEdit}
@@ -206,6 +209,8 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
           name='sum'
           addonAfter={isEdit && '$'}
           style={{ width: 204.4 }}
+          disabled={isSumDisabled}
+          formatter={(val) => Number(val).toFixed(2)}
         />
         <div style={{ flexBasis: '100%' }} />
         <Form.Item

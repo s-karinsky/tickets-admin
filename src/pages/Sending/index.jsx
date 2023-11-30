@@ -380,6 +380,7 @@ export default function Sending({
                   isEdit={isEditPage}
                   addonAfter={isEditPage && 'кг'}
                   rules={[...required(), ...numberRange({ min: 1, max: 99999 })]}
+                  formatter={(val) => Number(val).toFixed(3)}
                 />
                 <FormField
                   type='number'
@@ -389,6 +390,7 @@ export default function Sending({
                   isEdit={isEditPage}
                   addonAfter={isEditPage && 'кг'}
                   rules={[...required(), ...numberRange({ min: 1, max: 99999 })]}
+                  formatter={(val) => Number(val).toFixed(3)}
                 />
                 <FormField
                   type='select'

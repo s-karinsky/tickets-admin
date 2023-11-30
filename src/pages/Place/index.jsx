@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { useQueries } from 'react-query'
 import {
@@ -40,6 +40,7 @@ export default function Sending() {
   const [ search, setSearch ] = useState('')
   const [ editProduct, setEditProduct ] = useState(false)
   const [ activeRow, setActiveRow ] = useState()
+  const [ isSumDisabled, setIsSumDisabled ] = useState()
 
   const [ sendingData, placeData, productsData ] = useQueries([
     {
@@ -66,6 +67,10 @@ export default function Sending() {
     gross_weight: (productsData.data || []).reduce((sum, item) => sum + item.gross_weight || 0, 0),
     count: (productsData.data || []).reduce((sum, item) => sum + item.count || 0, 0)
   }
+
+  useEffect(() => {
+    if (initialPlace.pay_type !== 'Безналичный') setIsSumDisabled(true)
+  }, [initialPlace.pay_type])
 
   const maxNum = (productsData.data || []).reduce((max, item) => Math.max(item.number, max), 1)
 
@@ -340,6 +345,7 @@ export default function Sending() {
               size='large'
               initialValues={initialPlace}
               onFinish={handleSubmit}
+              onValuesChange={values => setIsSumDisabled(values.pay_type !== 'Безналичный')}
               form={form}
             >
               <div
@@ -436,6 +442,7 @@ export default function Sending() {
                   addonAfter={isEditPage && '$'}
                   style={{ width: 200 }}
                   isEdit={isEditPage}
+                  formatter={(val) => Number(val).toFixed(2)}
                 />
                 <FormField
                   type='number'
@@ -443,7 +450,9 @@ export default function Sending() {
                   name='items_sum'
                   addonAfter={isEditPage && '$'}
                   style={{ width: 200 }}
-                  isEdit={isEditPage}  
+                  isEdit={isEditPage}
+                  disabled={isSumDisabled}
+                  formatter={(val) => Number(val).toFixed(2)}
                 />
                 <FormField
                   type='number'
@@ -452,6 +461,7 @@ export default function Sending() {
                   addonAfter={isEditPage && '$'}
                   style={{ width: 200 }}
                   isEdit={isEditPage}  
+                  formatter={(val) => Number(val).toFixed(2)}
                 />
                 <FormField
                   label='Размер'
@@ -470,6 +480,7 @@ export default function Sending() {
                   isEdit={isEditPage}
                   disabled={isEditPage}
                   rules={[...required(), ...numberRange({ min: 0, max: 99999 })]}
+                  formatter={(val) => Number(val).toFixed(3)}
                 />
                 <FormField
                   type='number'
@@ -480,6 +491,7 @@ export default function Sending() {
                   isEdit={isEditPage}
                   disabled={isEditPage}
                   rules={[...required(), ...numberRange({ min: 0, max: 99999 })]}
+                  formatter={(val) => Number(val).toFixed(3)}
                 />
                 <FormField
                   type='number'
@@ -574,6 +586,7 @@ export default function Sending() {
         userId={user.u_id}
         product={editProduct}
         maxNum={maxNum}
+        isSumDisabled={isSumDisabled}
       />}
     </>
   )
