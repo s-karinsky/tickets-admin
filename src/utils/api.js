@@ -4,7 +4,16 @@ import axios from './axios'
 import { sqlUpdate } from './sql'
 
 export const getSendings = isAir => async () => {
-  const response = await axios.postWithAuth('/query/select', { sql: `SELECT * FROM trip WHERE \`to\`='${Number(isAir)}' AND canceled=0` })
+  const [ response, responseProducts ] = await Promise.all([
+    axios.postWithAuth('/query/select', { sql: `SELECT * FROM trip WHERE \`to\`='${Number(isAir)}' AND canceled=0` }),
+    axios.postWithAuth('/query/select', { sql: `SELECT id_trip, sum(JSON_EXTRACT(n.pole,'$.gross_weight')) AS gross_weight, sum(JSON_EXTRACT(n.pole,'$.net_weight')) AS net_weight, sum(JSON_EXTRACT(n.pole,'$.count')) AS count FROM trip t LEFT JOIN dataset m ON m.id_ref=t.id_trip LEFT JOIN dataset n ON n.id_ref=m.id WHERE canceled=0 AND \`to\`=0 GROUP BY id_trip` })
+  ])
+  
+  const productsMap = (responseProducts.data?.data || []).reduce((acc, item) => ({
+    ...acc,
+    [item.id_trip]: item
+  }), {})
+
   const data = response.data?.data || []
   return data.map(item => {
     let json
@@ -21,8 +30,8 @@ export const getSendings = isAir => async () => {
       date: item.create_datetime,
       transporter: json.transporter,
       status: json.status,
-      count: json.count_places,
-      weight: json.gross_weight,
+      count: productsMap[item.id_trip]?.count || 0,
+      weight: productsMap[item.id_trip]?.gross_weight || 0,
       departure: item.start_datetime,
       delivery: item.complete_datetime,
       json
@@ -43,7 +52,11 @@ export const getSendingById = sendingId => async () => {
       }
     }
   } else {
-    const response = await axios.postWithAuth('/query/select', { sql: `SELECT * FROM trip WHERE id_trip=${sendingId}` })
+    const [ response, responseProducts ] = await Promise.all([
+      axios.postWithAuth('/query/select', { sql: `SELECT * FROM trip WHERE id_trip=${sendingId}` }),
+      axios.postWithAuth('/query/select', { sql: `SELECT id_trip, sum(JSON_EXTRACT(n.pole,'$.gross_weight')) AS gross_weight, sum(JSON_EXTRACT(n.pole,'$.net_weight')) AS net_weight, sum(JSON_EXTRACT(n.pole,'$.count')) AS count FROM trip t LEFT JOIN dataset m ON m.id_ref=t.id_trip LEFT JOIN dataset n ON n.id_ref=m.id WHERE m.ref_tip='sending' AND m.id_ref=${sendingId} AND m.status=0 GROUP BY id_trip` })
+    ])
+    const products = (responseProducts.data?.data || [])[0] || {}
     const item = (response.data?.data || [])[0] || {}
     try {
       item.json = JSON.parse(item.json.replaceAll("\n", ''))
@@ -53,6 +66,9 @@ export const getSendingById = sendingId => async () => {
     item.create_datetime = dayjs(item.create_datetime)
     item.start_datetime = dayjs(item.start_datetime)
     item.complete_datetime = dayjs(item.complete_datetime)
+    item.gross_weight = products.gross_weight
+    item.net_weight = products.net_weight
+    item.count = products.count
     return item
   }
 }

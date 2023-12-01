@@ -379,7 +379,7 @@ export default function Sending({
                 <FormField
                   type='number'
                   label='Количество'
-                  name={['json', 'count_places']}
+                  name={'count'}
                   style={{ width: 120 }}
                   isEdit={isEditPage}
                   text={data.complete_datetime?.format('DD.MM.YYYY')}
@@ -388,7 +388,7 @@ export default function Sending({
                 <FormField
                   type='number'
                   label={<><sup>∑</sup>&nbsp;Вес нетто</>}
-                  name={['json', 'net_weight']}
+                  name={'net_weight'}
                   style={{ width: 120 }}
                   isEdit={isEditPage}
                   addonAfter={isEditPage && 'кг'}
@@ -399,7 +399,7 @@ export default function Sending({
                 <FormField
                   type='number'
                   label={<><sup>∑</sup>&nbsp;Вес брутто</>}
-                  name={['json', 'gross_weight']}
+                  name={'gross_weight'}
                   style={{ width: 120 }}
                   isEdit={isEditPage}
                   addonAfter={isEditPage && 'кг'}

@@ -160,10 +160,21 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
           name='material'
         />
         <FormField
+          style={{ width: 204.4 }}
           isEdit={isEdit}
           type='number'
           label='Вес нетто'
           name='net_weight'
+          addonAfter={isEdit && 'кг'}
+          rules={[...required(), ...numberRange({ min: 1, max: 99999 })]}
+          formatter={(val) => Number(val).toFixed(3)}
+        />
+        <FormField
+          style={{ width: 204.4 }}
+          isEdit={isEdit}
+          type='number'
+          label='Вес брутто'
+          name='gross_weight'
           addonAfter={isEdit && 'кг'}
           rules={[...required(), ...numberRange({ min: 1, max: 99999 })]}
           formatter={(val) => Number(val).toFixed(3)}
