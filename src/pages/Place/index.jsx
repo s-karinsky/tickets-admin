@@ -29,7 +29,7 @@ import axios from '../../utils/axios'
 
 const { Title, Link } = Typography
 
-export default function Sending() {
+export default function Place() {
   const navigate = useNavigate()
   const location = useLocation()
   const user = useSelector(getUserProfile)
@@ -173,7 +173,7 @@ export default function Sending() {
     },
   ]
 
-  const placeTitle = isNew ? 'Новое место' : location.pathname.toString().split('/').slice(-1).join('/')
+  const placeTitle = isNew ? 'Новое место' : `№${initialPlace?.place}`
 
   const handleSubmit = useCallback(async (values) => {
     const params = {
@@ -239,13 +239,7 @@ export default function Sending() {
                 }
                 style={{ color: 'blue' }}
               >
-                <span> </span>Отправка<span> </span>
-                {location.pathname
-                  .toString()
-                  .split('/')
-                  .slice(-2, -1)
-                  .join('/')}
-                <span> </span>
+                <span> </span>Отправка №{sendingData.data?.from}<span> </span>
                 &gt;<span> </span>
               </Link>
               {isNew ? placeTitle : `Место ${placeTitle}`}

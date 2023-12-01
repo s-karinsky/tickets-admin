@@ -143,8 +143,7 @@ export default function Sending({
       key: 'buttons',
     },
   ]
-
-  const sendingTitle = `Отправка ${location.pathname.toString().split('/').slice(-1).join('/')}`
+  const sendingTitle = `Отправка №${data?.from}`
 
   const handleSubmit = useCallback(async (values) => {
     const keys = ['`id_trip`', '`from`', '`to`', '`start_datetime`', '`complete_datetime`', '`create_datetime`', '`json`']
