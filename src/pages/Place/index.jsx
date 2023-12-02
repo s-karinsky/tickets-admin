@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { useQueries } from 'react-query'
-import { Button, Row, Table, Typography, Input, Checkbox, Form, Modal } from 'antd'
+import { Button, Row, Table, Typography, Input, Checkbox, Form, Modal, Space, Divider } from 'antd'
 import { useSelector } from 'react-redux'
 import dayjs from 'dayjs'
 import { BsTrash } from 'react-icons/bs'
@@ -33,6 +33,7 @@ export default function Place() {
   const [ editProduct, setEditProduct ] = useState(false)
   const [ activeRow, setActiveRow ] = useState()
   const [ isSumDisabled, setIsSumDisabled ] = useState()
+  const [ customPay, setCustomPay ] = useState('')
 
   const [ sendingData, placeData, productsData ] = useQueries([
     {
@@ -425,10 +426,23 @@ export default function Place() {
                   options={[
                     { value: 'Наличный', title: '' },
                     { value: 'Безналичный', title: '' },
-                  ]}
+                  ].concat(customPay ? { value: customPay } : [])}
                   text={initialPlace.pay_type}
                   isEdit={isEditPage}
                   rules={required()}
+                  dropdownRender={(menu) => (
+                    <>
+                      {menu}
+                      <Divider style={{ margin: '8px 0' }} />
+                      <Space style={{ padding: '0 8px 4px' }}>
+                        <Input
+                          placeholder='Произвольный тип'
+                          value={customPay}
+                          onChange={e => setCustomPay(e.target.value)}
+                        />
+                      </Space>
+                    </>
+                  )}
                 />
                 <FormField
                   type='number'
