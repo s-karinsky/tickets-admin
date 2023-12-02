@@ -1,13 +1,16 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Button, Row, Table, Typography, Input, Switch, Modal, DatePicker, Select } from 'antd'
+import { ExclamationCircleFilled } from '@ant-design/icons'
 import { useQuery } from 'react-query'
 import dayjs from 'dayjs'
-import { BsArrowRepeat, BsCheck2Circle, BsTrash } from 'react-icons/bs'
+import { BsTrash } from 'react-icons/bs'
+import { get as _get } from 'lodash'
 import { SendingsStatus } from '../../components/SendingsStatus'
 import { DateTableCell } from '../../components/DateTableCell'
 import axios from '../../utils/axios'
 import { getSendings, deleteSendingById } from '../../utils/api'
+import { declOfNum } from '../../utils/utils'
 import { getColumnSearchProps } from '../../utils/components'
 import { sqlUpdate } from '../../utils/sql'
 import { SENDING_STATUS } from '../../consts'
@@ -35,6 +38,7 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
       return str.includes(search.toLowerCase())
     })
     .map(item => {
+      const isMaking = item.status === 0
       return {
         ...item,
         'departure-date': <DateTableCell date={new Date(item.departure)} />,
@@ -53,14 +57,29 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
               Создать счет
             </Button>
             <BsTrash
-              style={{ cursor: 'pointer' }}
+              style={{ cursor: isMaking ? 'pointer' : 'auto' }}
               size={17}
-              color='red'
+              color={isMaking ? 'red' : '#ccc'}
+              title={!isMaking && 'Удалить можно только отправку со статусом «Формирование»'}
               onClick={() => {
-                if (!window.confirm('Delete sending?')) return
-                deleteSendingById(item.id)().then(() => {
-                  refetch()
-                })
+                if (!isMaking) return
+                axios.postWithAuth('/query/select', { sql: `SELECT count(*) FROM dataset WHERE ref_tip='sending' AND id_ref=${item.id}` })
+                  .then(res => {
+                    const count = _get(res, ['data', 'data', 0, 'count(*)'])
+                    Modal.confirm({
+                      title: 'Вы действительно хотите удалить эту отправку?',
+                      icon: <ExclamationCircleFilled />,
+                      content: count > 0 && <div>К этой отправке привязано {count} {declOfNum(count, ['запись', 'записи', 'записей'])} о местах, которые так же будут удалены</div>,
+                      okText: 'Да',
+                      okType: 'danger',
+                      cancelText: 'Нет',
+                      onOk() {
+                        deleteSendingById(item.id)().then(() => {
+                          refetch()
+                        })
+                      }
+                    })
+                  })
               }}
             />
           </div>

@@ -1,17 +1,10 @@
 import { useState, useCallback } from 'react'
 import { useNavigate, useLocation, useParams, useSearchParams } from 'react-router-dom'
-import {
-  Button,
-  Row,
-  Table,
-  Typography,
-  Input,
-  Checkbox,
-  Form,
-} from 'antd'
+import { Button, Row, Table, Typography, Input, Form, Modal } from 'antd'
 import {
   SaveOutlined,
-  CopyOutlined
+  CopyOutlined,
+  ExclamationCircleFilled
 } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import { get as _get } from 'lodash'
@@ -24,6 +17,7 @@ import axios from '../../utils/axios'
 import { getSendingById, deleteSendingById, getPlacesBySendingId, deletePlaceById } from '../../utils/api'
 import { getColumnSearchProps } from '../../utils/components'
 import { required, numberRange } from '../../utils/validationRules'
+import { declOfNum } from '../../utils/utils'
 import { SENDING_STATUS } from '../../consts'
 
 const { Title, Link } = Typography
@@ -78,10 +72,23 @@ export default function Sending({
               size={17}
               color='red'
               onClick={() => {
-                if (!window.confirm('Delete place?')) return
-                deletePlaceById(item.id)().then(() => {
-                  places.refetch()
-                })
+                axios.postWithAuth('/query/select', { sql: `SELECT count(*) FROM dataset WHERE ref_tip='place' AND id_ref=${item.id}` })
+                  .then(res => {
+                    const count = _get(res, ['data', 'data', 0, 'count(*)'])
+                    Modal.confirm({
+                      title: 'Вы действительно хотите удалить это место?',
+                      icon: <ExclamationCircleFilled />,
+                      content: count > 0 && <div>К этому месту привязано {count} {declOfNum(count, ['товар', 'товара', 'товаров'])}, которые так же будут удалены</div>,
+                      okText: 'Да',
+                      okType: 'danger',
+                      cancelText: 'Нет',
+                      onOk() {
+                        deletePlaceById(item.id)().then(() => {
+                          places.refetch()
+                        })
+                      }
+                    })
+                  })
               }}
             />
           </div>

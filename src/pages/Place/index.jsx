@@ -1,20 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { useQueries } from 'react-query'
-import {
-  Button,
-  Row,
-  Table,
-  Typography,
-  Input,
-  Checkbox,
-  Form,
-} from 'antd'
+import { Button, Row, Table, Typography, Input, Checkbox, Form, Modal } from 'antd'
 import { useSelector } from 'react-redux'
 import dayjs from 'dayjs'
 import { BsTrash } from 'react-icons/bs'
 import { BiEdit } from 'react-icons/bi'
-import { SaveOutlined, CopyOutlined } from '@ant-design/icons'
+import { SaveOutlined, CopyOutlined, ExclamationCircleFilled } from '@ant-design/icons'
 import { get as _get } from 'lodash'
 import { PropertyGap } from '../Sendings'
 import CreateProductModal from './СreateProductModal'
@@ -95,9 +87,17 @@ export default function Place() {
               size={17}
               color='red'
               onClick={() => {
-                if (!window.confirm('Delete product?')) return
-                deleteProductById(item.id).then(() => {
-                  productsData.refetch()
+                Modal.confirm({
+                  title: 'Вы действительно хотите удалить этот товар?',
+                  icon: <ExclamationCircleFilled />,
+                  okText: 'Да',
+                  okType: 'danger',
+                  cancelText: 'Нет',
+                  onOk() {
+                    deleteProductById(item.id).then(() => {
+                      productsData.refetch()
+                    })
+                  }
                 })
               }}
             />
