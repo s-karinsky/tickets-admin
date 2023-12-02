@@ -141,6 +141,7 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
       dataIndex: 'weight',
       key: 'weight',
       align: 'right',
+      render: val => Number(val).toFixed(3),
       sorter: (a, b) => a.weight - b.weight,
       ...getColumnSearchProps('weight', { type: 'number' })
     },

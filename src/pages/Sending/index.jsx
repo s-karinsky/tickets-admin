@@ -123,6 +123,7 @@ export default function Sending({
       dataIndex: 'gross_weight',
       key: 'gross_weight',
       align: 'right',
+      render: val => Number(val).toFixed(3),
       sorter: (a, b) => a.gross_weight - b.gross_weight,
       ...getColumnSearchProps('gross_weight', { type: 'number' })
     },
@@ -391,7 +392,7 @@ export default function Sending({
                   style={{ width: 120 }}
                   isEdit={isEditPage}
                   text={data.complete_datetime?.format('DD.MM.YYYY')}
-                  rules={[...required(), ...numberRange({ min: 1, max: 99999 })]}
+                  rules={numberRange({ min: 1, max: 99999 })}
                   disabled={isEditPage}
                 />
                 <FormField

@@ -157,6 +157,7 @@ export default function Place() {
       dataIndex: 'price',
       key: 'price',
       align: 'right',
+      render: val => Number(val) ? Number(val).toFixed(2) : null,
       ...getColumnSearchProps('price', { type: 'number' })
     },
     {
@@ -164,6 +165,7 @@ export default function Place() {
       dataIndex: 'sum',
       key: 'sum',
       align: 'right',
+      render: val => Number(val) ? Number(val).toFixed(2) : null,
       ...getColumnSearchProps('sum', { type: 'number' })
     },
     {
@@ -278,7 +280,7 @@ export default function Place() {
                   }}
                   type='primary'
                   danger
-                  onClick={() => setSearchParams()}
+                  onClick={() => isNew ? navigate(`/sendings/${sendingId}`) : setSearchParams()}
                 >
                   Отмена
                 </Button>
@@ -350,6 +352,12 @@ export default function Place() {
                 }}
               >
                 <FormField
+                  label='Место'
+                  name='place'
+                  isEdit={isEditPage}
+                  rules={required()}
+                />
+                <FormField
                   type='select'
                   label='Клиент'
                   name='client'
@@ -359,12 +367,6 @@ export default function Place() {
                     { value: 'Владимир', title: 'Ak2tr' },
                   ]}
                   text={initialPlace.client}
-                  isEdit={isEditPage}
-                  rules={required()}
-                />
-                <FormField
-                  label='Место'
-                  name='place'
                   isEdit={isEditPage}
                   rules={required()}
                 />
@@ -500,6 +502,7 @@ export default function Place() {
                 type='textarea'
                 label='Примечание'
                 name='note'
+                isEdit={isEditPage}
                 text={initialPlace.note}
               />
             </Form>
