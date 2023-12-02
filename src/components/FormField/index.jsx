@@ -40,7 +40,7 @@ export default function FormField({
 
     case 'textarea':
       child = isEdit ?
-        <Input.TextArea {...rest} /> :
+        <Input.TextArea {...rest} autoSize /> :
         <div style={{ fontSize: 16, fontWeight: 'normal', ...rest.style }}>
           {text}
         </div>

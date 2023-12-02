@@ -262,7 +262,6 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
             type='textarea'
             label='Примечание'
             name='note'
-            rows={4}
           />
         </div>
       </Form>

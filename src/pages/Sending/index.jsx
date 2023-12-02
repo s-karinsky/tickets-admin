@@ -14,7 +14,7 @@ import { BiEdit } from 'react-icons/bi'
 import { PropertyGap } from '../Sendings'
 import FormField from '../../components/FormField'
 import axios from '../../utils/axios'
-import { getSendingById, deleteSendingById, getPlacesBySendingId, deletePlaceById } from '../../utils/api'
+import { getSendingById, deleteSendingById, getPlacesBySendingId, deletePlaceById, useDictionary } from '../../utils/api'
 import { getColumnSearchProps } from '../../utils/components'
 import { required, numberRange } from '../../utils/validationRules'
 import { declOfNum } from '../../utils/utils'
@@ -43,6 +43,8 @@ export default function Sending({
       queryFn: getPlacesBySendingId(sendingId)
     }
   ])
+
+  const carriers = useDictionary('carriers')
 
   const isNew = sendingId === 'create'
   const isEditPage = isNew || searchParams.get('edit') !== null
@@ -349,7 +351,7 @@ export default function Sending({
               />
               <FormField
                 type='date'
-                label='Дата отправки'
+                label={<><sup>ƒ</sup>&nbsp;Дата отправки</>}
                 name='start_datetime'
                 style={{ width: 150 }}
                 isEdit={isEditPage}
@@ -361,16 +363,15 @@ export default function Sending({
                 name={['json', 'transporter']}
                 style={{ width: 200 }}
                 isEdit={isEditPage}
-                options={[
-                  { value: 'Александр', title: 'Aktr' },
-                  { value: 'Владимир', title: 'Aktr' },
-                ]}
+                options={(carriers.data || []).map(item => ({
+                  value: `${item.surname} ${item.name} ${item.middlename} (${item.company})`
+                }))}
                 text={data.json?.transporter}
                 rules={required()}
               />
               <FormField
                 type='date'
-                label='Дата поступления'
+                label={<><sup>ƒ</sup>&nbsp;Дата поступления</>}
                 name='complete_datetime'
                 style={{ width: 150 }}
                 isEdit={isEditPage}
@@ -391,6 +392,7 @@ export default function Sending({
                   isEdit={isEditPage}
                   text={data.complete_datetime?.format('DD.MM.YYYY')}
                   rules={[...required(), ...numberRange({ min: 1, max: 99999 })]}
+                  disabled={isEditPage}
                 />
                 <FormField
                   type='number'
@@ -432,7 +434,6 @@ export default function Sending({
               name={['json', 'note']}
               isEdit={isEditPage}
               text={data.json?.note}
-              rows={4}
             />
           </Form>
         )}

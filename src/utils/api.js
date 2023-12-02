@@ -1,5 +1,6 @@
 import dayjs from 'dayjs'
 import { get as _get } from 'lodash'
+import { useQuery } from 'react-query'
 import axios from './axios'
 import { sqlUpdate } from './sql'
 
@@ -152,4 +153,59 @@ export const getProductsByPlaceId = placeId => async () => {
 export const deleteProductById = async (productId) => {
   const response = await axios.postWithAuth('/query/update', { sql: sqlUpdate('dataset', { status: 1 }, `id=${productId}`) })
   return response
+}
+
+const dictionaryMap = {
+  carriers: [
+    {
+      id: '1',
+      code: '123',
+      company: 'Company',
+      surname: 'Иванов',
+      name: 'Иван',
+      middlename: 'Иванович',
+      phone: '+792364585740',
+      companyPhone: '+79132548574',
+      country: 'Россия',
+      city: 'Москва',
+      note: '12312'
+    },
+    {
+      id: '2',
+      code: '234',
+      company: 'Company 2',
+      surname: 'Петров',
+      name: 'Петр',
+      middlename: 'Петрович',
+      phone: '+792364585741',
+      companyPhone: '+79132448574',
+      country: 'Россия',
+      city: 'Санкт-Петербург',
+      note: '12312'
+    },
+    {
+      id: '3',
+      code: '345',
+      company: 'Company 3',
+      surname: 'Васильев',
+      name: 'Василий',
+      middlename: 'Васильевич',
+      phone: '+792364585742',
+      companyPhone: '+79132448575',
+      country: 'Россия',
+      city: 'Владивосток',
+      note: '12312'
+    }
+  ]
+}
+
+const getDictionary = name => async () => {
+  const mock = dictionaryMap[name] || []
+  return mock
+}
+
+export const useDictionary = name => {
+  return useQuery(name, getDictionary(name), {
+    staleTime: 5 * 60 * 1000
+  })
 }
