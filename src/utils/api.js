@@ -61,7 +61,7 @@ export const getSendingById = sendingId => async () => {
     try {
       item.json = JSON.parse(item.json.replaceAll("\n", ''))
     } catch (e) {
-      console.warn('Bad sending json')
+      console.warn(e)
     }
     item.create_datetime = dayjs(item.create_datetime)
     item.start_datetime = dayjs(item.start_datetime)
@@ -80,7 +80,15 @@ export const deleteSendingById = sendingId => async () => {
 
 export const getPlacesBySendingId = sendingId => async () => {
   const sql = `SELECT * FROM dataset WHERE ref_tip='sending' AND id_ref=${sendingId} AND status=0`
-  const response = await axios.postWithAuth('/query/select', { sql })
+  const [ response, responseProducts ] = await Promise.all([
+    axios.postWithAuth('/query/select', { sql }),
+    axios.postWithAuth('/query/select', { sql: `SELECT t.id, sum(JSON_EXTRACT(n.pole,'$.gross_weight')) AS gross_weight, sum(JSON_EXTRACT(n.pole,'$.count')) AS count FROM dataset t LEFT JOIN dataset n ON n.id_ref=t.id WHERE t.tip='place' AND t.id_ref=${sendingId} AND t.status=0 GROUP BY t.id` })
+  ])
+  
+  const productsMap = (responseProducts.data?.data || []).reduce((acc, item) => ({
+    ...acc,
+    [item.id]: item
+  }), {})
   const data = response.data?.data || []
   return data.map(item => {
     let json
@@ -91,7 +99,9 @@ export const getPlacesBySendingId = sendingId => async () => {
     }
     return {
       ...item,
-      ...json
+      ...json,
+      gross_weight: productsMap[item.id]?.gross_weight,
+      count: productsMap[item.id]?.count
     }
   })
 }
