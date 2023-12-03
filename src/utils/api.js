@@ -2,7 +2,13 @@ import dayjs from 'dayjs'
 import { get as _get } from 'lodash'
 import { useQuery } from 'react-query'
 import axios from './axios'
-import { sqlUpdate } from './sql'
+import { sqlUpdate, sqlInsert } from './sql'
+
+export const getCount = async (db, where) => {
+  const response = await axios.postWithAuth('/query/select', { sql: `SELECT count(*) FROM ${db}${where ? ' WHERE '+where : ''}` })
+  const count = _get(response, ['data', 'data', 0, 'count(*)'])
+  return count
+}
 
 export const getSendings = isAir => async () => {
   const [ response, responseProducts ] = await Promise.all([
@@ -32,7 +38,8 @@ export const getSendings = isAir => async () => {
       transporter: json.transporter,
       status: json.status,
       count: productsMap[item.id_trip]?.count || 0,
-      weight: productsMap[item.id_trip]?.gross_weight || 0,
+      net_weight: productsMap[item.id_trip]?.net_weight || 0,
+      gross_weight: productsMap[item.id_trip]?.gross_weight || 0,
       departure: item.start_datetime,
       delivery: item.complete_datetime,
       json
@@ -42,7 +49,12 @@ export const getSendings = isAir => async () => {
 
 export const getSendingById = sendingId => async () => {
   if (sendingId === 'create') {
-    const response = await axios.postWithAuth('/query/select', { sql: `SELECT max(\`from\`) FROM trip WHERE YEAR(create_datetime) = YEAR('${dayjs().format('YYYY-MM-DD')}')` })
+    const response = await axios.postWithAuth(
+      '/query/select',
+      {
+        sql: `SELECT max(\`from\`) FROM trip WHERE YEAR(create_datetime) = YEAR('${dayjs().format('YYYY-MM-DD')}')`
+      }
+    )
     const data = response.data?.data || []
     const number = parseInt(_get(data, [0, 'max(`from`)'])) || 0
     return {
@@ -74,12 +86,24 @@ export const getSendingById = sendingId => async () => {
   }
 }
 
-export const deleteSendingById = sendingId => async () => {
+export const deleteSendingById = async (sendingId) => {
   const response = await axios.postWithAuth('/query/update', { sql: sqlUpdate('trip', { canceled: 1 }, `id_trip=${sendingId}`) })
   return response
 }
 
+export const updateSendingById = async (sendingId, params = {}) => {
+  const response = await axios.postWithAuth('/query/update', { sql: sqlUpdate('trip', params, `id_trip=${sendingId}`) })
+  return response
+}
+
+export const createSending = async (values) => {
+  const response = await axios.postWithAuth('/query/insert', { sql: sqlInsert('trip', values) })
+  return response
+}
+
 export const getPlacesBySendingId = sendingId => async () => {
+  if (sendingId === 'create') return []
+
   const sql = `SELECT * FROM dataset WHERE ref_tip='sending' AND id_ref=${sendingId} AND status=0`
   const [ response, responseProducts ] = await Promise.all([
     axios.postWithAuth('/query/select', { sql }),
@@ -126,8 +150,18 @@ export const getPlaceById = placeId => async () => {
   }
 }
 
-export const deletePlaceById = placeId => async () => {
+export const deletePlaceById = async (placeId) => {
   const response = await axios.postWithAuth('/query/update', { sql: sqlUpdate('dataset', { status: 1 }, `id=${placeId}`) })
+  return response
+}
+
+export const updatePlaceById = async (placeId, params = {}) => {
+  const response = await axios.postWithAuth('/query/update', { sql: sqlUpdate('dataset', params, `id=${placeId}`) })
+  return response
+}
+
+export const createPlace = async (params) => {
+  const response = await axios.postWithAuth('/query/insert', { sql: sqlInsert('dataset', params) })
   return response
 }
 

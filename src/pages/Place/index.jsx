@@ -3,7 +3,6 @@ import { useNavigate, useLocation, useParams, useSearchParams } from 'react-rout
 import { useQueries } from 'react-query'
 import { Button, Row, Table, Typography, Input, Checkbox, Form, Modal, Space, Divider } from 'antd'
 import { useSelector } from 'react-redux'
-import dayjs from 'dayjs'
 import { BsTrash } from 'react-icons/bs'
 import { BiEdit } from 'react-icons/bi'
 import { SaveOutlined, CopyOutlined, ExclamationCircleFilled } from '@ant-design/icons'
@@ -11,13 +10,12 @@ import { get as _get } from 'lodash'
 import { PropertyGap } from '../Sendings'
 import CreateProductModal from './СreateProductModal'
 import FormField from '../../components/FormField'
-import { getSendingById, getPlaceById, deletePlaceById, getProductsByPlaceId, deleteProductById } from '../../utils/api'
+import { filterTableRows } from '../../utils/utils'
+import { getSendingById, getPlaceById, deletePlaceById, updatePlaceById, createPlace, getProductsByPlaceId, deleteProductById } from '../../utils/api'
 import { SENDING_STATUS } from '../../consts'
 import { getUserProfile } from '../../redux/user'
-import { sqlInsert, sqlUpdate } from '../../utils/sql'
 import { getColumnSearchProps } from '../../utils/components'
 import { required, numberRange } from '../../utils/validationRules'
-import axios from '../../utils/axios'
 
 const { Title, Link } = Typography
 
@@ -68,20 +66,12 @@ export default function Place() {
   const maxNum = (productsData.data || []).reduce((max, item) => Math.max(item.number, max), 1)
 
   const places = (productsData.data || [])
-    .filter(item => {
-      if (!search) return true
-      const str = Object.values(item).map(
-        val => typeof(val) ==='string' && val.length >= 10 && dayjs(val).isValid() ? dayjs(val).format('DD.MM.YYYY') : val
-      ).join(';').toLowerCase()
-      return str.includes(search.toLowerCase())
-    })
+    .filter(filterTableRows(search))
     .map((item) => {
       return {
         ...item,
         buttons: (
           <div style={{ display: 'flex', gap: 10 }}>
-            {/* <BiInfoCircle size={17} color='#141414' /> */}
-            {/* <AiOutlineMore size={17} color="#141414" /> */}
             <CopyOutlined size={17} color='#141414' />
             <BsTrash
               style={{ marginLeft: 30, cursor: 'pointer' }}
@@ -189,11 +179,11 @@ export default function Place() {
       status: 0
     }
     if (placeId === 'create') {
-      await axios.postWithAuth('/query/insert', { sql: sqlInsert('dataset', params) })
+      await createPlace(params)
       navigate(`/sendings/${sendingId}`)
     } else {
-      await axios.postWithAuth('/query/update', { sql: sqlUpdate('dataset', params, `id=${placeId}`) })
-      placeData.refetch()
+      await updatePlaceById(placeId, params)
+      await placeData.refetch()
       setSearchParams()
     }
   }, [sendingId, placeId, user])

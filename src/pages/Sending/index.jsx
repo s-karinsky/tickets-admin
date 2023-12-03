@@ -13,11 +13,10 @@ import { BsTrash } from 'react-icons/bs'
 import { BiEdit } from 'react-icons/bi'
 import { PropertyGap } from '../Sendings'
 import FormField from '../../components/FormField'
-import axios from '../../utils/axios'
-import { getSendingById, deleteSendingById, getPlacesBySendingId, deletePlaceById, useDictionary } from '../../utils/api'
+import { getCount, createSending, updateSendingById, getSendingById, deleteSendingById, getPlacesBySendingId, deletePlaceById, useDictionary } from '../../utils/api'
 import { getColumnSearchProps } from '../../utils/components'
-import { required, numberRange } from '../../utils/validationRules'
-import { declOfNum } from '../../utils/utils'
+import { required } from '../../utils/validationRules'
+import { declOfNum, filterTableRows } from '../../utils/utils'
 import { SENDING_STATUS } from '../../consts'
 
 const { Title, Link } = Typography
@@ -50,47 +49,32 @@ export default function Sending({
   const isEditPage = isNew || searchParams.get('edit') !== null
 
   const placesData = (places.data || [])
-    .filter(item => {
-      if (!search) return true
-      const str = Object.values(item).map(
-        val => typeof(val) ==='string' && val.length >= 10 && dayjs(val).isValid() ? dayjs(val).format('DD.MM.YYYY') : val
-      ).join(';').toLowerCase()
-      return str.includes(search.toLowerCase())
-    })
+    .filter(filterTableRows(search))
     .map((item) => {
       return {
         ...item,
         buttons: (
           <div style={{ display: 'flex', gap: 10 }}>
-            {/* <BiInfoCircle size={17} color='#141414' /> */}
             <CopyOutlined size={17} color='#141414' />
-            {/* <PlusCircleOutlined
-              size={17}
-              style={{ color: '#009650' }}
-            />
-            <CloseCircleOutlined size={17} style={{ color: 'red' }} /> */}
             <BsTrash
               style={{ marginLeft: 30, cursor: 'pointer' }} 
               size={17}
               color='red'
-              onClick={() => {
-                axios.postWithAuth('/query/select', { sql: `SELECT count(*) FROM dataset WHERE ref_tip='place' AND id_ref=${item.id}` })
-                  .then(res => {
-                    const count = _get(res, ['data', 'data', 0, 'count(*)'])
-                    Modal.confirm({
-                      title: 'Вы действительно хотите удалить это место?',
-                      icon: <ExclamationCircleFilled />,
-                      content: count > 0 && <div>К этому месту привязано {count} {declOfNum(count, ['товар', 'товара', 'товаров'])}, которые так же будут удалены</div>,
-                      okText: 'Да',
-                      okType: 'danger',
-                      cancelText: 'Нет',
-                      onOk() {
-                        deletePlaceById(item.id)().then(() => {
-                          places.refetch()
-                        })
-                      }
-                    })
-                  })
+              onClick={async () => {
+                const count = await getCount('dataset', `ref_tip='place' AND id_ref=${item.id}`)
+                Modal.confirm({
+                  title: 'Вы действительно хотите удалить это место?',
+                  icon: <ExclamationCircleFilled />,
+                  content: count > 0 && <div>
+                    К этому месту {declOfNum(count, ['привязан', 'привязано', 'привязано'])} {count}&nbsp;
+                    {declOfNum(count, ['товар', 'товара', 'товаров'])}, {count === '1' ? 'который' : 'которые'} так же&nbsp;
+                    {count === '1' ? 'будет удален' : 'будут удалены'}
+                  </div>,
+                  okText: 'Да',
+                  okType: 'danger',
+                  cancelText: 'Нет',
+                  onOk: () => deletePlaceById(item.id).then(() => places.refetch())
+                })
               }}
             />
           </div>
@@ -116,6 +100,7 @@ export default function Sending({
       title: 'Место',
       dataIndex: 'place',
       key: 'place',
+      align: 'right',
       ...getColumnSearchProps('place', { type: 'number' })
     },
     {
@@ -141,7 +126,7 @@ export default function Sending({
       ...getColumnSearchProps('count', { type: 'number' })
     },
     {
-      title: 'Услуга / Статус',
+      title: 'Статус услуги',
       dataIndex: 'status',
       key: 'status',
       render: val => val === 0 ? 'В обработке' : 'Выдано',
@@ -156,25 +141,19 @@ export default function Sending({
   const sendingTitle = `Отправка №${data?.from}`
 
   const handleSubmit = useCallback(async (values) => {
-    const keys = ['`id_trip`', '`from`', '`to`', '`start_datetime`', '`complete_datetime`', '`create_datetime`', '`json`']
-    const strValues = [
-      'NULL',
-      `'${values.from}'`,
-      `'${Number(isSendingAir)}'`,
-      `'${dayjs(values.start_datetime).format('YYYY-MM-DD')}'`,
-      `'${dayjs(values.complete_datetime).format('YYYY-MM-DD')}'`,
-      `'${dayjs(values.create_datetime).format('YYYY-MM-DD')}'`,
-      `'${JSON.stringify(values.json)}'`
-    ]
-    let sql
+    const valuesMap = {
+      from: values.from,
+      to: Number(isSendingAir),
+      start_datetime: dayjs(values.start_datetime).format('YYYY-MM-DD'),
+      complete_datetime: dayjs(values.complete_datetime).format('YYYY-MM-DD'),
+      create_datetime: dayjs(values.create_datetime).format('YYYY-MM-DD'),
+      json: JSON.stringify(values.json)
+    }
     if (sendingId === 'create') {
-      sql = `INSERT INTO trip (${keys.join(',')}) VALUES (${strValues.join(',')})`
-      await axios.postWithAuth('/query/insert/', { sql })
+      await createSending(valuesMap)
       navigate('/sendings')
     } else {
-      const update = keys.slice(1).map((key, i) => `${key} = ${strValues[i + 1]}`).join(', ')
-      sql = `UPDATE trip SET ${update} WHERE id_trip=${sendingId}`
-      await axios.postWithAuth('/query/update/', { sql })
+      await updateSendingById(sendingId, valuesMap)
       await refetch()
       setSearchParams({})
     }
@@ -329,13 +308,10 @@ export default function Sending({
                   [
                     ...required(),
                     () => ({
-                      validator(_, id) {
-                        if (!isNew && id === parseInt(data.from)) return Promise.resolve()
-                        return axios.postWithAuth('/query/select', { sql: `SELECT * FROM trip WHERE \`from\`=${id} AND canceled=0`})
-                          .then(res => {
-                            const resData = res.data?.data || []
-                            return resData.length > 0 ? Promise.reject(new Error('Отправка с таким номером уже существует')) : Promise.resolve()
-                          })
+                      validator: async (_, id) => {
+                        if (!isNew && parseInt(id) === parseInt(data.from)) return Promise.resolve()
+                        const count = await getCount('trip', `\`from\`=${id} AND canceled=0`)
+                        return count > 0 ? Promise.reject(new Error('Отправка с таким номером уже существует')) : Promise.resolve()
                       },
                     })
                   ]
@@ -356,6 +332,7 @@ export default function Sending({
                 name='start_datetime'
                 style={{ width: 150 }}
                 isEdit={isEditPage}
+                disabled={isEditPage}
                 text={data.start_datetime?.format('DD.MM.YYYY')}
               />
               <FormField
@@ -387,12 +364,11 @@ export default function Sending({
               >
                 <FormField
                   type='number'
-                  label='Количество'
+                  label={<><sup>∑</sup>&nbsp;Количество</>}
                   name={'count'}
                   style={{ width: 120 }}
                   isEdit={isEditPage}
                   text={data.complete_datetime?.format('DD.MM.YYYY')}
-                  rules={numberRange({ min: 1, max: 99999 })}
                   disabled={isEditPage}
                 />
                 <FormField
@@ -402,7 +378,6 @@ export default function Sending({
                   style={{ width: 120 }}
                   isEdit={isEditPage}
                   addonAfter={isEditPage && 'кг'}
-                  rules={numberRange({ min: 1, max: 99999 })}
                   formatter={(val) => Number(val).toFixed(3)}
                   disabled={isEditPage}
                 />
@@ -413,7 +388,6 @@ export default function Sending({
                   style={{ width: 120 }}
                   isEdit={isEditPage}
                   addonAfter={isEditPage && 'кг'}
-                  rules={numberRange({ min: 1, max: 99999 })}
                   formatter={(val) => Number(val).toFixed(3)}
                   disabled={isEditPage}
                 />

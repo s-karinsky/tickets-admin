@@ -1,4 +1,5 @@
 import { map, uniq, orderBy } from 'lodash'
+import dayjs from 'dayjs'
 
 export const capitalizeFirstLetter = str => {
   return str[0].toUpperCase() + str.substr(1)
@@ -24,4 +25,12 @@ export const getOptions = (arr, path) =>
 export const declOfNum = (number, titles) => {  
   const cases = [2, 0, 1, 1, 1, 2]
   return titles[ (number%100>4 && number%100<20)? 2 : cases[(number%10<5)?number%10:5] ]
+}
+
+export const filterTableRows = search => item => {
+  if (!search) return true
+  const str = Object.values(item).map(
+    val => typeof(val) ==='string' && val.length >= 10 && dayjs(val).isValid() ? dayjs(val).format('DD.MM.YYYY') : val
+  ).join(';').toLowerCase()
+  return str.includes(search.toLowerCase())
 }

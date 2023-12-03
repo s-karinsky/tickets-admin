@@ -8,15 +8,14 @@ import { BsTrash } from 'react-icons/bs'
 import { get as _get } from 'lodash'
 import { SendingsStatus } from '../../components/SendingsStatus'
 import { DateTableCell } from '../../components/DateTableCell'
-import axios from '../../utils/axios'
-import { getSendings, deleteSendingById } from '../../utils/api'
-import { declOfNum } from '../../utils/utils'
+import { getCount, getSendings, deleteSendingById, updateSendingById } from '../../utils/api'
+import { declOfNum, filterTableRows } from '../../utils/utils'
 import { getColumnSearchProps } from '../../utils/components'
-import { sqlUpdate } from '../../utils/sql'
 import { SENDING_STATUS } from '../../consts'
 
 const { Title, Link } = Typography
 export let PropertyGap = 10
+
 export default function Sendings({ isSendingAir, setIsSendingAir }) {
   const navigate = useNavigate()
   const location = useLocation()
@@ -30,13 +29,7 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
   const { isLoading, data, refetch } = useQuery(['sendings', { isAir: isSendingAir }], getSendings(isSendingAir))
 
   let sendings = (data || [])
-    .filter(item => {
-      if (!search) return true
-      const str = Object.values(item).map(
-        val => typeof(val) ==='string' && val.length >= 10 && dayjs(val).isValid() ? dayjs(val).format('DD.MM.YYYY') : val
-      ).join(';').toLowerCase()
-      return str.includes(search.toLowerCase())
-    })
+    .filter(filterTableRows(search))
     .map(item => {
       const isMaking = item.status === 0
       return {
@@ -45,8 +38,6 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
         'delivery-date': <DateTableCell date={new Date(item.delivery)} />,
         buttons: (
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            {/* <BsCheck2Circle size={17} color='green' /> */}
-            {/* <BsArrowRepeat size={17} color='' /> */}
             <Button
               type='primary'
               size='small'
@@ -61,25 +52,22 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
               size={17}
               color={isMaking ? 'red' : '#ccc'}
               title={!isMaking && 'Удалить можно только отправку со статусом «Формирование»'}
-              onClick={() => {
+              onClick={async () => {
                 if (!isMaking) return
-                axios.postWithAuth('/query/select', { sql: `SELECT count(*) FROM dataset WHERE ref_tip='sending' AND id_ref=${item.id}` })
-                  .then(res => {
-                    const count = _get(res, ['data', 'data', 0, 'count(*)'])
-                    Modal.confirm({
-                      title: 'Вы действительно хотите удалить эту отправку?',
-                      icon: <ExclamationCircleFilled />,
-                      content: count > 0 && <div>К этой отправке привязано {count} {declOfNum(count, ['запись', 'записи', 'записей'])} о местах, которые так же будут удалены</div>,
-                      okText: 'Да',
-                      okType: 'danger',
-                      cancelText: 'Нет',
-                      onOk() {
-                        deleteSendingById(item.id)().then(() => {
-                          refetch()
-                        })
-                      }
-                    })
-                  })
+                const count = await getCount('dataset', `ref_tip='sending' AND id_ref=${item.id}`)
+                Modal.confirm({
+                  title: 'Вы действительно хотите удалить эту отправку?',
+                  icon: <ExclamationCircleFilled />,
+                  content: count > 0 && <div>
+                    К этой отправке {declOfNum(count, ['привязана', 'привязано', 'привязано'])} {count}&nbsp;
+                    {declOfNum(count, ['запись', 'записи', 'записей'])} о местах, {count === '1' ? 'которая' : 'которые'} так же&nbsp;
+                    {count === '1' ? 'будет удалена' : 'будут удалены'}
+                  </div>,
+                  okText: 'Да',
+                  okType: 'danger',
+                  cancelText: 'Нет',
+                  onOk: () => deleteSendingById(item.id).then(() => refetch())
+                })
               }}
             />
           </div>
@@ -106,7 +94,8 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
       title: 'Дата',
       dataIndex: 'date',
       key: 'date',
-      render: date => <DateTableCell date={new Date(date)} />,
+      align: 'center',
+      render: date => dayjs(date).format('DD.MM.YYYY'),
       sorter: (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
       ...getColumnSearchProps('date', { type: 'date' })
     },
@@ -129,7 +118,7 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
       ...getColumnSearchProps(record => record.status + 1, { options: SENDING_STATUS.map((label, value) => ({ value: value + 1, label })) })
     },
     {
-      title: 'Количество мест',
+      title: 'Количество',
       dataIndex: 'count',
       key: 'count',
       align: 'right',
@@ -137,25 +126,38 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
       ...getColumnSearchProps('count', { type: 'number' })
     },
     {
-      title: 'Вес брутто',
-      dataIndex: 'weight',
-      key: 'weight',
+      title: 'Вес нетто',
+      dataIndex: 'net_weight',
+      key: 'net_weight',
       align: 'right',
       render: val => Number(val).toFixed(3),
       sorter: (a, b) => a.weight - b.weight,
-      ...getColumnSearchProps('weight', { type: 'number' })
+      ...getColumnSearchProps('net_weight', { type: 'number' })
     },
     {
-      title: 'Дата отправления',
-      dataIndex: 'departure-date',
-      key: 'departure-date',
+      title: 'Вес брутто',
+      dataIndex: 'gross_weight',
+      key: 'gross_weight',
+      align: 'right',
+      render: val => Number(val).toFixed(3),
+      sorter: (a, b) => a.weight - b.weight,
+      ...getColumnSearchProps('gross_weight', { type: 'number' })
+    },
+    {
+      title: 'Дата отправки',
+      dataIndex: 'departure',
+      key: 'departure',
+      align: 'center',
+      render: date => dayjs(date).format('DD.MM.YYYY'),
       sorter: (a, b) => new Date(a.departure).getTime() - new Date(b.departure).getTime(),
       ...getColumnSearchProps('departure', { type: 'date' })
     },
     {
       title: 'Дата поступления',
-      dataIndex: 'delivery-date',
-      key: 'delivery-date',
+      dataIndex: 'delivery',
+      key: 'delivery',
+      align: 'center',
+      render: date => dayjs(date).format('DD.MM.YYYY'),
       sorter: (a, b) => new Date(a.delivery).getTime() - new Date(b.delivery).getTime(),
       ...getColumnSearchProps('delivery', { type: 'date' })
     },
@@ -265,15 +267,12 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
         title='Изменить статус отправки'
         open={showStatusModal}
         width={300}
-        onOk={() => {
+        onOk={async () => {
           if (!statusModalItem) return
-          const json = statusModalItem.json
-          json.status = statusModalValue
-          axios.postWithAuth('/query/update', { sql: sqlUpdate('trip', { json: JSON.stringify(json) }, `id_trip=${statusModalItem.id}`) })
-            .then(() => {
-              refetch()
-              setShowStatusModal(false)
-            })
+          const json = { ...statusModalItem.json, status: statusModalValue }
+          await updateSendingById(statusModalItem.id, { json: JSON.stringify(json) })
+          refetch()
+          setShowStatusModal(false)
         }}
         onCancel={() => setShowStatusModal(false)}
       >

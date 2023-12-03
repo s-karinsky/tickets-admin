@@ -18,7 +18,7 @@ export const sqlInsert = (table, values) => {
 export const sqlUpdate = (table, values, where) => {
   const set = Object.keys(values).map(key => {
     const val = typeof values[key] === 'string' && values[key] !== 'NULL' ? `'${values[key]}'` : values[key]
-    return `${key}=${val}`
+    return `\`${key}\`=${val}`
   }).join(',')
   return `UPDATE ${table} SET ${set} WHERE ${where}`
 }
