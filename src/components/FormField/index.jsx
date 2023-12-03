@@ -14,7 +14,7 @@ export default function FormField({
   switch (type) {
     case 'date':
       child = isEdit ?
-        <DatePicker format='DD.MM.YYYY' {...rest} /> :
+        <DatePicker format='DD.MM.YYYY' placeholder='Выберите дату' {...rest} /> :
         <div style={{ fontSize: 16, fontWeight: 'normal', ...rest.style }}>
           {text}
         </div>

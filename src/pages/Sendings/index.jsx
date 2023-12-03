@@ -148,7 +148,7 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
       dataIndex: 'departure',
       key: 'departure',
       align: 'center',
-      render: date => dayjs(date).format('DD.MM.YYYY'),
+      render: (date, item) => item.json?.status > 0 && dayjs(item.json?.status_date_1).format('DD.MM.YYYY'),
       sorter: (a, b) => new Date(a.departure).getTime() - new Date(b.departure).getTime(),
       ...getColumnSearchProps('departure', { type: 'date' })
     },
@@ -157,7 +157,7 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
       dataIndex: 'delivery',
       key: 'delivery',
       align: 'center',
-      render: date => dayjs(date).format('DD.MM.YYYY'),
+      render: (date, item) => item.json?.status > 1 && dayjs(item.json?.status_date_2).format('DD.MM.YYYY'),
       sorter: (a, b) => new Date(a.delivery).getTime() - new Date(b.delivery).getTime(),
       ...getColumnSearchProps('delivery', { type: 'date' })
     },
@@ -269,7 +269,11 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
         width={300}
         onOk={async () => {
           if (!statusModalItem) return
-          const json = { ...statusModalItem.json, status: statusModalValue }
+          const json = {
+            ...statusModalItem.json,
+            status: statusModalValue,
+            [`status_date_${statusModalValue}`]: statusModalDate.format('YYYY-MM-DD')
+          }
           await updateSendingById(statusModalItem.id, { json: JSON.stringify(json) })
           refetch()
           setShowStatusModal(false)
@@ -287,7 +291,7 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
         <Select
           style={{ width: '100%', marginTop: 10 }}
           size='large'
-          options={SENDING_STATUS.map((label, value) => ({ label, value }))}
+          options={SENDING_STATUS.filter((_, i) => statusModalItem?.json?.status !== 0 || i !== 2).map((label, value) => ({ label, value }))}
           value={statusModalValue}
           onChange={val => setStatusModalValue(val)}
         />

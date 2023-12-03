@@ -339,7 +339,7 @@ export default function Sending({
                 type='select'
                 label='Перевозчик'
                 name={['json', 'transporter']}
-                style={{ width: 200 }}
+                style={{ width: 300 }}
                 isEdit={isEditPage}
                 options={(carriers.data || []).map(item => ({
                   value: `${item.surname} ${item.name} ${item.middlename} (${item.company})`

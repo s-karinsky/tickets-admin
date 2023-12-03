@@ -152,16 +152,6 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
           rules={[...required(), ...numberRange({ min: 1, max: 99999 })]}
           formatter={(val) => Number(val).toFixed(3)}
         />
-        <FormField
-          style={{ width: 204.4 }}
-          isEdit={isEdit}
-          type='number'
-          label='Вес брутто'
-          name='gross_weight'
-          addonAfter={isEdit && 'кг'}
-          rules={[...required(), ...numberRange({ min: 1, max: 99999 })]}
-          formatter={(val) => Number(val).toFixed(3)}
-        />
         <div style={{ flexBasis: '100%' }} />
         <fieldset style={{ display: 'flex', gap: 10, margin: '0 -10px' }}>
           <legend>Обувь</legend>

@@ -112,29 +112,11 @@ export default function Place() {
       ...getColumnSearchProps('name')
     },
     {
-      title: 'Марка',
-      dataIndex: 'label',
-      key: 'label',
-      ...getColumnSearchProps('label')
-    },
-    {
-      title: 'Артикул',
-      dataIndex: 'article',
-      key: 'article',
-      ...getColumnSearchProps('article')
-    },
-    {
-      title: 'Цвет',
-      dataIndex: 'color',
-      key: 'color',
-      ...getColumnSearchProps('color')
-    },
-    {
-      title: 'Размер',
-      dataIndex: 'size',
-      key: 'size',
+      title: 'Вес нетто',
+      dataIndex: 'net_weight',
+      key: 'net_weight',
       align: 'right',
-      ...getColumnSearchProps('size')
+      ...getColumnSearchProps('net_weight', { type: 'number' })
     },
     {
       title: 'Количество',
@@ -158,6 +140,12 @@ export default function Place() {
       align: 'right',
       render: val => Number(val) ? Number(val).toFixed(2) : null,
       ...getColumnSearchProps('sum', { type: 'number' })
+    },
+    {
+      title: 'Примечание',
+      dataIndex: 'note',
+      key: 'note',
+      ...getColumnSearchProps('note')
     },
     {
       title: '',

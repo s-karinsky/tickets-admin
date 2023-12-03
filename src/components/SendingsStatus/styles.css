@@ -18,8 +18,9 @@
   top: 0;
   display: flex;
   align-items: center;
-  gap: 5;
+  gap: 5px;
   flex-direction: row-reverse;
+  transition: ease .3s opacity;
 }
 
 .sending-status__hover-text {
@@ -29,14 +30,16 @@
   top: 0;
   font-size: 11px;
   text-align: center;
-  line-height: 13px;
+  line-height: 15px;
   font-weight: 500;
-  background: #fff;
   opacity: 0;
   transition: ease .3s opacity;
 }
 .sending-status:hover .sending-status__hover-text {
   opacity: 1;
+}
+.sending-status:hover .sending-status__car {
+  opacity: 0;
 }
 
 .sending-status_creating .sending-status__car {
