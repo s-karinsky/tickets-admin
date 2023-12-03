@@ -45,9 +45,10 @@ export default function Sending({
     }
   ])
 
-  const clientsMap = useMemo(() =>
-    clients.data.reduce((acc, item) => ({ ...acc, [item.id_user]: [item.family, item.name, item.middle].join(' ') }), {})
-  , [clients.data])
+  const clientsMap = useMemo(() => {
+    if (!Array.isArray(clients.data)) return {}
+    return clients.data.reduce((acc, item) => ({ ...acc, [item.id_user]: [item.family, item.name, item.middle].join(' ') }), {})
+  }, [clients.data])
 
   const [ driverOptions, driverMap ] = useMemo(() => {
     if (!Array.isArray(drivers.data)) return [[], {}]

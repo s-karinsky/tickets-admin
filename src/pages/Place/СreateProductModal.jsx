@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Row, Col, Typography, Modal, Button, Form, Checkbox } from 'antd'
+import { Row, Col, Typography, Modal, Button, Form, Checkbox, Tabs } from 'antd'
 import dayjs from 'dayjs'
 import { PropertyGap } from '../../pages/Sendings'
 import FormField from '../../components/FormField'
@@ -31,7 +31,7 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
                 marginTop: 0,
               }}
             >
-              {product === true ? 'Создать товар' : (isEdit ? 'Редактировать товар' : 'Просмотр товара')}
+              {product === true ? `Создать товар №${maxNum + 1}` : (isEdit ? 'Редактировать товар' : 'Просмотр товара')}
             </Title>
           </Col>
           {!isEdit && <Col>
@@ -80,7 +80,7 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
               tip: 'product',
               id_ref: placeId,
               ref_tip: 'place',
-              pole: JSON.stringify(values),
+              pole: JSON.stringify({ ...values, number: maxNum + 1 }),
               creator_id: userId,
               editor_id: userId
             }
@@ -91,10 +91,10 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
           handleCancel()
         }}
       >
-        <FormField
+        {/* <FormField
           type='number'
           isEdit={isEdit}
-          label='Номер'
+          label={<><sup>ƒ</sup>&nbsp;Номер</>}
           name='number'
           style={{ width: 204.4 }}
           rules={
@@ -108,9 +108,9 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
                 },
               })
             ]
-              //.concat(isNew ? numberRange({ min: maxNum + 1 }) : [])
           }
-        />
+          disabled={isEdit}
+        /> */}
         <FormField
           isEdit={isEdit}
           label='Наименование'
@@ -138,11 +138,6 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
           name='size'
         />
         <FormField
-          isEdit={isEdit}
-          label='Состав/материал'
-          name='material'
-        />
-        <FormField
           style={{ width: 204.4 }}
           isEdit={isEdit}
           type='number'
@@ -153,24 +148,43 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
           formatter={(val) => Number(val).toFixed(3)}
         />
         <div style={{ flexBasis: '100%' }} />
-        <fieldset style={{ display: 'flex', gap: 10, margin: '0 -10px' }}>
-          <legend>Обувь</legend>
-          <FormField
-            isEdit={isEdit}
-            label='Верх'
-            name='shoes_top'
-          />
-          <FormField
-            isEdit={isEdit}
-            label='Подкладка'
-            name='shoes_und'
-          />
-          <FormField
-            isEdit={isEdit}
-            label='Низ'
-            name='shoes_bottom'
-          />
-        </fieldset>
+        <Tabs
+          style={{ flexBasis: '100%' }}
+          defaultActiveKey='1'
+          items={[
+            {
+              key: '1',
+              label: 'Одежда',
+              children: 
+                <FormField
+                  isEdit={isEdit}
+                  label='Состав/материал'
+                  name='material'
+                />
+            },
+            {
+              key: '2',
+              label: 'Обувь',
+              children: <div style={{ display: 'flex', gap: 10 }}>
+                <FormField
+                  isEdit={isEdit}
+                  label='Верх'
+                  name='shoes_top'
+                />
+                <FormField
+                  isEdit={isEdit}
+                  label='Подкладка'
+                  name='shoes_und'
+                />
+                <FormField
+                  isEdit={isEdit}
+                  label='Низ'
+                  name='shoes_bottom'
+                />
+              </div>
+            }
+          ]}
+        />
         <div style={{ flexBasis: '100%' }} />
         <fieldset style={{ display: 'flex', gap: 10, margin: '0 -10px' }}>
           <legend>Сертификат/Декларация о соответствии</legend>
