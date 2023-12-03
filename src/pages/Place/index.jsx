@@ -330,7 +330,7 @@ export default function Place() {
               size='large'
               initialValues={initialPlace}
               onFinish={handleSubmit}
-              onValuesChange={values => setIsSumDisabled(values.pay_type !== 'Безналичный')}
+              onValuesChange={values => values.pay_type && setIsSumDisabled(values.pay_type !== 'Безналичный')}
               form={form}
             >
               <div
@@ -581,7 +581,7 @@ export default function Place() {
         userId={user.u_id}
         product={editProduct}
         maxNum={maxNum}
-        isSumDisabled={isSumDisabled}
+        isSumDisabled={initialPlace.pay_type !== 'Безналичный'}
       />}
     </>
   )

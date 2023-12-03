@@ -219,7 +219,7 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
         <FormField
           isEdit={isEdit}
           type='number'
-          label='Цена'
+          label={isSumDisabled ? <><sup>ƒ</sup>&nbsp;Цена</> : 'Цена'}
           name='price'
           addonAfter={isEdit && '$'}
           style={{ width: 204.4 }}
@@ -229,7 +229,7 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
         <FormField
           isEdit={isEdit}
           type='number'
-          label='Сумма'
+          label={isSumDisabled ? <><sup>ƒ</sup>&nbsp;Сумма</> : 'Сумма'}
           name='sum'
           addonAfter={isEdit && '$'}
           style={{ width: 204.4 }}
