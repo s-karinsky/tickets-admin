@@ -3,8 +3,7 @@ import { Row, Col, Typography, Modal, Button, Form, Checkbox } from 'antd'
 import dayjs from 'dayjs'
 import { PropertyGap } from '../../pages/Sendings'
 import FormField from '../../components/FormField'
-import { sqlInsert, sqlUpdate } from '../../utils/sql'
-import axios from '../../utils/axios'
+import { getCount, createDataset, updateDatasetById } from '../../utils/api'
 import { required, numberRange } from '../../utils/validationRules'
 const { Title } = Typography
 
@@ -85,12 +84,9 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
               creator_id: userId,
               editor_id: userId
             }
-            await axios.postWithAuth('/query/insert', { sql: sqlInsert('dataset', params) })
+            await createDataset(params)
           } else {
-            const params = {
-              pole: JSON.stringify(values)
-            }
-            await axios.postWithAuth('/query/update', { sql: sqlUpdate('dataset', params, `id=${product.id}`) })
+            await updateDatasetById(product.id, { pole: JSON.stringify(values) })
           }
           handleCancel()
         }}
@@ -105,23 +101,10 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
             [
               ...required(),
               () => ({
-                validator(_, id) {
-                  if (!isNew && id === parseInt(initialValues.number)) return Promise.resolve()
-                  return axios.postWithAuth('/query/select', { sql: `SELECT * FROM dataset WHERE id_ref=${placeId} AND ref_tip="place"`})
-                    .then(res => {
-                      let isFound
-                      (res.data?.data || []).map(item => {
-                        try {
-                          const json = JSON.parse(item.pole)
-                          if (id === parseInt(json.number)) {
-                            isFound = true
-                          }
-                        } catch (e) {
-                          console.warn('Bad product item')
-                        }
-                      })
-                      return isFound ? Promise.reject('Товар с таким номером уже существует') : Promise.resolve()
-                    })
+                validator: async (_, id) => {
+                  if (!isNew && parseInt(id) === parseInt(initialValues.number)) return Promise.resolve()
+                  const count = await getCount('dataset', `JSON_EXTRACT(pole,'$.number')=${id}`)
+                  return count > 0 ? Promise.reject(new Error('Отправка с таким номером уже существует')) : Promise.resolve()
                 },
               })
             ]
@@ -252,6 +235,7 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
         <div style={{ flexBasis: '100%' }} />
         <Form.Item
           name='mark'
+          valuePropName='checked'
         >
           <Checkbox disabled={!isEdit}>Маркировка ЧЗ</Checkbox>
         </Form.Item>

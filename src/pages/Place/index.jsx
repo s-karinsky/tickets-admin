@@ -11,7 +11,7 @@ import { PropertyGap } from '../Sendings'
 import CreateProductModal from './СreateProductModal'
 import FormField from '../../components/FormField'
 import { filterTableRows } from '../../utils/utils'
-import { getSendingById, getPlaceById, deletePlaceById, updatePlaceById, createPlace, getProductsByPlaceId, deleteProductById } from '../../utils/api'
+import { getSendingById, getPlaceById, deletePlaceById, updateDatasetById, createDataset, getProductsByPlaceId, deleteProductById } from '../../utils/api'
 import { SENDING_STATUS } from '../../consts'
 import { getUserProfile } from '../../redux/user'
 import { getColumnSearchProps } from '../../utils/components'
@@ -179,10 +179,10 @@ export default function Place() {
       status: 0
     }
     if (placeId === 'create') {
-      await createPlace(params)
+      await createDataset(params)
       navigate(`/sendings/${sendingId}`)
     } else {
-      await updatePlaceById(placeId, params)
+      await updateDatasetById(placeId, params)
       await placeData.refetch()
       setSearchParams()
     }

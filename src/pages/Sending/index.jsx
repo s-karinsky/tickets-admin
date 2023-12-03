@@ -353,6 +353,7 @@ export default function Sending({
                 name='complete_datetime'
                 style={{ width: 150 }}
                 isEdit={isEditPage}
+                disabled={isEditPage}
                 text={data.complete_datetime?.format('DD.MM.YYYY')}
               />
               <div
