@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { useNavigate, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { Button, Row, Table, Typography, Input, Form, Modal } from 'antd'
 import {
@@ -7,13 +7,12 @@ import {
   ExclamationCircleFilled
 } from '@ant-design/icons'
 import dayjs from 'dayjs'
-import { get as _get } from 'lodash'
 import { useQueries } from 'react-query'
 import { BsTrash } from 'react-icons/bs'
 import { BiEdit } from 'react-icons/bi'
 import { PropertyGap } from '../Sendings'
 import FormField from '../../components/FormField'
-import { getCount, createSending, updateSendingById, getSendingById, deleteSendingById, getPlacesBySendingId, deletePlaceById, useDictionary } from '../../utils/api'
+import { useUsers, getCount, createSending, updateSendingById, getSendingById, deleteSendingById, getPlacesBySendingId, deletePlaceById, useDictionary } from '../../utils/api'
 import { getColumnSearchProps } from '../../utils/components'
 import { required } from '../../utils/validationRules'
 import { declOfNum, filterTableRows } from '../../utils/utils'
@@ -32,6 +31,9 @@ export default function Sending({
   const [ search, setSearch ] = useState('')
   const [ activeRow, setActiveRow ] = useState()
 
+  const clients = useUsers(1)
+  const drivers = useUsers(2)
+
   const [ { isLoading, data, refetch }, places ] = useQueries([
     {
       queryKey: ['sending', sendingId],
@@ -43,7 +45,19 @@ export default function Sending({
     }
   ])
 
-  const carriers = useDictionary('carriers')
+  const clientsMap = useMemo(() =>
+    clients.data.reduce((acc, item) => ({ ...acc, [item.id_user]: [item.family, item.name, item.middle].join(' ') }), {})
+  , [clients.data])
+
+  const [ driverOptions, driverMap ] = useMemo(() => {
+    if (!Array.isArray(drivers.data)) return [[], {}]
+    const options = drivers.data.map(item => ({
+      value: item.id_user,
+      label: [item.family, item.name, item.middle].join(' ')
+    }))
+    const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
+    return [ options, map ]
+  }, [drivers.data])
 
   const isNew = sendingId === 'create'
   const isEditPage = isNew || searchParams.get('edit') !== null
@@ -94,6 +108,7 @@ export default function Sending({
       title: 'Клиент',
       dataIndex: 'client',
       key: 'client',
+      render: id => clientsMap[id],
       ...getColumnSearchProps('client', { options: [{ value: 'Александр' }, { value: 'Владимир' }] })
     },
     {
@@ -144,8 +159,6 @@ export default function Sending({
     const valuesMap = {
       from: values.from,
       to: Number(isSendingAir),
-      start_datetime: dayjs(values.start_datetime).format('YYYY-MM-DD'),
-      complete_datetime: dayjs(values.complete_datetime).format('YYYY-MM-DD'),
       create_datetime: dayjs(values.create_datetime).format('YYYY-MM-DD'),
       json: JSON.stringify(values.json)
     }
@@ -333,7 +346,7 @@ export default function Sending({
                 style={{ width: 150 }}
                 isEdit={isEditPage}
                 disabled={isEditPage}
-                text={data.start_datetime?.format('DD.MM.YYYY')}
+                text={data.start_datetime && data.start_datetime?.format('DD.MM.YYYY')}
               />
               <FormField
                 type='select'
@@ -341,10 +354,8 @@ export default function Sending({
                 name={['json', 'transporter']}
                 style={{ width: 300 }}
                 isEdit={isEditPage}
-                options={(carriers.data || []).map(item => ({
-                  value: `${item.surname} ${item.name} ${item.middlename} (${item.company})`
-                }))}
-                text={data.json?.transporter}
+                options={driverOptions}
+                text={driverMap[data.json?.transporter]}
                 rules={required()}
               />
               <FormField
@@ -354,7 +365,7 @@ export default function Sending({
                 style={{ width: 150 }}
                 isEdit={isEditPage}
                 disabled={isEditPage}
-                text={data.complete_datetime?.format('DD.MM.YYYY')}
+                text={data.complete_datetime && data.complete_datetime?.format('DD.MM.YYYY')}
               />
               <div
                 style={{
@@ -366,16 +377,15 @@ export default function Sending({
                 <FormField
                   type='number'
                   label={<><sup>∑</sup>&nbsp;Количество</>}
-                  name={'count'}
+                  name='count'
                   style={{ width: 120 }}
                   isEdit={isEditPage}
-                  text={data.complete_datetime?.format('DD.MM.YYYY')}
                   disabled={isEditPage}
                 />
                 <FormField
                   type='number'
                   label={<><sup>∑</sup>&nbsp;Вес нетто</>}
-                  name={'net_weight'}
+                  name='net_weight'
                   style={{ width: 120 }}
                   isEdit={isEditPage}
                   addonAfter={isEditPage && 'кг'}
@@ -385,7 +395,7 @@ export default function Sending({
                 <FormField
                   type='number'
                   label={<><sup>∑</sup>&nbsp;Вес брутто</>}
-                  name={'gross_weight'}
+                  name='gross_weight'
                   style={{ width: 120 }}
                   isEdit={isEditPage}
                   addonAfter={isEditPage && 'кг'}

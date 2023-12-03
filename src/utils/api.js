@@ -77,8 +77,8 @@ export const getSendingById = sendingId => async () => {
       console.warn(e)
     }
     item.create_datetime = dayjs(item.create_datetime)
-    item.start_datetime = dayjs(item.start_datetime)
-    item.complete_datetime = dayjs(item.complete_datetime)
+    item.start_datetime = item.json?.status > 0 && dayjs(item.json?.status_date_1)
+    item.complete_datetime = item.json?.status > 1 && dayjs(item.json?.status_date_2)
     item.gross_weight = products.gross_weight
     item.net_weight = products.net_weight
     item.count = products.count
@@ -125,7 +125,6 @@ export const getPlacesBySendingId = sendingId => async () => {
     return {
       ...item,
       ...json,
-      gross_weight: productsMap[item.id]?.gross_weight,
       count: productsMap[item.id]?.count
     }
   })
@@ -219,11 +218,11 @@ const dictionaryMap = {
     },
     {
       id: '3',
-      code: '345',
       company: 'Company 3',
       surname: 'Васильев',
       name: 'Василий',
       middlename: 'Васильевич',
+      code: '345',
       phone: '+792364585742',
       companyPhone: '+79132448575',
       country: 'Россия',
@@ -243,3 +242,18 @@ export const useDictionary = name => {
     staleTime: 5 * 60 * 1000
   })
 }
+
+export const useUsers = role => useQuery(['users', role], async () => {
+  const response = await axios.postWithAuth('/query/select', { sql: `SELECT id_user, name, family, middle, json FROM users WHERE id_role=${role} AND active=1 AND id_verification_status${role === 2 ? '=2' : ' is null'}` })
+  const users = (response.data?.data || []).map(user => {
+    try {
+      user.json = JSON.parse(user.json)
+    } catch (e) {
+      console.warn(e)
+    }
+    return user
+  })
+  return users
+}, {
+  staleTime: 5 * 60 * 1000
+})

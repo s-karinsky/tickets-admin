@@ -1,14 +1,13 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Button, Row, Table, Typography, Input, Switch, Modal, DatePicker, Select } from 'antd'
 import { ExclamationCircleFilled } from '@ant-design/icons'
 import { useQuery } from 'react-query'
 import dayjs from 'dayjs'
 import { BsTrash } from 'react-icons/bs'
-import { get as _get } from 'lodash'
 import { SendingsStatus } from '../../components/SendingsStatus'
 import { DateTableCell } from '../../components/DateTableCell'
-import { getCount, getSendings, deleteSendingById, updateSendingById } from '../../utils/api'
+import { getCount, getSendings, deleteSendingById, updateSendingById, useUsers } from '../../utils/api'
 import { declOfNum, filterTableRows } from '../../utils/utils'
 import { getColumnSearchProps } from '../../utils/components'
 import { SENDING_STATUS } from '../../consts'
@@ -27,6 +26,11 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
   const [ activeRow, setActiveRow ] = useState()
   const [ search, setSearch ] = useState('')
   const { isLoading, data, refetch } = useQuery(['sendings', { isAir: isSendingAir }], getSendings(isSendingAir))
+  const drivers = useUsers(2)
+  const driverMap = useMemo(() => {
+    if (!Array.isArray(drivers.data)) return {}
+    return drivers.data.reduce((acc, item) => ({ ...acc, [item.id_user]: [item.family, item.name, item.middle].join(' ') }), {})
+  }, [drivers.data])
 
   let sendings = (data || [])
     .filter(filterTableRows(search))
@@ -103,6 +107,7 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
       title: 'Перевозчик',
       dataIndex: 'transporter',
       key: 'transporter',
+      render: val => driverMap[val],
       sorter: (a, b) => a.transporter.localeCompare(b.transporter),
       ...getColumnSearchProps('transporter', { options: [{ value: 'Александр' }, { value: 'Владимир' }] })
     },

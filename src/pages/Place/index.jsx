@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, useMemo } from 'react'
 import { useNavigate, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { useQueries } from 'react-query'
 import { Button, Row, Table, Typography, Input, Checkbox, Form, Modal, Space, Divider } from 'antd'
@@ -11,7 +11,7 @@ import { PropertyGap } from '../Sendings'
 import CreateProductModal from './СreateProductModal'
 import FormField from '../../components/FormField'
 import { filterTableRows } from '../../utils/utils'
-import { getSendingById, getPlaceById, deletePlaceById, updateDatasetById, createDataset, getProductsByPlaceId, deleteProductById } from '../../utils/api'
+import { useUsers, getSendingById, getPlaceById, deletePlaceById, updateDatasetById, createDataset, getProductsByPlaceId, deleteProductById } from '../../utils/api'
 import { SENDING_STATUS } from '../../consts'
 import { getUserProfile } from '../../redux/user'
 import { getColumnSearchProps } from '../../utils/components'
@@ -47,6 +47,17 @@ export default function Place() {
       queryFn: getProductsByPlaceId(placeId)
     }
   ])
+  const clients = useUsers(1)
+
+  const [ clientsOptions, clientsMap ] = useMemo(() => {
+    if (!Array.isArray(clients.data)) return [[], {}]
+    const options = clients.data.map(item => ({
+      value: item.id_user,
+      label: [item.family, item.name, item.middle].join(' ')
+    }))
+    const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
+    return [ options, map ]
+  }, [clients.data])
 
   const isNew = placeId === 'create'
   const isEditPage = isNew || searchParams.get('edit') !== null
@@ -55,7 +66,6 @@ export default function Place() {
     ...placeData.data,
     status: sendingData.data?.json?.status,
     net_weight: (productsData.data || []).reduce((sum, item) => sum + item.net_weight || 0, 0),
-    gross_weight: (productsData.data || []).reduce((sum, item) => sum + item.gross_weight || 0, 0),
     count: (productsData.data || []).reduce((sum, item) => sum + item.count || 0, 0)
   }
 
@@ -341,11 +351,8 @@ export default function Place() {
                   label='Клиент'
                   name='client'
                   style={{ width: 200 }}
-                  options={[
-                    { value: 'Александр', title: 'Aktr' },
-                    { value: 'Владимир', title: 'Ak2tr' },
-                  ]}
-                  text={initialPlace.client}
+                  options={clientsOptions}
+                  text={clientsMap[initialPlace.client]}
                   isEdit={isEditPage}
                   rules={required()}
                 />
@@ -356,12 +363,12 @@ export default function Place() {
                   style={{ width: 200 }}
                   isEdit={isEditPage}
                   options={SENDING_STATUS.map((name, i) => ({ label: name, value: i }))}
-                  text={SENDING_STATUS[initialPlace.status]}
-                  disabled
+                  text={SENDING_STATUS[sendingData.data?.json?.status]}
+                  disabled={isEditPage}
                 />
                 <FormField 
                   type='select'
-                  label='Статус услуги'
+                  label={<><sup>ƒ</sup>&nbsp;Статус услуги</>}
                   name='service_status'
                   style={{ width: 200 }}
                   options={[
@@ -370,6 +377,7 @@ export default function Place() {
                   ]}
                   text={initialPlace.service_status}
                   isEdit={isEditPage}
+                  disabled={isEditPage}
                 />
                 <FormField
                   type='select'
@@ -471,12 +479,11 @@ export default function Place() {
                 />
                 <FormField
                   type='number'
-                  label={<><sup>∑</sup>&nbsp;Вес брутто</>}
+                  label='Вес брутто'
                   name='gross_weight'
                   addonAfter={isEditPage && 'кг'}
                   style={{ width: 200 }}
                   isEdit={isEditPage}
-                  disabled={isEditPage}
                   rules={numberRange({ min: 0, max: 99999 })}
                   formatter={(val) => Number(val).toFixed(3)}
                 />
