@@ -30,6 +30,9 @@ export default function Sending({
   const { sendingId } = useParams()
   const [ search, setSearch ] = useState('')
   const [ activeRow, setActiveRow ] = useState()
+  
+  const isNew = sendingId === 'create'
+  const isEditPage = isNew || searchParams.get('edit') !== null
 
   const clients = useUsers(1)
   const drivers = useUsers(2)
@@ -59,9 +62,6 @@ export default function Sending({
     const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
     return [ options, map ]
   }, [drivers.data])
-
-  const isNew = sendingId === 'create'
-  const isEditPage = isNew || searchParams.get('edit') !== null
 
   const placesData = (places.data || [])
     .filter(filterTableRows(search))
@@ -225,7 +225,7 @@ export default function Sending({
                   alignItems: 'center',
                 }}
                 type='primary'
-                size={'large'}
+                size='large'
                 onClick={() => {
                   form.submit()
                 }}
@@ -313,10 +313,10 @@ export default function Sending({
               }}
             >
               <FormField
+                width={120}
                 label='Номер'
                 name='from'
                 type='number'
-                style={{ width: 120 }}
                 isEdit={isEditPage}
                 rules={
                   [
@@ -324,7 +324,7 @@ export default function Sending({
                     () => ({
                       validator: async (_, id) => {
                         if (!isNew && parseInt(id) === parseInt(data.from)) return Promise.resolve()
-                        const count = await getCount('trip', `\`from\`=${id} AND canceled=0`)
+                        const count = await getCount('trip', `\`from\`=${id} AND canceled=0 AND YEAR(create_datetime) = YEAR('${dayjs().format('YYYY-MM-DD')}')`)
                         return count > 0 ? Promise.reject(new Error('Отправка с таким номером уже существует')) : Promise.resolve()
                       },
                     })
@@ -332,41 +332,23 @@ export default function Sending({
                 }
               />
               <FormField
+                width={200}
                 type='date'
                 label='Дата'
                 name='create_datetime'
-                style={{ width: 150 }}
                 isEdit={isEditPage}
                 text={data.create_datetime?.format('DD.MM.YYYY')}
                 rules={required()}
               />
               <FormField
-                type='date'
-                label={<><sup>ƒ</sup>&nbsp;Дата отправки</>}
-                name='start_datetime'
-                style={{ width: 150 }}
-                isEdit={isEditPage}
-                disabled={isEditPage}
-                text={data.start_datetime && data.start_datetime?.format('DD.MM.YYYY')}
-              />
-              <FormField
+                width={600}
                 type='select'
                 label='Перевозчик'
                 name={['json', 'transporter']}
-                style={{ width: 300 }}
                 isEdit={isEditPage}
                 options={driverOptions}
                 text={driverMap[data.json?.transporter]}
                 rules={required()}
-              />
-              <FormField
-                type='date'
-                label={<><sup>ƒ</sup>&nbsp;Дата поступления</>}
-                name='complete_datetime'
-                style={{ width: 150 }}
-                isEdit={isEditPage}
-                disabled={isEditPage}
-                text={data.complete_datetime && data.complete_datetime?.format('DD.MM.YYYY')}
               />
               <div
                 style={{
@@ -376,16 +358,39 @@ export default function Sending({
                 }}
               >
                 <FormField
+                  type='date'
+                  label='Дата отправки'
+                  labelType='calc'
+                  name='start_datetime'
+                  style={{ width: 150 }}
+                  isEdit={isEditPage}
+                  disabled={isEditPage}
+                  text={data.start_datetime && data.start_datetime?.format('DD.MM.YYYY')}
+                />
+                <FormField
+                  type='date'
+                  label='Дата поступления'
+                  labelType='calc'
+                  name='complete_datetime'
+                  style={{ width: 150 }}
+                  isEdit={isEditPage}
+                  disabled={isEditPage}
+                  text={data.complete_datetime && data.complete_datetime?.format('DD.MM.YYYY')}
+                />
+                <FormField
                   type='number'
-                  label={<><sup>∑</sup>&nbsp;Количество</>}
+                  label='Количество'
+                  labelType='sum'
                   name='count'
                   style={{ width: 120 }}
                   isEdit={isEditPage}
                   disabled={isEditPage}
+                  formatter={val => val === '' ? '0' : val}
                 />
                 <FormField
                   type='number'
-                  label={<><sup>∑</sup>&nbsp;Вес нетто</>}
+                  label='Вес нетто'
+                  labelType='sum'
                   name='net_weight'
                   style={{ width: 120 }}
                   isEdit={isEditPage}
@@ -395,7 +400,8 @@ export default function Sending({
                 />
                 <FormField
                   type='number'
-                  label={<><sup>∑</sup>&nbsp;Вес брутто</>}
+                  label='Вес брутто'
+                  labelType='sum'
                   name='gross_weight'
                   style={{ width: 120 }}
                   isEdit={isEditPage}
@@ -405,7 +411,8 @@ export default function Sending({
                 />
                 <FormField
                   type='select'
-                  label={<><sup>ƒ</sup>&nbsp;Статус</>}
+                  label='Статус'
+                  labelType='calc'
                   name={['json', 'status']}
                   style={{ width: 200 }}
                   isEdit={isEditPage}
@@ -416,6 +423,7 @@ export default function Sending({
               </div>
             </div>
             <FormField
+              width={960}
               type='textarea'
               label='Примечание'
               name={['json', 'note']}

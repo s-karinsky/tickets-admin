@@ -7,9 +7,21 @@ export default function FormField({
   isEdit = true,
   text,
   rules,
+  width,
+  labelType,
   ...rest
 }) {
   let child = null
+
+  if (width) {
+    rest = {
+      style: {
+        width,
+        ...rest?.style
+      },
+      ...rest
+    }
+  }
 
   switch (type) {
     case 'date':
@@ -55,11 +67,17 @@ export default function FormField({
       break
   }
 
+  if (labelType === 'sum') {
+    label = <><sup>∑</sup>&nbsp;{label}</>
+  } else if (labelType === 'calc') {
+    label = <><sup>ƒ</sup>&nbsp;{label}</>
+  }
+
   return (
     <Form.Item
       label={label}
       name={name}
-      style={{ fontWeight: 'bold', width: rest.style?.width }}
+      style={{ fontWeight: 'bold', width }}
       rules={isEdit ? rules : undefined}
     >
       {child}

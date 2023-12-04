@@ -20,6 +20,7 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
   return (
     <Modal
       width={700}
+      style={{ top: 20 }}
       title={
         <Row>
           <Col>
@@ -31,7 +32,7 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
                 marginTop: 0,
               }}
             >
-              {product === true ? `Создать товар №${maxNum + 1}` : (isEdit ? 'Редактировать товар' : 'Просмотр товара')}
+              {product === true ? 'Создать товар' : (isEdit ? 'Редактировать товар' : 'Просмотр товара')}
             </Title>
           </Col>
           {!isEdit && <Col>
@@ -70,7 +71,6 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
           flexWrap: 'wrap',
           alignItems: 'flex-start',
         }}
-        size='large'
         layout='vertical'
         form={form}
         initialValues={initialValues}
@@ -91,12 +91,13 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
           handleCancel()
         }}
       >
-        {/* <FormField
+        <FormField
           type='number'
           isEdit={isEdit}
-          label={<><sup>ƒ</sup>&nbsp;Номер</>}
+          label='Номер'
+          labelType='calc'
           name='number'
-          style={{ width: 204.4 }}
+          width={100}
           rules={
             [
               ...required(),
@@ -110,35 +111,40 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
             ]
           }
           disabled={isEdit}
-        /> */}
+        />
         <FormField
+          width={260}
           isEdit={isEdit}
           label='Наименование'
           name='name'
           rules={required()}
         />
         <FormField
+          width={250}
           isEdit={isEdit}
           label='Марка'
           name='label'
         />
         <FormField
+          width={150}
           isEdit={isEdit}
           label='Артикул'
           name='article'
         />
         <FormField
+          width={150}
           isEdit={isEdit}
           label='Цвет'
           name='color'
         />
         <FormField
+          width={150}
           isEdit={isEdit}
           label='Размер'
           name='size'
         />
         <FormField
-          style={{ width: 204.4 }}
+          width={150}
           isEdit={isEdit}
           type='number'
           label='Вес нетто'
@@ -149,6 +155,7 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
         />
         <div style={{ flexBasis: '100%' }} />
         <Tabs
+          size='small'
           style={{ flexBasis: '100%' }}
           defaultActiveKey='1'
           items={[
@@ -189,55 +196,59 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
         <fieldset style={{ display: 'flex', gap: 10, margin: '0 -10px' }}>
           <legend>Сертификат/Декларация о соответствии</legend>
           <FormField
+            width={210}
             isEdit={isEdit}
             label='Номер'
             name='cert_number'
           />
           <FormField
+            width={210}
             isEdit={isEdit}
             type='date'
             label='Дата начала'
             name='cert_start_date'
-            style={{ width: 204.4 }}
           />
           <FormField
+            width={210}
             isEdit={isEdit}
             type='date'
             label='Дата окончания'
             name='cert_end_date'
-            style={{ width: 204.4 }}
           />
         </fieldset>
         <FormField
+          width={150}
           isEdit={isEdit}
           type='number'
           label='Количество'
           name='count'
-          style={{ width: 204.4 }}
           rules={[...required(), ...numberRange({ min: 1, max: 99999 })]}
         />
         <FormField
+          width={150}
           isEdit={isEdit}
           type='number'
-          label={isSumDisabled ? <><sup>ƒ</sup>&nbsp;Цена</> : 'Цена'}
+          label='Цена'
+          labelType={isSumDisabled && 'calc'}
           name='price'
           addonAfter={isEdit && '$'}
-          style={{ width: 204.4 }}
           disabled={isSumDisabled}
           formatter={(val) => Number(val).toFixed(2)}
         />
         <FormField
+          width={150}
           isEdit={isEdit}
           type='number'
-          label={isSumDisabled ? <><sup>ƒ</sup>&nbsp;Сумма</> : 'Сумма'}
+          label='Сумма'
+          labelType={isSumDisabled && 'calc'}
           name='sum'
           addonAfter={isEdit && '$'}
-          style={{ width: 204.4 }}
           disabled={isSumDisabled}
           formatter={(val) => Number(val).toFixed(2)}
         />
-        <div style={{ flexBasis: '100%' }} />
         <Form.Item
+          width={150}
+          style={{ alignSelf: 'flex-end' }}
           name='mark'
           valuePropName='checked'
         >

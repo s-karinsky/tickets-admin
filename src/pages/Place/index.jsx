@@ -73,7 +73,7 @@ export default function Place() {
     if (initialPlace.pay_type !== 'Безналичный') setIsSumDisabled(true)
   }, [initialPlace.pay_type])
 
-  const maxNum = (productsData.data || []).reduce((max, item) => Math.max(item.number, max), 1)
+  const maxNum = (productsData.data || []).reduce((max, item) => Math.max(item.number, max), 0)
 
   const places = (productsData.data || [])
     .filter(filterTableRows(search))
@@ -358,7 +358,8 @@ export default function Place() {
                 />
                 <FormField
                   type='select'
-                  label={<><sup>ƒ</sup>&nbsp;Статус места</>}
+                  label='Статус места'
+                  labelType='calc'
                   name='status'
                   style={{ width: 200 }}
                   isEdit={isEditPage}
@@ -368,7 +369,8 @@ export default function Place() {
                 />
                 <FormField 
                   type='select'
-                  label={<><sup>ƒ</sup>&nbsp;Статус услуги</>}
+                  label='Статус услуги'
+                  labelType='calc'
                   name='service_status'
                   style={{ width: 200 }}
                   options={[
@@ -468,7 +470,8 @@ export default function Place() {
                 />
                 <FormField
                   type='number'
-                  label={<><sup>∑</sup>&nbsp;Вес нетто</>}
+                  label='Вес нетто'
+                  labelType='sum'
                   name='net_weight'
                   addonAfter={isEditPage && 'кг'}
                   style={{ width: 200 }}
@@ -489,7 +492,8 @@ export default function Place() {
                 />
                 <FormField
                   type='number'
-                  label={<><sup>∑</sup>&nbsp;Количество товара</>}
+                  label='Количество товара'
+                  labelType='sum'
                   name='count'
                   style={{ width: 200 }}
                   isEdit={isEditPage}
