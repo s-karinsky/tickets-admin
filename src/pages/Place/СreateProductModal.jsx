@@ -7,7 +7,16 @@ import { getCount, createDataset, updateDatasetById } from '../../utils/api'
 import { required, numberRange } from '../../utils/validationRules'
 const { Title } = Typography
 
-export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId, maxNum, isSumDisabled, product = {} }) => {
+export const CreateProductModal = ({
+  isModalOpen,
+  handleCancel,
+  placeId,
+  userId,
+  maxNum,
+  isSumDisabled,
+  isNotSending,
+  product = {}
+}) => {
   const [ form ] = Form.useForm()
   const isNew = product === true
   const [ isEdit, setIsEdit ] = useState(isNew)
@@ -36,7 +45,7 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
             </Title>
           </Col>
           {!isEdit && <Col>
-            <Button style={{ margin: '6px 0 0 20px' }} onClick={() => setIsEdit(true)}>
+            <Button style={{ margin: '6px 0 0 20px' }} onClick={() => setIsEdit(true)} type='primary'>
               Редактировать
             </Button>
           </Col>}
@@ -97,51 +106,63 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
           label='Номер'
           labelType='calc'
           name='number'
-          width={100}
+          width={80}
           rules={
             [
               ...required(),
               () => ({
                 validator: async (_, id) => {
                   if (!isNew && parseInt(id) === parseInt(initialValues.number)) return Promise.resolve()
-                  const count = await getCount('dataset', `JSON_EXTRACT(pole,'$.number')=${id}`)
-                  return count > 0 ? Promise.reject(new Error('Отправка с таким номером уже существует')) : Promise.resolve()
+                  const count = await getCount('dataset', `JSON_EXTRACT(pole,'$.number')=${id} AND id_ref=${placeId} AND ref_tip='place' AND status=0`)
+                  return count > 0 ? Promise.reject(new Error('Товар с таким номером уже существует')) : Promise.resolve()
                 },
               })
             ]
           }
-          disabled={isEdit}
+          disabled={!isNotSending && isEdit}
         />
         <FormField
-          width={260}
+          width={210}
           isEdit={isEdit}
           label='Наименование'
           name='name'
           rules={required()}
+          disabled={!isNotSending}
         />
         <FormField
-          width={250}
+          width={200}
           isEdit={isEdit}
           label='Марка'
           name='label'
+          disabled={!isNotSending}
+        />
+        <FormField
+          width={120}
+          isEdit={isEdit}
+          label='Код ТН ВЭД ТС'
+          name='tn_code'
+          disabled={!isNotSending}
         />
         <FormField
           width={150}
           isEdit={isEdit}
           label='Артикул'
           name='article'
+          disabled={!isNotSending}
         />
         <FormField
           width={150}
           isEdit={isEdit}
           label='Цвет'
           name='color'
+          disabled={!isNotSending}
         />
         <FormField
           width={150}
           isEdit={isEdit}
           label='Размер'
           name='size'
+          disabled={!isNotSending}
         />
         <FormField
           width={150}
@@ -152,6 +173,7 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
           addonAfter={isEdit && 'кг'}
           rules={[...required(), ...numberRange({ min: 1, max: 99999 })]}
           formatter={(val) => Number(val).toFixed(3)}
+          disabled={!isNotSending}
         />
         <div style={{ flexBasis: '100%' }} />
         <Tabs
@@ -167,6 +189,7 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
                   isEdit={isEdit}
                   label='Состав/материал'
                   name='material'
+                  disabled={!isNotSending}
                 />
             },
             {
@@ -177,16 +200,19 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
                   isEdit={isEdit}
                   label='Верх'
                   name='shoes_top'
+                  disabled={!isNotSending}
                 />
                 <FormField
                   isEdit={isEdit}
                   label='Подкладка'
                   name='shoes_und'
+                  disabled={!isNotSending}
                 />
                 <FormField
                   isEdit={isEdit}
                   label='Низ'
                   name='shoes_bottom'
+                  disabled={!isNotSending}
                 />
               </div>
             }
@@ -200,6 +226,7 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
             isEdit={isEdit}
             label='Номер'
             name='cert_number'
+            disabled={!isNotSending}
           />
           <FormField
             width={210}
@@ -207,6 +234,7 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
             type='date'
             label='Дата начала'
             name='cert_start_date'
+            disabled={!isNotSending}
           />
           <FormField
             width={210}
@@ -214,6 +242,7 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
             type='date'
             label='Дата окончания'
             name='cert_end_date'
+            disabled={!isNotSending}
           />
         </fieldset>
         <FormField
@@ -223,6 +252,7 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
           label='Количество'
           name='count'
           rules={[...required(), ...numberRange({ min: 1, max: 99999 })]}
+          disabled={!isNotSending}
         />
         <FormField
           width={150}
@@ -252,7 +282,7 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
           name='mark'
           valuePropName='checked'
         >
-          <Checkbox disabled={!isEdit}>Маркировка ЧЗ</Checkbox>
+          <Checkbox disabled={!isNotSending || !isEdit}>Маркировка ЧЗ</Checkbox>
         </Form.Item>
         <div style={{ flexBasis: '100%' }} />
         <div style={{ flexGrow: 1 }}>
@@ -261,6 +291,7 @@ export const CreateProductModal = ({ isModalOpen, handleCancel, placeId, userId,
             type='textarea'
             label='Примечание'
             name='note'
+            disabled={!isNotSending}
           />
         </div>
       </Form>

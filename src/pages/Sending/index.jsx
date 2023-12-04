@@ -48,6 +48,8 @@ export default function Sending({
     }
   ])
 
+  const isNotSending = data?.json?.status === 0
+
   const clientsMap = useMemo(() => {
     if (!Array.isArray(clients.data)) return {}
     return clients.data.reduce((acc, item) => ({ ...acc, [item.id_user]: [item.family, item.name, item.middle].join(' ') }), {})
@@ -69,7 +71,7 @@ export default function Sending({
       return {
         ...item,
         buttons: (
-          <div style={{ display: 'flex', gap: 10 }}>
+          isNotSending && <div style={{ display: 'flex', gap: 10 }}>
             <CopyOutlined size={17} color='#141414' />
             <BsTrash
               style={{ marginLeft: 30, cursor: 'pointer' }} 
@@ -99,11 +101,11 @@ export default function Sending({
 
   const columns = [
     {
-      title: 'Номер',
-      dataIndex: 'id',
-      key: 'id',
+      title: 'Место',
+      dataIndex: 'place',
+      key: 'place',
       align: 'right',
-      sorter: (a, b) => a.id - b.id,
+      ...getColumnSearchProps('place', { type: 'number' })
     },
     {
       title: 'Клиент',
@@ -111,13 +113,6 @@ export default function Sending({
       key: 'client',
       render: id => clientsMap[id],
       ...getColumnSearchProps('client', { options: [{ value: 'Александр' }, { value: 'Владимир' }] })
-    },
-    {
-      title: 'Место',
-      dataIndex: 'place',
-      key: 'place',
-      align: 'right',
-      ...getColumnSearchProps('place', { type: 'number' })
     },
     {
       title: 'Вес брутто',
@@ -248,7 +243,7 @@ export default function Sending({
               </Button>
             </>
           ) : (
-            <>
+            isNotSending && <>
               <Button
                 style={{
                   gap: 10,
@@ -477,7 +472,7 @@ export default function Sending({
                 }}
               >
                 {' '}
-                <Button
+                {isNotSending && <Button
                   type='primary'
                   onClick={() => {
                     // editHandle(true)
@@ -486,7 +481,7 @@ export default function Sending({
                   size={'large'}
                 >
                   Создать
-                </Button>
+                </Button>}
                 <Button
                   type='primary'
                   size='large'

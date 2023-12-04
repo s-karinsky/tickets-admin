@@ -11,7 +11,7 @@ import { PropertyGap } from '../Sendings'
 import CreateProductModal from './СreateProductModal'
 import FormField from '../../components/FormField'
 import { filterTableRows } from '../../utils/utils'
-import { useUsers, getSendingById, getPlaceById, deletePlaceById, updateDatasetById, createDataset, getProductsByPlaceId, deleteProductById } from '../../utils/api'
+import { useUsers, getCount, getSendingById, getPlaceById, deletePlaceById, updateDatasetById, createDataset, getProductsByPlaceId, deleteProductById } from '../../utils/api'
 import { SENDING_STATUS } from '../../consts'
 import { getUserProfile } from '../../redux/user'
 import { getColumnSearchProps } from '../../utils/components'
@@ -39,8 +39,8 @@ export default function Place() {
       queryFn: getSendingById(sendingId)
     },
     {
-      queryKey: ['place', placeId],
-      queryFn: getPlaceById(placeId)
+      queryKey: ['place', sendingId, placeId],
+      queryFn: getPlaceById(placeId, sendingId)
     },
     {
       queryKey: ['products', placeId],
@@ -69,6 +69,8 @@ export default function Place() {
     count: (productsData.data || []).reduce((sum, item) => sum + item.count || 0, 0)
   }
 
+  const isNotSending = sendingData.data?.json?.status === 0
+
   useEffect(() => {
     if (initialPlace.pay_type !== 'Безналичный') setIsSumDisabled(true)
   }, [initialPlace.pay_type])
@@ -81,7 +83,7 @@ export default function Place() {
       return {
         ...item,
         buttons: (
-          <div style={{ display: 'flex', gap: 10 }}>
+          isNotSending && <div style={{ display: 'flex', gap: 10 }}>
             <CopyOutlined size={17} color='#141414' />
             <BsTrash
               style={{ marginLeft: 30, cursor: 'pointer' }}
@@ -275,7 +277,7 @@ export default function Place() {
                 </Button>
               </>
             ) : (
-              <>
+              isNotSending && <>
                 <Button
                   style={{
                     gap: 10,
@@ -341,10 +343,23 @@ export default function Place() {
                 }}
               >
                 <FormField
+                  width={200}
+                  type='number'
                   label='Место'
                   name='place'
                   isEdit={isEditPage}
-                  rules={required()}
+                  rules={
+                    [
+                      ...required(),
+                      () => ({
+                        validator: async (_, id) => {
+                          if (!isNew && parseInt(id) === parseInt(initialPlace.place)) return Promise.resolve()
+                          const count = await getCount('dataset', `JSON_EXTRACT(pole,'$.place')='${id}' AND id_ref=${sendingId} AND ref_tip='sending' AND status=0`)
+                          return count > 0 ? Promise.reject(new Error('Место уже занято')) : Promise.resolve()
+                        },
+                      })
+                    ]
+                  }
                 />
                 <FormField
                   type='select'
@@ -543,13 +558,13 @@ export default function Place() {
                 onChange={e => setSearch(e.target.value)}
               />
             </Row>
-            <Button
+            {isNotSending && <Button
               type='primary'
               onClick={() => setEditProduct(true)}
               size={'large'}
             >
               Создать
-            </Button>
+            </Button>}
           </div>
         </Row>
         <Table
@@ -586,6 +601,7 @@ export default function Place() {
         product={editProduct}
         maxNum={maxNum}
         isSumDisabled={initialPlace.pay_type !== 'Безналичный'}
+        isNotSending={isNotSending}
       />}
     </>
   )
