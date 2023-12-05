@@ -11,7 +11,7 @@ import { PropertyGap } from '../Sendings'
 import CreateProductModal from './СreateProductModal'
 import FormField from '../../components/FormField'
 import { filterTableRows } from '../../utils/utils'
-import { useUsers, getCount, getSendingById, getPlaceById, deletePlaceById, updateDatasetById, createDataset, getProductsByPlaceId, deleteProductById } from '../../utils/api'
+import { useUsersWithRole, getCount, getSendingById, getPlaceById, deletePlaceById, updateDatasetById, createDataset, getProductsByPlaceId, deleteProductById } from '../../utils/api'
 import { SENDING_STATUS } from '../../consts'
 import { getUserProfile } from '../../redux/user'
 import { getColumnSearchProps } from '../../utils/components'
@@ -47,7 +47,7 @@ export default function Place() {
       queryFn: getProductsByPlaceId(placeId)
     }
   ])
-  const clients = useUsers(1)
+  const clients = useUsersWithRole(1)
 
   const [ clientsOptions, clientsMap ] = useMemo(() => {
     if (!Array.isArray(clients.data)) return [[], {}]

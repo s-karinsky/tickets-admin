@@ -12,7 +12,7 @@ import { BsTrash } from 'react-icons/bs'
 import { BiEdit } from 'react-icons/bi'
 import { PropertyGap } from '../Sendings'
 import FormField from '../../components/FormField'
-import { useUsers, getCount, createSending, updateSendingById, getSendingById, deleteSendingById, getPlacesBySendingId, deletePlaceById, useDictionary } from '../../utils/api'
+import { useUsersWithRole, getCount, createSending, updateSendingById, getSendingById, deleteSendingById, getPlacesBySendingId, deletePlaceById, useDictionary } from '../../utils/api'
 import { getColumnSearchProps } from '../../utils/components'
 import { required } from '../../utils/validationRules'
 import { declOfNum, filterTableRows } from '../../utils/utils'
@@ -34,8 +34,8 @@ export default function Sending({
   const isNew = sendingId === 'create'
   const isEditPage = isNew || searchParams.get('edit') !== null
 
-  const clients = useUsers(1)
-  const drivers = useUsers(2)
+  const clients = useUsersWithRole(1)
+  const drivers = useUsersWithRole(2)
 
   const [ { isLoading, data, refetch, isFetching }, places ] = useQueries([
     {

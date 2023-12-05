@@ -251,8 +251,27 @@ export const useDictionary = name => {
   })
 }
 
-export const useUsers = role => useQuery(['users', role], async () => {
-  const response = await axios.postWithAuth('/query/select', { sql: `SELECT id_user, name, family, middle, json FROM users WHERE id_role=${role} AND active=1 AND id_verification_status${role === 2 ? '=2' : ' is null'}` })
+export const useUsers = userId => useQuery(['users'].concat(userId || []), async () => {
+  const response = await axios.postWithAuth('/query/select', {
+    sql: `SELECT * FROM users WHERE active=1 AND deleted!=1${userId ? ` AND id_user=${userId}` : ''}`
+  })
+  const users = (response.data?.data || []).map(user => {
+    if (!user.json) {
+      user.json = {}
+    } else {
+      try {
+        user.json = JSON.parse(user.json)
+      } catch (e) {
+        console.warn(e)
+      }
+    }
+    return user
+  })
+  return userId ? users[0] : users
+})
+
+export const useUsersWithRole = role => useQuery(['usersWithRole', role], async () => {
+  const response = await axios.postWithAuth('/query/select', { sql: `SELECT id_user, name, family, middle, json FROM users WHERE id_role=${role} AND active=1 AND deleted!=1 AND id_verification_status${role === 2 ? '=2' : ' is null'}` })
   const users = (response.data?.data || []).map(user => {
     try {
       user.json = JSON.parse(user.json)

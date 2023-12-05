@@ -7,7 +7,7 @@ import dayjs from 'dayjs'
 import { BsTrash } from 'react-icons/bs'
 import { SendingsStatus } from '../../components/SendingsStatus'
 import { DateTableCell } from '../../components/DateTableCell'
-import { getCount, getSendings, deleteSendingById, updateSendingById, useUsers } from '../../utils/api'
+import { getCount, getSendings, deleteSendingById, updateSendingById, useUsersWithRole } from '../../utils/api'
 import { declOfNum, filterTableRows } from '../../utils/utils'
 import { getColumnSearchProps } from '../../utils/components'
 import { SENDING_STATUS } from '../../consts'
@@ -26,7 +26,7 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
   const [ activeRow, setActiveRow ] = useState()
   const [ search, setSearch ] = useState('')
   const { isLoading, data, refetch } = useQuery(['sendings', { isAir: isSendingAir }], getSendings(isSendingAir))
-  const drivers = useUsers(2)
+  const drivers = useUsersWithRole(2)
   const driverMap = useMemo(() => {
     if (!Array.isArray(drivers.data)) return {}
     return drivers.data.reduce((acc, item) => ({ ...acc, [item.id_user]: [item.family, item.name, item.middle].join(' ') }), {})
