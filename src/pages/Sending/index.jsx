@@ -37,7 +37,7 @@ export default function Sending({
   const clients = useUsers(1)
   const drivers = useUsers(2)
 
-  const [ { isLoading, data, refetch }, places ] = useQueries([
+  const [ { isLoading, data, refetch, isFetching }, places ] = useQueries([
     {
       queryKey: ['sending', sendingId],
       queryFn: getSendingById(sendingId)
@@ -167,6 +167,8 @@ export default function Sending({
       setSearchParams({})
     }
   }, [sendingId, isSendingAir])
+
+  if (isFetching) return null
 
   return (
     <div

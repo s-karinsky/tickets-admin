@@ -188,6 +188,8 @@ export default function Place() {
     }
   }, [sendingId, placeId, user])
 
+  if (placeData.isFetching) return null
+
   return (
     <>
       <div
@@ -396,18 +398,6 @@ export default function Place() {
                   isEdit={isEditPage}
                   disabled={isEditPage}
                 />
-                <FormField
-                  type='select'
-                  label='Услуги'
-                  name='services'
-                  style={{ width: 200 }}
-                  options={[
-                    { value: 'В обработке', title: '' },
-                    { value: 'Выдача со склада', title: '' },
-                  ]}
-                  text={initialPlace.services}
-                  isEdit={isEditPage}
-                />
                 <FormField 
                   type='select'
                   label='Тариф'
@@ -469,11 +459,13 @@ export default function Place() {
                 <FormField
                   type='number'
                   label='Сумма оплаты'
+                  labelType='calc'
                   name='pay_sum'
                   addonAfter={isEditPage && '$'}
                   style={{ width: 200 }}
                   isEdit={isEditPage}  
                   formatter={(val) => Number(val).toFixed(2)}
+                  disabled={isEditPage}
                 />
                 <FormField
                   label='Размер'
@@ -526,68 +518,72 @@ export default function Place() {
             </Form>
           )}
         </Row>
-        <Row>
-          <Title
-            level={1}
-            style={{ fontWeight: '700', marginBottom: '0' }}
-          >
-            Товары
-          </Title>
-        </Row>
-        <Row>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              gap: '20px',
-              width: '100%',
-            }}
-          >
-            <Row
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                gap: '15px',
-                width: '100%',
-              }}
-            >
-              <Input
-                placeholder='Поиск'
-                style={{ width: 300 }}
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-              />
+        {!isNew &&
+          <>
+            <Row>
+              <Title
+                level={1}
+                style={{ fontWeight: '700', marginBottom: '0' }}
+              >
+                Товары
+              </Title>
             </Row>
-            {isNotSending && <Button
-              type='primary'
-              onClick={() => setEditProduct(true)}
-              size={'large'}
-            >
-              Создать
-            </Button>}
-          </div>
-        </Row>
-        <Table
-          size='small'
-          columns={columns}
-          isLoading={productsData.isLoading}
-          rowClassName={(r, index) => index === activeRow ? 'active-row' : ''}
-          dataSource={places}
-          rowKey={({ id }) => id}
-          onRow={(record, index) => ({
-            onClick: (e) => {
-              if (e.detail === 2) {
-                setEditProduct(record)
-              } else {
-                setActiveRow(index)
-              }
-            },
-          })}
-          style={{ overflow: 'scroll' }}
-          rowSelection={{
-            type: Checkbox,
-          }}
-        />
+            <Row>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  gap: '20px',
+                  width: '100%',
+                }}
+              >
+                <Row
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    gap: '15px',
+                    width: '100%',
+                  }}
+                >
+                  <Input
+                    placeholder='Поиск'
+                    style={{ width: 300 }}
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                  />
+                </Row>
+                {isNotSending && <Button
+                  type='primary'
+                  onClick={() => setEditProduct(true)}
+                  size={'large'}
+                >
+                  Создать
+                </Button>}
+              </div>
+            </Row>
+            <Table
+              size='small'
+              columns={columns}
+              isLoading={productsData.isLoading}
+              rowClassName={(r, index) => index === activeRow ? 'active-row' : ''}
+              dataSource={places}
+              rowKey={({ id }) => id}
+              onRow={(record, index) => ({
+                onClick: (e) => {
+                  if (e.detail === 2) {
+                    setEditProduct(record)
+                  } else {
+                    setActiveRow(index)
+                  }
+                },
+              })}
+              style={{ overflow: 'scroll' }}
+              rowSelection={{
+                type: Checkbox,
+              }}
+            />
+          </>
+        }
       </div>
       {!!editProduct && <CreateProductModal
         title={editProduct === true ? 'Создать товар' : 'Редактировать товар'}

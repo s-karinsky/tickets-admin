@@ -52,7 +52,7 @@ export const getSendingById = sendingId => async () => {
     const response = await axios.postWithAuth(
       '/query/select',
       {
-        sql: `SELECT max(cast(\`from\` as decimal)) as max FROM trip WHERE YEAR(create_datetime) = YEAR('${dayjs().format('YYYY-MM-DD')}')`
+        sql: `SELECT max(cast(\`from\` as decimal)) as max FROM trip WHERE canceled=0 AND YEAR(create_datetime) = YEAR('${dayjs().format('YYYY-MM-DD')}')`
       }
     )
     const data = response.data?.data || []
