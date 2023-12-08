@@ -1,53 +1,337 @@
-import { useEffect, useCallback } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { useParams } from 'react-router-dom'
-import { Avatar, Col, Row, Tag, Switch } from 'antd'
-import { fetchUser, updateUser } from '../../redux/users'
-import { USER_ROLES, USER_ROLES_COLOR } from '../../consts'
+import { useState } from 'react'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
+import { Form, Button, Col, Row } from 'antd'
+import { CaretLeftFilled, SaveOutlined } from '@ant-design/icons'
+import { BiEdit } from 'react-icons/bi'
+import { BsTrash } from 'react-icons/bs'
+import FormField from '../../components/FormField'
+import { useUsers, createUser, updateUserById } from '../../utils/api'
+import { emailRule } from '../../utils/validationRules'
+import { USER_ROLES, USER_ROLES_OPTIONS, VALIDATION_MESSAGES } from '../../consts'
 
 export default function PageUser() {
-  const dispatch = useDispatch()
-  const profile = useSelector(state => state.users.currentProfile)
-  const isUpdating = useSelector(state => state.users.isUpdating)
   const { id } = useParams()
+  const navigate = useNavigate()
+  const [ isSending, setIsSending ] = useState()
+  const [ searchParams, setSearchParams ] = useSearchParams()
+  const users = useUsers(id)
+  const profile = users.data || {}
 
-  useEffect(() => {
-    dispatch(fetchUser(id))
-  }, [id])
+  const isNew = id === 'create'
+  const isEdit = isNew || searchParams.get('edit') !== null
 
-  const changeStatus = useCallback((checked) => {
-    if (!profile) return
-    const state = checked ? '2' : null
-    dispatch(updateUser(id, { u_check_state: state }))
-  }, [profile, id])
-
-  if (!profile) {
-    return null
-  }
+  if (users.isLoading) return null
 
   return (
-    <Row style={{ margin: '20px' }}>
-      <Col span={4}>
-        <Avatar
-          style={{ width: '128px', height: '128px', fontSize: '64px', lineHeight: '120px' }}
-          src={profile.u_photo}
-        >
-          {(profile.u_name || '?')[0].toUpperCase()}
-        </Avatar>
-      </Col>
-      <Col>
-        {profile.u_name || 'No name'}<br />
-        {profile.u_email || 'No email'}<br />
-        <Tag color={USER_ROLES_COLOR[profile.u_role]}>{USER_ROLES[profile.u_role]}</Tag>
-        {profile.u_role === '2' && <div style={{ marginTop: 20 }}>
-          <Switch
-            checked={profile.u_check_state === '2'}
-            onChange={changeStatus}
-            loading={isUpdating}
+    <Form
+      initialValues={profile}
+      layout='vertical'
+      size='large'
+      validateMessages={VALIDATION_MESSAGES}
+      onFinish={async (values) => {
+        const isClient = values.id_role === '1'
+        values.phone = values.phone.replaceAll('_', '')
+        if (isClient) {
+          values.json.addPhone = (values.addPhone || '').replaceAll('_', '')
+          values.json.company.phone = (values.json.company.phone || '').replaceAll('_', '')
+        } else {
+          values.json.companyPhone = (values.json.companyPhone || '').replaceAll('_', '')
+        }
+        values.json = JSON.stringify(values.json)
+        setIsSending(true)
+        if (isNew) {
+          await createUser(values)
+        } else {
+          await updateUserById(id, values)
+        }
+        setIsSending(false)
+      }}
+    >
+      <Row
+        style={{
+          borderBottom: '1px solid #ccc',
+          padding: '10px 20px',
+        }}
+        justify='space-between'
+      >
+        <Col>
+          <Button
+            icon={<CaretLeftFilled />}
+            onClick={() => navigate('/users')}
+          >
+            К списку пользователей
+          </Button>
+        </Col>
+        <Col>
+          {isEdit ?
+            <Button
+              icon={<SaveOutlined />}
+              type='primary'
+              htmlType='submit'
+              style={{ marginRight: 10 }}
+              disabled={isSending}
+            >
+              {isNew ? 'Содзать' : 'Сохранить'}
+            </Button> :
+            <Button
+              icon={<BiEdit />}
+              type='primary'
+              htmlType='button'
+              onClick={e => {
+                e.preventDefault()
+                navigate('?edit')
+              }}
+              style={{ marginRight: 10 }}
+            >
+              Редактировать
+            </Button>
+          }
+          {isEdit && 
+            <Button
+              type='primary'
+              onClick={() => isNew ? navigate('/users') : setSearchParams({})}
+              danger
+            >
+              Отмена
+            </Button>
+            // :
+            // <Button
+            //   icon={<BsTrash />}
+            //   type='primary'
+            //   onClick={() => {
+            //   }}
+            //   danger
+            // >
+            //   Удалить
+            // </Button>
+          }
+        </Col>
+      </Row>
+      <Row
+        gutter={16}
+        style={{ margin: 10 }}
+      >
+        <Col span={3}>
+          <FormField
+            name={['json', 'code']}
+            label='Код'
+            rules={[{ required: true }]}
+            isEdit={isEdit}
           />
-          <span style={{ display: 'inline-block', verticalAlign: 'middle', marginLeft: 5 }}>Checked seller</span>
-        </div>}
-      </Col>
-    </Row>
+        </Col>
+        <Col span={5}>
+          <FormField
+            type='select'
+            name='id_role'
+            label='Роль'
+            options={USER_ROLES_OPTIONS.map(value => ({ value, label: USER_ROLES[value] }))}
+            text={USER_ROLES[profile.id_role]}
+            rules={[{ required: true }]}
+            isEdit={isEdit}
+          />
+        </Col>
+      </Row>
+      <Form.Item dependencies={['id_role']}>
+        {({ getFieldValue }) => {
+          const isClient = getFieldValue('id_role') === '1'
+          return (
+            <Row
+              gutter={16}
+              style={{ margin: 10 }}
+            >
+              <Col span={8}>
+                <FormField
+                  name='email'
+                  label='E-mail'
+                  rules={[{ required: true }, emailRule('Введите корректный e-mail')]}
+                  isEdit={isEdit}
+                />
+              </Col>
+              <Col span={8}>
+                <FormField
+                  name='phone'
+                  label={isClient ? 'Телефон' : 'Телефон ответственного'}
+                  rules={[{ required: true }]}
+                  isEdit={isEdit}
+                  size='large'
+                  mask='+000000000000'
+                />
+              </Col>
+              <Col span={8}>
+                <FormField
+                  name='family'
+                  label={isClient ? 'Фамилия' : 'Фамилия ответственного'}
+                  isEdit={isEdit}
+                  rules={!isClient && [{ required: true }]}
+                />
+              </Col>
+              <Col span={8}>
+                <FormField
+                  name='name'
+                  label={isClient ? 'Имя' : 'Имя ответственного'}
+                  isEdit={isEdit}
+                  rules={!isClient && [{ required: true }]}
+                />
+              </Col>
+              <Col span={8}>
+                <FormField
+                  name='middle'
+                  label={isClient ? 'Отчество' : 'Отчество ответственного'}
+                  isEdit={isEdit}
+                />
+              </Col>
+              {!isClient && <Col span={8}>
+                <FormField
+                  name={['json', 'companyName']}
+                  label='Название компании'
+                  isEdit={isEdit}
+                  rules={[{ required: true }]}
+                />  
+              </Col>}
+              <Col span={8}>
+                <FormField
+                  name={isClient ? ['json', 'addPhone'] : ['json', 'companyPhone']}
+                  label={isClient ? 'Дополнительный телефон' : 'Телефон компании'}
+                  isEdit={isEdit}
+                  size='large'
+                  mask='+000000000000'
+                  rules={!isClient && [{ required: true }]}
+                />
+              </Col>
+              <Col span={8}>
+                <FormField
+                  name={['json', 'country']}
+                  label='Страна'
+                  isEdit={isEdit}
+                />
+              </Col>
+              <Col span={8}>
+                <FormField
+                  name={['json', 'city']}
+                  label='Город'
+                  isEdit={isEdit}
+                />
+              </Col>
+              <Col span={24}>
+                <FormField
+                  type='textarea'
+                  name={['json', 'note']}
+                  label='Примечание'
+                  isEdit={isEdit}
+                />
+              </Col>
+            </Row>
+          )
+        }}
+      </Form.Item>
+      <Form.Item dependencies={['id_role']}>
+        {({ getFieldValue }) => {
+          const role = getFieldValue('id_role')
+          return role === '2' ? null : (
+            <fieldset style={{ padding: 10, margin: '20px 10px' }}>
+              <legend>Юридическое лицо</legend>
+              <Row
+                gutter={16}
+              >
+                <Col span={8}>
+                  <FormField
+                    label='Компания/ИП'
+                    isEdit={isEdit}
+                    name={['json', 'company', 'name']}
+                  />
+                </Col>
+                <Col span={8}>
+                  <FormField
+                    label='Руководитель'
+                    isEdit={isEdit}
+                    name={['json', 'company', 'head']}
+                  />
+                </Col>
+                <Col span={8}>
+                  <FormField
+                    label='ИНН/УНП'
+                    isEdit={isEdit}
+                    name={['json', 'company', 'inn']}
+                  />
+                </Col>
+                <Col span={8}>
+                  <FormField
+                    label='Свидетельство о регистрации'
+                    isEdit={isEdit}
+                    name={['json', 'company', 'certificate']}
+                  />
+                </Col>
+                <Col span={8}>
+                  <FormField
+                    label='Юридический адрес'
+                    isEdit={isEdit}
+                    name={['json', 'company', 'address']}
+                  />
+                </Col>
+                <Col span={8}>
+                  <FormField
+                    label='Телефон'
+                    isEdit={isEdit}
+                    name={['json', 'company', 'phone']}
+                    size='large'
+                    mask='+000000000000'
+                  />
+                </Col>
+                <Col span={8}>
+                  <FormField
+                    label='E-mail'
+                    isEdit={isEdit}
+                    name={['json', 'company', 'email']}
+                    rules={[emailRule('Введите корректный e-mail')]}
+                  />
+                </Col>
+                <Col span={8}>
+                  <FormField
+                    label='Адрес разгрузки'
+                    isEdit={isEdit}
+                    name={['json', 'company', 'unloadAddress']}
+                  />
+                </Col>
+                <Col span={8}>
+                  <FormField
+                    label='Наименование банка'
+                    isEdit={isEdit}
+                    name={['json', 'company', 'bank']}
+                  />
+                </Col>
+                <Col span={8}>
+                  <FormField
+                    label='БИК банка'
+                    isEdit={isEdit}
+                    name={['json', 'company', 'bik']}
+                  />
+                </Col>
+                <Col span={8}>
+                  <FormField
+                    label='SWIFT'
+                    isEdit={isEdit}
+                    name={['json', 'company', 'swift']}
+                  />
+                </Col>
+                <Col span={8}>
+                  <FormField
+                    label='Расчетный счет'
+                    isEdit={isEdit}
+                    name={['json', 'company', 'checkingAccount']}
+                  />
+                </Col>
+                <Col span={8}>
+                  <FormField
+                    label='Адрес банка'
+                    isEdit={isEdit}
+                    name={['json', 'company', 'bankAddress']}
+                  />
+                </Col>
+              </Row>
+            </fieldset>
+          )
+        }}
+      </Form.Item>
+    </Form>
   )
 }

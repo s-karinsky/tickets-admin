@@ -1,9 +1,8 @@
 import { useNavigate } from 'react-router-dom'
-import { useQuery } from 'react-query'
-import { Table, Tag } from 'antd'
-import { CheckOutlined } from '@ant-design/icons'
-import axios from '../../utils/axios'
+import { Table, Tag, Row, Button } from 'antd'
+import { CheckOutlined, PlusCircleFilled } from '@ant-design/icons'
 import { getColumnSearchProps } from '../../utils/components'
+import { useUsers } from '../../utils/api'
 import { USER_ROLES, USER_ROLES_COLOR } from '../../consts'
 
 const columns = [
@@ -42,23 +41,38 @@ const columns = [
 
 export default function PageUsers() {
   const navigate = useNavigate()
-
-  const { isLoading, data } = useQuery('users', async () => {
-    const response = await axios.postWithAuth('/query/select', {
-      sql: `SELECT id_user,id_role,phone,email,name,family,middle,id_verification_status FROM users WHERE active=1 AND deleted!=1`
-    })
-    return response.data?.data || []
-  })
+  const users = useUsers()
 
   return (
-    <Table
-      columns={columns}
-      dataSource={data}
-      loading={isLoading}
-      rowKey={({ id_user }) => id_user}
-      onRow={record => ({
-        onClick: () => navigate(`/users/${record.id_user}`)
-      })}
-    />
+    <>
+      <Row
+        style={{
+          borderBottom: '1px solid #ccc',
+          padding: '10px 20px',
+        }}
+      >
+        <Button
+          icon={<PlusCircleFilled />}
+          style={{ marginRight: '10px' }}
+          type='primary'
+          onClick={() => navigate('/users/create')}
+        >
+          Создать пользователя
+        </Button>
+      </Row>
+      <Table
+        columns={columns}
+        dataSource={users.data}
+        loading={users.isLoading}
+        rowKey={({ id_user }) => id_user}
+        onRow={record => ({
+          onClick: (e) => {
+            if (e.detail === 2) {
+              navigate(`/users/${record.id_user}`)
+            }
+          }
+        })}
+      />
+    </>
   )
 }

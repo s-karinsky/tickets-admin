@@ -252,6 +252,12 @@ export const useDictionary = name => {
 }
 
 export const useUsers = userId => useQuery(['users'].concat(userId || []), async () => {
+  if (userId === 'create') {
+    return {
+      id_role: '1'
+    }
+  }
+
   const response = await axios.postWithAuth('/query/select', {
     sql: `SELECT * FROM users WHERE active=1 AND deleted!=1${userId ? ` AND id_user=${userId}` : ''}`
   })
@@ -284,3 +290,13 @@ export const useUsersWithRole = role => useQuery(['usersWithRole', role], async 
 }, {
   staleTime: 5 * 60 * 1000
 })
+
+export const updateUserById = async (userId, values = {}) => {
+  const response = await axios.postWithAuth('/query/update', { sql: sqlUpdate('users', values, `id_user=${userId}`) })
+  return response
+}
+
+export const createUser = async (values) => {
+  const response = await axios.postWithAuth('/query/insert', { sql: sqlInsert('users', values) })
+  return response
+}

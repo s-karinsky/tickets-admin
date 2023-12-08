@@ -1,4 +1,5 @@
 import { Form, Input, InputNumber, DatePicker, Select } from 'antd'
+import { MaskedInput } from 'antd-mask-input'
 
 export default function FormField({
   label,
@@ -9,6 +10,7 @@ export default function FormField({
   rules,
   width,
   labelType,
+  mask,
   ...rest
 }) {
   let child = null
@@ -59,11 +61,18 @@ export default function FormField({
       break
   
     default:
-      child = <Input
-        {...rest}
-        bordered={isEdit}
-        readOnly={!isEdit}
-      />
+      child = mask ?
+        <MaskedInput
+          {...rest}
+          bordered={isEdit}
+          readOnly={!isEdit}
+          mask={mask}
+        />
+        : <Input
+          {...rest}
+          bordered={isEdit}
+          readOnly={!isEdit}
+        />
       break
   }
 

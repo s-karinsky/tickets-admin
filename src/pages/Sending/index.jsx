@@ -168,7 +168,7 @@ export default function Sending({
     }
   }, [sendingId, isSendingAir])
 
-  if (isFetching) return null
+  if (isFetching && isNew) return null
 
   return (
     <div
@@ -216,6 +216,7 @@ export default function Sending({
           {isEditPage ? (
             <>
               <Button
+                icon={<SaveOutlined />}
                 style={{
                   gap: 10,
                   display: 'flex',
@@ -228,7 +229,6 @@ export default function Sending({
                 }}
               >
                 Сохранить
-                <SaveOutlined size={16} />
               </Button>
               <Button
                 size={'large'}
@@ -247,6 +247,7 @@ export default function Sending({
           ) : (
             isNotSending && <>
               <Button
+                icon={<BiEdit />}
                 style={{
                   gap: 10,
                   display: 'flex',
@@ -259,10 +260,10 @@ export default function Sending({
                 }}
               >
                 Редактировать
-                <BiEdit size={16} />
               </Button>
               <Button
-                size={'large'}
+                size='large'
+                icon={<BsTrash />}
                 style={{
                   gap: 10,
                   display: 'flex',
@@ -276,7 +277,6 @@ export default function Sending({
                 danger
               >
                 Удалить
-                <BsTrash size={16} />
               </Button>
             </>
           )}
@@ -290,7 +290,7 @@ export default function Sending({
           borderRadius: 20,
           backgroundColor: '#FAFAFA',
           padding: 20,
-          boxShadow: ' 0px 2px 4px 0px #00000026',
+          boxShadow: '0px 2px 4px 0px #00000026',
         }}
       >
         {!isLoading && (
