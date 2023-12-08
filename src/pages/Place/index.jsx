@@ -188,7 +188,7 @@ export default function Place() {
     }
   }, [sendingId, placeId, user])
 
-  if (placeData.isFetching) return null
+  if (placeData.isFetching && isNew) return null
 
   return (
     <>
@@ -411,6 +411,39 @@ export default function Place() {
                   isEdit={isEditPage}
                   rules={required()}
                 />
+                <Form.Item
+                  label={<b>Размер</b>}
+                  style={{ width: 420 }}
+                >
+                  <div style={{ width: 420, display: 'flex', gap: 5 }}>
+                    <FormField
+                      type='number'
+                      width={120}
+                      name={['size', 'length']}
+                      isEdit={isEditPage}
+                      rules={required()}
+                      addonAfter={isEditPage && 'см'}
+                    />
+                    <span style={{ lineHeight: '39px' }}>x</span>
+                    <FormField
+                      type='number'
+                      width={120}
+                      name={['size', 'width']}
+                      isEdit={isEditPage}
+                      rules={required()}
+                      addonAfter={isEditPage && 'см'}
+                    />
+                    <span style={{ lineHeight: '39px' }}>x</span>
+                    <FormField
+                      type='number'
+                      width={120}
+                      name={['size', 'height']}
+                      isEdit={isEditPage}
+                      rules={required()}
+                      addonAfter={isEditPage && 'см'}
+                    />
+                  </div>
+                </Form.Item>
                 <FormField
                   type='select'
                   label='Тип оплаты'
@@ -466,14 +499,6 @@ export default function Place() {
                   isEdit={isEditPage}  
                   formatter={(val) => Number(val).toFixed(2)}
                   disabled={isEditPage}
-                />
-                <FormField
-                  label='Размер'
-                  name='size'
-                  addonAfter={isEditPage && 'см'}
-                  style={{ width: 200 }}
-                  isEdit={isEditPage}  
-                  rules={required()}
                 />
                 <FormField
                   type='number'
