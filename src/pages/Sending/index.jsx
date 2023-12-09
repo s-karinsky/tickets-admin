@@ -119,7 +119,7 @@ export default function Sending({
       dataIndex: 'gross_weight',
       key: 'gross_weight',
       align: 'right',
-      render: val => Number(val).toFixed(3),
+      render: val => Number(val) ? Number(val).toFixed(3) : '',
       sorter: (a, b) => a.gross_weight - b.gross_weight,
       ...getColumnSearchProps('gross_weight', { type: 'number' })
     },
