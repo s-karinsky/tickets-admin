@@ -1,11 +1,10 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { Form, Button, Col, Row } from 'antd'
 import { CaretLeftFilled, SaveOutlined } from '@ant-design/icons'
 import { BiEdit } from 'react-icons/bi'
-import { BsTrash } from 'react-icons/bs'
 import FormField from '../../components/FormField'
-import { useUsers, createUser, updateUserById } from '../../utils/api'
+import { useUsers, createUser, updateUserById, useData } from '../../utils/api'
 import { emailRule } from '../../utils/validationRules'
 import { USER_ROLES, USER_ROLES_OPTIONS, VALIDATION_MESSAGES } from '../../consts'
 
@@ -16,6 +15,17 @@ export default function PageUser() {
   const [ searchParams, setSearchParams ] = useSearchParams()
   const users = useUsers(id)
   const profile = users.data || {}
+
+  const data = useData()
+
+  const [ countriesOptions, citiesOptions ] = useMemo(() => {
+    if (data.isLoading) return [[], []]
+    const countries = data.data?.countries || {}
+    const countriesOptions = Object.keys(countries).map(value => ({ value, label: countries[value].ru }))
+    const cities = data.data?.cities || {}
+    const citiesOptions = Object.keys(cities).map(value => ({ value, label: cities[value].ru, country: cities[value].country }))
+    return [ countriesOptions, citiesOptions ]
+  }, [data])
 
   const isNew = id === 'create'
   const isEdit = isNew || searchParams.get('edit') !== null
@@ -141,24 +151,6 @@ export default function PageUser() {
             >
               <Col span={8}>
                 <FormField
-                  name='email'
-                  label='E-mail'
-                  rules={[{ required: true }, emailRule('Введите корректный e-mail')]}
-                  isEdit={isEdit}
-                />
-              </Col>
-              <Col span={8}>
-                <FormField
-                  name='phone'
-                  label={isClient ? 'Телефон' : 'Телефон ответственного'}
-                  rules={[{ required: true }]}
-                  isEdit={isEdit}
-                  size='large'
-                  mask='+000000000000'
-                />
-              </Col>
-              <Col span={8}>
-                <FormField
                   name='family'
                   label={isClient ? 'Фамилия' : 'Фамилия ответственного'}
                   isEdit={isEdit}
@@ -178,6 +170,24 @@ export default function PageUser() {
                   name='middle'
                   label={isClient ? 'Отчество' : 'Отчество ответственного'}
                   isEdit={isEdit}
+                />
+              </Col>
+              <Col span={8}>
+                <FormField
+                  name='email'
+                  label='E-mail'
+                  rules={[{ required: true }, emailRule('Введите корректный e-mail')]}
+                  isEdit={isEdit}
+                />
+              </Col>
+              <Col span={8}>
+                <FormField
+                  name='phone'
+                  label={isClient ? 'Телефон' : 'Телефон ответственного'}
+                  rules={[{ required: true }]}
+                  isEdit={isEdit}
+                  size='large'
+                  mask='+000000000000'
                 />
               </Col>
               {!isClient && <Col span={8}>
@@ -200,16 +210,22 @@ export default function PageUser() {
               </Col>
               <Col span={8}>
                 <FormField
+                  type='select'
                   name={['json', 'country']}
                   label='Страна'
+                  options={countriesOptions}
                   isEdit={isEdit}
+                  text={(data?.data?.countries || {})[profile.json?.country]?.ru}
                 />
               </Col>
               <Col span={8}>
                 <FormField
+                  type='select'
                   name={['json', 'city']}
                   label='Город'
+                  options={citiesOptions}
                   isEdit={isEdit}
+                  text={(data?.data?.cities || {})[profile.json?.city]?.ru}
                 />
               </Col>
               <Col span={24}>
