@@ -122,7 +122,7 @@ export const CreateProductModal = ({
           disabled={!isNotSending && isEdit}
         />
         <FormField
-          width={210}
+          width={220}
           isEdit={isEdit}
           label='Наименование'
           name='name'
@@ -130,7 +130,7 @@ export const CreateProductModal = ({
           disabled={!isNotSending}
         />
         <FormField
-          width={200}
+          width={180}
           isEdit={isEdit}
           label='Марка'
           name='label'
@@ -171,7 +171,7 @@ export const CreateProductModal = ({
           label='Вес нетто'
           name='net_weight'
           addonAfter={isEdit && 'кг'}
-          rules={[...required(), ...numberRange({ min: 1, max: 99999 })]}
+          rules={[...required(), ...numberRange({ min: 0.001, max: 99999 })]}
           formatter={(val) => Number(val).toFixed(3)}
           disabled={!isNotSending}
         />
@@ -197,18 +197,21 @@ export const CreateProductModal = ({
               label: 'Обувь',
               children: <div style={{ display: 'flex', gap: 10 }}>
                 <FormField
+                  width={205}
                   isEdit={isEdit}
                   label='Верх'
                   name='shoes_top'
                   disabled={!isNotSending}
                 />
                 <FormField
+                  width={205}
                   isEdit={isEdit}
                   label='Подкладка'
                   name='shoes_und'
                   disabled={!isNotSending}
                 />
                 <FormField
+                  width={205}
                   isEdit={isEdit}
                   label='Низ'
                   name='shoes_bottom'

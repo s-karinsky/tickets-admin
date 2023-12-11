@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react'
 import { useNavigate, useLocation, useParams, useSearchParams } from 'react-router-dom'
-import { Button, Row, Table, Typography, Input, Form, Modal } from 'antd'
+import { Button, Row, Table, Typography, Input, Form, Modal, Checkbox } from 'antd'
 import {
   SaveOutlined,
   CopyOutlined,
@@ -50,9 +50,14 @@ export default function Sending({
 
   const isNotSending = data?.json?.status === 0
 
-  const clientsMap = useMemo(() => {
-    if (!Array.isArray(clients.data)) return {}
-    return clients.data.reduce((acc, item) => ({ ...acc, [item.id_user]: [item.family, item.name, item.middle].join(' ') }), {})
+  const [ clientsOptions, clientsMap ] = useMemo(() => {
+    if (!Array.isArray(clients.data)) return [[], {}]
+    const options = clients.data.map(item => ({
+      value: item.id_user,
+      label: [item.family, item.name, item.middle].join(' ')
+    }))
+    const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
+    return [ options, map ]
   }, [clients.data])
 
   const [ driverOptions, driverMap ] = useMemo(() => {
@@ -105,6 +110,7 @@ export default function Sending({
       dataIndex: 'place',
       key: 'place',
       align: 'right',
+      sorter: (a, b) => a.place - b.place,
       ...getColumnSearchProps('place', { type: 'number' })
     },
     {
@@ -112,7 +118,8 @@ export default function Sending({
       dataIndex: 'client',
       key: 'client',
       render: id => clientsMap[id],
-      ...getColumnSearchProps('client', { options: [{ value: 'Александр' }, { value: 'Владимир' }] })
+      sorter: (a, b) => (clientsMap[a.client] || '').localeCompare(clientsMap[b.client] || ''),
+      ...getColumnSearchProps('client', { options: clientsOptions })
     },
     {
       title: 'Вес брутто',
@@ -124,9 +131,16 @@ export default function Sending({
       ...getColumnSearchProps('gross_weight', { type: 'number' })
     },
     {
+      title: 'Размеры',
+      dataIndex: 'size',
+      key: 'size',
+      render: size => typeof size === 'object' ? `${size.width} / ${size.height} / ${size.length}` : size
+    },
+    {
       title: 'Тариф',
       dataIndex: 'tarif',
       key: 'tarif',
+      sorter: (a, b) => (a.tarif || '').localeCompare(b.tarif || ''),
       ...getColumnSearchProps('tarif', { options: [{ value: 'Эконом' }, { value: 'Экспресс' }] })
     },
     {
@@ -134,6 +148,7 @@ export default function Sending({
       dataIndex: 'count',
       key: 'count',
       align: 'right',
+      sorter: (a, b) => a.count - b.count,
       ...getColumnSearchProps('count', { type: 'number' })
     },
     {
@@ -141,6 +156,7 @@ export default function Sending({
       dataIndex: 'status',
       key: 'status',
       render: val => val === 0 ? 'В обработке' : 'Выдано',
+      sorter: (a, b) => a.status - b.status,
       ...getColumnSearchProps(record => record.status + 1, { options: [{ value: 1, label: 'В обработке' }, { value: 2, label: 'Выдано' }] })
     },
     {
@@ -521,6 +537,9 @@ export default function Sending({
             })}
             size='small'
             style={{ overflow: 'scroll' }}
+            rowSelection={{
+              type: Checkbox,
+            }}
           />
         </>
       }

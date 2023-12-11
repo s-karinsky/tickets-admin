@@ -122,6 +122,7 @@ export default function Place() {
       title: 'Наименование',
       dataIndex: 'name',
       key: 'name',
+      sorter: (a, b) => a.name.localeCompare(b.name),
       ...getColumnSearchProps('name')
     },
     {
@@ -129,6 +130,7 @@ export default function Place() {
       dataIndex: 'net_weight',
       key: 'net_weight',
       align: 'right',
+      sorter: (a, b) => a.net_weight - b.net_weight,
       ...getColumnSearchProps('net_weight', { type: 'number' })
     },
     {
@@ -136,6 +138,7 @@ export default function Place() {
       dataIndex: 'count',
       key: 'count',
       align: 'right',
+      sorter: (a, b) => a.count - b.count,
       ...getColumnSearchProps('count', { type: 'number' })
     },
     {
@@ -143,6 +146,7 @@ export default function Place() {
       dataIndex: 'price',
       key: 'price',
       align: 'right',
+      sorter: (a, b) => a.price - b.price,
       render: val => Number(val) ? Number(val).toFixed(2) : null,
       ...getColumnSearchProps('price', { type: 'number' })
     },
@@ -151,6 +155,7 @@ export default function Place() {
       dataIndex: 'sum',
       key: 'sum',
       align: 'right',
+      sorter: (a, b) => a.sum - b.sum,
       render: val => Number(val) ? Number(val).toFixed(2) : null,
       ...getColumnSearchProps('sum', { type: 'number' })
     },
@@ -158,6 +163,7 @@ export default function Place() {
       title: 'Примечание',
       dataIndex: 'note',
       key: 'note',
+      sorter: (a, b) => (a.note || '').localeCompare(b.note || ''),
       ...getColumnSearchProps('note')
     },
     {
@@ -355,6 +361,7 @@ export default function Place() {
                   rules={
                     [
                       ...required(),
+                      ...numberRange({ min: 1 }),
                       () => ({
                         validator: async (_, id) => {
                           if (!isNew && parseInt(id) === parseInt(initialPlace.place)) return Promise.resolve()
@@ -548,37 +555,21 @@ export default function Place() {
         {!isNew &&
           <>
             <Row>
-              <Title
-                level={1}
-                style={{ fontWeight: '700', marginBottom: '0' }}
-              >
-                Товары
-              </Title>
-            </Row>
-            <Row>
               <div
                 style={{
                   display: 'flex',
                   justifyContent: 'space-between',
+                  alignItems: 'flex-end',
                   gap: '20px',
                   width: '100%',
                 }}
               >
-                <Row
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    gap: '15px',
-                    width: '100%',
-                  }}
+                <Title
+                  level={1}
+                  style={{ fontWeight: '700', marginBottom: '0' }}
                 >
-                  <Input
-                    placeholder='Поиск'
-                    style={{ width: 300 }}
-                    value={search}
-                    onChange={e => setSearch(e.target.value)}
-                  />
-                </Row>
+                  Товары
+                </Title>
                 {isNotSending && <Button
                   type='primary'
                   onClick={() => setEditProduct(true)}
