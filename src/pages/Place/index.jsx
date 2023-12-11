@@ -11,7 +11,7 @@ import { PropertyGap } from '../Sendings'
 import CreateProductModal from './СreateProductModal'
 import FormField from '../../components/FormField'
 import { filterTableRows } from '../../utils/utils'
-import { useUsersWithRole, getCount, getSendingById, getPlaceById, deletePlaceById, updateDatasetById, createDataset, getProductsByPlaceId, deleteProductById } from '../../utils/api'
+import { useUsersWithRole, getLastId, getCount, getSendingById, getPlaceById, deletePlaceById, updateDatasetById, createDataset, getProductsByPlaceId, deleteProductById } from '../../utils/api'
 import { SENDING_STATUS } from '../../consts'
 import { getUserProfile } from '../../redux/user'
 import { getColumnSearchProps } from '../../utils/components'
@@ -40,7 +40,8 @@ export default function Place() {
     },
     {
       queryKey: ['place', sendingId, placeId],
-      queryFn: getPlaceById(placeId, sendingId)
+      queryFn: getPlaceById(placeId, sendingId),
+      staleTime: 0
     },
     {
       queryKey: ['products', placeId],
@@ -180,7 +181,8 @@ export default function Place() {
     }
     if (placeId === 'create') {
       await createDataset(params)
-      navigate(`/sendings/${sendingId}`)
+      const id = await getLastId('dataset')
+      navigate(`/sendings/${sendingId}/${id}`)
     } else {
       await updateDatasetById(placeId, params)
       await placeData.refetch()
@@ -188,7 +190,7 @@ export default function Place() {
     }
   }, [sendingId, placeId, user])
 
-  if (placeData.isFetching && isNew) return null
+  // if (placeData.isFetching && isNew) return null
 
   return (
     <>

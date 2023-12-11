@@ -10,6 +10,12 @@ export const getCount = async (db, where) => {
   return count
 }
 
+export const getLastId = async (table, id = 'id') => {
+  const response = await axios.postWithAuth('/query/select', { sql: `SELECT max(${id}) as max FROM ${table}` })
+  const count = _get(response, ['data', 'data', 0, 'max'])
+  return count
+}
+
 export const getSendings = isAir => async () => {
   const [ response, responseProducts ] = await Promise.all([
     axios.postWithAuth('/query/select', { sql: `SELECT * FROM trip WHERE \`to\`='${Number(isAir)}' AND canceled=0` }),

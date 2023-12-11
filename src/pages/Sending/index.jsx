@@ -12,7 +12,7 @@ import { BsTrash } from 'react-icons/bs'
 import { BiEdit } from 'react-icons/bi'
 import { PropertyGap } from '../Sendings'
 import FormField from '../../components/FormField'
-import { useUsersWithRole, getCount, createSending, updateSendingById, getSendingById, deleteSendingById, getPlacesBySendingId, deletePlaceById, useDictionary } from '../../utils/api'
+import { useUsersWithRole, getLastId, getCount, createSending, updateSendingById, getSendingById, deleteSendingById, getPlacesBySendingId, deletePlaceById, useDictionary } from '../../utils/api'
 import { getColumnSearchProps } from '../../utils/components'
 import { required } from '../../utils/validationRules'
 import { declOfNum, filterTableRows } from '../../utils/utils'
@@ -160,7 +160,8 @@ export default function Sending({
     }
     if (sendingId === 'create') {
       await createSending(valuesMap)
-      navigate('/sendings')
+      const id = await getLastId('trip', 'id_trip')
+      navigate(`/sendings/${id}`)
     } else {
       await updateSendingById(sendingId, valuesMap)
       await refetch()
@@ -168,7 +169,7 @@ export default function Sending({
     }
   }, [sendingId, isSendingAir])
 
-  if (isFetching && isNew) return null
+  if (isNew && isFetching) return null
 
   return (
     <div
