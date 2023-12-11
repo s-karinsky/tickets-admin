@@ -81,11 +81,18 @@ export default function Place() {
 
   const places = (productsData.data || [])
     .map((item) => {
+      const { number, ...record } = item
       return {
         ...item,
         buttons: (
           isNotSending && <div style={{ display: 'flex', gap: 10 }}>
-            <CopyOutlined size={17} color='#141414' />
+            <CopyOutlined
+              size={17}
+              color='#141414'
+              onClick={() => {
+                setEditProduct(record)
+              }}
+            />
             <BsTrash
               style={{ marginLeft: 30, cursor: 'pointer' }}
               size={17}

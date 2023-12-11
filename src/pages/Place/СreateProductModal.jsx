@@ -18,7 +18,7 @@ export const CreateProductModal = ({
   product = {}
 }) => {
   const [ form ] = Form.useForm()
-  const isNew = product === true
+  const isNew = product === true || !product.number
   const [ isEdit, setIsEdit ] = useState(isNew)
   const initialValues = {
     number: maxNum + 1,
@@ -84,7 +84,7 @@ export const CreateProductModal = ({
         form={form}
         initialValues={initialValues}
         onFinish={async (values) => {
-          if (product === true) {
+          if (isNew) {
             const params = {
               tip: 'product',
               id_ref: placeId,
