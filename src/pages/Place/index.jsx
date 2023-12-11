@@ -10,12 +10,12 @@ import { get as _get } from 'lodash'
 import { PropertyGap } from '../Sendings'
 import CreateProductModal from './СreateProductModal'
 import FormField from '../../components/FormField'
-import { filterTableRows } from '../../utils/utils'
 import { useUsersWithRole, getLastId, getCount, getSendingById, getPlaceById, deletePlaceById, updateDatasetById, createDataset, getProductsByPlaceId, deleteProductById } from '../../utils/api'
 import { SENDING_STATUS } from '../../consts'
 import { getUserProfile } from '../../redux/user'
 import { getColumnSearchProps } from '../../utils/components'
 import { required, numberRange } from '../../utils/validationRules'
+import { declOfNum } from '../../utils/utils'
 
 const { Title, Link } = Typography
 
@@ -328,10 +328,20 @@ export default function Place() {
                     alignItems: 'center',
                   }}
                   type='primary'
-                  onClick={() => {
-                    if (!window.confirm('Delete place?')) return
-                    deletePlaceById(placeId)().then(() => {
-                      navigate(`/sendings/${sendingId}`)
+                  onClick={async () => {
+                    const count = places.length
+                    Modal.confirm({
+                      title: 'Вы действительно хотите удалить это место?',
+                      icon: <ExclamationCircleFilled />,
+                      content: count > 0 && <div>
+                        К этому месту {declOfNum(count, ['привязан', 'привязано', 'привязано'])} {count}&nbsp;
+                        {declOfNum(count, ['товар', 'товара', 'товаров'])}, {count === '1' ? 'который' : 'которые'} так же&nbsp;
+                        {count === '1' ? 'будет удален' : 'будут удалены'}
+                      </div>,
+                      okText: 'Да',
+                      okType: 'danger',
+                      cancelText: 'Нет',
+                      onOk: () => deletePlaceById(placeId).then(() => { navigate(`/sendings/${sendingId}`) })
                     })
                   }}
                   danger

@@ -293,8 +293,20 @@ export default function Sending({
                 }}
                 type='primary'
                 onClick={() => {
-                  if (!window.confirm('Delete sending?')) return
-                  deleteSendingById(sendingId)().then(() => navigate('/sendings'))
+                  const count = placesData.length
+                  Modal.confirm({
+                    title: 'Вы действительно хотите удалить эту отправку?',
+                    icon: <ExclamationCircleFilled />,
+                    content: count > 0 && <div>
+                      К этой отправке {declOfNum(count, ['привязана', 'привязано', 'привязано'])} {count}&nbsp;
+                      {declOfNum(count, ['запись', 'записи', 'записей'])} о местах, {count === '1' ? 'которая' : 'которые'} так же&nbsp;
+                      {count === '1' ? 'будет удалена' : 'будут удалены'}
+                    </div>,
+                    okText: 'Да',
+                    okType: 'danger',
+                    cancelText: 'Нет',
+                    onOk: () => deleteSendingById(sendingId).then(() => navigate('/sendings'))
+                  })
                 }}
                 danger
               >
