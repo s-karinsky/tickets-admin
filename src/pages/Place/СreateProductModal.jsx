@@ -176,51 +176,59 @@ export const CreateProductModal = ({
           disabled={!isNotSending}
         />
         <div style={{ flexBasis: '100%' }} />
-        <Tabs
-          size='small'
-          style={{ flexBasis: '100%' }}
-          defaultActiveKey='1'
-          items={[
-            {
-              key: '1',
-              label: 'Одежда',
-              children: 
-                <FormField
-                  isEdit={isEdit}
-                  label='Состав/материал'
-                  name='material'
-                  disabled={!isNotSending}
-                />
-            },
-            {
-              key: '2',
-              label: 'Обувь',
-              children: <div style={{ display: 'flex', gap: 10 }}>
-                <FormField
-                  width={205}
-                  isEdit={isEdit}
-                  label='Верх'
-                  name='shoes_top'
-                  disabled={!isNotSending}
-                />
-                <FormField
-                  width={205}
-                  isEdit={isEdit}
-                  label='Подкладка'
-                  name='shoes_und'
-                  disabled={!isNotSending}
-                />
-                <FormField
-                  width={205}
-                  isEdit={isEdit}
-                  label='Низ'
-                  name='shoes_bottom'
-                  disabled={!isNotSending}
-                />
-              </div>
-            }
-          ]}
-        />
+        <Form.Item style={{ flexBasis: '100%' }} dependencies={['material', 'shoes_top', 'shoes_und', 'shoes_bottom']}>
+          {({ getFieldValue }) => {
+            return (
+              <Tabs
+                size='small'
+                style={{ flexBasis: '100%' }}
+                defaultActiveKey='1'
+                items={[
+                  {
+                    key: '1',
+                    label: 'Одежда',
+                    disabled: !!getFieldValue('shoes_top') || !!getFieldValue('shoes_und') || !!getFieldValue('shoes_bottom'),
+                    children: 
+                      <FormField
+                        isEdit={isEdit}
+                        label='Состав/материал'
+                        name='material'
+                        disabled={!isNotSending}
+                      />
+                  },
+                  {
+                    key: '2',
+                    label: 'Обувь',
+                    disabled: !!getFieldValue('material'),
+                    children: <div style={{ display: 'flex', gap: 10 }}>
+                      <FormField
+                        width={205}
+                        isEdit={isEdit}
+                        label='Верх'
+                        name='shoes_top'
+                        disabled={!isNotSending}
+                      />
+                      <FormField
+                        width={205}
+                        isEdit={isEdit}
+                        label='Подкладка'
+                        name='shoes_und'
+                        disabled={!isNotSending}
+                      />
+                      <FormField
+                        width={205}
+                        isEdit={isEdit}
+                        label='Низ'
+                        name='shoes_bottom'
+                        disabled={!isNotSending}
+                      />
+                    </div>
+                  }
+                ]}
+              />
+            )
+          }}
+        </Form.Item>
         <div style={{ flexBasis: '100%' }} />
         <fieldset style={{ display: 'flex', gap: 10, margin: '0 -10px' }}>
           <legend>Сертификат/Декларация о соответствии</legend>
