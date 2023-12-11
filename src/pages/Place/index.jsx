@@ -42,7 +42,7 @@ export default function Place() {
     {
       queryKey: ['place', sendingId, placeId, { copy }],
       queryFn: getPlaceById(placeId, sendingId, { copy }),
-      staleTime: 0
+      cacheTime: 0
     },
     {
       queryKey: ['products', placeId],
@@ -202,8 +202,6 @@ export default function Place() {
       setSearchParams()
     }
   }, [sendingId, placeId, user])
-
-  // if (placeData.isFetching && isNew) return null
 
   return (
     <>
