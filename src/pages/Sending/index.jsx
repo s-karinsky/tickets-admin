@@ -161,7 +161,7 @@ export default function Sending({
       title: 'Статус услуги',
       dataIndex: 'status',
       key: 'status',
-      render: val => val === 0 ? 'В обработке' : 'Выдано',
+      render: val => '',
       sorter: (a, b) => a.status - b.status,
       ...getColumnSearchProps(record => record.status + 1, { options: [{ value: 1, label: 'В обработке' }, { value: 2, label: 'Выдано' }] })
     },
