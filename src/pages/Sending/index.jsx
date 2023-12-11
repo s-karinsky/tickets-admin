@@ -77,7 +77,13 @@ export default function Sending({
         ...item,
         buttons: (
           isNotSending && <div style={{ display: 'flex', gap: 10 }}>
-            <CopyOutlined size={17} color='#141414' />
+            <CopyOutlined
+              size={17}
+              color='#141414'
+              onClick={() => {
+                navigate(`/sendings/${sendingId}/create?copy=${item.id}`)
+              }}
+            />
             <BsTrash
               style={{ marginLeft: 30, cursor: 'pointer' }} 
               size={17}

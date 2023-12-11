@@ -27,11 +27,12 @@ export default function Place() {
   const { sendingId, placeId } = useParams()
   const [ form ] = Form.useForm()
 
-  const [ search, setSearch ] = useState('')
   const [ editProduct, setEditProduct ] = useState(false)
   const [ activeRow, setActiveRow ] = useState()
   const [ isSumDisabled, setIsSumDisabled ] = useState()
   const [ customPay, setCustomPay ] = useState('')
+
+  const copy = searchParams.get('copy')
 
   const [ sendingData, placeData, productsData ] = useQueries([
     {
@@ -39,8 +40,8 @@ export default function Place() {
       queryFn: getSendingById(sendingId)
     },
     {
-      queryKey: ['place', sendingId, placeId],
-      queryFn: getPlaceById(placeId, sendingId),
+      queryKey: ['place', sendingId, placeId, { copy }],
+      queryFn: getPlaceById(placeId, sendingId, { copy }),
       staleTime: 0
     },
     {
@@ -79,7 +80,6 @@ export default function Place() {
   const maxNum = (productsData.data || []).reduce((max, item) => Math.max(item.number, max), 0)
 
   const places = (productsData.data || [])
-    .filter(filterTableRows(search))
     .map((item) => {
       return {
         ...item,

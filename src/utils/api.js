@@ -136,7 +136,8 @@ export const getPlacesBySendingId = sendingId => async () => {
   })
 }
 
-export const getPlaceById = (placeId, sendingId) => async () => {
+export const getPlaceById = (placeId, sendingId, params = {}) => async () => {
+  let values = {}
   if (placeId === 'create') {
     const response = await axios.postWithAuth(
       '/query/select',
@@ -144,11 +145,12 @@ export const getPlaceById = (placeId, sendingId) => async () => {
         sql: `SELECT max(cast(JSON_EXTRACT(pole,'$.place') as decimal)) as max FROM dataset WHERE id_ref=${sendingId} AND ref_tip='sending'`
       }
     )
-    return {
+    values = {
       place: parseInt(_get(response, ['data', 'data', 0, 'max']) || 0) + 1
     }
+    if (!params.copy) return values
   }
-  const sql = `SELECT * FROM dataset WHERE id=${placeId}`
+  const sql = params.copy ? `SELECT * FROM dataset WHERE id=${params.copy}` : `SELECT * FROM dataset WHERE id=${placeId}`
   const response = await axios.postWithAuth('/query/select', { sql })
   const data = (response.data?.data || [])[0]
   let json
@@ -159,7 +161,8 @@ export const getPlaceById = (placeId, sendingId) => async () => {
   }
   return {
     ...data,
-    ...json
+    ...json,
+    ...values
   }
 }
 
