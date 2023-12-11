@@ -99,7 +99,14 @@ export default function PageUser() {
           {isEdit && 
             <Button
               type='primary'
-              onClick={() => isNew ? navigate('/users') : setSearchParams({})}
+              onClick={() => {
+                if (isNew) {
+                  navigate('/users')
+                } else {
+                  setSearchParams({})
+                  window.location.reload()
+                } 
+              }}
               danger
             >
               Отмена
