@@ -193,13 +193,27 @@ export default function Place() {
       status: 0
     }
     if (placeId === 'create') {
-      await createDataset(params)
-      const id = await getLastId('dataset')
-      navigate(`/sendings/${sendingId}/${id}`)
+      const result = await createDataset(params)
+      if (result.status === 'error') {
+        Modal.error({
+          title: 'Ошибка при сохранении',
+          content: result.message
+        })
+      } else {
+        const id = await getLastId('dataset')
+        navigate(`/sendings/${sendingId}/${id}`)
+      }
     } else {
-      await updateDatasetById(placeId, params)
-      await placeData.refetch()
-      setSearchParams()
+      const result = await updateDatasetById(placeId, params)
+      if (result.status === 'error') {
+        Modal.error({
+          title: 'Ошибка при сохранении',
+          content: result.message
+        })
+      } else {
+        await placeData.refetch()
+        setSearchParams()
+      }
     }
   }, [sendingId, placeId, user])
 

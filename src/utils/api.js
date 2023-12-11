@@ -173,12 +173,12 @@ export const deletePlaceById = async (placeId) => {
 
 export const updateDatasetById = async (placeId, params = {}) => {
   const response = await axios.postWithAuth('/query/update', { sql: sqlUpdate('dataset', params, `id=${placeId}`) })
-  return response
+  return response.data
 }
 
 export const createDataset = async (params) => {
   const response = await axios.postWithAuth('/query/insert', { sql: sqlInsert('dataset', params) })
-  return response
+  return response.data
 }
 
 export const getProductsByPlaceId = placeId => async () => {
