@@ -141,7 +141,7 @@ export default function Sending({
       title: 'Размеры',
       dataIndex: 'size',
       key: 'size',
-      render: size => typeof size === 'object' ? `${size.width} / ${size.height} / ${size.length}` : size
+      render: size => typeof size === 'object' ? `${size.length} / ${size.width} / ${size.height}` : size
     },
     {
       title: 'Тариф',

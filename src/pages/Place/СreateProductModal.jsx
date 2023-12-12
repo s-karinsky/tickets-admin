@@ -93,11 +93,26 @@ export const CreateProductModal = ({
               creator_id: userId,
               editor_id: userId
             }
-            await createDataset(params)
+            const result = await createDataset(params)
+            if (result.status === 'error') {
+              Modal.error({
+                title: 'Ошибка при сохранении',
+                content: result.message
+              })
+            } else {
+              handleCancel()
+            }
           } else {
-            await updateDatasetById(product.id, { pole: JSON.stringify(values) })
+            const result = await updateDatasetById(product.id, { pole: JSON.stringify(values) })
+            if (result.status === 'error') {
+              Modal.error({
+                title: 'Ошибка при сохранении',
+                content: result.message
+              })
+            } else {
+              handleCancel()
+            }
           }
-          handleCancel()
         }}
       >
         <FormField
