@@ -138,10 +138,25 @@ export default function Sending({
       ...getColumnSearchProps('gross_weight', { type: 'number' })
     },
     {
-      title: 'Размеры',
+      title: 'Длина',
       dataIndex: 'size',
-      key: 'size',
-      render: size => typeof size === 'object' ? `${size.length} / ${size.width} / ${size.height}` : size
+      key: 'length',
+      render: size => typeof size === 'object' ? size.length : '',
+      sorter: (a, b) => a.size?.length - b.size?.length
+    },
+    {
+      title: 'Ширина',
+      dataIndex: 'size',
+      key: 'width',
+      render: size => typeof size === 'object' ? size.width : '',
+      sorter: (a, b) => a.size?.width - b.size?.width
+    },
+    {
+      title: 'Высота',
+      dataIndex: 'size',
+      key: 'height',
+      render: size => typeof size === 'object' ? size.height : '',
+      sorter: (a, b) => a.size?.height - b.size?.height
     },
     {
       title: 'Тариф',

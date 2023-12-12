@@ -458,39 +458,33 @@ export default function Place() {
                   isEdit={isEditPage}
                   rules={required()}
                 />
-                <Form.Item
-                  label={<b className='b-required'>Размер</b>}
-                  style={{ width: 420 }}
-                >
-                  <div style={{ width: 420, display: 'flex', gap: 5 }}>
-                    <FormField
-                      type='number'
-                      width={120}
-                      name={['size', 'length']}
-                      isEdit={isEditPage}
-                      rules={[...required(), ...numberRange({ min: 1 })]}
-                      addonAfter={isEditPage && 'см'}
-                    />
-                    <span style={{ lineHeight: '39px' }}>x</span>
-                    <FormField
-                      type='number'
-                      width={120}
-                      name={['size', 'width']}
-                      isEdit={isEditPage}
-                      rules={[...required(), ...numberRange({ min: 1 })]}
-                      addonAfter={isEditPage && 'см'}
-                    />
-                    <span style={{ lineHeight: '39px' }}>x</span>
-                    <FormField
-                      type='number'
-                      width={120}
-                      name={['size', 'height']}
-                      isEdit={isEditPage}
-                      rules={[...required(), ...numberRange({ min: 1 })]}
-                      addonAfter={isEditPage && 'см'}
-                    />
-                  </div>
-                </Form.Item>
+                <FormField
+                  type='number'
+                  label='Длина'
+                  width={127}
+                  name={['size', 'length']}
+                  isEdit={isEditPage}
+                  rules={[...required(), ...numberRange({ min: 1 })]}
+                  addonAfter={isEditPage && 'см'}
+                />
+                <FormField
+                  type='number'
+                  label='Ширина'
+                  width={127}
+                  name={['size', 'width']}
+                  isEdit={isEditPage}
+                  rules={[...required(), ...numberRange({ min: 1 })]}
+                  addonAfter={isEditPage && 'см'}
+                />
+                <FormField
+                  type='number'
+                  label='Высота'
+                  width={127}
+                  name={['size', 'height']}
+                  isEdit={isEditPage}
+                  rules={[...required(), ...numberRange({ min: 1 })]}
+                  addonAfter={isEditPage && 'см'}
+                />
                 <FormField
                   type='select'
                   label='Тип оплаты'
