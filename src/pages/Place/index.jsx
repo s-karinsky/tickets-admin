@@ -27,6 +27,7 @@ export default function Place() {
   const { sendingId, placeId } = useParams()
   const [ form ] = Form.useForm()
 
+  const [ isProductChanged, setIsProductChanged ] = useState(false)
   const [ editProduct, setEditProduct ] = useState(false)
   const [ activeRow, setActiveRow ] = useState()
   const [ isSumDisabled, setIsSumDisabled ] = useState()
@@ -70,6 +71,14 @@ export default function Place() {
     net_weight: (productsData.data || []).reduce((sum, item) => sum + item.net_weight || 0, 0),
     count: (productsData.data || []).reduce((sum, item) => sum + item.count || 0, 0)
   }
+
+  
+  useEffect(() => {
+    if (!isProductChanged) return
+    console.log(initialPlace)
+    form.setFieldsValue(initialPlace)
+    setIsProductChanged(false)
+  }, [isProductChanged])
 
   const isNotSending = sendingData.data?.json?.status === 0
 
@@ -450,7 +459,7 @@ export default function Place() {
                   rules={required()}
                 />
                 <Form.Item
-                  label={<b>Размер</b>}
+                  label={<b className='b-required'>Размер</b>}
                   style={{ width: 420 }}
                 >
                   <div style={{ width: 420, display: 'flex', gap: 5 }}>
@@ -459,7 +468,7 @@ export default function Place() {
                       width={120}
                       name={['size', 'length']}
                       isEdit={isEditPage}
-                      rules={required()}
+                      rules={[...required(), ...numberRange({ min: 1 })]}
                       addonAfter={isEditPage && 'см'}
                     />
                     <span style={{ lineHeight: '39px' }}>x</span>
@@ -468,7 +477,7 @@ export default function Place() {
                       width={120}
                       name={['size', 'width']}
                       isEdit={isEditPage}
-                      rules={required()}
+                      rules={[...required(), ...numberRange({ min: 1 })]}
                       addonAfter={isEditPage && 'см'}
                     />
                     <span style={{ lineHeight: '39px' }}>x</span>
@@ -477,7 +486,7 @@ export default function Place() {
                       width={120}
                       name={['size', 'height']}
                       isEdit={isEditPage}
-                      rules={required()}
+                      rules={[...required(), ...numberRange({ min: 1 })]}
                       addonAfter={isEditPage && 'см'}
                     />
                   </div>
@@ -637,7 +646,7 @@ export default function Place() {
         isModalOpen={!!editProduct}
         handleCancel={() => {
           setEditProduct(false)
-          productsData.refetch()
+          productsData.refetch().then(() => setIsProductChanged(true))
         }}
         placeId={placeId}
         userId={user.u_id}
