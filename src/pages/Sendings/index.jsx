@@ -139,15 +139,15 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
       sorter: (a, b) => a.weight - b.weight,
       ...getColumnSearchProps('net_weight', { type: 'number' })
     },
-    {
-      title: 'Вес брутто',
-      dataIndex: 'gross_weight',
-      key: 'gross_weight',
-      align: 'right',
-      render: val => Number(val).toFixed(3),
-      sorter: (a, b) => a.weight - b.weight,
-      ...getColumnSearchProps('gross_weight', { type: 'number' })
-    },
+    // {
+    //   title: 'Вес брутто',
+    //   dataIndex: 'gross_weight',
+    //   key: 'gross_weight',
+    //   align: 'right',
+    //   render: val => Number(val).toFixed(3),
+    //   sorter: (a, b) => a.weight - b.weight,
+    //   ...getColumnSearchProps('gross_weight', { type: 'number' })
+    // },
     {
       title: 'Дата отправки',
       dataIndex: 'departure',

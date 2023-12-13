@@ -67,15 +67,15 @@ export default function Place() {
 
   const initialPlace = {
     ...placeData.data,
+    pay_sum: (placeData.data?.pay_kg || 0) * (placeData.data?.gross_weight || 0),
     status: sendingData.data?.json?.status,
-    net_weight: (productsData.data || []).reduce((sum, item) => sum + item.net_weight || 0, 0),
-    count: (productsData.data || []).reduce((sum, item) => sum + item.count || 0, 0)
+    net_weight: (productsData.data || []).reduce((sum, item) => sum + (item.net_weight || 0), 0),
+    items_sum: (productsData.data || []).reduce((sum, item) => sum + (item.sum || 0), 0),
+    count: (productsData.data || []).reduce((sum, item) => sum + (item.count || 0), 0)
   }
 
-  
   useEffect(() => {
     if (!isProductChanged) return
-    console.log(initialPlace)
     form.setFieldsValue(initialPlace)
     setIsProductChanged(false)
   }, [isProductChanged])
@@ -370,7 +370,7 @@ export default function Place() {
             borderRadius: 20,
             backgroundColor: '#FAFAFA',
             padding: 20,
-            boxShadow: ' 0px 2px 4px 0px #00000026',
+            boxShadow: '0px 2px 4px 0px #00000026',
           }}
         >
           {!sendingData.isLoading && !placeData.isLoading && (
@@ -380,7 +380,13 @@ export default function Place() {
               size='large'
               initialValues={initialPlace}
               onFinish={handleSubmit}
-              onValuesChange={values => values.pay_type && setIsSumDisabled(values.pay_type !== 'Безналичный')}
+              onValuesChange={(values, allValues) => {
+                if (values.pay_type) setIsSumDisabled(values.pay_type !== 'Безналичный')
+                if (values.pay_kg || values.gross_weight) {
+                  const sum = (allValues.pay_kg || 0) * (allValues.gross_weight || 0)
+                  form.setFieldValue('pay_sum', sum)
+                }
+              }}
               form={form}
             >
               <div
@@ -628,9 +634,6 @@ export default function Place() {
                 },
               })}
               style={{ overflow: 'scroll' }}
-              rowSelection={{
-                type: Checkbox,
-              }}
             />
           </>
         }
