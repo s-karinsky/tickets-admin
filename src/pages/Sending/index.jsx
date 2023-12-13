@@ -481,77 +481,68 @@ export default function Sending({
       </Row>
       {!isNew &&
         <>
-          <Row>
-            <Title
-              level={1}
-              style={{ fontWeight: '700', marginBottom: '0' }}
-            >
-              Места
-            </Title>
-          </Row>
-          <Row>
-            <div
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              gap: '20px',
+              width: '100%',
+            }}
+          >
+            <Row
               style={{
                 display: 'flex',
-                justifyContent: 'space-between',
-                gap: '20px',
+                flexDirection: 'row',
+                gap: '15px',
                 width: '100%',
               }}
             >
-              <Row
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  gap: '15px',
-                  width: '100%',
-                }}
+              <Title
+                level={1}
+                style={{ fontWeight: '700', marginBottom: '0' }}
               >
-                <Input
-                  placeholder='Поиск'
-                  style={{ width: 300 }}
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                />
-              </Row>
-              <Row
-                style={{
-                  display: 'flex',
-                  gap: '15px',
-                  flexDirection: 'row',
-                  justifyContent: 'flex-end',
-                  width: '100%',
+                Места
+              </Title>
+            </Row>
+            <Row
+              style={{
+                display: 'flex',
+                gap: '15px',
+                flexDirection: 'row',
+                justifyContent: 'flex-end',
+                alignItems: 'flex-end',
+                width: '100%',
+              }}
+            >
+              {' '}
+              {isNotSending && <Button
+                type='primary'
+                onClick={() => {
+                  // editHandle(true)
+                  navigate(location.pathname + `/create`)
                 }}
+                size={'large'}
               >
-                {' '}
-                {isNotSending && <Button
-                  type='primary'
-                  onClick={() => {
-                    // editHandle(true)
-                    navigate(location.pathname + `/create`)
-                  }}
-                  size={'large'}
-                >
-                  Создать
-                </Button>}
-                <Button
-                  type='primary'
-                  size='large'
-                  title='Функция в разработке'
-                  disabled
-                >
-                  Создать услугу
-                </Button>
-                <Button
-                  type='primary'
-                  size='large'
-                  title='Функция в разработке'
-                  disabled
-                >
-                    Отменить услугу
-                </Button>
-              </Row>
-            </div>
-          </Row>
+                Создать
+              </Button>}
+              <Button
+                type='primary'
+                size='large'
+                title='Функция в разработке'
+                disabled
+              >
+                Создать услугу
+              </Button>
+              <Button
+                type='primary'
+                size='large'
+                title='Функция в разработке'
+                disabled
+              >
+                Отменить услугу
+              </Button>
+            </Row>
+          </div>
           <Table
             columns={columns}
             isLoading={places.isLoading}

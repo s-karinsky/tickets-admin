@@ -220,26 +220,11 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
         <div
           style={{
             display: 'flex',
-            justifyContent: 'space-between',
+            justifyContent: 'flex-end',
             gap: '20px',
             width: '100%',
           }}
         >
-          <Row
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              gap: '15px',
-              width: '100%',
-            }}
-          >
-            <Input
-              placeholder='Поиск'
-              style={{ width: 300 }}
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-            />
-          </Row>
           <Button
             type='primary'
             onClick={() => {
