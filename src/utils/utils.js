@@ -34,3 +34,5 @@ export const filterTableRows = search => item => {
   ).join(';').toLowerCase()
   return str.includes(search.toLowerCase())
 }
+
+export const numberFormatter = digits => (val, { userTyping, input }) => userTyping ? input : `${Number(val).toFixed(digits)}`.replace('.', ',')

@@ -5,6 +5,7 @@ import { PropertyGap } from '../../pages/Sendings'
 import FormField from '../../components/FormField'
 import { getCount, createDataset, updateDatasetById } from '../../utils/api'
 import { required, numberRange } from '../../utils/validationRules'
+import { numberFormatter } from '../../utils/utils'
 const { Title } = Typography
 
 export const CreateProductModal = ({
@@ -187,7 +188,7 @@ export const CreateProductModal = ({
           name='net_weight'
           addonAfter={isEdit && 'кг'}
           rules={[...required(), ...numberRange({ min: 0.001, max: 99999 })]}
-          formatter={(val) => Number(val).toFixed(3)}
+          formatter={numberFormatter(3)}
           disabled={!isNotSending}
         />
         <div style={{ flexBasis: '100%' }} />
@@ -289,7 +290,7 @@ export const CreateProductModal = ({
           name='price'
           addonAfter={isEdit && '$'}
           disabled={isSumDisabled}
-          formatter={(val) => Number(val).toFixed(2)}
+          formatter={numberFormatter(2)}
         />
         <FormField
           width={150}
@@ -300,7 +301,7 @@ export const CreateProductModal = ({
           name='sum'
           addonAfter={isEdit && '$'}
           disabled={isSumDisabled}
-          formatter={(val) => Number(val).toFixed(2)}
+          formatter={numberFormatter(2)}
         />
         <Form.Item
           width={150}

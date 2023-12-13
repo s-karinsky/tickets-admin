@@ -47,6 +47,7 @@ export default function FormField({
     case 'number':
       child = <InputNumber
         {...rest}
+        decimalSeparator=','
         bordered={isEdit}
         readOnly={!isEdit}
       />

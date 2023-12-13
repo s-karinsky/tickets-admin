@@ -15,7 +15,7 @@ import { SENDING_STATUS } from '../../consts'
 import { getUserProfile } from '../../redux/user'
 import { getColumnSearchProps } from '../../utils/components'
 import { required, numberRange } from '../../utils/validationRules'
-import { declOfNum } from '../../utils/utils'
+import { declOfNum, numberFormatter } from '../../utils/utils'
 
 const { Title, Link } = Typography
 
@@ -524,7 +524,7 @@ export default function Place() {
                   addonAfter={isEditPage && '$'}
                   style={{ width: 200 }}
                   isEdit={isEditPage}
-                  formatter={(val) => Number(val).toFixed(2)}
+                  formatter={numberFormatter(2)}
                 />
                 <FormField
                   type='number'
@@ -534,7 +534,7 @@ export default function Place() {
                   style={{ width: 200 }}
                   isEdit={isEditPage}
                   disabled={isSumDisabled}
-                  formatter={(val) => Number(val).toFixed(2)}
+                  formatter={numberFormatter(2)}
                 />
                 <FormField
                   type='number'
@@ -544,7 +544,7 @@ export default function Place() {
                   addonAfter={isEditPage && '$'}
                   style={{ width: 200 }}
                   isEdit={isEditPage}  
-                  formatter={(val) => Number(val).toFixed(2)}
+                  formatter={numberFormatter(2)}
                   disabled={isEditPage}
                 />
                 <FormField
@@ -557,7 +557,7 @@ export default function Place() {
                   isEdit={isEditPage}
                   disabled={isEditPage}
                   rules={numberRange({ min: 0, max: 99999 })}
-                  formatter={(val) => Number(val).toFixed(3)}
+                  formatter={numberFormatter(3)}
                 />
                 <FormField
                   type='number'
@@ -567,7 +567,7 @@ export default function Place() {
                   style={{ width: 200 }}
                   isEdit={isEditPage}
                   rules={numberRange({ min: 0, max: 99999 })}
-                  formatter={(val) => Number(val).toFixed(3)}
+                  formatter={numberFormatter(3)}
                 />
                 <FormField
                   type='number'

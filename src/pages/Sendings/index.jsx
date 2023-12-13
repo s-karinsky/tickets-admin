@@ -8,7 +8,7 @@ import { BsTrash } from 'react-icons/bs'
 import { SendingsStatus } from '../../components/SendingsStatus'
 import { DateTableCell } from '../../components/DateTableCell'
 import { getCount, getSendings, deleteSendingById, updateSendingById, useUsersWithRole } from '../../utils/api'
-import { declOfNum, filterTableRows } from '../../utils/utils'
+import { declOfNum } from '../../utils/utils'
 import { getColumnSearchProps } from '../../utils/components'
 import { SENDING_STATUS } from '../../consts'
 
@@ -24,7 +24,6 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
   const [ statusModalDate, setStatusModalDate ] = useState()
   const [ statusModalItem, setStatusModalItem ] = useState()
   const [ activeRow, setActiveRow ] = useState()
-  const [ search, setSearch ] = useState('')
   const { isLoading, data, refetch } = useQuery(['sendings', { isAir: isSendingAir }], getSendings(isSendingAir))
   const drivers = useUsersWithRole(2)
   const driverMap = useMemo(() => {
@@ -33,7 +32,6 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
   }, [drivers.data])
 
   let sendings = (data || [])
-    .filter(filterTableRows(search))
     .map(item => {
       const isMaking = item.status === 0
       return {

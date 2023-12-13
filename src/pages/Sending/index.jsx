@@ -15,7 +15,7 @@ import FormField from '../../components/FormField'
 import { useUsersWithRole, getLastId, getCount, createSending, updateSendingById, getSendingById, deleteSendingById, getPlacesBySendingId, deletePlaceById } from '../../utils/api'
 import { getColumnSearchProps } from '../../utils/components'
 import { required } from '../../utils/validationRules'
-import { declOfNum, filterTableRows } from '../../utils/utils'
+import { declOfNum, numberFormatter } from '../../utils/utils'
 import { SENDING_STATUS } from '../../consts'
 
 const { Title, Link } = Typography
@@ -28,7 +28,6 @@ export default function Sending({
   const navigate = useNavigate()
   const location = useLocation()
   const { sendingId } = useParams()
-  const [ search, setSearch ] = useState('')
   const [ activeRow, setActiveRow ] = useState()
   
   const isNew = sendingId === 'create'
@@ -72,7 +71,6 @@ export default function Sending({
   }, [drivers.data])
 
   const placesData = (places.data || [])
-    .filter(filterTableRows(search))
     .map((item) => {
       return {
         ...item,
@@ -441,7 +439,7 @@ export default function Sending({
                   style={{ width: 120 }}
                   isEdit={isEditPage}
                   addonAfter={isEditPage && 'кг'}
-                  formatter={(val) => Number(val).toFixed(3)}
+                  formatter={numberFormatter(3)}
                   disabled={isEditPage}
                 />
                 <FormField
@@ -452,7 +450,7 @@ export default function Sending({
                   style={{ width: 120 }}
                   isEdit={isEditPage}
                   addonAfter={isEditPage && 'кг'}
-                  formatter={(val) => Number(val).toFixed(3)}
+                  formatter={numberFormatter(3)}
                   disabled={isEditPage}
                 />
                 <FormField
