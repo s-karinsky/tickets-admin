@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { Button, Row, Table } from 'antd'
 import { PlusCircleFilled } from '@ant-design/icons'
-import { getColumnSearchProps } from '../../utils/components'
+import { getColumnSearch } from '../../utils/components'
 import { getOptions } from '../../utils/utils'
 import { fetchData, getStadiumsList } from '../../redux/data'
 import { getCountries } from '../../redux/config'
@@ -23,24 +23,26 @@ export default function PageStadiums() {
 
   const columns = [
     {
+      width: 200,
       title: 'Name',
       dataIndex: 'en',
       key: 'en',
-      ...getColumnSearchProps('en'),
+      ...getColumnSearch('name', { getData: 'en' }),
     },
     {
+      width: 300,
       title: 'Country',
       dataIndex: 'country',
       key: 'country',
-      sorter: (a, b) => a.country.localeCompare(b.country),
+      sorter: (a, b) => (a.country || '').localeCompare(b.country || ''),
       render: id => countries[id]?.en,
-      ...getColumnSearchProps(record => countries[record.country]?.en, { options: countriesOptions }),
+      ...getColumnSearch('country', { getData: record => countries[record.country]?.en, options: countriesOptions }),
     },
     {
       title: 'Address',
       dataIndex: 'address_en',
       key: 'address_en',
-      ...getColumnSearchProps('address_en'),
+      ...getColumnSearch('address', { getData: 'address_en' }),
     }
   ]
 

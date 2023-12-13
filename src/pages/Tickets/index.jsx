@@ -7,7 +7,7 @@ import TicketsForm from '../../components/TicketsForm'
 import { fetchTicketGroups, fetchAllTickets, getMatchTickets } from '../../redux/tickets'
 import { fetchData, getSchedule } from '../../redux/data'
 import { getIsAdmin } from '../../redux/user'
-import { getColumnSearchProps } from '../../utils/components'
+import { getColumnSearch } from '../../utils/components'
 import { getOptions } from '../../utils/utils'
 
 function MatchList({ schedule }) {
@@ -35,7 +35,7 @@ function MatchList({ schedule }) {
       key: 'tournament',
       render: match => match.tournament && match.tournament?.en,
       sorter: (a, b) => a.match?.tournament?.en?.localeCompare(b.match?.tournament?.en),
-      ...getColumnSearchProps(record => record.match?.tournament?.en, { options: tournamentOptions })
+      ...getColumnSearch('tournament', { getData: record => record.match?.tournament?.en, options: tournamentOptions })
     },
     {
       title: 'Team home',
@@ -43,7 +43,7 @@ function MatchList({ schedule }) {
       key: 'home',
       render: match => match.team1.en,
       sorter: (a, b) => (a.match?.team1?.en || '').localeCompare(b.match?.team1?.en),
-      ...getColumnSearchProps(record => record.match?.team1?.en, { options: homeOptions })
+      ...getColumnSearch('home', { getData: record => record.match?.team1?.en, options: homeOptions })
     },
     {
       title: 'Team away',
@@ -51,7 +51,7 @@ function MatchList({ schedule }) {
       key: 'away',
       render: match => match.team2.en,
       sorter: (a, b) => (a.match?.team2?.en || '').localeCompare(b.match?.team2?.en),
-      ...getColumnSearchProps(record => record.match?.team2?.en, { options: awayOptions })
+      ...getColumnSearch('away', { getData: record => record.match?.team2?.en, options: awayOptions })
     },
     {
       title: 'Tickets',

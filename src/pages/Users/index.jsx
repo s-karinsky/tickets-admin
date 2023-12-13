@@ -3,7 +3,7 @@ import { useQuery } from 'react-query'
 import { Table, Tag } from 'antd'
 import { CheckOutlined } from '@ant-design/icons'
 import axios from '../../utils/axios'
-import { getColumnSearchProps } from '../../utils/components'
+import { getColumnSearch } from '../../utils/components'
 import { USER_ROLES, USER_ROLES_COLOR } from '../../consts'
 
 const columns = [
@@ -12,14 +12,14 @@ const columns = [
     dataIndex: 'name',
     key: 'name',
     render: (name, { family }) => [name, family].filter(item => item).join(' ') || 'No name',
-    ...getColumnSearchProps(record => ([record.name, record.family].join(' ')))
+    ...getColumnSearch('name', { getData: record => ([record.name, record.family].join(' ')) })
   },
   {
     title: 'Email',
     dataIndex: 'email',
     key: 'email',
     render: email => email || 'No email',
-    ...getColumnSearchProps('email')
+    ...getColumnSearch('email')
   },
   {
     title: 'Role',

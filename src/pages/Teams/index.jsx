@@ -5,7 +5,7 @@ import { Button, Row, Table } from 'antd'
 import { PlusCircleFilled } from '@ant-design/icons'
 import { fetchData, getTeams } from '../../redux/data'
 import { getCities, getCountries } from '../../redux/config'
-import { getColumnSearchProps } from '../../utils/components'
+import { getColumnSearch } from '../../utils/components'
 import { getOptions } from '../../utils/utils'
 
 export default function PageTeams() {
@@ -27,7 +27,7 @@ export default function PageTeams() {
       width: 180,
       sorter: (a, b) => a.country.localeCompare(b.country),
       render: id => countries[id].en,
-      ...getColumnSearchProps(record => countries[record.country].en, { options: countriesOptions }),
+      ...getColumnSearch('country', { getData: record => countries[record.country].en, options: countriesOptions }),
     },
     {
       title: 'Logo',
@@ -41,14 +41,14 @@ export default function PageTeams() {
       dataIndex: 'en',
       key: 'en',
       sorter: (a, b) => a.country.localeCompare(b.country),
-      ...getColumnSearchProps('en'),
+      ...getColumnSearch('name', { getData: 'en' }),
     },
     {
       title: 'City',
       dataIndex: 'city',
       key: 'city',
       render: cityId => cities[cityId]?.en,
-      ...getColumnSearchProps(record => cities[record.city]?.en, { options: citiesOptions }),
+      ...getColumnSearch('city', { getData: record => cities[record.city]?.en, options: citiesOptions }),
     }
   ]
 

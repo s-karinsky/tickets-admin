@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { Button, Calendar, Input, Select } from 'antd'
+import { useSearchParams, useLocation } from 'react-router-dom'
 import { SearchOutlined } from '@ant-design/icons'
 
 export default function ColumnFilter({
@@ -11,8 +12,9 @@ export default function ColumnFilter({
   selectedKeys,
   confirm,
   clearFilters,
-  close
+  name
 }) {
+  const [ searchParams, setSearchParams ] = useSearchParams()
   const isInput = type === 'input'
   const isSelect = type === 'select'
   const isDate = type === 'date'
@@ -21,6 +23,19 @@ export default function ColumnFilter({
     return options.map(item => item.value ? item : ({ value: item, label: item }))
   }, [options])
 
+  const addSearchParam = (name, val) => {
+    const params = {}
+    for (const [ key, value ] of searchParams) {
+      if (key !== name) {
+        params[key] = value
+      }
+    }
+    if (val) {
+      params[name] = val
+    }
+    setSearchParams(params)
+  }
+
   return (
     <div style={{ padding: 10 }} onKeyDown={e => e.stopPropagation()}>
       <div style={{ minWidth: 200, maxWidth: 300 }}>
@@ -28,13 +43,19 @@ export default function ColumnFilter({
           placeholder={placeholder}
           value={selectedKeys[0]}
           onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-          onPressEnter={() => confirm()}
+          onPressEnter={() => {
+            addSearchParam(name, selectedKeys[0])
+            confirm()
+          }}
           style={{ width: '100%', marginBottom: 8 }}
         />}
         {isSelect && <Select
           placeholder={placeholder}
           value={selectedKeys[0]}
-          onChange={value => setSelectedKeys(value ? [String(value)] : [])}
+          onChange={value => {
+            addSearchParam(name, String(value))
+            setSelectedKeys(value ? [String(value)] : [])
+          }}
           onSelect={() => confirm()}
           onPressEnter={() => confirm()}
           filterOption={(input, option) =>
@@ -53,7 +74,10 @@ export default function ColumnFilter({
       <div>
         {(isInput || isDate) && <Button
           type='primary'
-          onClick={() => confirm()}
+          onClick={() => {
+            addSearchParam(name, selectedKeys[0])
+            confirm()
+          }}
           icon={<SearchOutlined />}
           size='small'
           style={{ width: '100%', marginBottom: 8 }}
@@ -63,6 +87,7 @@ export default function ColumnFilter({
         <Button
           onClick={() => {
             clearFilters && clearFilters()
+            addSearchParam(name)
             confirm()
           }}
           size='small'

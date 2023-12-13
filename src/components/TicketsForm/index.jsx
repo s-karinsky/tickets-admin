@@ -20,7 +20,7 @@ import dayjs from 'dayjs'
 import InputFile from '../InputFile'
 import axios from '../../utils/axios'
 import { capitalizeFirstLetter, toBase64, getFileExt } from '../../utils/utils'
-import { getColumnSearchProps } from '../../utils/components'
+import { getColumnSearch } from '../../utils/components'
 import { getCurrencyList, getDefaultCurrency } from '../../redux/config'
 import { getSchedule, getMatch } from '../../redux/data'
 import { fetchTicketGroups, fetchTicketsFiles, getMatchTickets } from '../../redux/tickets'
@@ -33,21 +33,21 @@ const getTicketsColumns = (getFile = () => {}, usersMap = {}) => ([
     dataIndex: 'block',
     key: 'block',
     sorter: (a, b) => a.block.localeCompare(b.block),
-    ...getColumnSearchProps('block')
+    ...getColumnSearch('block')
   },
   {
     title: 'Row',
     dataIndex: 'row',
     key: 'row',
     sorter: (a, b) => parseInt(a.row) - parseInt(b.row),
-    ...getColumnSearchProps('row')
+    ...getColumnSearch('row')
   },
   {
     title: 'Seat',
     dataIndex: 'seat',
     key: 'seat',
     sorter: (a, b) => parseInt(a.seat) - parseInt(b.seat),
-    ...getColumnSearchProps('seat')
+    ...getColumnSearch('seat')
   },
   {
     title: 'Price',
@@ -55,7 +55,7 @@ const getTicketsColumns = (getFile = () => {}, usersMap = {}) => ([
     key: 'price',
     sorter: (a, b) => parseInt(a.price) - parseInt(b.price),
     render: (price, { currency }) => `${price} ${currency || ''}`,
-    ...getColumnSearchProps('price')
+    ...getColumnSearch('price')
   },
   {
     title: 'File',

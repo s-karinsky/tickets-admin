@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { Button, Row, Table, Switch } from 'antd'
 import { PlusCircleFilled } from '@ant-design/icons'
-import { getColumnSearchProps } from '../../utils/components'
+import { getColumnSearch } from '../../utils/components'
 import { getOptions } from '../../utils/utils'
 import { fetchData, getScheduleList, postData } from '../../redux/data'
 
@@ -36,35 +36,35 @@ export default function PageMatches() {
       dataIndex: 'team1',
       key: 'team1',
       render: team => team && team.en,
-      ...getColumnSearchProps(record => record.team1?.en, { options: options.home })
+      ...getColumnSearch('home', { getData: record => record.team1?.en, options: options.home })
     },
     {
       title: 'Team away',
       dataIndex: 'team2',
       key: 'team2',
       render: team => team && team.en,
-      ...getColumnSearchProps(record => record.team2?.en, { options: options.away })
+      ...getColumnSearch('away', { getData: record => record.team2?.en, options: options.away })
     },
     {
       title: 'Tournament',
       dataIndex: 'tournament',
       key: 'tournament',
       render: tournament => tournament && tournament.en,
-      ...getColumnSearchProps(record => record.tournament?.en, { options: options.tournament })
+      ...getColumnSearch('tournament', { getData: record => record.tournament?.en, options: options.tournament })
     },
     {
       title: 'Stadium',
       dataIndex: 'stadium',
       key: 'stadium',
       render: (stadium, { team1 }) => stadium ? stadium.en : team1?.stadium?.en,
-      ...getColumnSearchProps(record => record.stadium?.en || record.team1?.stadium?.en, { options: options.stadium })
+      ...getColumnSearch('stadium', { getData: record => record.stadium?.en || record.team1?.stadium?.en, options: options.stadium })
     },
     {
       title: 'Date',
       dataIndex: 'datetime',
       key: 'datetime',
       render: datetime => datetime,
-      ...getColumnSearchProps('datetime', { type: 'date' })
+      ...getColumnSearch('datetime', { type: 'date' })
     },
     {
       title: 'Top match',
