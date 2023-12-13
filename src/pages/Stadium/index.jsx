@@ -70,7 +70,7 @@ export default function PageStadium() {
     <Form
       layout='vertical'
       onFinish={values => {
-        const { name, address, country, city, scheme, scheme_blob } = values
+        const { name, address = {}, country, city, scheme, scheme_blob } = values
         const stadium = {
           ...name,
           address_en: address.en,
