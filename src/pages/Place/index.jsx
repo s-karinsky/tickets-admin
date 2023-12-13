@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState, useMemo } from 'react'
 import { useNavigate, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { useQueries } from 'react-query'
-import { Button, Row, Table, Typography, Input, Checkbox, Form, Modal, Space, Divider } from 'antd'
+import { Button, Row, Table, Typography, Input, Form, Modal, Space, Divider } from 'antd'
 import { useSelector } from 'react-redux'
 import { BsTrash } from 'react-icons/bs'
 import { BiEdit } from 'react-icons/bi'
-import { SaveOutlined, CopyOutlined, ExclamationCircleFilled } from '@ant-design/icons'
+import { SaveOutlined, CopyOutlined, ExclamationCircleFilled, LoadingOutlined } from '@ant-design/icons'
 import { get as _get } from 'lodash'
 import { PropertyGap } from '../Sendings'
 import CreateProductModal from './СreateProductModal'
@@ -191,6 +191,8 @@ export default function Place() {
 
   const placeTitle = isNew ? 'Новое место' : `№${initialPlace?.place}`
 
+  const isDataLoaded = !sendingData.isLoading && !placeData.isLoading && !productsData.isLoading
+
   const handleSubmit = useCallback(async (values) => {
     const params = {
       tip: 'place',
@@ -245,13 +247,21 @@ export default function Place() {
           }}
         >
           <Typography>
-            <Title
-              level={1}
-              style={{ fontWeight: '700', marginBottom: '0' }}
-            >
-              {isNew ? placeTitle : `Место ${placeTitle}`}
-            </Title>
-            <div className=''>
+            {isDataLoaded ?
+              <Title
+                level={1}
+                style={{ fontWeight: '700', marginBottom: '0' }}
+              >
+                {isNew ? placeTitle : `Место ${placeTitle}`}
+              </Title> :
+              <Title
+                level={1}
+                style={{ fontWeight: '700', marginBottom: '0' }}
+              >
+                <LoadingOutlined />
+              </Title>
+            }
+            {isDataLoaded && <div>
               <Link
                 onClick={() => navigate(`/sendings`)}
                 style={{ color: 'blue' }}
@@ -270,11 +280,13 @@ export default function Place() {
                 }
                 style={{ color: 'blue' }}
               >
-                <span> </span>Отправка №{sendingData.data?.from}<span> </span>
+                <span> </span>
+                Отправка №{sendingData.data?.from}
+                <span> </span>
                 &gt;<span> </span>
               </Link>
               {isNew ? placeTitle : `Место ${placeTitle}`}
-            </div>
+            </div>}
           </Typography>
           <Row
             style={{
@@ -373,7 +385,7 @@ export default function Place() {
             boxShadow: '0px 2px 4px 0px #00000026',
           }}
         >
-          {!sendingData.isLoading && !placeData.isLoading && (
+          {isDataLoaded &&(
             <Form
               style={{ display: 'block', width: '100%' }}
               layout='vertical'
