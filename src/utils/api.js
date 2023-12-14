@@ -276,3 +276,20 @@ export const useCities = (country) => useQuery(['cities', country], async () => 
 }, {
   enabled: !!country
 })
+
+export const useDictionary = name => useQuery(['dictionary', name], async () => {
+  const response = await axios.postWithAuth('/query/select', { sql: `SELECT * FROM sprset WHERE tip='${name}'` })
+  const list = (_get(response, ['data', 'data']) || []).map(item => {
+    let json = {}
+    try {
+      json = JSON.parse(item.pole)
+    } catch (e) {
+      json = {}
+    }
+    return json
+  })
+  const map = keyBy(list, 'value')
+  return { list, map }
+}, {
+  staleTime: 10 * 60 * 1000
+})

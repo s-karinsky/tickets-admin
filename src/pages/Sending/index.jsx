@@ -12,7 +12,7 @@ import { BsTrash } from 'react-icons/bs'
 import { BiEdit } from 'react-icons/bi'
 import { PropertyGap } from '../Sendings'
 import FormField from '../../components/FormField'
-import { useUsersWithRole, getLastId, getCount, createSending, updateSendingById, getSendingById, deleteSendingById, getPlacesBySendingId, deletePlaceById } from '../../utils/api'
+import { useDictionary, useUsersWithRole, getLastId, getCount, createSending, updateSendingById, getSendingById, deleteSendingById, getPlacesBySendingId, deletePlaceById } from '../../utils/api'
 import { getColumnSearchProps } from '../../utils/components'
 import { required } from '../../utils/validationRules'
 import { declOfNum, numberFormatter } from '../../utils/utils'
@@ -47,6 +47,7 @@ export default function Sending({
       queryFn: getPlacesBySendingId(sendingId)
     }
   ])
+  const tarifs = useDictionary('tarif')
 
   const isNotSending = data?.json?.status === 0
 
@@ -160,8 +161,9 @@ export default function Sending({
       title: 'Тариф',
       dataIndex: 'tarif',
       key: 'tarif',
+      render: item => tarifs.data?.map[item]?.label,
       sorter: (a, b) => (a.tarif || '').localeCompare(b.tarif || ''),
-      ...getColumnSearchProps('tarif', { options: [{ value: 'Эконом' }, { value: 'Экспресс' }] })
+      ...getColumnSearchProps('tarif', { options: tarifs.data?.label })
     },
     {
       title: 'Количество товара',

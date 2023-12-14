@@ -10,7 +10,7 @@ import { get as _get } from 'lodash'
 import { PropertyGap } from '../Sendings'
 import CreateProductModal from './СreateProductModal'
 import FormField from '../../components/FormField'
-import { useUsersWithRole, getLastId, getCount, getSendingById, getPlaceById, deletePlaceById, updateDatasetById, createDataset, getProductsByPlaceId, deleteProductById } from '../../utils/api'
+import { useDictionary, useUsersWithRole, getLastId, getCount, getSendingById, getPlaceById, deletePlaceById, updateDatasetById, createDataset, getProductsByPlaceId, deleteProductById } from '../../utils/api'
 import { SENDING_STATUS } from '../../consts'
 import { getUserProfile } from '../../redux/user'
 import { getColumnSearchProps } from '../../utils/components'
@@ -51,6 +51,7 @@ export default function Place() {
     }
   ])
   const clients = useUsersWithRole(1)
+  const tarifs = useDictionary('tarif')
 
   const [ clientsOptions, clientsMap ] = useMemo(() => {
     if (!Array.isArray(clients.data)) return [[], {}]
@@ -468,11 +469,8 @@ export default function Place() {
                   label='Тариф'
                   name='tarif'
                   style={{ width: 200 }}
-                  options={[
-                    { value: 'Экспресс', title: '' },
-                    { value: 'Эконом', title: '' },
-                  ]}
-                  text={initialPlace.tarif}
+                  options={tarifs.data?.list || []}
+                  text={(tarifs.data?.map || {})[initialPlace.tarif]?.label}
                   isEdit={isEditPage}
                   rules={required()}
                 />
