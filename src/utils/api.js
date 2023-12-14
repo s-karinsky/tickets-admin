@@ -251,8 +251,9 @@ export const updateUserById = async (userId, values = {}) => {
 }
 
 export const createUser = async (values) => {
-  const response = await axios.postWithAuth('/query/insert', { sql: sqlInsert('users', values) })
-  return response
+  await axios.postWithAuth('/query/insert', { sql: sqlInsert('users', values) })
+  const lastId = await getLastId('users', 'id_user')
+  return lastId
 }
 
 export const useCountries = () => useQuery('countries', async () => {

@@ -58,7 +58,8 @@ export default function PageUser() {
         values.json = JSON.stringify(values.json)
         setIsSending(true)
         if (isNew) {
-          await createUser(values)
+          const lastId = await createUser(values)
+          navigate(`/users/${lastId}`)
         } else {
           await updateUserById(id, values)
         }
@@ -89,7 +90,7 @@ export default function PageUser() {
               style={{ marginRight: 10 }}
               disabled={isSending}
             >
-              {isNew ? 'Содзать' : 'Сохранить'}
+              {isNew ? 'Создать' : 'Сохранить'}
             </Button> :
             <Button
               icon={<BiEdit />}
