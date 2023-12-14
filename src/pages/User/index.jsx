@@ -230,7 +230,7 @@ export default function PageUser() {
                   label='Страна'
                   options={countries.data?.list || []}
                   isEdit={isEdit}
-                  text={(countries.data?.map || {})[profile.json?.country]?.ru}
+                  text={(countries.data?.map || {})[profile.json?.country]?.label}
                 />
               </Col>
               <Col span={8}>
@@ -240,7 +240,7 @@ export default function PageUser() {
                   label='Город'
                   options={cities.data?.list || []}
                   isEdit={isEdit}
-                  text={(cities.data?.map || {})[profile.json?.city]?.ru}
+                  text={(cities.data?.map || {})[profile.json?.city]?.label}
                 />
               </Col>
               <Col span={24}>
