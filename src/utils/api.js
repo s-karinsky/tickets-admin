@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import { get as _get } from 'lodash'
+import { get as _get, keyBy } from 'lodash'
 import { useQuery } from 'react-query'
 import axios from './axios'
 import { sqlUpdate, sqlInsert } from './sql'
@@ -255,13 +255,24 @@ export const createUser = async (values) => {
   return response
 }
 
-export const useData = () => useQuery(['data'], async () => {
-  const response = await axios.postWithAuth('/data')
-  const data = _get(response, ['data', 'data', 'data'])
-  return {
-    countries: data.countries,
-    cities: data.cities
-  }
+export const useCountries = () => useQuery('countries', async () => {
+  const response = await axios.postWithAuth('/query/select', { sql: `SELECT \`ISO 3166-1 alpha-2 code\` as value, country_name_ru as label FROM countries_list WHERE active=1 ORDER BY country_name_ru` })
+  let list = _get(response, ['data', 'data']) || []
+  const ru = list.find(item => item.value === 'ru')
+  const by = list.find(item => item.value === 'by')
+  list = list.filter(item => !['ru', 'by'].includes(item.value))
+  list = [ru, by].filter(Boolean).concat(list)
+  const map = keyBy(list, 'value')
+  return { map, list }
 }, {
   staleTime: 10 * 60 * 1000
+})
+
+export const useCities = (country) => useQuery(['cities', country], async () => {
+  const response = await axios.postWithAuth('/query/select', { sql: `SELECT id_city as value, country, name_ru as label FROM city WHERE country='${country}' ORDER BY name_ru` })
+  const list = _get(response, ['data', 'data']) || []
+  const map = keyBy(list, 'value')
+  return { map, list }
+}, {
+  enabled: !!country
 })

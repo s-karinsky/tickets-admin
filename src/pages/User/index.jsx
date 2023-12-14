@@ -1,31 +1,30 @@
-import { useState, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { Form, Button, Col, Row } from 'antd'
 import { CaretLeftFilled, SaveOutlined } from '@ant-design/icons'
 import { BiEdit } from 'react-icons/bi'
 import FormField from '../../components/FormField'
-import { useUsers, createUser, updateUserById, useData } from '../../utils/api'
+import { useCountries, useCities, useUsers, createUser, updateUserById } from '../../utils/api'
 import { emailRule } from '../../utils/validationRules'
 import { USER_ROLES, USER_ROLES_OPTIONS, VALIDATION_MESSAGES } from '../../consts'
 
 export default function PageUser() {
+  const [ form ] = Form.useForm()
   const { id } = useParams()
   const navigate = useNavigate()
+  const [ country, setCountry ] = useState()
   const [ isSending, setIsSending ] = useState()
   const [ searchParams, setSearchParams ] = useSearchParams()
   const users = useUsers(id)
   const profile = users.data || {}
 
-  const data = useData()
+  const countries = useCountries()
+  const cities = useCities(country)
 
-  const [ countriesOptions, citiesOptions ] = useMemo(() => {
-    if (data.isLoading) return [[], []]
-    const countries = data.data?.countries || {}
-    const countriesOptions = Object.keys(countries).map(value => ({ value, label: countries[value].ru }))
-    const cities = data.data?.cities || {}
-    const citiesOptions = Object.keys(cities).map(value => ({ value, label: cities[value].ru, country: cities[value].country }))
-    return [ countriesOptions, citiesOptions ]
-  }, [data])
+  useEffect(() => {
+    if (profile.isLoading) return
+    setCountry(profile.json?.country)
+  }, [profile])
 
   const isNew = id === 'create'
   const isEdit = isNew || searchParams.get('edit') !== null
@@ -38,6 +37,15 @@ export default function PageUser() {
       layout='vertical'
       size='large'
       validateMessages={VALIDATION_MESSAGES}
+      form={form}
+      onFieldsChange={fields => {
+        const field = fields.find(field => Array.isArray(field.name) && field.name.join('.') === 'json.country')
+        if (!field) return
+        if (field.value !== country) {
+          form.setFieldValue(['json', 'city'])
+        }
+        setCountry(field.value)
+      }}
       onFinish={async (values) => {
         const isClient = values.id_role === '1'
         values.phone = values.phone.replaceAll('_', '')
@@ -220,9 +228,9 @@ export default function PageUser() {
                   type='select'
                   name={['json', 'country']}
                   label='Страна'
-                  options={countriesOptions}
+                  options={countries.data?.list || []}
                   isEdit={isEdit}
-                  text={(data?.data?.countries || {})[profile.json?.country]?.ru}
+                  text={(countries.data?.map || {})[profile.json?.country]?.ru}
                 />
               </Col>
               <Col span={8}>
@@ -230,9 +238,9 @@ export default function PageUser() {
                   type='select'
                   name={['json', 'city']}
                   label='Город'
-                  options={citiesOptions}
+                  options={cities.data?.list || []}
                   isEdit={isEdit}
-                  text={(data?.data?.cities || {})[profile.json?.city]?.ru}
+                  text={(cities.data?.map || {})[profile.json?.city]?.ru}
                 />
               </Col>
               <Col span={24}>
