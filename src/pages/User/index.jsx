@@ -67,6 +67,7 @@ export default function PageUser() {
             await updateUserById(id, values)
           }
           setIsSending(false)
+          setSearchParams({})
         }}
       >
         <Row
@@ -259,6 +260,8 @@ export default function PageUser() {
                         </Button>
                       </>
                     )}
+                    filterOption={(input, { label, value } = {}) => (label ?? '').toLowerCase().includes(input.toLowerCase())}
+                    showSearch
                   />
                 </Col>
                 <Col span={24}>
@@ -384,7 +387,15 @@ export default function PageUser() {
       </Form>
       <CreateCityModal
         isOpen={isAddCity}
-        onCancel={() => setIsAddCity(false)}
+        onOk={values => {
+          if (values.country !== country) {
+            setCountry(values.country)
+          } else {
+            cities.refetch()
+          }
+          form.setFieldValue(['json', 'city'], values.id)
+        }}
+        onClose={() => setIsAddCity(false)}
         initialValues={{
           country
         }}

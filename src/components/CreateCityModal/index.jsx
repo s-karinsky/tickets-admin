@@ -1,9 +1,11 @@
 import { Modal, Form, Button, Select, Input } from 'antd'
 import axios from '../../utils/axios'
 import { sqlInsert } from '../../utils/sql'
+import { getLastId } from '../../utils/api'
 
 export default function CreateCityModal({
-  onCancel = () => {},
+  onOk = () => {},
+  onClose = () => {},
   countries,
   initialValues,
   isOpen
@@ -16,7 +18,7 @@ export default function CreateCityModal({
       onOk={() => {
         form.submit()
       }}
-      onCancel={onCancel}
+      onCancel={onClose}
       open
     >
       <Form
@@ -24,15 +26,18 @@ export default function CreateCityModal({
         layout='vertical'
         size='large'
         onFinish={async (values) => {
-          const resp = await axios.postWithAuth('/query/insert', {
+          await axios.postWithAuth('/query/insert', {
             sql: sqlInsert('city', values)
           })
+          const id = await getLastId('city', 'id_city')
+          onOk({ id, ...values })
+          onClose()
         }}
         form={form}
         footer={[
           <Button
             key='1'
-            onClick={() => onCancel()}
+            onClick={() => onClose()}
             danger
           >
             Отмена
