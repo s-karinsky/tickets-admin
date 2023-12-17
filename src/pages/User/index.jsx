@@ -117,7 +117,7 @@ export default function PageUser() {
                     navigate('/users')
                   } else {
                     setSearchParams({})
-                    window.location.reload()
+                    form.resetFields()
                   } 
                 }}
                 danger
