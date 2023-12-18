@@ -157,6 +157,7 @@ export default function PageUser() {
               options={USER_ROLES_OPTIONS.map(value => ({ value, label: USER_ROLES[value] }))}
               text={USER_ROLES[profile.id_role]}
               rules={[{ required: true }]}
+              disabled={isEdit}
               isEdit={isEdit}
             />
           </Col>

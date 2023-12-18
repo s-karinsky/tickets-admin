@@ -7,21 +7,7 @@ import { USER_ROLES, USER_ROLES_COLOR } from '../../consts'
 
 const columns = [
   {
-    title: 'Name',
-    dataIndex: 'name',
-    key: 'name',
-    render: (name, { family }) => [name, family].filter(item => item).join(' ') || 'No name',
-    ...getColumnSearchProps(record => ([record.name, record.family].join(' ')))
-  },
-  {
-    title: 'Email',
-    dataIndex: 'email',
-    key: 'email',
-    render: email => email || 'No email',
-    ...getColumnSearchProps('email')
-  },
-  {
-    title: 'Role',
+    title: 'Роль',
     dataIndex: 'id_role',
     key: 'id_role',
     render: text => (<Tag color={USER_ROLES_COLOR[text]}>{USER_ROLES[text]}</Tag>),
@@ -32,10 +18,31 @@ const columns = [
     onFilter: (value, record) => record.id_role === value
   },
   {
-    title: 'Checked seller',
-    dataIndex: 'id_verification_status',
-    key: 'id_verification_status',
-    render: (state, record) => record.id_role === '2' && state === '2' ? <CheckOutlined style={{ color: '#09d934' }} /> : ''
+    title: 'Код',
+    dataIndex: 'json',
+    key: 'code',
+    render: json => json.code,
+    ...getColumnSearchProps(record => record.json?.code)
+  },
+  {
+    title: 'Наименование',
+    dataIndex: 'name',
+    key: 'name',
+    render: (name, { family }) => [name, family].filter(item => item).join(' ') || 'No name',
+    ...getColumnSearchProps(record => ([record.name, record.family].join(' ')))
+  },
+  {
+    title: 'Телефон',
+    dataIndex: 'phone',
+    render: phone => phone || 'No phone',
+    ...getColumnSearchProps('email')
+  },
+  {
+    title: 'Email',
+    dataIndex: 'email',
+    key: 'email',
+    render: email => email || 'No email',
+    ...getColumnSearchProps('email')
   }
 ]
 
