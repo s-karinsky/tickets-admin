@@ -57,7 +57,7 @@ export default function Place() {
     if (!Array.isArray(clients.data)) return [[], {}]
     const options = clients.data.map(item => ({
       value: item.id_user,
-      label: [item.family, item.name, item.middle].join(' ')
+      label: item.json?.code
     }))
     const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
     return [ options, map ]

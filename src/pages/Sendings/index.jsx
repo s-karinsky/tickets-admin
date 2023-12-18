@@ -28,7 +28,7 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
   const drivers = useUsersWithRole(2)
   const driverMap = useMemo(() => {
     if (!Array.isArray(drivers.data)) return {}
-    return drivers.data.reduce((acc, item) => ({ ...acc, [item.id_user]: [item.family, item.name, item.middle].join(' ') }), {})
+    return drivers.data.reduce((acc, item) => ({ ...acc, [item.id_user]: item.json?.code }), {})
   }, [drivers.data])
 
   let sendings = (data || [])
@@ -107,7 +107,7 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
       key: 'transporter',
       render: val => driverMap[val],
       sorter: (a, b) => a.transporter.localeCompare(b.transporter),
-      ...getColumnSearchProps('transporter', { options: [{ value: 'Александр' }, { value: 'Владимир' }] })
+      ...getColumnSearchProps('transporter')
     },
     {
       title: 'Статус',
@@ -137,15 +137,6 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
       sorter: (a, b) => a.weight - b.weight,
       ...getColumnSearchProps('net_weight', { type: 'number' })
     },
-    // {
-    //   title: 'Вес брутто',
-    //   dataIndex: 'gross_weight',
-    //   key: 'gross_weight',
-    //   align: 'right',
-    //   render: val => Number(val).toFixed(3),
-    //   sorter: (a, b) => a.weight - b.weight,
-    //   ...getColumnSearchProps('gross_weight', { type: 'number' })
-    // },
     {
       title: 'Дата отправки',
       dataIndex: 'departure',
