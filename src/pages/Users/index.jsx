@@ -69,6 +69,7 @@ export default function PageUsers() {
         </Button>
       </Row>
       <Table
+        size='small'
         columns={columns}
         dataSource={users.data}
         loading={users.isLoading}
