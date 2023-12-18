@@ -15,7 +15,7 @@ import FormField from '../../components/FormField'
 import { useDictionary, useUsersWithRole, getLastId, getCount, createSending, updateSendingById, getSendingById, deleteSendingById, getPlacesBySendingId, deletePlaceById } from '../../utils/api'
 import { getColumnSearchProps } from '../../utils/components'
 import { required } from '../../utils/validationRules'
-import { declOfNum, numberFormatter } from '../../utils/utils'
+import { declOfNum, numberFormatter, getPaginationSettings } from '../../utils/utils'
 import { SENDING_STATUS } from '../../consts'
 
 const { Title, Link } = Typography
@@ -563,6 +563,7 @@ export default function Sending({
             rowSelection={{
               type: Checkbox,
             }}
+            pagination={getPaginationSettings('sending')}
           />
         </>
       }

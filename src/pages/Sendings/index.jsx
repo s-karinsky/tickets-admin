@@ -8,7 +8,7 @@ import { BsTrash } from 'react-icons/bs'
 import { SendingsStatus } from '../../components/SendingsStatus'
 import { DateTableCell } from '../../components/DateTableCell'
 import { getCount, getSendings, deleteSendingById, updateSendingById, useUsersWithRole } from '../../utils/api'
-import { declOfNum } from '../../utils/utils'
+import { declOfNum, getPaginationSettings } from '../../utils/utils'
 import { getColumnSearchProps } from '../../utils/components'
 import { SENDING_STATUS } from '../../consts'
 
@@ -250,6 +250,7 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
             }
           },
         })}
+        pagination={getPaginationSettings('sendings')}
       />
       <Modal
         title='Изменить статус отправки'

@@ -36,3 +36,14 @@ export const filterTableRows = search => item => {
 }
 
 export const numberFormatter = digits => (val, { userTyping, input }) => userTyping ? input : `${Number(val).toFixed(digits)}`.replace('.', ',')
+
+export const getPaginationSettings = (name) => {
+  const defaultSize = localStorage.getItem(`per-page-${name}`) || 20
+  return {
+    defaultPageSize: defaultSize,
+    showSizeChanger: true,
+    pageSizeOptions: ['20', '50', '100'],
+    size: 'default',
+    onShowSizeChange: (current, size) => localStorage.setItem(`per-page-${name}`, size)
+  }
+}

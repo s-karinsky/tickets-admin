@@ -1,8 +1,9 @@
 import { useNavigate } from 'react-router-dom'
 import { Table, Tag, Row, Button } from 'antd'
-import { CheckOutlined, PlusCircleFilled } from '@ant-design/icons'
+import { PlusCircleFilled } from '@ant-design/icons'
 import { getColumnSearchProps } from '../../utils/components'
 import { useUsers } from '../../utils/api'
+import { getPaginationSettings } from '../../utils/utils'
 import { USER_ROLES, USER_ROLES_COLOR } from '../../consts'
 
 const columns = [
@@ -79,6 +80,7 @@ export default function PageUsers() {
             }
           }
         })}
+        pagination={getPaginationSettings('users')}
       />
     </>
   )
