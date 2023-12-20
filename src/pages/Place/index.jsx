@@ -15,7 +15,7 @@ import { SENDING_STATUS } from '../../consts'
 import { getUserProfile } from '../../redux/user'
 import { getColumnSearchProps } from '../../utils/components'
 import { required, numberRange } from '../../utils/validationRules'
-import { declOfNum, numberFormatter, getPaginationSettings } from '../../utils/utils'
+import { declOfNum, numberFormatter, getPaginationSettings, filterOption } from '../../utils/utils'
 
 const { Title, Link } = Typography
 
@@ -438,6 +438,8 @@ export default function Place() {
                   text={clientsMap[initialPlace.client]}
                   isEdit={isEditPage}
                   rules={required()}
+                  filterOption={filterOption}
+                  showSearch
                 />
                 <FormField
                   type='select'

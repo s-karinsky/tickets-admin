@@ -47,3 +47,5 @@ export const getPaginationSettings = (name) => {
     onShowSizeChange: (current, size) => localStorage.setItem(`per-page-${name}`, size)
   }
 }
+
+export const filterOption = (input, { label, value } = {}) => (label ?? '').toLowerCase().includes(input.toLowerCase())

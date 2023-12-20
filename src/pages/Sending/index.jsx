@@ -15,7 +15,7 @@ import FormField from '../../components/FormField'
 import { useDictionary, useUsersWithRole, getLastId, getCount, createSending, updateSendingById, getSendingById, deleteSendingById, getPlacesBySendingId, deletePlaceById } from '../../utils/api'
 import { getColumnSearchProps } from '../../utils/components'
 import { required } from '../../utils/validationRules'
-import { declOfNum, numberFormatter, getPaginationSettings } from '../../utils/utils'
+import { declOfNum, numberFormatter, getPaginationSettings, filterOption } from '../../utils/utils'
 import { SENDING_STATUS } from '../../consts'
 
 const { Title, Link } = Typography
@@ -395,6 +395,8 @@ export default function Sending({
                 options={driverOptions}
                 text={driverMap[data.json?.transporter]}
                 rules={required()}
+                filterOption={filterOption}
+                showSearch
               />
               <div
                 style={{
