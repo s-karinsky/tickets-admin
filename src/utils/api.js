@@ -231,7 +231,7 @@ export const useUsers = userId => useQuery(['users'].concat(userId || []), async
 })
 
 export const useUsersWithRole = role => useQuery(['usersWithRole', role], async () => {
-  const response = await axios.postWithAuth('/query/select', { sql: `SELECT id_user, name, family, middle, json FROM users WHERE id_role=${role} AND active=1 AND deleted!=1 AND id_verification_status${role === 2 ? '=2' : ' is null'}` })
+  const response = await axios.postWithAuth('/query/select', { sql: `SELECT id_user, name, family, middle, json FROM users WHERE id_role=${role} AND active=1 AND deleted!=1` })
   const users = (response.data?.data || []).map(user => {
     try {
       user.json = JSON.parse(user.json)
@@ -241,8 +241,6 @@ export const useUsersWithRole = role => useQuery(['usersWithRole', role], async 
     return user
   })
   return users
-}, {
-  staleTime: 5 * 60 * 1000
 })
 
 export const updateUserById = async (userId, values = {}) => {

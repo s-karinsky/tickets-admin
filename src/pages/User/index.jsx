@@ -65,9 +65,9 @@ export default function PageUser() {
             navigate(`/users/${lastId}`)
           } else {
             await updateUserById(id, values)
+            setSearchParams({})
           }
           setIsSending(false)
-          setSearchParams({})
         }}
       >
         <Row
@@ -157,7 +157,7 @@ export default function PageUser() {
               options={USER_ROLES_OPTIONS.map(value => ({ value, label: USER_ROLES[value] }))}
               text={USER_ROLES[profile.id_role]}
               rules={[{ required: true }]}
-              disabled={isEdit}
+              disabled={isEdit && !isNew}
               isEdit={isEdit}
             />
           </Col>

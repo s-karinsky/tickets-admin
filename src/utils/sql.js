@@ -5,7 +5,7 @@ export const sqlInsert = (table, values) => {
 
   const [ fields, vals ] = Object.keys(values).reduce((acc, key) => {
     acc[0] = acc[0].concat(`\`${key}\``)
-    let value = values[key]
+    let value = values[key] || ''
     if (typeof value === 'string' && value !== 'NULL') {
       value = `'${value}'`
     }
