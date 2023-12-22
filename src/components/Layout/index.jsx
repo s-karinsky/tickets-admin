@@ -9,8 +9,7 @@ import {
 } from '@ant-design/icons'
 import { Avatar, Button, Dropdown, Menu, Space, Layout, Row, Col } from 'antd'
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom'
-import { useSelector, useDispatch } from 'react-redux'
-import { logout } from '../../redux/user'
+import Cookies from 'universal-cookie'
 import styles from './styles.module.scss'
 
 const { Header, Sider, Content } = Layout
@@ -37,12 +36,10 @@ const MENU_ITEMS = {
   ),
 }
 
-export default function PageLayout() {
-  const [collapsed, setCollapsed] = useState(false)
-  const user = useSelector((state) => state.user.profile)
+export default function PageLayout({ user }) {
+  const [ collapsed, setCollapsed ] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
-  const dispatch = useDispatch()
 
   const items = useMemo(() => {
     if (user.u_role === '4') {
@@ -64,9 +61,11 @@ export default function PageLayout() {
         label: (
           <Button
             type='link'
-            onClick={(e) => {
+            onClick={e => {
               e.preventDefault()
-              dispatch(logout)
+              const cookies = new Cookies()
+              cookies.remove('token')
+              cookies.remove('u_hash')
               navigate('/login')
             }}
           >
@@ -76,7 +75,7 @@ export default function PageLayout() {
         key: '0',
       },
     ],
-    [navigate, dispatch]
+    [navigate]
   )
 
   return (

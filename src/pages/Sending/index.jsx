@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react'
 import { useNavigate, useLocation, useParams, useSearchParams } from 'react-router-dom'
-import { Button, Row, Table, Typography, Input, Form, Modal, Checkbox } from 'antd'
+import { Button, Row, Table, Typography, Form, Modal, Checkbox } from 'antd'
 import {
   SaveOutlined,
   CopyOutlined,
@@ -205,7 +205,7 @@ export default function Sending({
       await refetch()
       setSearchParams({})
     }
-  }, [sendingId, isSendingAir])
+  }, [sendingId, isSendingAir, navigate, refetch, setSearchParams])
 
   return (
     <div

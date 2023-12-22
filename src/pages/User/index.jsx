@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
-import { Form, Button, Col, Row, Divider, Modal, Select, Input } from 'antd'
+import { Form, Button, Col, Row, Divider } from 'antd'
 import { CaretLeftFilled, SaveOutlined, PlusOutlined } from '@ant-design/icons'
 import { BiEdit } from 'react-icons/bi'
 import CreateCityModal from '../../components/CreateCityModal'
@@ -8,6 +8,8 @@ import FormField from '../../components/FormField'
 import { useCountries, useCities, useUsers, createUser, updateUserById } from '../../utils/api'
 import { emailRule } from '../../utils/validationRules'
 import { USER_ROLES, USER_ROLES_OPTIONS, VALIDATION_MESSAGES } from '../../consts'
+
+const EMPTY_OBJECT = {}
 
 export default function PageUser() {
   const [ form ] = Form.useForm()
@@ -18,7 +20,7 @@ export default function PageUser() {
   const [ isSending, setIsSending ] = useState()
   const [ searchParams, setSearchParams ] = useSearchParams()
   const users = useUsers(id)
-  const profile = users.data || {}
+  const profile = users.data || EMPTY_OBJECT
 
   const countries = useCountries()
   const cities = useCities(country)

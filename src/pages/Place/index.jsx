@@ -2,27 +2,23 @@ import { useCallback, useEffect, useState, useMemo } from 'react'
 import { useNavigate, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { useQueries } from 'react-query'
 import { Button, Row, Table, Typography, Input, Form, Modal, Space, Divider } from 'antd'
-import { useSelector } from 'react-redux'
 import { BsTrash } from 'react-icons/bs'
 import { BiEdit } from 'react-icons/bi'
 import { SaveOutlined, CopyOutlined, ExclamationCircleFilled, LoadingOutlined } from '@ant-design/icons'
-import { get as _get } from 'lodash'
 import { PropertyGap } from '../Sendings'
 import CreateProductModal from './СreateProductModal'
 import FormField from '../../components/FormField'
 import { useDictionary, useUsersWithRole, getLastId, getCount, getSendingById, getPlaceById, deletePlaceById, updateDatasetById, createDataset, getProductsByPlaceId, deleteProductById } from '../../utils/api'
 import { SENDING_STATUS } from '../../consts'
-import { getUserProfile } from '../../redux/user'
 import { getColumnSearchProps } from '../../utils/components'
 import { required, numberRange } from '../../utils/validationRules'
 import { declOfNum, numberFormatter, getPaginationSettings, filterOption } from '../../utils/utils'
 
 const { Title, Link } = Typography
 
-export default function Place() {
+export default function Place({ user }) {
   const navigate = useNavigate()
   const location = useLocation()
-  const user = useSelector(getUserProfile)
   const [ searchParams, setSearchParams ] = useSearchParams()
   const { sendingId, placeId } = useParams()
   const [ form ] = Form.useForm()
@@ -66,20 +62,20 @@ export default function Place() {
   const isNew = placeId === 'create'
   const isEditPage = isNew || searchParams.get('edit') !== null
 
-  const initialPlace = {
+  const initialPlace = useMemo(() => ({
     ...placeData.data,
     pay_sum: (placeData.data?.pay_kg || 0) * (placeData.data?.gross_weight || 0),
     status: sendingData.data?.json?.status,
     net_weight: (productsData.data || []).reduce((sum, item) => sum + (item.net_weight || 0), 0),
     items_sum: (productsData.data || []).reduce((sum, item) => sum + (item.sum || 0), 0),
     count: (productsData.data || []).reduce((sum, item) => sum + (item.count || 0), 0)
-  }
+  }), [placeData, productsData, sendingData])
 
   useEffect(() => {
     if (!isProductChanged) return
     form.setFieldsValue(initialPlace)
     setIsProductChanged(false)
-  }, [isProductChanged])
+  }, [isProductChanged, setIsProductChanged, form, initialPlace])
 
   const isNotSending = sendingData.data?.json?.status === 0
 
@@ -227,7 +223,7 @@ export default function Place() {
         setSearchParams()
       }
     }
-  }, [sendingId, placeId, user])
+  }, [sendingId, placeId, user, placeData, navigate, setSearchParams])
 
   return (
     <>

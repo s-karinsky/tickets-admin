@@ -1,8 +1,40 @@
 import dayjs from 'dayjs'
 import { get as _get, keyBy } from 'lodash'
 import { useQuery } from 'react-query'
+import Cookies from 'universal-cookie'
 import axios from './axios'
+import { toFormData } from 'axios'
 import { sqlUpdate, sqlInsert } from './sql'
+
+export const useAuthorization = ({ token, u_hash }) => useQuery(['authorization', { token, u_hash }], async () => {
+  if (!token || !u_hash) return { authorized: false }
+  const response = await axios.post('/user/authorized', toFormData({ token, u_hash }))
+  const user = response.data?.auth_user
+  return user ? {
+    authorized: true,
+    ...user
+  } : {
+    authorized: false
+  }
+}, {
+  staleTime: 10 * 60 * 1000
+})
+
+export const login = async (values) => {
+  const response = await axios.post('/auth', toFormData({ ...values, type: 'e-mail' }))
+  const { data } = response
+  if (!data.auth_hash || !['2', '4'].includes(data.auth_user?.u_role)) {
+    return false
+  }
+  const responseTokens = await axios.post('/token', toFormData({ auth_hash: data.auth_hash }))
+  const tokens = responseTokens.data?.data
+  if (tokens) {
+    const cookies = new Cookies()
+    cookies.set('token', tokens.token)
+    cookies.set('u_hash', tokens.u_hash)
+  }
+  return data.auth_user?.u_role
+}
 
 export const getCount = async (db, where) => {
   const response = await axios.postWithAuth('/query/select', { sql: `SELECT count(*) FROM ${db}${where ? ' WHERE '+where : ''}` })

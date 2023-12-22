@@ -1,18 +1,11 @@
-import {
-  Col,
-  Row,
-  Button,
-  Form,
-  Input
-} from 'antd'
-import { useDispatch, useSelector } from 'react-redux'
+import { useState } from 'react'
+import { Col, Row, Button, Form, Input } from 'antd'
 import { useNavigate } from 'react-router-dom'
-import { login } from '../../redux/user'
+import { login } from '../../utils/api'
 
 export default function PageLogin() {
-  const dispatch = useDispatch()
+  const [ isLoading, setIsLoading ] = useState()
   const navigate = useNavigate()
-  const isLoading = useSelector(state => state.user.isLoading)
 
   return (
     <Row style={{ height: '100vh' }} justify="center" align="middle">
@@ -23,9 +16,13 @@ export default function PageLogin() {
           wrapperCol={{ span: 16 }}
           style={{ maxWidth: 600, textAlign: 'left' }}
           initialValues={{ remember: true }}
-          onFinish={values => dispatch(login(values)).then(role => {
-            if (role) navigate(role === '4' ? '/users' : '/tickets')
-          })}
+          onFinish={values => {
+            setIsLoading(true)
+            login(values).then(role => {
+              setIsLoading(false)
+              if (role) navigate(role === '4' ? '/users' : '/tickets')
+            })
+          }}
           autoComplete="off"
         >
           <Form.Item
