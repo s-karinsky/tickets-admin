@@ -62,7 +62,8 @@ export default function PageLayout() {
     () => [
       {
         label: (
-          <a
+          <Button
+            type='link'
             onClick={(e) => {
               e.preventDefault()
               dispatch(logout)
@@ -70,7 +71,7 @@ export default function PageLayout() {
             }}
           >
             Logout
-          </a>
+          </Button>
         ),
         key: '0',
       },
@@ -101,8 +102,7 @@ export default function PageLayout() {
               menu={{ items: userItems }}
               trigger={['click']}
             >
-              <a
-                onClick={(e) => e.preventDefault()}
+              <span
                 className={styles.headerUser}
               >
                 <Space>
@@ -111,7 +111,7 @@ export default function PageLayout() {
                     style={{ fontSize: '10px' }}
                   />
                 </Space>
-              </a>
+              </span>
             </Dropdown>
           </Col>
         </Row>
