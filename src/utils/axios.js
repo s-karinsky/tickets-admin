@@ -1,6 +1,6 @@
 import axios from 'axios'
 import Cookies from 'universal-cookie'
-import toFormData from './formData'
+import { toFormData } from './utils'
 import { API_URL } from '../consts'
 
 const instance = axios.create({

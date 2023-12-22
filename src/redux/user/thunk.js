@@ -1,6 +1,6 @@
 import Cookies from 'universal-cookie'
 import axios from '../../utils/axios'
-import toFormData from '../../utils/formData'
+import { toFormData } from '../../utils/utils'
 import { setToken, setLoading, setProfile } from '.'
 
 export const login = params => async (dispatch) => {

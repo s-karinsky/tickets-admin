@@ -1,16 +1,11 @@
 import { useMemo, useState } from 'react'
 import {
-  BarcodeOutlined,
   UserOutlined,
   DownOutlined,
   UnorderedListOutlined,
   MenuUnfoldOutlined,
   MenuFoldOutlined,
-  FileTextOutlined,
-  TranslationOutlined,
-  MailOutlined,
-  CarOutlined,
-  NotificationOutlined,
+  CarOutlined
 } from '@ant-design/icons'
 import { Avatar, Button, Dropdown, Menu, Space, Layout, Row, Col } from 'antd'
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom'
@@ -34,7 +29,7 @@ const MENU_ITEMS = {
   services: getItem('Услуги', 'services', <UnorderedListOutlined />, [
     getItem(<Link to='/services/store'>Хранение</Link>, 'services-store')
   ]),
-  users: getItem(<Link to='/users'>Users</Link>, 'users', <UserOutlined />),
+  users: getItem(<Link to='/users'>Пользователи</Link>, 'users', <UserOutlined />),
   sendings: getItem(
     <Link to='/sendings'>Отправки</Link>,
     'sendings',

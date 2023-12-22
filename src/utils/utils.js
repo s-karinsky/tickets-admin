@@ -49,3 +49,11 @@ export const getPaginationSettings = (name) => {
 }
 
 export const filterOption = (input, { label, value } = {}) => (label ?? '').toLowerCase().includes(input.toLowerCase())
+
+export const toFormData = (params) => {
+  const data = new FormData()
+  Object.keys(params).forEach(key => {
+    data.append(key, params[key])
+  })
+  return data
+}
