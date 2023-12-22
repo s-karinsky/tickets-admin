@@ -1,19 +1,31 @@
 import { useMemo, useState, useCallback, useEffect } from 'react'
-import { Col, Row, Button, Form, Select, Input } from 'antd'
+import { Col, Row, Button, Form, Select, Input, Tabs } from 'antd'
 import { useDispatch, useSelector } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import { forEach } from 'lodash'
-import Wysiwyg from '../../components/Wysiwyg'
+import HTMLPreview from '../../components/HTMLPreview'
 import { getLang, getLangValue, updateLang } from '../../redux/config'
+
+const TEMPLATE_BY_PAGE = {
+  signup: 'email_register',
+  'successful-payment': 'email_ticket_paid',
+  'email-verification': 'email_verification_start',
+  'checking-ticket': 'email_ticket_block_cart',
+  'checking-ticket-available': 'email_available_seats',
+  'restore-password': 'email_remind'
+}
 
 export default function PageTemplates() {
   const [ form ] = Form.useForm()
   const { page } = useParams()
   const [ activeLang, setActiveLang ] = useState('1')
+  const [ tab, setTab ] = useState('code')
   const dispatch = useDispatch()
 
-  const contentKey = `email_template_${page}`
+  const subjectKey = `${TEMPLATE_BY_PAGE[page]}_subject`
+  const contentKey = `${TEMPLATE_BY_PAGE[page]}_body` // `email_template_${page}`
   const langs = useSelector(getLang)
+  const subject = useSelector(state => getLangValue(state, subjectKey))
   const content = useSelector(state => getLangValue(state, contentKey))
   const isUpdating = useSelector(state => state.config.isUpdating)
 
@@ -38,7 +50,7 @@ export default function PageTemplates() {
   return (
     <Form
       layout='vertical'
-      initialValues={{ content }}
+      initialValues={{ subject, content }}
       onFinish={handleSubmit}
       form={form}
     >
@@ -76,10 +88,46 @@ export default function PageTemplates() {
         >
           <Col span={22} offset={1}>
             <Form.Item
-              label='Template'
-              name={['content', lang.value]}
+              label='Subject'
+              name={['subject', lang.value]}
             >
-              <Wysiwyg />
+              <Input />
+            </Form.Item>
+          </Col>
+          <Col span={22} offset={1}>
+            <Tabs
+              items={[
+                {
+                  key: 'code',
+                  label: 'Code',
+                },
+                {
+                  key: 'preview',
+                  label: 'Preview'
+                }
+              ]}
+              onChange={key => setTab(key)}
+              value={tab}
+            />
+          </Col>
+          <Col span={22} offset={1}>
+            {tab === 'preview' &&
+              <Form.Item
+                label='Body'
+                name={['content', lang.value]}
+              >
+                <HTMLPreview />
+              </Form.Item>
+            }
+            <Form.Item
+              label='Body'
+              name={['content', lang.value]}
+              style={{ display: tab !== 'code' ? 'none' : null }}
+            >
+              <Input.TextArea
+                rows={30}
+              />
+              {/* <Wysiwyg /> */}
             </Form.Item>
           </Col>
         </Row>

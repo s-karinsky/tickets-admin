@@ -56,12 +56,13 @@ const MENU_ITEMS = {
   ]),
   templates: getItem('E-mail templates', 'templates', <MailOutlined />, [
     getItem(<Link to='/templates/signup'>Signup</Link>, 'signup'),
+    getItem(<Link to='/templates/email-verification'>Email verification</Link>, 'email-verification'),
     getItem(<Link to='/templates/booking-in-cart'>Booking tickets in cart</Link>, 'booking-in-cart'),
     getItem(<Link to='/templates/successful-payment'>Successful payment</Link>, 'successful-payment'),
-    getItem(<Link to='/templates/checking-ticket'>Does the ticket work or not</Link>, 'checking-ticket'),
+    getItem(<Link to='/templates/checking-ticket'>Checking ticket</Link>, 'checking-ticket'),
+    getItem(<Link to='/templates/checking-ticket-available'>Tickets are in stock</Link>, 'checking-ticket-available'),
     getItem(<Link to='/templates/feedback'>Feedback</Link>, 'feedback'),
     getItem(<Link to='/templates/restore-password'>Restore password</Link>, 'restore-password'),
-    getItem(<Link to='/templates/tickets-are-in-stock'>Tickets are in stock</Link>, 'tickets-are-in-stock')
   ]),
   users: getItem(<Link to='/users'>Users</Link>, 'users', <UserOutlined />),
   tickets: getItem(<Link to='/tickets'>Tickets</Link>, 'tickets', <BarcodeOutlined />),
