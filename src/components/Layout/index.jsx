@@ -31,74 +31,12 @@ function getItem(label, key, icon, children, type) {
 }
 
 const MENU_ITEMS = {
-  translations: getItem(
-    <Link to='/translations'>Translations</Link>,
-    'translations',
-    <TranslationOutlined />
-  ),
-  content: getItem('Content', 'content', <FileTextOutlined />, [
-    getItem(<Link to='/content/about-us'>About us</Link>, 'about-us'),
-    getItem(<Link to='/content/faq'>FAQ</Link>, 'faq'),
-    getItem(<Link to='/content/news'>News</Link>, 'news'),
-    getItem(<Link to='/content/corporate'>Corporate</Link>, 'corporate'),
-    getItem(
-      <Link to='/content/privacy-policy'>Privacy policy</Link>,
-      'privacy-policy'
-    ),
-    getItem(
-      <Link to='/content/become-a-partner'>Become a partner</Link>,
-      'become-a-partner'
-    ),
-  ]),
-  data: getItem('Data', 'data', <UnorderedListOutlined />, [
-    getItem(<Link to='/matches'>Matches</Link>, 'matches'),
-    getItem(<Link to='/teams'>Teams</Link>, 'teams'),
-    getItem(<Link to='/stadiums'>Stadiums</Link>, 'stadiums'),
-    getItem(<Link to='/tournaments'>Tournaments</Link>, 'tournaments'),
-  ]),
-  templates: getItem('E-mail templates', 'templates', <MailOutlined />, [
-    getItem(<Link to='/templates/signup'>Signup</Link>, 'signup'),
-    getItem(
-      <Link to='/templates/booking-in-cart'>
-        Booking tickets in cart
-      </Link>,
-      'booking-in-cart'
-    ),
-    getItem(
-      <Link to='/templates/successful-payment'>Successful payment</Link>,
-      'successful-payment'
-    ),
-    getItem(
-      <Link to='/templates/checking-ticket'>
-        Does the ticket work or not
-      </Link>,
-      'checking-ticket'
-    ),
-    getItem(<Link to='/templates/feedback'>Feedback</Link>, 'feedback'),
-    getItem(
-      <Link to='/templates/restore-password'>Restore password</Link>,
-      'restore-password'
-    ),
-    getItem(
-      <Link to='/templates/tickets-are-in-stock'>
-        Tickets are in stock
-      </Link>,
-      'tickets-are-in-stock'
-    ),
+  services: getItem('Услуги', 'services', <UnorderedListOutlined />, [
+    getItem(<Link to='/services/store'>Хранение</Link>, 'services-store')
   ]),
   users: getItem(<Link to='/users'>Users</Link>, 'users', <UserOutlined />),
-  tickets: getItem(
-    <Link to='/tickets'>Tickets</Link>,
-    'tickets',
-    <BarcodeOutlined />
-  ),
-  notifications: getItem(
-    <Link to='/notifications'>Notifications</Link>,
-    'notifications',
-    <NotificationOutlined />
-  ),
   sendings: getItem(
-    <Link to='/sendings'>Sendings</Link>,
+    <Link to='/sendings'>Отправки</Link>,
     'sendings',
     <CarOutlined />
   ),
@@ -114,24 +52,9 @@ export default function PageLayout() {
   const items = useMemo(() => {
     if (user.u_role === '4') {
       return [
-        //MENU_ITEMS.translations,
-        //MENU_ITEMS.content,
         MENU_ITEMS.users,
-        //MENU_ITEMS.data,
-        //MENU_ITEMS.templates,
-        //MENU_ITEMS.tickets,
-        //MENU_ITEMS.notifications,
         MENU_ITEMS.sendings,
-      ]
-    } else if (user.u_role === '2') {
-      return [
-        getItem(
-          <Link to='/matches'>Matches</Link>,
-          'matches',
-          <UnorderedListOutlined />
-        ),
-        MENU_ITEMS.tickets,
-        MENU_ITEMS.notifications,
+        MENU_ITEMS.services
       ]
     }
   }, [user.u_role])

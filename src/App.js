@@ -9,7 +9,6 @@ import PageUser from './pages/User'
 import Sendings from './pages/Sendings'
 import Sending from './pages/Sending'
 import Place from './pages/Place'
-import Product from './pages/Product'
 import Layout from './components/Layout'
 import { authorizeByTokens } from './redux/user'
 import { fetchConfig } from './redux/config'
@@ -57,7 +56,6 @@ function App() {
           <Route path="/sendings" element={<Sendings isSendingAir={isSendingAir} setIsSendingAir={setIsSendingAir} />} />
           <Route path="/sendings/:sendingId" element={<Sending isSendingAir={isSendingAir} />} />
           <Route path="/sendings/:sendingId/:placeId" element={<Place />} />
-          <Route path="/sendings/:id/:id/:id" element={<Product />} />
         </Route>
         <Route path="/login" element={<PageLogin />} />
       </Routes>
