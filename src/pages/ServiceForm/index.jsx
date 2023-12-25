@@ -83,7 +83,7 @@ export default function ServiceForm() {
         ...item,
         buttons: (
           <div style={{ display: 'flex', gap: 10 }}>
-            <BsTrash
+            {isNew && <BsTrash
               style={{ marginLeft: 30, cursor: 'pointer' }} 
               size={17}
               color='red'
@@ -94,7 +94,7 @@ export default function ServiceForm() {
                   navigate(location.pathname, { state: { sendingId, selectedRows } })
                 }
               }}
-            />
+            />}
           </div>
         ),
       }
