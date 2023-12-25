@@ -1,17 +1,18 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { Typography, Row, Col, Space, Button, Form, Table, Checkbox } from 'antd'
 import { useParams, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery } from 'react-query'
 import { SaveOutlined } from '@ant-design/icons'
 import { BiEdit } from 'react-icons/bi'
 import { BsTrash } from 'react-icons/bs'
+import dayjs from 'dayjs'
 import FormField from '../../components/FormField'
 import { VALIDATION_MESSAGES } from '../../consts'
 import { numberRange } from '../../utils/validationRules'
-import { getDatasetsById, useUsersWithRole, useDictionary } from '../../utils/api'
+import { getDatasetsById, useUsersWithRole, useDictionary, useService } from '../../utils/api'
 import { getColumnSearchProps } from '../../utils/components'
 import axios from '../../utils/axios'
-import { sqlInsert } from '../../utils/sql'
+import { sqlInsert, sqlUpdate } from '../../utils/sql'
 
 const getTitle = (name, id) => {
   const isNew = id === 'create'
@@ -30,15 +31,29 @@ export default function ServiceForm() {
   const [ searchParams ] = useSearchParams()
   const navigate = useNavigate()
   const location = useLocation()
+
+  const isNew = id === 'create'
+  const isEdit = isNew || searchParams.get('edit') !== null
+
   const { sendingId, sendingNum, selectedRows: datasets = [] } = location.state || {}
   const [ isGotClient, setIsGotClient ] = useState(false)
 
   const clients = useUsersWithRole(1)
   const internalClients = useUsersWithRole(3)
   const tarifs = useDictionary('tarif')
-  const places = useQuery(['datasets', { id: datasets }], getDatasetsById(datasets), {
-    enabled: !!datasets
+
+  const service = useService(serviceName, id, { enabled: !isNew })
+  const initialValues = service.data || {}
+  const datasetsId = isNew ? datasets : [initialValues.id_ref]
+  const places = useQuery(['datasets', { id: datasetsId }], getDatasetsById(datasetsId), {
+    enabled: isNew ? datasets.length > 0 : service.status === 'success'
   })
+
+  useEffect(() => {
+    if (initialValues.pole?.is_got_client) {
+      setIsGotClient(initialValues.pole.is_got_client)
+    }
+  }, [initialValues])
 
   const [ clientsOptions, clientsMap ] = useMemo(() => {
     if (!Array.isArray(clients.data)) return [[], {}]
@@ -88,7 +103,7 @@ export default function ServiceForm() {
   const columns = [
     {
       title: 'Отправка',
-      render: () => sendingNum,
+      render: () => sendingNum || initialValues.sending_number,
       align: 'right'
     },
     {
@@ -169,8 +184,7 @@ export default function ServiceForm() {
     }
   ]
 
-  const isNew = id === 'create'
-  const isEdit = isNew || searchParams.get('edit') !== null
+  if (!isNew && service.isLoading) return null
 
   return (
     <>
@@ -204,7 +218,7 @@ export default function ServiceForm() {
                 type='primary'
                 size='large'
                 icon={<BiEdit />}
-                onClick={() => navigate(`/services/${serviceName}/create`)}
+                onClick={() => navigate(`${location.pathname}?edit`)}
               >
                 Редактировать
               </Button>
@@ -241,16 +255,28 @@ export default function ServiceForm() {
         style={{ margin: '40px' }}
         size='large'
         form={form}
+        initialValues={initialValues}
         onFinish={async (values) => {
-          const pole = JSON.stringify(values.pole)
-          const items = datasets.map(id => ({
+          const initialNumber = values.pole.number
+          const items = datasetsId.map((id, i) => ({
             id_ref: id,
             ref_tip: 'place',
-            tip: 'service-delivery',
+            tip: 'service',
             status: 0,
-            pole
+            pole: JSON.stringify({
+              ...values.pole,
+              type: serviceName,
+              is_finished: 0,
+              number: initialNumber + i,
+              is_got_client: isGotClient
+            })
           }))
-          const promises = items.map(item => axios.postWithAuth('/query/insert', { sql: sqlInsert('dataset', item) } ))
+          let promises = []
+          if (isNew) {
+            promises = items.map(item => axios.postWithAuth('/query/insert', { sql: sqlInsert('dataset', item) } ))
+          } else {
+            promises = items.map(item => axios.postWithAuth('/query/update', { sql: sqlUpdate('dataset', item, `id=${id}`) } ))
+          }
           await Promise.all(promises)
         }}
       >
@@ -315,6 +341,7 @@ export default function ServiceForm() {
             <Checkbox
               name={['pole', 'is_got_client']}
               onChange={handleChangeGotClient}
+              checked={isGotClient}
             >
               Получил клиент
             </Checkbox>

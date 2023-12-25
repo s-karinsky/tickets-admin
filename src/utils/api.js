@@ -182,7 +182,12 @@ export const getPlaceById = (placeId, sendingId, params = {}) => async () => {
     }
     if (!params.copy) return values
   }
-  const sql = params.copy ? `SELECT * FROM dataset WHERE id=${params.copy}` : `SELECT * FROM dataset WHERE id=${placeId}`
+  let sql
+  if (params.copy) {
+    sql = `SELECT * FROM dataset WHERE id=${params.copy}`
+  } else {
+    sql = `SELECT * FROM dataset WHERE id=${placeId}`
+  }
   const response = await axios.postWithAuth('/query/select', { sql })
   const data = (response.data?.data || [])[0]
   let json
@@ -333,29 +338,23 @@ export const useDictionary = name => useQuery(['dictionary', name], async () => 
   staleTime: 10 * 60 * 1000
 })
 
-export const useService = name => useQuery(['dataset', name], async () => {
-  const response = await axios.postWithAuth('/query/select', { sql: `SELECT * FROM dataset d LEFT JOIN dataset n ON d.id_ref=n.id WHERE n.tip='place' AND d.tip='service-${name}'`})
-  // const data = response.data?.data || []
-
-  const data = [
-    {
-      id: 1,
-      tip: 'service-delivery',
-      ref_tip: 'place',
-      id_ref: 169,
-      pole: '{"number": "145", "date": "2023-12-27T07:16:53.539Z", "client": "1455"}'
-    },
-    {
-      id: 2,
-      tip: 'service-delivery',
-      ref_tip: 'place',
-      id_ref: 171,
-      pole: '{"number": "146", "date": "2023-12-27T07:16:53.539Z", "client": "1455"}'
+export const useService = (name, id, params) => useQuery(['dataset', name, id], async () => {
+  const response = await axios.postWithAuth('/query/select', {
+    sql: `SELECT d.id as id, d.id_ref as id_ref, d.ref_tip as ref_tip, d.tip as tip, d.pole as pole, n.pole as place, s.from as sending_number, s.json as sending FROM dataset d
+      LEFT JOIN dataset n ON d.id_ref=n.id AND n.tip='place'
+      LEFT JOIN trip s ON n.id_ref=s.id_trip
+      WHERE d.tip='service' AND JSON_EXTRACT(d.pole, '$.type')='${name}'${id ? ` AND d.id=${id}` : ''}`.replaceAll('\n', ' ')
+  })
+  const data = (response.data?.data || []).map(item => {
+    const pole = parseJSON(item.pole)
+    pole.date = dayjs(pole.date)
+    pole.delivery_date = dayjs(pole.delivery_date)
+    return {
+      ...item,
+      ...parseJSON(item.pole),
+      place: parseJSON(item.place),
+      pole
     }
-  ]
-
-  return data.map(item => ({
-    ...item,
-    ...parseJSON(item.pole)
-  }))
-})
+  })
+  return id ? data[0] : data
+}, params)

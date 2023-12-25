@@ -193,7 +193,7 @@ export default function Sending({
   const handleSubmit = useCallback(async (values) => {
     const valuesMap = {
       from: values.from,
-      to: Number(isSendingAir),
+      to: isSendingAir ? '1' : '0',
       create_datetime: dayjs(values.create_datetime).format('YYYY-MM-DD'),
       json: JSON.stringify(values.json)
     }

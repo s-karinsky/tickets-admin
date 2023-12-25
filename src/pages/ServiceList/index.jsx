@@ -1,5 +1,6 @@
 import { Row, Col, Button, Typography, Table } from 'antd'
 import { useParams, useNavigate } from 'react-router-dom'
+import dayjs from 'dayjs'
 import { useService } from '../../utils/api'
 
 const SERVICES = {
@@ -22,11 +23,32 @@ export default function ServiceList() {
   const { serviceName } = useParams()
   const navigate = useNavigate()
   const { data, isLoading } = useService(serviceName)
-
   const columns = [
     {
       title: 'Номер',
       dataIndex: 'number'
+    },
+    {
+      title: 'Отправка',
+      dataIndex: 'sending_number'
+    },
+    {
+      title: 'Место',
+      dataIndex: ['place', 'place'],
+      key: 'place'
+    },
+    {
+      title: 'Статус',
+      dataIndex: 'status'
+    },
+    {
+      title: 'Дата',
+      dataIndex: 'date',
+      render: date => dayjs(date).format('DD.MM.YYYY')
+    },
+    {
+      title: 'Внутренний клиент',
+      dataIndex: 'client'
     }
   ]
 
