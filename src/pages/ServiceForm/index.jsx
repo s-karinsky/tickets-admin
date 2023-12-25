@@ -28,7 +28,7 @@ const getTitle = (name, id) => {
 export default function ServiceForm() {
   const [ form ] = Form.useForm()
   const { serviceName, id } = useParams()
-  const [ searchParams ] = useSearchParams()
+  const [ searchParams, setSearchParams ] = useSearchParams()
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -207,7 +207,7 @@ export default function ServiceForm() {
               <Button
                 type='primary'
                 size='large'
-                onClick={() => navigate(`/services/${serviceName}/create`)}
+                onClick={() => setSearchParams({})}
                 danger
               >
                 Отмена
@@ -222,14 +222,14 @@ export default function ServiceForm() {
               >
                 Редактировать
               </Button>
-              <Button
+              {/* <Button
                 type='primary'
                 size='large'
                 onClick={() => navigate(`/services/${serviceName}/create`)}
                 danger
               >
                 Удалить
-              </Button>
+              </Button> */}
             </Space>
           }
         </Col>
@@ -298,6 +298,7 @@ export default function ServiceForm() {
               type='date'
               rules={[{ required: true }]}
               isEdit={isEdit}
+              text={initialValues.pole?.date?.format('DD.MM.YYYY')}
               width='100%'
             />
           </Col>
@@ -308,6 +309,7 @@ export default function ServiceForm() {
               name={['pole', 'client']}
               label='Внутренний клиент'
               rules={[{ required: true }]}
+              text={initialValues?.pole?.client}
               isEdit={isEdit}
               width='100%'
             />
@@ -332,6 +334,7 @@ export default function ServiceForm() {
               labelType='calc'
               isEdit={isEdit}
               disabled={isEdit}
+              text={initialValues.pole?.delivery_date?.format('DD.MM.YYYY')}
               width='100%'
             />
           </Col>
@@ -342,6 +345,7 @@ export default function ServiceForm() {
               name={['pole', 'is_got_client']}
               onChange={handleChangeGotClient}
               checked={isGotClient}
+              disabled={!isEdit}
             >
               Получил клиент
             </Checkbox>
@@ -351,6 +355,7 @@ export default function ServiceForm() {
               label='ФИО получателя'
               name={['pole', 'got_name']}
               rules={[{ required: !isGotClient }]}
+              isEdit={isEdit}
             />
           </Col>
           <Col span={10}>
@@ -358,6 +363,7 @@ export default function ServiceForm() {
               label='Телефон получателя'
               name={['pole', 'got_phone']}
               rules={[{ required: !isGotClient }]}
+              isEdit={isEdit}
               mask='+000000000000'
               size='large'
             />
@@ -368,6 +374,7 @@ export default function ServiceForm() {
             <FormField
               label='Автомобиль получателя'
               name={['pole', 'got_car']}
+              isEdit={isEdit}
             />
           </Col>
           <Col span={15}>
@@ -375,6 +382,7 @@ export default function ServiceForm() {
               type='textarea'
               label='Примечание'
               name={['pole', 'note']}
+              isEdit={isEdit}
             />
           </Col>
         </Row>
