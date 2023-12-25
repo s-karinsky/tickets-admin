@@ -559,7 +559,7 @@ export default function Sending({
                   }
                 ]}}
                 trigger={['click']}
-                disabled={selectedRows.length === 0}
+                disabled={selectedRows.length === 0 || selectedRows.map(rowId => placesData.find(item => item.id === rowId)).filter(item => !!item.service_id).length > 0}
               >
                 <Button
                   type='primary'

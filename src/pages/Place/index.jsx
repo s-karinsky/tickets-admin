@@ -448,30 +448,12 @@ export default function Place({ user }) {
                   disabled={isEditPage}
                 />
                 <FormField 
-                  label='Услуга'
-                  labelType='calc'
-                  value={SERVICE_NAME[initialPlace.service?.type]}
-                  style={{ width: 200 }}
-                  isEdit={isEditPage}
-                  disabled={isEditPage}
-                />
-                <FormField 
                   label='Статус услуги'
                   labelType='calc'
-                  name={['service', 'status']}
-                  style={{ width: 200 }}
+                  value={[SERVICE_NAME[initialPlace.service?.type], initialPlace.service?.status].filter(item => item).join(' → ')}
+                  style={{ width: 420 }}
                   isEdit={isEditPage}
                   disabled={isEditPage}
-                />
-                <FormField 
-                  type='select'
-                  label='Тариф'
-                  name='tarif'
-                  style={{ width: 200 }}
-                  options={tarifs.data?.list || []}
-                  text={(tarifs.data?.map || {})[initialPlace.tarif]?.label}
-                  isEdit={isEditPage}
-                  rules={required()}
                 />
                 <FormField
                   type='number'
@@ -499,6 +481,16 @@ export default function Place({ user }) {
                   isEdit={isEditPage}
                   rules={[...required(), ...numberRange({ min: 1 })]}
                   addonAfter={isEditPage && 'см'}
+                />
+                <FormField 
+                  type='select'
+                  label='Тариф'
+                  name='tarif'
+                  style={{ width: 200 }}
+                  options={tarifs.data?.list || []}
+                  text={(tarifs.data?.map || {})[initialPlace.tarif]?.label}
+                  isEdit={isEditPage}
+                  rules={required()}
                 />
                 <FormField
                   type='select'
