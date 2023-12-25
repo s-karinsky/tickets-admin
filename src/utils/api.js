@@ -3,7 +3,7 @@ import { get as _get, keyBy } from 'lodash'
 import { useQuery } from 'react-query'
 import Cookies from 'universal-cookie'
 import axios from './axios'
-import { toFormData } from 'axios'
+import { parseJSON, toFormData } from './utils'
 import { sqlUpdate, sqlInsert } from './sql'
 
 export const useAuthorization = ({ token, u_hash }) => useQuery(['authorization', { token, u_hash }], async () => {
@@ -198,6 +198,14 @@ export const getPlaceById = (placeId, sendingId, params = {}) => async () => {
   }
 }
 
+export const getDatasetsById = (ids) => async () => {
+  if (!ids || !Array.isArray(ids)) return []
+  const where = ids.map(id => `id=${id}`).join(' OR ')
+  const response = await axios.postWithAuth('/query/select', { sql: `SELECT * FROM dataset WHERE ${where}` })
+  const data = response.data?.data || []
+  return data.map(item => ({ ...item, ...parseJSON(item.pole) }))
+}
+
 export const deletePlaceById = async (placeId) => {
   const response = await axios.postWithAuth('/query/update', { sql: sqlUpdate('dataset', { status: 1 }, `id=${placeId}`) })
   return response
@@ -323,4 +331,31 @@ export const useDictionary = name => useQuery(['dictionary', name], async () => 
   return { list, map }
 }, {
   staleTime: 10 * 60 * 1000
+})
+
+export const useService = name => useQuery(['dataset', name], async () => {
+  const response = await axios.postWithAuth('/query/select', { sql: `SELECT * FROM dataset d LEFT JOIN dataset n ON d.id_ref=n.id WHERE n.tip='place' AND d.tip='service-${name}'`})
+  // const data = response.data?.data || []
+
+  const data = [
+    {
+      id: 1,
+      tip: 'service-delivery',
+      ref_tip: 'place',
+      id_ref: 169,
+      pole: '{"number": "145", "date": "2023-12-27T07:16:53.539Z", "client": "1455"}'
+    },
+    {
+      id: 2,
+      tip: 'service-delivery',
+      ref_tip: 'place',
+      id_ref: 171,
+      pole: '{"number": "146", "date": "2023-12-27T07:16:53.539Z", "client": "1455"}'
+    }
+  ]
+
+  return data.map(item => ({
+    ...item,
+    ...parseJSON(item.pole)
+  }))
 })

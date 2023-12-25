@@ -8,6 +8,8 @@ import PageUsers from './pages/Users'
 import PageUser from './pages/User'
 import Sendings from './pages/Sendings'
 import Sending from './pages/Sending'
+import ServiceForm from './pages/ServiceForm'
+import ServiceList from './pages/ServiceList'
 import Place from './pages/Place'
 import Layout from './components/Layout'
 import { useAuthorization } from './utils/api'
@@ -45,23 +47,27 @@ function App() {
 
   if ((user.isLoading || !user.data?.authorized) && !isLoginPage) {
     return (
-      <Row style={{ height: '100vh' }} justify="center" align="middle">
+      <Row style={{ height: '100vh' }} justify='center' align='middle'>
         <LoadingOutlined style={{ fontSize: '64px' }} />
       </Row>
     )
   }
 
   return (
-    <div className="App">
+    <div className='App'>
       <Routes>
-        <Route path="/" element={<Layout user={user.data} />}>
-          <Route path="/users" element={<PageUsers />} />
-          <Route path="/users/:id" element={<PageUser />} />
-          <Route path="/sendings" element={<Sendings isSendingAir={isSendingAir} setIsSendingAir={setIsSendingAir} />} />
-          <Route path="/sendings/:sendingId" element={<Sending isSendingAir={isSendingAir} />} />
-          <Route path="/sendings/:sendingId/:placeId" element={<Place user={user.data} />} />
+        <Route path='/' element={<Layout user={user.data} />}>
+          <Route path='/users' element={<PageUsers />} />
+          <Route path='/users/:id' element={<PageUser />} />
+          <Route path='/sendings' element={<Sendings isSendingAir={isSendingAir} setIsSendingAir={setIsSendingAir} />} />
+          <Route path='/sendings/:sendingId' element={<Sending isSendingAir={isSendingAir} />} />
+          <Route path='/sendings/:sendingId/:placeId' element={<Place user={user.data} />} />
+          <Route path='/services'>
+            <Route path=':serviceName' element={<ServiceList />} />
+            <Route path=':serviceName/:id' element={<ServiceForm />} />
+          </Route>
         </Route>
-        <Route path="/login" element={<PageLogin />} />
+        <Route path='/login' element={<PageLogin />} />
       </Routes>
     </div>
   )
