@@ -142,7 +142,7 @@ export const createSending = async (values) => {
 export const getPlacesBySendingId = sendingId => async () => {
   if (sendingId === 'create') return []
 
-  const sql = `SELECT p.*, s.id as service_id FROM dataset p LEFT JOIN dataset s ON s.id_ref=p.id AND s.tip='service' AND JSON_EXTRACT(s.pole, '$.is_finished')=0 WHERE p.ref_tip='sending' AND p.id_ref=${sendingId} AND p.status=0`
+  const sql = `SELECT p.*, s.id as service_id, s.pole as service FROM dataset p LEFT JOIN dataset s ON s.id_ref=p.id AND s.tip='service' AND JSON_EXTRACT(s.pole, '$.is_finished')=0 WHERE p.ref_tip='sending' AND p.id_ref=${sendingId} AND p.status=0`
   const [ response, responseProducts ] = await Promise.all([
     axios.postWithAuth('/query/select', { sql }),
     axios.postWithAuth('/query/select', {
@@ -162,16 +162,13 @@ export const getPlacesBySendingId = sendingId => async () => {
   }), {})
   const data = response.data?.data || []
   return data.map(item => {
-    let json
-    try {
-      json = JSON.parse(item.pole)
-    } catch (e) {
-      json = {}
-    }
+    const json = parseJSON(item.pole)
+    const service = parseJSON(item.service)
     return {
       ...item,
       ...json,
-      count: productsMap[item.id]?.count
+      count: productsMap[item.id]?.count,
+      service
     }
   })
 }
@@ -194,20 +191,17 @@ export const getPlaceById = (placeId, sendingId, params = {}) => async () => {
   if (params.copy) {
     sql = `SELECT * FROM dataset WHERE id=${params.copy}`
   } else {
-    sql = `SELECT * FROM dataset WHERE id=${placeId}`
+    sql = `SELECT p.*, s.pole as service FROM dataset p LEFT JOIN dataset s ON s.id_ref=p.id AND s.tip='service' AND JSON_EXTRACT(s.pole, '$.is_finished')=0 WHERE p.id=${placeId}`
   }
   const response = await axios.postWithAuth('/query/select', { sql })
   const data = (response.data?.data || [])[0]
-  let json
-  try {
-    json = JSON.parse(data.pole)
-  } catch (e) {
-    json = {}
-  }
+  const json = parseJSON(data.pole)
+  const service = parseJSON(data.service)
   return {
     ...data,
     ...json,
-    ...values
+    ...values,
+    service
   }
 }
 

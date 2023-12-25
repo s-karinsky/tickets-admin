@@ -18,6 +18,10 @@ export const USER_ROLES_OPTIONS = ['1', '2', '3']
 
 export const SENDING_STATUS = ['Формирование', 'В пути', 'Поступила', 'Приостановлен']
 
+export const SERVICE_NAME = {
+  delivery: 'Выдача со склада'
+}
+
 export const SERVICE_STATUS = {
   delivery: ['Подготовка выдачи', 'Выдача', 'Выдано']
 }

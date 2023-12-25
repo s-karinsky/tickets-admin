@@ -9,7 +9,7 @@ import { PropertyGap } from '../Sendings'
 import CreateProductModal from './СreateProductModal'
 import FormField from '../../components/FormField'
 import { useDictionary, useUsersWithRole, getLastId, getCount, getSendingById, getPlaceById, deletePlaceById, updateDatasetById, createDataset, getProductsByPlaceId, deleteProductById } from '../../utils/api'
-import { SENDING_STATUS } from '../../consts'
+import { SENDING_STATUS, SERVICE_NAME } from '../../consts'
 import { getColumnSearchProps } from '../../utils/components'
 import { required, numberRange } from '../../utils/validationRules'
 import { declOfNum, numberFormatter, getPaginationSettings, filterOption } from '../../utils/utils'
@@ -61,7 +61,6 @@ export default function Place({ user }) {
 
   const isNew = placeId === 'create'
   const isEditPage = isNew || searchParams.get('edit') !== null
-
   const initialPlace = useMemo(() => ({
     ...placeData.data,
     pay_sum: (placeData.data?.pay_kg || 0) * (placeData.data?.gross_weight || 0),
@@ -449,16 +448,18 @@ export default function Place({ user }) {
                   disabled={isEditPage}
                 />
                 <FormField 
-                  type='select'
+                  label='Услуга'
+                  labelType='calc'
+                  value={SERVICE_NAME[initialPlace.service?.type]}
+                  style={{ width: 200 }}
+                  isEdit={isEditPage}
+                  disabled={isEditPage}
+                />
+                <FormField 
                   label='Статус услуги'
                   labelType='calc'
-                  name='service_status'
+                  name={['service', 'status']}
                   style={{ width: 200 }}
-                  options={[
-                    { value: 'В обработке', title: '' },
-                    { value: 'Выдано', title: '' },
-                  ]}
-                  text={initialPlace.service_status}
                   isEdit={isEditPage}
                   disabled={isEditPage}
                 />

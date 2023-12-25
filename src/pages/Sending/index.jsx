@@ -16,7 +16,7 @@ import { useDictionary, useUsersWithRole, getLastId, getCount, createSending, up
 import { getColumnSearchProps } from '../../utils/components'
 import { required } from '../../utils/validationRules'
 import { declOfNum, numberFormatter, getPaginationSettings, filterOption } from '../../utils/utils'
-import { SENDING_STATUS } from '../../consts'
+import { SENDING_STATUS, SERVICE_NAME } from '../../consts'
 
 const { Title, Link } = Typography
 
@@ -175,10 +175,18 @@ export default function Sending({
       ...getColumnSearchProps('count', { type: 'number' })
     },
     {
+      title: 'Услуга',
+      dataIndex: 'service',
+      key: 'service_name',
+      render: service => SERVICE_NAME[service?.type] || '',
+      sorter: (a, b) => a.status - b.status,
+      ...getColumnSearchProps(record => record.status + 1, { options: [{ value: 1, label: 'В обработке' }, { value: 2, label: 'Выдано' }] })
+    },
+    {
       title: 'Статус услуги',
-      dataIndex: 'status',
-      key: 'status',
-      render: val => '',
+      dataIndex: 'service',
+      key: 'service_status',
+      render: service => service?.status,
       sorter: (a, b) => a.status - b.status,
       ...getColumnSearchProps(record => record.status + 1, { options: [{ value: 1, label: 'В обработке' }, { value: 2, label: 'Выдано' }] })
     },
