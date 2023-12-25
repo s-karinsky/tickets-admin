@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Row, Col, Button, Typography, Table, Modal, DatePicker, Select } from 'antd'
 import { useParams, useNavigate } from 'react-router-dom'
+import { ExclamationCircleFilled } from '@ant-design/icons'
+import { BsTrash } from 'react-icons/bs'
 import dayjs from 'dayjs'
 import { useService, updateDatasetById } from '../../utils/api'
 import { SERVICE_STATUS } from '../../consts'
@@ -75,8 +77,46 @@ export default function ServiceList() {
     {
       title: 'Внутренний клиент',
       dataIndex: 'client'
+    },
+    {
+      title: '',
+      dataIndex: 'buttons',
+      key: 'buttons',
     }
   ]
+
+  const serviceData = (data || []).map(item => {
+    return {
+      ...item,
+      buttons: (
+        <div style={{ display: 'flex', gap: 10 }}>
+          {SERVICE_STATUS.delivery.indexOf(item.status) === 0 && <BsTrash
+            style={{ marginLeft: 30, cursor: 'pointer' }} 
+            size={17}
+            color='red'
+            title='Удалить услугу'
+            onClick={() => {
+              Modal.confirm({
+                title: 'Вы действительно хотите удалить эту услугу?',
+                icon: <ExclamationCircleFilled />,
+                okText: 'Да',
+                okType: 'danger',
+                cancelText: 'Нет',
+                onOk: async () => {
+                  const pole = {
+                    ...item.pole,
+                    is_finished: 1
+                  }
+                  await updateDatasetById(item.id, { status: 1, pole: JSON.stringify(pole) })
+                  refetch()
+                }
+              })
+            }}
+          />}
+        </div>
+      )
+    }
+  })
 
   return (
     <>
@@ -97,7 +137,7 @@ export default function ServiceList() {
       <Table
         columns={columns}
         isLoading={isLoading}
-        dataSource={data}
+        dataSource={serviceData}
         rowKey={({ id }) => id}
         onRow={(record, index) => ({
           onClick: (e) => {

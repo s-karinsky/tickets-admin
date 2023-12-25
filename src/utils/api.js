@@ -340,7 +340,7 @@ export const useService = (name, id, params) => useQuery(['dataset', name, id], 
     sql: `SELECT d.id as id, d.id_ref as id_ref, d.ref_tip as ref_tip, d.tip as tip, d.pole as pole, n.pole as place, s.id_trip as sending_id, s.from as sending_number, s.json as sending FROM dataset d
       LEFT JOIN dataset n ON d.id_ref=n.id AND n.tip='place'
       LEFT JOIN trip s ON n.id_ref=s.id_trip
-      WHERE d.tip='service' AND JSON_EXTRACT(d.pole, '$.type')='${name}'${id ? ` AND d.id=${id}` : ''}`.replaceAll('\n', ' ')
+      WHERE d.status=0 AND d.tip='service' AND JSON_EXTRACT(d.pole, '$.type')='${name}'${id ? ` AND d.id=${id}` : ''}`.replaceAll('\n', ' ')
   })
   const data = (response.data?.data || []).map(item => {
     const pole = parseJSON(item.pole)
