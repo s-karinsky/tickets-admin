@@ -179,16 +179,14 @@ export default function Sending({
       dataIndex: 'service',
       key: 'service_name',
       render: service => SERVICE_NAME[service?.type] || '',
-      sorter: (a, b) => a.status - b.status,
-      ...getColumnSearchProps(record => record.status + 1, { options: [{ value: 1, label: 'В обработке' }, { value: 2, label: 'Выдано' }] })
+      sorter: (a, b) => (SERVICE_NAME[a.service?.type] || '').localeCompare(SERVICE_NAME[b.service?.type] || '')
     },
     {
       title: 'Статус услуги',
       dataIndex: 'service',
       key: 'service_status',
       render: service => service?.status,
-      sorter: (a, b) => a.status - b.status,
-      ...getColumnSearchProps(record => record.status + 1, { options: [{ value: 1, label: 'В обработке' }, { value: 2, label: 'Выдано' }] })
+      sorter: (a, b) => (a.service?.status || '').localeCompare(b.service?.status || '')
     },
     {
       title: '',
