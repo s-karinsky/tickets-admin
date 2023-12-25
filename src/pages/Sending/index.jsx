@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react'
 import { useNavigate, useLocation, useParams, useSearchParams } from 'react-router-dom'
-import { Button, Row, Table, Typography, Form, Modal, Checkbox } from 'antd'
+import { Button, Row, Table, Typography, Form, Modal, Checkbox, Dropdown } from 'antd'
 import {
   SaveOutlined,
   CopyOutlined,
@@ -29,6 +29,7 @@ export default function Sending({
   const location = useLocation()
   const { sendingId } = useParams()
   const [ activeRow, setActiveRow ] = useState()
+  const [ selectedRows, setSelectedRows ] = useState([])
   
   const isNew = sendingId === 'create'
   const isEditPage = isNew || searchParams.get('edit') !== null
@@ -527,14 +528,30 @@ export default function Sending({
               >
                 Создать
               </Button>}
-              <Button
-                type='primary'
-                size='large'
-                title='Функция в разработке'
-                disabled
+              <Dropdown
+                menu={{ items: [
+                  {
+                    key: 'delivery',
+                    label: (
+                      <span onClick={e => {
+                        navigate('/services/delivery/create', { state: { sendingNum: data?.from ,sendingId, selectedRows } })
+                      }}>
+                        Выдача со склада
+                      </span>
+                    )
+                  }
+                ]}}
+                trigger={['click']}
+                disabled={selectedRows.length === 0}
               >
-                Создать услугу
-              </Button>
+                <Button
+                  type='primary'
+                  size='large'
+                  title='Функция в разработке'
+                >
+                  Создать услугу
+                </Button>
+              </Dropdown>
               <Button
                 type='primary'
                 size='large'
@@ -564,6 +581,7 @@ export default function Sending({
             style={{ overflow: 'scroll' }}
             rowSelection={{
               type: Checkbox,
+              onChange: selectedKeys => setSelectedRows(selectedKeys)
             }}
             pagination={getPaginationSettings('sending')}
           />
