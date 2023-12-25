@@ -1,7 +1,9 @@
-import { Row, Col, Button, Typography, Table } from 'antd'
+import { useState } from 'react'
+import { Row, Col, Button, Typography, Table, Modal, DatePicker, Select } from 'antd'
 import { useParams, useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
-import { useService } from '../../utils/api'
+import { useService, updateDatasetById } from '../../utils/api'
+import { SERVICE_STATUS } from '../../consts'
 
 const SERVICES = {
   delivery: {
@@ -22,7 +24,19 @@ const SERVICES = {
 export default function ServiceList() {
   const { serviceName } = useParams()
   const navigate = useNavigate()
-  const { data, isLoading } = useService(serviceName)
+  const [ showStatusModal, setShowStatusModal ] = useState(false)
+  const [ statusModalValue, setStatusModalValue ] = useState()
+  const [ statusModalDate, setStatusModalDate ] = useState()
+  const [ statusModalItem, setStatusModalItem ] = useState()
+  const { data, isLoading, refetch } = useService(serviceName)
+
+  const handleClickStatus = (item) => {
+    setStatusModalValue(item.status)
+    setStatusModalItem(item)
+    setStatusModalDate(dayjs())
+    setShowStatusModal(true)
+  }
+
   const columns = [
     {
       title: 'Номер',
@@ -39,7 +53,19 @@ export default function ServiceList() {
     },
     {
       title: 'Статус',
-      dataIndex: 'status'
+      dataIndex: 'status',
+      render: (val, item) => (
+        <>
+          {val} <Button
+            onClick={() => handleClickStatus(item)}
+            size='small'
+            type='primary'
+            ghost
+          >
+            Изменить
+          </Button>
+        </>
+      )
     },
     {
       title: 'Дата',
@@ -81,6 +107,41 @@ export default function ServiceList() {
           },
         })}
       />
+      <Modal
+        title='Изменить статус услуги'
+        open={showStatusModal}
+        width={300}
+        onOk={async () => {
+          if (!statusModalItem) return
+          const statusNum = SERVICE_STATUS.delivery.indexOf(statusModalValue)
+          const pole = {
+            ...statusModalItem.pole,
+            status: statusModalValue,
+            [`date_status_${statusNum}`]: statusModalDate.format('DD.MM.YYYY'),
+            is_finished: Number(statusNum === SERVICE_STATUS.delivery.length - 1)
+          }
+          await updateDatasetById(statusModalItem.id, { pole: JSON.stringify(pole) })
+          refetch()
+          setShowStatusModal(false)
+        }}
+        onCancel={() => setShowStatusModal(false)}
+      >
+        <DatePicker
+          size='large'
+          value={statusModalDate}
+          onChange={val => setStatusModalDate(val)}
+          format='DD.MM.YYYY'
+          style={{ width: '100%' }}
+        />
+        <br />
+        <Select
+          style={{ width: '100%', marginTop: 10 }}
+          size='large'
+          options={SERVICE_STATUS.delivery.map(value => ({ value }))}
+          value={statusModalValue}
+          onChange={val => setStatusModalValue(val)}
+        />
+      </Modal>
     </>
   )
 }

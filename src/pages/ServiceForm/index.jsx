@@ -43,7 +43,11 @@ export default function ServiceForm() {
   const tarifs = useDictionary('tarif')
 
   const service = useService(serviceName, id, { enabled: !isNew })
-  const initialValues = service.data || {}
+  const initialValues = service.data || {
+    pole: {
+      status: 'Подготовка выдачи'
+    }
+  }
   const datasetsId = isNew ? datasets : [initialValues.id_ref]
   const places = useQuery(['datasets', { id: datasetsId }], getDatasetsById(datasetsId), {
     enabled: isNew ? datasets.length > 0 : service.status === 'success'
@@ -207,7 +211,7 @@ export default function ServiceForm() {
               <Button
                 type='primary'
                 size='large'
-                onClick={() => setSearchParams({})}
+                onClick={() => isNew ? navigate('/services/delivery') : setSearchParams({})}
                 danger
               >
                 Отмена
@@ -243,7 +247,7 @@ export default function ServiceForm() {
         onRow={(record, index) => ({
           onClick: (e) => {
             if (e.detail === 2) {
-              navigate(`/sendings/${sendingId}/${record.id}`)
+              navigate(`/sendings/${sendingId || initialValues.sending_id}/${record.id}`)
             }
           },
         })}
@@ -317,10 +321,8 @@ export default function ServiceForm() {
           <Col span={6}>
             <FormField
               name={['pole', 'status']}
-              type='select'
               label='Статус'
               labelType='calc'
-              options={[{ value: 'Подготовка к выдаче' }, { value: 'Выдача' }, { value: 'Выдано' } ]}
               isEdit={isEdit}
               disabled={isEdit}
               width='100%'
@@ -328,13 +330,11 @@ export default function ServiceForm() {
           </Col>
           <Col span={4}>
             <FormField
-              name={['pole', 'delivery_date']}
-              type='date'
+              name={['pole', 'date_status_2']}
               label='Дата выдачи'
               labelType='calc'
               isEdit={isEdit}
               disabled={isEdit}
-              text={initialValues.pole?.delivery_date?.format('DD.MM.YYYY')}
               width='100%'
             />
           </Col>
