@@ -166,7 +166,7 @@ export default function PageUser() {
         </Row>
         <Form.Item dependencies={['id_role']}>
           {({ getFieldValue }) => {
-            const isClient = getFieldValue('id_role') === '1'
+            const isClient = ['1', '3'].includes(getFieldValue('id_role'))
             return (
               <Row
                 gutter={16}
