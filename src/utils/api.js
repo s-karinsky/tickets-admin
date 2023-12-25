@@ -142,10 +142,18 @@ export const createSending = async (values) => {
 export const getPlacesBySendingId = sendingId => async () => {
   if (sendingId === 'create') return []
 
-  const sql = `SELECT * FROM dataset WHERE ref_tip='sending' AND id_ref=${sendingId} AND status=0`
+  const sql = `SELECT p.*, s.id as service_id FROM dataset p LEFT JOIN dataset s ON s.id_ref=p.id AND s.tip='service' AND JSON_EXTRACT(s.pole, '$.is_finished')=0 WHERE p.ref_tip='sending' AND p.id_ref=${sendingId} AND p.status=0`
   const [ response, responseProducts ] = await Promise.all([
     axios.postWithAuth('/query/select', { sql }),
-    axios.postWithAuth('/query/select', { sql: `SELECT t.id, sum(JSON_EXTRACT(n.pole,'$.gross_weight')) AS gross_weight, sum(JSON_EXTRACT(n.pole,'$.count')) AS count FROM dataset t LEFT JOIN dataset n ON n.id_ref=t.id WHERE t.tip='place' AND t.id_ref=${sendingId} AND t.status=0 GROUP BY t.id` })
+    axios.postWithAuth('/query/select', {
+      sql: `SELECT
+        t.id,
+        sum(JSON_EXTRACT(n.pole,'$.gross_weight')) AS gross_weight,
+        sum(JSON_EXTRACT(n.pole,'$.count')) AS count
+        FROM dataset t
+        LEFT JOIN dataset n ON n.id_ref=t.id
+        WHERE t.tip='place' AND t.id_ref=${sendingId} AND t.status=0 GROUP BY t.id`.replaceAll('\n', '')
+      })
   ])
   
   const productsMap = (responseProducts.data?.data || []).reduce((acc, item) => ({

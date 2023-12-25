@@ -534,7 +534,18 @@ export default function Sending({
                     key: 'delivery',
                     label: (
                       <span onClick={e => {
-                        navigate('/services/delivery/create', { state: { sendingNum: data?.from ,sendingId, selectedRows } })
+                        const withServices = selectedRows
+                          .map(rowId => placesData.find(item => item.id === rowId))
+                          .filter(item => !!item.service_id)
+                          .map(item => item.place)
+                        if (withServices.length) {
+                          Modal.info({
+                            title: 'У некоторых мест есть активные услуги',
+                            content: `Для ${declOfNum(withServices.length, ['места', 'мест', 'мест'])} ${withServices.join(', ')} невозможно создать услугу, пока не выполнена текущая`
+                          })
+                        } else {
+                          navigate('/services/delivery/create', { state: { sendingNum: data?.from, sendingId, selectedRows } })
+                        }
                       }}>
                         Выдача со склада
                       </span>
@@ -547,7 +558,6 @@ export default function Sending({
                 <Button
                   type='primary'
                   size='large'
-                  title='Функция в разработке'
                 >
                   Создать услугу
                 </Button>
