@@ -1,15 +1,15 @@
 import { useMemo, useState, useEffect } from 'react'
 import { Typography, Row, Col, Space, Button, Form, Table, Checkbox } from 'antd'
 import { useParams, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
-import { useQuery } from 'react-query'
+import { useQuery, useQueries } from 'react-query'
 import { SaveOutlined } from '@ant-design/icons'
 import { BiEdit } from 'react-icons/bi'
 import { BsTrash } from 'react-icons/bs'
-import dayjs from 'dayjs'
+import { get as _get } from 'lodash'
 import FormField from '../../components/FormField'
 import { VALIDATION_MESSAGES } from '../../consts'
 import { numberRange } from '../../utils/validationRules'
-import { getDatasetsById, useUsersWithRole, useDictionary, useService } from '../../utils/api'
+import { getDatasetsById, useUsersWithRole, useDictionary, useService, getProductsByPlaceId } from '../../utils/api'
 import { getColumnSearchProps } from '../../utils/components'
 import axios from '../../utils/axios'
 import { sqlInsert, sqlUpdate } from '../../utils/sql'
@@ -53,6 +53,12 @@ export default function ServiceForm() {
     enabled: isNew ? datasets.length > 0 : service.status === 'success'
   })
 
+  const products = useQueries(datasetsId.map(placeId => ({
+    queryKey: ['products', placeId],
+    queryFn: getProductsByPlaceId(placeId),
+    enabled: isNew ? datasets.length > 0 : service.status === 'success'
+  })))
+
   useEffect(() => {
     if (initialValues.pole?.is_got_client) {
       setIsGotClient(initialValues.pole.is_got_client)
@@ -83,8 +89,13 @@ export default function ServiceForm() {
 
   const placesData = (places.data || [])
     .map((item) => {
+      const placeProducts = products.find(product => _get(product, 'data.0.id_ref') === item.id)?.data || []
+      const net_weight = placeProducts.reduce((sum, product) => sum + (product.net_weight * product.count), 0)
+      const count = placeProducts.reduce((sum, product) => sum + product.count, 0)
       return {
         ...item,
+        count,
+        net_weight,
         buttons: (
           <div style={{ display: 'flex', gap: 10 }}>
             {isNew && <BsTrash

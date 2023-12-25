@@ -230,16 +230,11 @@ export const createDataset = async (params) => {
 
 export const getProductsByPlaceId = placeId => async () => {
   const response = await axios.postWithAuth('/query/select', {
-    sql: `SELECT * FROM dataset WHERE id_ref=${placeId} AND ref_tip='place' AND status=0`
+    sql: `SELECT * FROM dataset WHERE id_ref=${placeId} AND ref_tip='place' AND tip='product' AND status=0`
   })
   const data = response.data?.data || []
   return data.map(item => {
-    let json
-    try {
-      json = JSON.parse(item.pole)
-    } catch (e) {
-      json = {}
-    }
+    const json = parseJSON(item.pole)
     return {
       ...item,
       ...json
