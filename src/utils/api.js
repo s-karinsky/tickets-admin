@@ -6,6 +6,8 @@ import axios from './axios'
 import { parseJSON, toFormData } from './utils'
 import { sqlUpdate, sqlInsert } from './sql'
 
+const sendingSummaryFields = ['id_trip', 'sum(JSON_EXTRACT(m.pole,"$.gross_weight")) AS gross_weight', 'sum(JSON_EXTRACT(n.pole,"$.net_weight")) AS net_weight', 'sum(JSON_EXTRACT(n.pole,"$.count")) AS count']
+
 export const useAuthorization = ({ token, u_hash }) => useQuery(['authorization', { token, u_hash }], async () => {
   if (!token || !u_hash) return { authorized: false }
   const response = await axios.post('/user/authorized', toFormData({ token, u_hash }))
@@ -37,21 +39,33 @@ export const login = async (values) => {
 }
 
 export const getCount = async (db, where) => {
-  const response = await axios.postWithAuth('/query/select', { sql: `SELECT count(*) FROM ${db}${where ? ' WHERE '+where : ''}` })
-  const count = _get(response, ['data', 'data', 0, 'count(*)'])
+  const response = await axios.select(db, 'count(*) as count', { where })
+  const count = _get(response, ['data', 'data', 0, 'count'])
   return count
 }
 
 export const getLastId = async (table, id = 'id') => {
-  const response = await axios.postWithAuth('/query/select', { sql: `SELECT max(${id}) as max FROM ${table}` })
+  const response = await axios.select(table, `max(${id}) as max`)
   const count = _get(response, ['data', 'data', 0, 'max'])
   return count
 }
 
 export const getSendings = isAir => async () => {
   const [ response, responseProducts ] = await Promise.all([
-    axios.postWithAuth('/query/select', { sql: `SELECT * FROM trip WHERE \`to\`='${Number(isAir)}' AND canceled=0` }),
-    axios.postWithAuth('/query/select', { sql: `SELECT id_trip, sum(JSON_EXTRACT(n.pole,'$.gross_weight')) AS gross_weight, sum(JSON_EXTRACT(n.pole,'$.net_weight')) AS net_weight, sum(JSON_EXTRACT(n.pole,'$.count')) AS count FROM trip t LEFT JOIN dataset m ON m.id_ref=t.id_trip LEFT JOIN dataset n ON n.id_ref=m.id WHERE canceled=0 AND \`to\`=0 GROUP BY id_trip` })
+    axios.select('trip', '*', { where: { to: `${Number(isAir)}`, canceled: 0 } }),
+    axios.select('trip t', sendingSummaryFields,
+      {
+        where: {
+          canceled: 0,
+          to: `${Number(isAir)}`
+        },
+        leftJoin: {
+          'dataset m': 'm.id_ref=t.id_trip',
+          'dataset n': 'n.id_ref=m.id'
+        },
+        groupBy: 'id_trip'
+      }
+    )
   ])
   
   const productsMap = (responseProducts.data?.data || []).reduce((acc, item) => ({
@@ -61,13 +75,7 @@ export const getSendings = isAir => async () => {
 
   const data = response.data?.data || []
   return data.map(item => {
-    let json
-    try {
-      json = JSON.parse(item.json.replaceAll("\n", ''))
-    } catch (e) {
-      console.warn(e)
-      json = {}
-    }
+    const json = parseJSON((item.json || '').replaceAll("\n", ''))
 
     return {
       id: item.id_trip,
@@ -87,12 +95,7 @@ export const getSendings = isAir => async () => {
 
 export const getSendingById = sendingId => async () => {
   if (sendingId === 'create') {
-    const response = await axios.postWithAuth(
-      '/query/select',
-      {
-        sql: `SELECT max(cast(\`from\` as decimal)) as max FROM trip WHERE canceled=0 AND YEAR(create_datetime) = YEAR('${dayjs().format('YYYY-MM-DD')}')`
-      }
-    )
+    const response = await axios.select('trip', 'max(cast(`from` as decimal)) as max', { where: { canceled: 0, 'YEAR(create_datetime)': `YEAR('${dayjs().format('YYYY-MM-DD')}')` } })
     const data = response.data?.data || []
     const number = parseInt(_get(data, [0, 'max'])) || 0
     return {
@@ -104,16 +107,26 @@ export const getSendingById = sendingId => async () => {
     }
   } else {
     const [ response, responseProducts ] = await Promise.all([
-      axios.postWithAuth('/query/select', { sql: `SELECT * FROM trip WHERE id_trip=${sendingId}` }),
-      axios.postWithAuth('/query/select', { sql: `SELECT id_trip, sum(JSON_EXTRACT(n.pole,'$.gross_weight')) AS gross_weight, sum(JSON_EXTRACT(n.pole,'$.net_weight')) AS net_weight, sum(JSON_EXTRACT(n.pole,'$.count')) AS count FROM trip t LEFT JOIN dataset m ON m.id_ref=t.id_trip LEFT JOIN dataset n ON n.id_ref=m.id WHERE m.ref_tip='sending' AND m.id_ref=${sendingId} AND m.status=0 GROUP BY id_trip` })
+      axios.select('trip', '*', { where: { id_trip: sendingId} }),
+      axios.select('trip t', sendingSummaryFields,
+        {
+          where: {
+            'm.ref_tip': 'sending',
+            'm.id_ref': sendingId,
+            'm.status': 0,
+            'n.status': 0
+          },
+          leftJoin: {
+            'dataset m': 'm.id_ref=t.id_trip',
+            'dataset n': 'n.id_ref=m.id'
+          },
+          groupBy: 'id_trip'
+        }
+      )
     ])
     const products = (responseProducts.data?.data || [])[0] || {}
     const item = (response.data?.data || [])[0] || {}
-    try {
-      item.json = JSON.parse(item.json.replaceAll("\n", ''))
-    } catch (e) {
-      console.warn(e)
-    }
+    item.json = parseJSON((item.json || '').replaceAll("\n", ''))
     item.create_datetime = dayjs(item.create_datetime)
     item.start_datetime = item.json?.status > 0 && dayjs(item.json?.status_date_1)
     item.complete_datetime = item.json?.status > 1 && dayjs(item.json?.status_date_2)
@@ -142,18 +155,28 @@ export const createSending = async (values) => {
 export const getPlacesBySendingId = sendingId => async () => {
   if (sendingId === 'create') return []
 
-  const sql = `SELECT p.*, s.id as service_id, s.pole as service FROM dataset p LEFT JOIN dataset s ON s.id_ref=p.id AND s.tip='service' AND JSON_EXTRACT(s.pole, '$.is_finished')=0 WHERE p.ref_tip='sending' AND p.id_ref=${sendingId} AND p.status=0`
   const [ response, responseProducts ] = await Promise.all([
-    axios.postWithAuth('/query/select', { sql }),
-    axios.postWithAuth('/query/select', {
-      sql: `SELECT
-        t.id,
-        sum(JSON_EXTRACT(n.pole,'$.gross_weight')) AS gross_weight,
-        sum(JSON_EXTRACT(n.pole,'$.count')) AS count
-        FROM dataset t
-        LEFT JOIN dataset n ON n.id_ref=t.id
-        WHERE t.tip='place' AND t.id_ref=${sendingId} AND t.status=0 GROUP BY t.id`.replaceAll('\n', '')
-      })
+    axios.select('dataset p', ['p.*', 's.id as service_id', 's.pole as service'], {
+      leftJoin: {
+        'dataset s': 's.id_ref=p.id AND s.tip="service" AND JSON_EXTRACT(s.pole, "$.is_finished")=0'
+      },
+      where: {
+        'p.ref_tip': 'sending',
+        'p.id_ref': sendingId,
+        'p.status': 0
+      }
+    }),
+    axios.select('dataset t', ['t.id', 'sum(JSON_EXTRACT(n.pole,"$.gross_weight")) AS gross_weight', 'sum(JSON_EXTRACT(n.pole,"$.count")) AS count'], {
+      where: {
+        't.tip': 'place',
+        't.id_ref': sendingId,
+        't.status': 0
+      },
+      leftJoin: {
+        'dataset n': 'n.id_ref=t.id'
+      },
+      groupBy: 't.id'
+    })
   ])
   
   const productsMap = (responseProducts.data?.data || []).reduce((acc, item) => ({
@@ -176,12 +199,7 @@ export const getPlacesBySendingId = sendingId => async () => {
 export const getPlaceById = (placeId, sendingId, params = {}) => async () => {
   let values = {}
   if (placeId === 'create') {
-    const response = await axios.postWithAuth(
-      '/query/select',
-      {
-        sql: `SELECT max(cast(JSON_EXTRACT(pole,'$.place') as decimal)) as max FROM dataset WHERE id_ref=${sendingId} AND ref_tip='sending'`
-      }
-    )
+    const response = await axios.select('dataset', 'max(cast(JSON_EXTRACT(pole,"$.place") as decimal)) as max', { where: { id_ref: sendingId, ref_tip: 'sending' } })
     values = {
       place: parseInt(_get(response, ['data', 'data', 0, 'max']) || 0) + 1
     }

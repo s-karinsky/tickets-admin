@@ -56,7 +56,7 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
               title={!isMaking && 'Удалить можно только отправку со статусом «Формирование»'}
               onClick={async () => {
                 if (!isMaking) return
-                const count = await getCount('dataset', `ref_tip='sending' AND id_ref=${item.id}`)
+                const count = await getCount('dataset', { tip: 'place', id_ref: item.id })
                 Modal.confirm({
                   title: 'Вы действительно хотите удалить эту отправку?',
                   icon: <ExclamationCircleFilled />,

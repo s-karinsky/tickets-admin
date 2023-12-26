@@ -90,7 +90,7 @@ export default function Sending({
               size={17}
               color='red'
               onClick={async () => {
-                const count = await getCount('dataset', `ref_tip='place' AND id_ref=${item.id}`)
+                const count = await getCount('dataset', { tip: 'product', id_ref: item.id })
                 Modal.confirm({
                   title: 'Вы действительно хотите удалить это место?',
                   icon: <ExclamationCircleFilled />,
@@ -377,7 +377,11 @@ export default function Sending({
                     () => ({
                       validator: async (_, id) => {
                         if (!isNew && parseInt(id) === parseInt(data.from)) return Promise.resolve()
-                        const count = await getCount('trip', `\`from\`=${id} AND canceled=0 AND YEAR(create_datetime) = YEAR('${dayjs().format('YYYY-MM-DD')}')`)
+                        const count = await getCount('trip', {
+                          from: id,
+                          canceled: 0,
+                          'YEAR(create_datetime)': `YEAR('${dayjs().format('YYYY-MM-DD')}')`
+                        })
                         return count > 0 ? Promise.reject(new Error('Отправка с таким номером уже существует')) : Promise.resolve()
                       },
                     })

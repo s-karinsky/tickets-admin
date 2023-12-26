@@ -417,7 +417,7 @@ export default function Place({ user }) {
                       () => ({
                         validator: async (_, id) => {
                           if (!isNew && parseInt(id) === parseInt(initialPlace.place)) return Promise.resolve()
-                          const count = await getCount('dataset', `JSON_EXTRACT(pole,'$.place')='${id}' AND id_ref=${sendingId} AND ref_tip='sending' AND status=0`)
+                          const count = await getCount('dataset', { '$.pole.place': id, id_ref: sendingId, tip: 'place', status: 0 })
                           return count > 0 ? Promise.reject(new Error('Место уже занято')) : Promise.resolve()
                         },
                       })

@@ -126,10 +126,11 @@ export const CreateProductModal = ({
           rules={
             [
               ...required(),
+              ...numberRange({ min: 1 }),
               () => ({
                 validator: async (_, id) => {
                   if (!isNew && parseInt(id) === parseInt(initialValues.number)) return Promise.resolve()
-                  const count = await getCount('dataset', `JSON_EXTRACT(pole,'$.number')=${id} AND id_ref=${placeId} AND ref_tip='place' AND status=0`)
+                  const count = await getCount('dataset', { '$.pole.number': id, id_ref: placeId, tip: 'product', status: 0 })
                   return count > 0 ? Promise.reject(new Error('Товар с таким номером уже существует')) : Promise.resolve()
                 },
               })
