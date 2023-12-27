@@ -7,7 +7,7 @@ import { BiEdit } from 'react-icons/bi'
 import { BsTrash } from 'react-icons/bs'
 import { get as _get } from 'lodash'
 import FormField from '../../components/FormField'
-import { VALIDATION_MESSAGES } from '../../consts'
+import { VALIDATION_MESSAGES, SERVICE_STATUS } from '../../consts'
 import { numberRange } from '../../utils/validationRules'
 import { getDatasetsById, useUsersWithRole, useDictionary, useService, getProductsByPlaceId } from '../../utils/api'
 import { getColumnSearchProps } from '../../utils/components'
@@ -17,8 +17,11 @@ import { sqlInsert, sqlUpdate } from '../../utils/sql'
 const getTitle = (name, id) => {
   const isNew = id === 'create'
   switch (name) {
-    case 'delivery':
+    case 'issuance':
       return isNew ? 'Новая выдача со склада' : `Выдача со склада №${id}`
+
+    case 'delivery':
+      return isNew ? 'Новая доставка' : `Доставка №${id}`
   
     default:
       return isNew ? 'Новая услуга' : `Услуга №${id}`
@@ -31,21 +34,28 @@ export default function ServiceForm() {
   const [ searchParams, setSearchParams ] = useSearchParams()
   const navigate = useNavigate()
   const location = useLocation()
+  const [ dynamicRequired, setDynamicRequired ] = useState({})
+  // const [ newCreated, setNewCreated ] = useState(false)
+  // const [ newNumbers, setNewNumber ] = useState([])
 
   const isNew = id === 'create'
   const isEdit = isNew || searchParams.get('edit') !== null
+
+  const isIssuance = () => serviceName === 'issuance'
+  const isDelivery = () => serviceName === 'delivery'
 
   const { sendingId, sendingNum, selectedRows: datasets = [] } = location.state || {}
   const [ isGotClient, setIsGotClient ] = useState(false)
 
   const clients = useUsersWithRole(1)
+  const drivers = useUsersWithRole(2, { enabled: isDelivery() })
   const internalClients = useUsersWithRole(3)
   const tarifs = useDictionary('tarif')
 
   const service = useService(serviceName, id, { enabled: !isNew })
   const initialValues = service.data || {
     pole: {
-      status: 'Подготовка выдачи'
+      status: _get(SERVICE_STATUS, [serviceName, 0])
     }
   }
   const datasetsId = isNew ? datasets : [initialValues.id_ref]
@@ -59,11 +69,34 @@ export default function ServiceForm() {
     enabled: isNew ? datasets.length > 0 : service.status === 'success'
   })))
 
+  /* useEffect(() => {
+    if (!isNew) return
+    async function createEmpryServices() {
+      const sql = `INSERT INTO dataset (id_ref, ref_tip, tip, status) VALUES ${datasets.map(id_ref => `(${id_ref}, 'place', 'service', 1)`).join(',')}`
+      await axios.postWithAuth('/query/insert', { sql })
+      let response = await axios.select('dataset', '*', { where: `ref_tip="place" AND tip="service" AND status=1 AND (${datasets.map(id_ref => `id_ref=${id_ref}`).join(' OR ')})`, orderBy: 'id DESC' })
+      const data = response.data?.data || []
+      const refIds = data.slice(0, datasets.length).map(item => item.id)
+      const year = new Date().getFullYear() - 2000
+      const idSql = `INSERT INTO n_u${year} (id_ref, tip_ref) VALUES ${refIds.map(id => `(${id}, 'service')`).join(',')}`
+      await axios.postWithAuth('/query/insert', { sql: idSql })
+      response = await axios.select(`n_u${year}`, '*', { where: `tip_ref='service' AND ${refIds.map(id => `id_ref=${id}`).join(' OR ')}`, orderBy: 'num DESC' })
+      const numbers = (response.data?.data || []).map(item => item.num)
+      setNewNumber(numbers)
+      setNewCreated(true)
+    }
+    createEmpryServices()
+  }, [isNew]) */
+
   useEffect(() => {
     if (initialValues.pole?.is_got_client) {
       setIsGotClient(initialValues.pole.is_got_client)
     }
   }, [initialValues])
+
+  const priceRub = Form.useWatch(['pole', 'price_rub'], form)
+  const priceUsd = Form.useWatch(['pole', 'price_usd'], form)
+  const driverValue = Form.useWatch(['pole', 'driver'], form)
 
   const [ clientsOptions, clientsMap ] = useMemo(() => {
     if (!Array.isArray(clients.data)) return [[], {}]
@@ -75,14 +108,24 @@ export default function ServiceForm() {
     return [ options, map ]
   }, [clients.data])
 
-  const [ internalClientsOptions, internalClientsMap ] = useMemo(() => {
+  const [ driverOptions, driverMap ] = useMemo(() => {
+    if (!Array.isArray(drivers.data)) return [[], {}]
+    const options = drivers.data.map(item => ({
+      value: item.id_user,
+      label: item.json?.code,
+      phone: item.phone
+    }))
+    const map = options.reduce((acc, item) => ({ ...acc, [item.value]: { label: item.label, phone: item.phone } }), {})
+    return [ options, map ]
+  }, [drivers.data])
+
+  const [ internalClientsOptions ] = useMemo(() => {
     if (!Array.isArray(internalClients.data)) return [[], {}]
     const options = internalClients.data.map(item => ({
       value: item.id_user,
       label: item.json?.code
     }))
-    const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
-    return [ options, map ]
+    return [ options ]
   }, [internalClients.data])
 
   const handleChangeGotClient = e => setIsGotClient(e.target.checked)
@@ -200,13 +243,13 @@ export default function ServiceForm() {
   ]
 
   if (!isNew && service.isLoading) return null
+  // if (isNew && !newCreated) return null
 
   return (
     <>
       <Row align='bottom' style={{ padding: '0 40px' }}>
         <Col span={12}>
           <Typography.Title style={{ fontWeight: 'bold' }}>{getTitle(serviceName, id)}</Typography.Title>
-          <Typography.Title level={2} style={{ marginTop: -20 }}>{datasets.length > 1 ? 'для мест' : 'для места'}</Typography.Title>
         </Col>
         <Col span={12} style={{ textAlign: 'right', paddingBottom: 20 }}>
           {isEdit ?
@@ -222,7 +265,7 @@ export default function ServiceForm() {
               <Button
                 type='primary'
                 size='large'
-                onClick={() => isNew ? navigate('/services/delivery') : setSearchParams({})}
+                onClick={() => isNew ? navigate('/services/issuance') : setSearchParams({})}
                 danger
               >
                 Отмена
@@ -249,21 +292,6 @@ export default function ServiceForm() {
           }
         </Col>
       </Row>
-      <Table
-        columns={columns}
-        isLoading={places.isLoading}
-        dataSource={placesData}
-        rowKey={({ id }) => id}
-        size='small'
-        onRow={(record, index) => ({
-          onClick: (e) => {
-            if (e.detail === 2) {
-              navigate(`/sendings/${sendingId || initialValues.sending_id}/${record.id}`)
-            }
-          },
-        })}
-        pagination={false}
-      />
       <Form
         validateMessages={VALIDATION_MESSAGES}
         layout='vertical'
@@ -271,8 +299,20 @@ export default function ServiceForm() {
         size='large'
         form={form}
         initialValues={initialValues}
+        onValuesChange={values => {
+          if (_get(values, ['pole', 'delivery_type']) === 'Адрес клиента') {
+            setDynamicRequired({ ...dynamicRequired, client_address: true, terminal_address: false, terminal_phone: false })
+          }
+          if (_get(values, ['pole', 'delivery_type']) === 'Терминал') {
+            setDynamicRequired({ ...dynamicRequired, client_address: false, terminal_address: true, terminal_phone: true })
+          }
+        }}
         onFinish={async (values) => {
           const initialNumber = values.pole.number
+          const add = {}
+          if (isDelivery) {
+            add.driver_phone = driverMap[driverValue]?.phone
+          }
           const items = datasetsId.map((id, i) => ({
             id_ref: id,
             ref_tip: 'place',
@@ -283,7 +323,8 @@ export default function ServiceForm() {
               type: serviceName,
               is_finished: 0,
               number: initialNumber + i,
-              is_got_client: isGotClient
+              is_got_client: isGotClient,
+              ...add
             })
           }))
           let promises = []
@@ -293,9 +334,10 @@ export default function ServiceForm() {
             promises = items.map(item => axios.postWithAuth('/query/update', { sql: sqlUpdate('dataset', item, `id=${id}`) } ))
           }
           await Promise.all(promises)
+          navigate(`/services/${serviceName}`)
         }}
       >
-        <Row gutter={10}>
+        <Row gutter={[10, 20]} align='middle'>
           <Col span={3}>
             <FormField
               name={['pole', 'number']}
@@ -304,7 +346,7 @@ export default function ServiceForm() {
               rules={[{ required: true }, ...numberRange({ min: 1, max: 99999 })]}
               isEdit={isEdit}
               width='100%'
-            />
+            />  
           </Col>
           <Col span={4}>
             <FormField
@@ -349,8 +391,44 @@ export default function ServiceForm() {
               width='100%'
             />
           </Col>
-        </Row>
-        <Row gutter={10} style={{ marginTop: 20 }} align='middle'>
+          {isDelivery() && <>
+            <Col span={3}>
+              <FormField
+                name={['pole', 'delivery_type']}
+                label='Тип доставки'
+                type='select'
+                options={[{ value: 'Терминал' }, { value: 'Адрес клиента' }]}
+                isEdit={isEdit}
+                text={initialValues.pole?.delivery_type}
+              />  
+            </Col>
+            <Col span={4}>
+              <FormField
+                name={['pole', 'terminal_phone']}
+                label='Телефон терминала'
+                rules={[ { required: dynamicRequired.terminal_phone }]}
+                mask='+00000000000'
+                size='large'
+                isEdit={isEdit}
+              />  
+            </Col>
+            <Col span={8}>
+              <FormField
+                name={['pole', 'terminal_address']}
+                label='Адрес терминала'
+                rules={[ { required: dynamicRequired.terminal_address }]}
+                isEdit={isEdit}
+              />  
+            </Col>
+            <Col span={8}>
+              <FormField
+                name={['pole', 'client_address']}
+                label='Адрес доставки клиента'
+                rules={[ { required: dynamicRequired.client_address }]}
+                isEdit={isEdit}
+              />  
+            </Col>
+          </>}
           <Col span={3}>
             <Checkbox
               name={['pole', 'is_got_client']}
@@ -379,16 +457,67 @@ export default function ServiceForm() {
               size='large'
             />
           </Col>
-        </Row>
-        <Row gutter={10} style={{ marginTop: 20 }}>
-          <Col span={8}>
+          {isDelivery() && <>
+            <Col span={3}>
+              <FormField
+                label='Тип оплаты'
+                name={['pole', 'pay_type']}
+                type='select'
+                options={[{ value: 'Бесплатно' }, { value: 'Наличными' }, { value: 'Безналичными' }]}
+                rules={[ { required: true }]}
+                isEdit={isEdit}
+                text={initialValues.pole?.pay_type}
+              />
+            </Col>
+            <Col span={3}>
+              <FormField
+                label='Сумма оплаты (₽)'
+                type='number'
+                addonAfter={isEdit && '₽'}
+                name={['pole', 'price_rub']}
+                disabled={!!priceUsd}
+                isEdit={isEdit}
+              />
+            </Col>
+            <Col span={3}>
+              <FormField
+                label='Сумма оплаты ($)'
+                type='number'
+                addonAfter={isEdit && '$'}
+                name={['pole', 'price_usd']}
+                disabled={!!priceRub}
+                isEdit={isEdit}
+              />
+            </Col>
+            <Col span={7}>
+              <FormField
+                name={['pole', 'driver']}
+                label='Перевозчик'
+                type='select'
+                options={driverOptions}
+                text={driverMap[initialValues.pole?.driver]?.label}
+                isEdit={isEdit}
+                rules={[ { required: true } ]}
+              />
+            </Col>
+            <Col span={7}>
+              <FormField
+                label='Телефон перевозчика'
+                value={driverMap[driverValue]?.phone}
+                isEdit={isEdit}
+                rules={[ { required: true } ]}
+                disabled
+              />
+            </Col>
+          </>}
+          {isIssuance() && <Col span={9}>
             <FormField
               label='Автомобиль получателя'
               name={['pole', 'got_car']}
               isEdit={isEdit}
             />
-          </Col>
-          <Col span={15}>
+          </Col>}
+          <Col span={14}>
             <FormField
               type='textarea'
               label='Примечание'
@@ -398,6 +527,22 @@ export default function ServiceForm() {
           </Col>
         </Row>
       </Form>
+      <Typography.Title level={2} style={{ padding: '0 40px' }}>{datasets.length > 1 ? 'для мест' : 'для места'}</Typography.Title>
+      <Table
+        columns={columns}
+        isLoading={places.isLoading}
+        dataSource={placesData}
+        rowKey={({ id }) => id}
+        size='small'
+        onRow={(record, index) => ({
+          onClick: (e) => {
+            if (e.detail === 2) {
+              navigate(`/sendings/${sendingId || initialValues.sending_id}/${record.id}`)
+            }
+          },
+        })}
+        pagination={false}
+      />
     </>
   )
 }

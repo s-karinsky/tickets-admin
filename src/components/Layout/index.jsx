@@ -26,7 +26,8 @@ function getItem(label, key, icon, children, type) {
 
 const MENU_ITEMS = {
   services: getItem('Услуги', 'services', <UnorderedListOutlined />, [
-    getItem(<Link to='/services/delivery'>Выдача со склада</Link>, 'services-delivery')
+    getItem(<Link to='/services/issuance'>Выдача со склада</Link>, 'services-issuance'),
+    getItem(<Link to='/services/delivery'>Доставка</Link>, 'services-delivery')
   ]),
   users: getItem(<Link to='/users'>Пользователи</Link>, 'users', <UserOutlined />),
   sendings: getItem(

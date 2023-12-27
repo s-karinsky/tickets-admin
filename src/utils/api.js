@@ -290,18 +290,14 @@ export const useUsers = userId => useQuery(['users'].concat(userId || []), async
   return userId ? users[0] : users
 })
 
-export const useUsersWithRole = role => useQuery(['usersWithRole', role], async () => {
-  const response = await axios.postWithAuth('/query/select', { sql: `SELECT id_user, name, family, middle, json FROM users WHERE id_role=${role} AND active=1 AND deleted!=1` })
+export const useUsersWithRole = (role, params) => useQuery(['usersWithRole', role], async () => {
+  const response = await axios.postWithAuth('/query/select', { sql: `SELECT id_user, name, family, middle, json, phone FROM users WHERE id_role=${role} AND active=1 AND deleted!=1` })
   const users = (response.data?.data || []).map(user => {
-    try {
-      user.json = JSON.parse(user.json)
-    } catch (e) {
-      console.warn(e)
-    }
+    user.json = parseJSON(user.json)
     return user
   })
   return users
-})
+}, params)
 
 export const updateUserById = async (userId, values = {}) => {
   const response = await axios.postWithAuth('/query/update', { sql: sqlUpdate('users', values, `id_user=${userId}`) })

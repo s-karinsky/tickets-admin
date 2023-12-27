@@ -19,11 +19,13 @@ export const USER_ROLES_OPTIONS = ['1', '2', '3']
 export const SENDING_STATUS = ['Формирование', 'В пути', 'Поступила', 'Приостановлен']
 
 export const SERVICE_NAME = {
-  delivery: 'Выдача со склада'
+  issuance: 'Выдача со склада',
+  delivery: 'Доставка'
 }
 
 export const SERVICE_STATUS = {
-  delivery: ['Подготовка выдачи', 'Выдача', 'Выдано']
+  issuance: ['Подготовка выдачи', 'Выдача', 'Выдано'],
+  delivery: ['Подготовка доставки', 'Доставка до терминала', 'Доставка до адреса', 'Выдача с терминала', 'Выдано']
 }
 
 export const VALIDATION_MESSAGES = {

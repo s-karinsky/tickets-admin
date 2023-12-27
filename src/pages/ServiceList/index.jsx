@@ -1,45 +1,14 @@
-import { useState } from 'react'
-import { Row, Col, Button, Typography, Table, Modal, DatePicker, Select } from 'antd'
+import { useState, useCallback, useMemo } from 'react'
+import { Row, Col, Button, Typography, Table, Modal, DatePicker, Select, Switch } from 'antd'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ExclamationCircleFilled } from '@ant-design/icons'
 import { BsTrash } from 'react-icons/bs'
 import dayjs from 'dayjs'
 import { useService, updateDatasetById } from '../../utils/api'
-import { SERVICE_STATUS } from '../../consts'
+import { SERVICE_STATUS, SERVICE_NAME } from '../../consts'
 
-const SERVICES = {
-  delivery: {
-    title: 'Выдача со склада',
-    columns: [
-      {
-        title: 'Номер',
-        key: 'number'
-      },
-      {
-        title: 'Клиент',
-        key: 'client'
-      }
-    ]
-  }
-}
-
-export default function ServiceList() {
-  const { serviceName } = useParams()
-  const navigate = useNavigate()
-  const [ showStatusModal, setShowStatusModal ] = useState(false)
-  const [ statusModalValue, setStatusModalValue ] = useState()
-  const [ statusModalDate, setStatusModalDate ] = useState()
-  const [ statusModalItem, setStatusModalItem ] = useState()
-  const { data, isLoading, refetch } = useService(serviceName)
-
-  const handleClickStatus = (item) => {
-    setStatusModalValue(item.status)
-    setStatusModalItem(item)
-    setStatusModalDate(dayjs())
-    setShowStatusModal(true)
-  }
-
-  const columns = [
+const getColumns = (name, { ocStatusClick }) => {
+  const commonColumns = [
     {
       title: 'Номер',
       dataIndex: 'number'
@@ -59,7 +28,7 @@ export default function ServiceList() {
       render: (val, item) => (
         <>
           {val} <Button
-            onClick={() => handleClickStatus(item)}
+            onClick={() => ocStatusClick(item)}
             size='small'
             type='primary'
             ghost
@@ -85,46 +54,82 @@ export default function ServiceList() {
     }
   ]
 
-  const serviceData = (data || []).map(item => {
-    return {
-      ...item,
-      buttons: (
-        <div style={{ display: 'flex', gap: 10 }}>
-          {SERVICE_STATUS.delivery.indexOf(item.status) === 0 && <BsTrash
-            style={{ marginLeft: 30, cursor: 'pointer' }} 
-            size={17}
-            color='red'
-            title='Удалить услугу'
-            onClick={() => {
-              Modal.confirm({
-                title: 'Вы действительно хотите удалить эту услугу?',
-                icon: <ExclamationCircleFilled />,
-                okText: 'Да',
-                okType: 'danger',
-                cancelText: 'Нет',
-                onOk: async () => {
-                  const pole = {
-                    ...item.pole,
-                    is_finished: 1
+  return commonColumns
+}
+
+export default function ServiceList() {
+  const { serviceName } = useParams()
+  const navigate = useNavigate()
+  const [ showStatusModal, setShowStatusModal ] = useState(false)
+  const [ statusModalValue, setStatusModalValue ] = useState()
+  const [ statusModalDate, setStatusModalDate ] = useState()
+  const [ statusModalItem, setStatusModalItem ] = useState()
+  const [ isActive, setIsActive ] = useState(true)
+  const { data, isLoading, refetch } = useService(serviceName)
+
+  const handleClickStatus = useCallback((item) => {
+    setStatusModalValue(item.status)
+    setStatusModalItem(item)
+    setStatusModalDate(dayjs())
+    setShowStatusModal(true)
+  }, [])
+
+  const columns = useMemo(
+    () => getColumns(serviceName, { ocStatusClick: handleClickStatus }),
+    [serviceName, handleClickStatus]
+  )
+
+  const serviceData = (data || [])
+    .filter(item => Number(!item.is_finished) === Number(isActive))
+    .map(item => {
+      return {
+        ...item,
+        buttons: (
+          <div style={{ display: 'flex', gap: 10 }}>
+            {SERVICE_STATUS[serviceName]?.indexOf(item.status) === 0 && <BsTrash
+              style={{ marginLeft: 30, cursor: 'pointer' }} 
+              size={17}
+              color='red'
+              title='Удалить услугу'
+              onClick={() => {
+                Modal.confirm({
+                  title: 'Вы действительно хотите удалить эту услугу?',
+                  icon: <ExclamationCircleFilled />,
+                  okText: 'Да',
+                  okType: 'danger',
+                  cancelText: 'Нет',
+                  onOk: async () => {
+                    const pole = {
+                      ...item.pole,
+                      is_finished: 1
+                    }
+                    await updateDatasetById(item.id, { status: 1, pole: JSON.stringify(pole) })
+                    refetch()
                   }
-                  await updateDatasetById(item.id, { status: 1, pole: JSON.stringify(pole) })
-                  refetch()
-                }
-              })
-            }}
-          />}
-        </div>
-      )
-    }
-  })
+                })
+              }}
+            />}
+          </div>
+        )
+      }
+    })
 
   return (
     <>
       <Row align='bottom' style={{ padding: '0 40px' }}>
         <Col span={12}>
-          <Typography.Title style={{ fontWeight: 'bold' }}>{SERVICES[serviceName]?.title}</Typography.Title>
+          <Typography.Title style={{ fontWeight: 'bold' }}>{SERVICE_NAME[serviceName]}</Typography.Title>
         </Col>
         <Col span={12} style={{ textAlign: 'right', paddingBottom: 20 }}>
+          <Switch
+            style={{
+              transform: 'scale(140%)',
+            }}
+            checkedChildren='Активные'
+            unCheckedChildren='Выполненные'
+            checked={isActive}
+            onChange={setIsActive}
+          />
           {/* <Button
             type='primary'
             size='large'
@@ -142,7 +147,7 @@ export default function ServiceList() {
         onRow={(record, index) => ({
           onClick: (e) => {
             if (e.detail === 2) {
-              navigate(`/services/delivery/${record.id}`)
+              navigate(`/services/${serviceName}/${record.id}`)
             }
           },
         })}
@@ -153,12 +158,16 @@ export default function ServiceList() {
         width={300}
         onOk={async () => {
           if (!statusModalItem) return
-          const statusNum = SERVICE_STATUS.delivery.indexOf(statusModalValue)
+          if (!statusModalDate) {
+            alert('Не выбрана дата')
+            return
+          }
+          const statusNum = SERVICE_STATUS[serviceName]?.indexOf(statusModalValue)
           const pole = {
             ...statusModalItem.pole,
             status: statusModalValue,
             [`date_status_${statusNum}`]: statusModalDate.format('DD.MM.YYYY'),
-            is_finished: Number(statusNum === SERVICE_STATUS.delivery.length - 1)
+            is_finished: Number(statusNum === SERVICE_STATUS[serviceName]?.length - 1)
           }
           await updateDatasetById(statusModalItem.id, { pole: JSON.stringify(pole) })
           refetch()
@@ -177,7 +186,7 @@ export default function ServiceList() {
         <Select
           style={{ width: '100%', marginTop: 10 }}
           size='large'
-          options={SERVICE_STATUS.delivery.map(value => ({ value }))}
+          options={SERVICE_STATUS[serviceName]?.map(value => ({ value }))}
           value={statusModalValue}
           onChange={val => setStatusModalValue(val)}
         />

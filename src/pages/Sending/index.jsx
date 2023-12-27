@@ -541,23 +541,22 @@ export default function Sending({
               <Dropdown
                 menu={{ items: [
                   {
+                    key: 'issuance',
+                    label: (
+                      <span onClick={e => {
+                        navigate('/services/issuance/create', { state: { sendingNum: data?.from, sendingId, selectedRows } })
+                      }}>
+                        Выдача со склада
+                      </span>
+                    )
+                  },
+                  {
                     key: 'delivery',
                     label: (
                       <span onClick={e => {
-                        const withServices = selectedRows
-                          .map(rowId => placesData.find(item => item.id === rowId))
-                          .filter(item => !!item.service_id)
-                          .map(item => item.place)
-                        if (withServices.length) {
-                          Modal.info({
-                            title: 'У некоторых мест есть активные услуги',
-                            content: `Для ${declOfNum(withServices.length, ['места', 'мест', 'мест'])} ${withServices.join(', ')} невозможно создать услугу, пока не выполнена текущая`
-                          })
-                        } else {
-                          navigate('/services/delivery/create', { state: { sendingNum: data?.from, sendingId, selectedRows } })
-                        }
+                        navigate('/services/delivery/create', { state: { sendingNum: data?.from, sendingId, selectedRows } })
                       }}>
-                        Выдача со склада
+                        Доставка
                       </span>
                     )
                   }
