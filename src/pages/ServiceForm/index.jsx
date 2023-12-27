@@ -22,6 +22,9 @@ const getTitle = (name, id) => {
 
     case 'delivery':
       return isNew ? 'Новая доставка' : `Доставка №${id}`
+
+    case 'fullfillment':
+      return isNew ? 'Новый фулфилмент' : `Фулфилмент №${id}`
   
     default:
       return isNew ? 'Новая услуга' : `Услуга №${id}`
@@ -43,6 +46,7 @@ export default function ServiceForm() {
 
   const isIssuance = () => serviceName === 'issuance'
   const isDelivery = () => serviceName === 'delivery'
+  const isFullFill = () => serviceName === 'fullfillment'
 
   const { sendingId, sendingNum, selectedRows: datasets = [] } = location.state || {}
   const [ isGotClient, setIsGotClient ] = useState(false)
@@ -365,7 +369,6 @@ export default function ServiceForm() {
               options={internalClientsOptions}
               name={['pole', 'client']}
               label='Внутренний клиент'
-              rules={[{ required: true }]}
               text={initialValues?.pole?.client}
               isEdit={isEdit}
               width='100%'
@@ -383,8 +386,8 @@ export default function ServiceForm() {
           </Col>
           <Col span={4}>
             <FormField
-              name={['pole', 'date_status_2']}
-              label='Дата выдачи'
+              name={['pole', `date_status_${SERVICE_STATUS[serviceName]?.length - 1}`]}
+              label={isFullFill() ? 'Дата передачи' : 'Дата выдачи'}
               labelType='calc'
               isEdit={isEdit}
               disabled={isEdit}
@@ -429,35 +432,46 @@ export default function ServiceForm() {
               />  
             </Col>
           </>}
-          <Col span={3}>
-            <Checkbox
-              name={['pole', 'is_got_client']}
-              onChange={handleChangeGotClient}
-              checked={isGotClient}
-              disabled={!isEdit}
-            >
-              Получил клиент
-            </Checkbox>
-          </Col>
-          <Col span={10}>
-            <FormField
-              label='ФИО получателя'
-              name={['pole', 'got_name']}
-              rules={[{ required: !isGotClient }]}
-              isEdit={isEdit}
-            />
-          </Col>
-          <Col span={10}>
-            <FormField
-              label='Телефон получателя'
-              name={['pole', 'got_phone']}
-              rules={[{ required: !isGotClient }]}
-              isEdit={isEdit}
-              mask='+000000000000'
-              size='large'
-            />
-          </Col>
-          {isDelivery() && <>
+          {!isFullFill() && <>
+            <Col span={3}>
+              <Checkbox
+                name={['pole', 'is_got_client']}
+                onChange={handleChangeGotClient}
+                checked={isGotClient}
+                disabled={!isEdit}
+              >
+                Получил клиент
+              </Checkbox>
+            </Col>
+            <Col span={10}>
+              <FormField
+                label='ФИО получателя'
+                name={['pole', 'got_name']}
+                rules={[{ required: !isGotClient }]}
+                isEdit={isEdit}
+              />
+            </Col>
+            <Col span={10}>
+              <FormField
+                label='Телефон получателя'
+                name={['pole', 'got_phone']}
+                rules={[{ required: !isGotClient }]}
+                isEdit={isEdit}
+                mask='+000000000000'
+                size='large'
+              />
+            </Col>
+          </>}
+          {(isDelivery() || isFullFill()) && <>
+            {isFullFill() && <Col span={4}>
+              <FormField
+                name={['pole', 'merketplace']}
+                label='Маркетплейс'
+                type='select'
+                options={[{ value: 'Wilberries' }, { value: 'OZON' }, { value: 'Яндекс' }]}
+                rules={[{ required: true }]}
+              />
+            </Col>}
             <Col span={3}>
               <FormField
                 label='Тип оплаты'
@@ -489,7 +503,7 @@ export default function ServiceForm() {
                 isEdit={isEdit}
               />
             </Col>
-            <Col span={7}>
+            {isDelivery() && <Col span={7}>
               <FormField
                 name={['pole', 'driver']}
                 label='Перевозчик'
@@ -499,8 +513,8 @@ export default function ServiceForm() {
                 isEdit={isEdit}
                 rules={[ { required: true } ]}
               />
-            </Col>
-            <Col span={7}>
+            </Col>}
+            {isDelivery() && <Col span={7}>
               <FormField
                 label='Телефон перевозчика'
                 value={driverMap[driverValue]?.phone}
@@ -508,7 +522,21 @@ export default function ServiceForm() {
                 rules={[ { required: true } ]}
                 disabled
               />
-            </Col>
+            </Col>}
+            {isFullFill() && <Col span={5}>
+              <FormField
+                name={['pole', 'getter_name']}
+                label='ФИО представителя'
+                isEdit={isEdit}
+              />
+            </Col>}
+            {isFullFill() && <Col span={5}>
+              <FormField
+                name={['pole', 'getter_phone']}
+                label='Телефон представителя'
+                isEdit={isEdit}
+              />
+            </Col>}
           </>}
           {isIssuance() && <Col span={9}>
             <FormField

@@ -559,6 +559,16 @@ export default function Sending({
                         Доставка
                       </span>
                     )
+                  },
+                  {
+                    key: 'fullfillment',
+                    label: (
+                      <span onClick={e => {
+                        navigate('/services/fullfillment/create', { state: { sendingNum: data?.from, sendingId, selectedRows } })
+                      }}>
+                        Фулфилмент
+                      </span>
+                    )
                   }
                 ]}}
                 trigger={['click']}
