@@ -579,6 +579,16 @@ export default function Sending({
                         Хранение
                       </span>
                     )
+                  },
+                  {
+                    key: 'repack',
+                    label: (
+                      <span onClick={e => {
+                        navigate('/services/repack/create', { state: { sendingNum: data?.from, sendingId, selectedRows } })
+                      }}>
+                        Переупаковка
+                      </span>
+                    )
                   }
                 ]}}
                 trigger={['click']}

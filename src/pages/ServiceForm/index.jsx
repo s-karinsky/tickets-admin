@@ -52,6 +52,7 @@ export default function ServiceForm() {
   const isDelivery = () => serviceName === 'delivery'
   const isFullFill = () => serviceName === 'fullfillment'
   const isStorage = () => serviceName === 'storage'
+  const isRepack = () => serviceName === 'repack'
 
   const { sendingId, sendingNum, selectedRows: datasets = [] } = location.state || {}
   const [ isGotClient, setIsGotClient ] = useState(false)
@@ -477,7 +478,7 @@ export default function ServiceForm() {
               />  
             </Col>
           </>}
-          {!isFullFill() && !isStorage() && <>
+          {!isFullFill() && !isStorage() && !isRepack() && <>
             <Col span={3}>
               <Checkbox
                 name={['pole', 'is_got_client']}
@@ -507,7 +508,7 @@ export default function ServiceForm() {
               />
             </Col>
           </>}
-          {(isDelivery() || isFullFill() || isStorage()) && <>
+          {(!isIssuance()) && <>
             {isFullFill() && <Col span={4}>
               <FormField
                 name={['pole', 'merketplace']}
