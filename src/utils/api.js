@@ -225,10 +225,14 @@ export const getPlaceById = (placeId, sendingId, params = {}) => async () => {
 
 export const getDatasetsById = (ids) => async () => {
   if (!ids || !Array.isArray(ids)) return []
-  const where = ids.map(id => `id=${id}`).join(' OR ')
-  const response = await axios.postWithAuth('/query/select', { sql: `SELECT * FROM dataset WHERE ${where}` })
+  const where = ids.map(id => `d.id=${id}`).join(' OR ')
+  const response = await axios.postWithAuth('/query/select', { sql: `SELECT d.*, t.json as sending FROM dataset d LEFT JOIN trip t ON t.id_trip=d.id_ref WHERE ${where}` })
   const data = response.data?.data || []
-  return data.map(item => ({ ...item, ...parseJSON(item.pole) }))
+  return data.map(item => ({
+    ...item,
+    ...parseJSON(item.pole),
+    sending: parseJSON(item.sending)
+  }))
 }
 
 export const deletePlaceById = async (placeId) => {
@@ -359,6 +363,8 @@ export const useService = (name, id, params) => useQuery(['dataset', name, id], 
   const data = (response.data?.data || []).map(item => {
     const pole = parseJSON(item.pole)
     pole.date = dayjs(pole.date)
+    if (pole.start_date) pole.start_date = dayjs(pole.start_date)
+    if (pole.end_date) pole.end_date = dayjs(pole.end_date)
     return {
       ...item,
       ...parseJSON(item.pole),

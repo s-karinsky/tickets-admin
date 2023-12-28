@@ -569,6 +569,16 @@ export default function Sending({
                         Фулфилмент
                       </span>
                     )
+                  },
+                  {
+                    key: 'storage',
+                    label: (
+                      <span onClick={e => {
+                        navigate('/services/storage/create', { state: { sendingNum: data?.from, sendingId, selectedRows } })
+                      }}>
+                        Хранение
+                      </span>
+                    )
                   }
                 ]}}
                 trigger={['click']}

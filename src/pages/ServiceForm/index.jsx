@@ -5,7 +5,8 @@ import { useQuery, useQueries } from 'react-query'
 import { SaveOutlined } from '@ant-design/icons'
 import { BiEdit } from 'react-icons/bi'
 import { BsTrash } from 'react-icons/bs'
-import { get as _get } from 'lodash'
+import dayjs from 'dayjs'
+import { get as _get, set as _set } from 'lodash'
 import FormField from '../../components/FormField'
 import { VALIDATION_MESSAGES, SERVICE_STATUS } from '../../consts'
 import { numberRange } from '../../utils/validationRules'
@@ -25,6 +26,9 @@ const getTitle = (name, id) => {
 
     case 'fullfillment':
       return isNew ? 'Новый фулфилмент' : `Фулфилмент №${id}`
+
+    case 'storage':
+      return isNew ? 'Новое хранение' : `Хранение №${id}`
   
     default:
       return isNew ? 'Новая услуга' : `Услуга №${id}`
@@ -47,6 +51,7 @@ export default function ServiceForm() {
   const isIssuance = () => serviceName === 'issuance'
   const isDelivery = () => serviceName === 'delivery'
   const isFullFill = () => serviceName === 'fullfillment'
+  const isStorage = () => serviceName === 'storage'
 
   const { sendingId, sendingNum, selectedRows: datasets = [] } = location.state || {}
   const [ isGotClient, setIsGotClient ] = useState(false)
@@ -62,6 +67,7 @@ export default function ServiceForm() {
       status: _get(SERVICE_STATUS, [serviceName, 0])
     }
   }
+  _set(initialValues, ['pole', 'date'], dayjs())
   const datasetsId = isNew ? datasets : [initialValues.id_ref]
   const places = useQuery(['datasets', { id: datasetsId }], getDatasetsById(datasetsId), {
     enabled: isNew ? datasets.length > 0 : service.status === 'success'
@@ -238,13 +244,23 @@ export default function ServiceForm() {
       align: 'right',
       sorter: (a, b) => a.count - b.count,
       ...getColumnSearchProps('count', { type: 'number' })
-    },
-    {
-      title: '',
-      dataIndex: 'buttons',
-      key: 'buttons',
     }
   ]
+
+  if (isStorage()) {
+    columns.push({
+      title: 'Дата отправки',
+      dataIndex: ['sending', 'status_date_1'],
+      key: 'sending_date',
+      render: date => date && dayjs(date).format('DD.MM.YYYY')
+    })
+  }
+
+  columns.push({
+    title: '',
+    dataIndex: 'buttons',
+    key: 'buttons',
+  })
 
   if (!isNew && service.isLoading) return null
   // if (isNew && !newCreated) return null
@@ -352,7 +368,7 @@ export default function ServiceForm() {
               width='100%'
             />  
           </Col>
-          <Col span={4}>
+          <Col span={isStorage() ? 3 : 4}>
             <FormField
               name={['pole', 'date']}
               label='Дата'
@@ -363,7 +379,7 @@ export default function ServiceForm() {
               width='100%'
             />
           </Col>
-          <Col span={6}>
+          <Col span={isStorage() ? 4 : 6}>
             <FormField
               type='select'
               options={internalClientsOptions}
@@ -374,7 +390,7 @@ export default function ServiceForm() {
               width='100%'
             />
           </Col>
-          <Col span={6}>
+          <Col span={isStorage() ? 4 : 6}>
             <FormField
               name={['pole', 'status']}
               label='Статус'
@@ -384,7 +400,7 @@ export default function ServiceForm() {
               width='100%'
             />
           </Col>
-          <Col span={4}>
+          {!isStorage() && <Col span={4}>
             <FormField
               name={['pole', `date_status_${SERVICE_STATUS[serviceName]?.length - 1}`]}
               label={isFullFill() ? 'Дата передачи' : 'Дата выдачи'}
@@ -393,7 +409,36 @@ export default function ServiceForm() {
               disabled={isEdit}
               width='100%'
             />
-          </Col>
+          </Col>}
+          {isStorage() && <>
+            <Col span={3}>
+              <FormField
+                type='date'
+                label='Дата начала'  
+                name={['pole', 'start_date']}
+                isEdit={isEdit}
+                text={initialValues.pole?.start_date?.format('DD.MM.YYYY')}
+              />
+            </Col>
+            <Col span={3}>
+              <FormField
+                type='date'
+                label='Дата окончания'  
+                name={['pole', 'end_date']}
+                isEdit={isEdit}
+                text={initialValues.pole?.end_date?.format('DD.MM.YYYY')}
+              />
+            </Col>
+            <Col span={3}>
+              <FormField
+                width='100%'
+                type='number'
+                label='Дней хранения'
+                disabled={isEdit}
+                isEdit={isEdit}
+              />
+            </Col>
+          </>}
           {isDelivery() && <>
             <Col span={3}>
               <FormField
@@ -432,7 +477,7 @@ export default function ServiceForm() {
               />  
             </Col>
           </>}
-          {!isFullFill() && <>
+          {!isFullFill() && !isStorage() && <>
             <Col span={3}>
               <Checkbox
                 name={['pole', 'is_got_client']}
@@ -462,7 +507,7 @@ export default function ServiceForm() {
               />
             </Col>
           </>}
-          {(isDelivery() || isFullFill()) && <>
+          {(isDelivery() || isFullFill() || isStorage()) && <>
             {isFullFill() && <Col span={4}>
               <FormField
                 name={['pole', 'merketplace']}
@@ -470,6 +515,8 @@ export default function ServiceForm() {
                 type='select'
                 options={[{ value: 'Wilberries' }, { value: 'OZON' }, { value: 'Яндекс' }]}
                 rules={[{ required: true }]}
+                isEdit={isEdit}
+                text={initialValues.pole?.merketplace}
               />
             </Col>}
             <Col span={3}>

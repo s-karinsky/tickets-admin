@@ -28,7 +28,8 @@ const MENU_ITEMS = {
   services: getItem('Услуги', 'services', <UnorderedListOutlined />, [
     getItem(<Link to='/services/issuance'>Выдача со склада</Link>, 'services-issuance'),
     getItem(<Link to='/services/delivery'>Доставка</Link>, 'services-delivery'),
-    getItem(<Link to='/services/fullfillment'>Фулфилмент</Link>, 'services-fullfillment')
+    getItem(<Link to='/services/fullfillment'>Фулфилмент</Link>, 'services-fullfillment'),
+    getItem(<Link to='/services/storage'>Хранение</Link>, 'services-storage')
   ]),
   users: getItem(<Link to='/users'>Пользователи</Link>, 'users', <UserOutlined />),
   sendings: getItem(
