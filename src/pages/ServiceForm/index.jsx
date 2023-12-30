@@ -42,9 +42,6 @@ export default function ServiceForm() {
   const navigate = useNavigate()
   const location = useLocation()
   const [ dynamicRequired, setDynamicRequired ] = useState({})
-  const [ document, setDocument ] = useState('new')
-  // const [ newCreated, setNewCreated ] = useState(false)
-  // const [ newNumbers, setNewNumber ] = useState([])
 
   const isNew = id === 'create'
   const isEdit = isNew || searchParams.get('edit') !== null
@@ -69,9 +66,10 @@ export default function ServiceForm() {
   })
   const initialValues = service.data || {
     pole: {
-      status: _get(SERVICE_STATUS, [serviceName, 0])
+      status: 0
     }
   }
+  initialValues.statusName = SERVICE_STATUS[serviceName][initialValues.pole.status]
   if (!service.data) {
     _set(initialValues, ['pole', 'date'], dayjs())
   }
@@ -85,25 +83,6 @@ export default function ServiceForm() {
     queryFn: getProductsByPlaceId(placeId),
     enabled: isNew ? datasets.length > 0 : service.status === 'success'
   })))
-
-  /* useEffect(() => {
-    if (!isNew) return
-    async function createEmptyServices() {
-      const sql = `INSERT INTO dataset (id_ref, ref_tip, tip, status) VALUES ${datasets.map(id_ref => `(${id_ref}, 'place', 'service', 1)`).join(',')}`
-      await axios.postWithAuth('/query/insert', { sql })
-      let response = await axios.select('dataset', '*', { where: `ref_tip="place" AND tip="service" AND status=1 AND (${datasets.map(id_ref => `id_ref=${id_ref}`).join(' OR ')})`, orderBy: 'id DESC' })
-      const data = response.data?.data || []
-      const refIds = data.slice(0, datasets.length).map(item => item.id)
-      const year = new Date().getFullYear() - 2000
-      const idSql = `INSERT INTO n_u${year} (id_ref, tip_ref) VALUES ${refIds.map(id => `(${id}, 'service')`).join(',')}`
-      await axios.postWithAuth('/query/insert', { sql: idSql })
-      response = await axios.select(`n_u${year}`, '*', { where: `tip_ref='service' AND ${refIds.map(id => `id_ref=${id}`).join(' OR ')}`, orderBy: 'num DESC' })
-      const numbers = (response.data?.data || []).map(item => item.num)
-      setNewNumber(numbers)
-      setNewCreated(true)
-    }
-    createEmptyServices()
-  }, [isNew]) */
 
   useEffect(() => {
     if (initialValues.pole?.is_got_client) {
@@ -349,6 +328,9 @@ export default function ServiceForm() {
           if (isDelivery) {
             add.driver_phone = driverMap[driverValue]?.phone
           }
+          if (isNew) {
+            values.pole.status = 0
+          }
           const item = {
             ref_tip: 'place',
             tip: 'service',
@@ -408,7 +390,7 @@ export default function ServiceForm() {
           </Col>
           <Col span={isStorage() ? 4 : 6}>
             <FormField
-              name={['pole', 'status']}
+              name={['statusName']}
               label='Статус'
               labelType='calc'
               isEdit={isEdit}

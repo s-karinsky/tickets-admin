@@ -354,13 +354,20 @@ export const useDictionary = name => useQuery(['dictionary', name], async () => 
 })
 
 export const useService = (name, id, params) => useQuery(['dataset', name, id], async () => {
+  const where = typeof name === 'object' ? name : {
+    'JSON_EXTRACT(pole, "$.type")': name
+  }
+  if (typeof id === 'object' && !params) {
+    params = id
+  } else {
+    where.id = id
+  }
   const response = await axios.select('dataset', '*',
     {
       where: {
         'status': 0,
         'tip': 'service',
-        'JSON_EXTRACT(pole, "$.type")': name,
-        id
+        ...where
       }
     }
   )
@@ -392,5 +399,5 @@ export const useService = (name, id, params) => useQuery(['dataset', name, id], 
       pole
     }
   })
-  return id ? res[0] : res
+  return id && typeof id !== 'object' ? res[0] : res
 }, params)

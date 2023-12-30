@@ -23,7 +23,7 @@ const getColumns = (name, { ocStatusClick }) => {
       dataIndex: 'status',
       render: (val, item) => (
         <>
-          {val} <Button
+          {SERVICE_STATUS[name][val]} <Button
             onClick={() => ocStatusClick(item)}
             size='small'
             type='primary'
@@ -182,7 +182,7 @@ export default function ServiceList() {
         <Select
           style={{ width: '100%', marginTop: 10 }}
           size='large'
-          options={SERVICE_STATUS[serviceName]?.map(value => ({ value }))}
+          options={SERVICE_STATUS[serviceName]?.map((label, value) => ({ label, value }))}
           value={statusModalValue}
           onChange={val => setStatusModalValue(val)}
         />
