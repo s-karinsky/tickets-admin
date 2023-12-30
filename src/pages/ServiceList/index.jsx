@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
 import { Row, Col, Button, Typography, Table, Modal, DatePicker, Select, Switch } from 'antd'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ExclamationCircleFilled } from '@ant-design/icons'
@@ -14,13 +14,9 @@ const getColumns = (name, { ocStatusClick }) => {
       dataIndex: 'number'
     },
     {
-      title: 'Отправка',
-      dataIndex: 'sending_number'
-    },
-    {
-      title: 'Место',
-      dataIndex: ['place', 'place'],
-      key: 'place'
+      title: 'Отправка / Место',
+      dataIndex: 'placeData',
+      render: data => (data || []).map(item => <>{item.sending_number+' / '+item.place}<br /></>)
     },
     {
       title: 'Статус',

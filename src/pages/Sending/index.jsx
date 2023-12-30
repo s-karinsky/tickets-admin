@@ -8,6 +8,7 @@ import {
 } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import { useQueries } from 'react-query'
+import { uniqBy } from 'lodash'
 import { BsTrash } from 'react-icons/bs'
 import { BiEdit } from 'react-icons/bi'
 import { PropertyGap } from '../Sendings'
@@ -110,6 +111,13 @@ export default function Sending({
         ),
       }
     })
+
+  const createServiceDisabled = useMemo(() => {
+    const selectedPlaces = selectedRows.map(rowId => placesData.find(item => item.id === rowId))
+    const withActiveService = selectedPlaces.filter(item => !!item.service_id).length > 0
+    const sameClient = uniqBy(selectedPlaces, 'client')
+    return withActiveService || sameClient.length > 1
+  }, [selectedRows, placesData])
 
   const columns = [
     {
@@ -592,7 +600,7 @@ export default function Sending({
                   }
                 ]}}
                 trigger={['click']}
-                disabled={selectedRows.length === 0 || selectedRows.map(rowId => placesData.find(item => item.id === rowId)).filter(item => !!item.service_id).length > 0}
+                disabled={selectedRows.length === 0 || createServiceDisabled}
               >
                 <Button
                   type='primary'

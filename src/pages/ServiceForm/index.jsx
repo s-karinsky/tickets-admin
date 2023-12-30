@@ -1,8 +1,8 @@
 import { useMemo, useState, useEffect } from 'react'
-import { Typography, Row, Col, Space, Button, Form, Table, Checkbox } from 'antd'
+import { Typography, Row, Col, Space, Button, Form, Table, Checkbox, Select, Modal } from 'antd'
 import { useParams, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery, useQueries } from 'react-query'
-import { SaveOutlined } from '@ant-design/icons'
+import { SaveOutlined, ExclamationCircleFilled } from '@ant-design/icons'
 import { BiEdit } from 'react-icons/bi'
 import { BsTrash } from 'react-icons/bs'
 import dayjs from 'dayjs'
@@ -42,6 +42,7 @@ export default function ServiceForm() {
   const navigate = useNavigate()
   const location = useLocation()
   const [ dynamicRequired, setDynamicRequired ] = useState({})
+  const [ document, setDocument ] = useState('new')
   // const [ newCreated, setNewCreated ] = useState(false)
   // const [ newNumbers, setNewNumber ] = useState([])
 
@@ -62,14 +63,19 @@ export default function ServiceForm() {
   const internalClients = useUsersWithRole(3)
   const tarifs = useDictionary('tarif')
 
-  const service = useService(serviceName, id, { enabled: !isNew })
+  const service = useService(serviceName, id, {
+    enabled: !isNew,
+    refetchOnWindowFocus: false
+  })
   const initialValues = service.data || {
     pole: {
       status: _get(SERVICE_STATUS, [serviceName, 0])
     }
   }
-  _set(initialValues, ['pole', 'date'], dayjs())
-  const datasetsId = isNew ? datasets : [initialValues.id_ref]
+  if (!service.data) {
+    _set(initialValues, ['pole', 'date'], dayjs())
+  }
+  const datasetsId = isNew ? datasets : (initialValues.places || [])
   const places = useQuery(['datasets', { id: datasetsId }], getDatasetsById(datasetsId), {
     enabled: isNew ? datasets.length > 0 : service.status === 'success'
   })
@@ -82,7 +88,7 @@ export default function ServiceForm() {
 
   /* useEffect(() => {
     if (!isNew) return
-    async function createEmpryServices() {
+    async function createEmptyServices() {
       const sql = `INSERT INTO dataset (id_ref, ref_tip, tip, status) VALUES ${datasets.map(id_ref => `(${id_ref}, 'place', 'service', 1)`).join(',')}`
       await axios.postWithAuth('/query/insert', { sql })
       let response = await axios.select('dataset', '*', { where: `ref_tip="place" AND tip="service" AND status=1 AND (${datasets.map(id_ref => `id_ref=${id_ref}`).join(' OR ')})`, orderBy: 'id DESC' })
@@ -96,7 +102,7 @@ export default function ServiceForm() {
       setNewNumber(numbers)
       setNewCreated(true)
     }
-    createEmpryServices()
+    createEmptyServices()
   }, [isNew]) */
 
   useEffect(() => {
@@ -158,10 +164,19 @@ export default function ServiceForm() {
               color='red'
               title='Удалить место из услуги'
               onClick={() => {
-                const selectedRows = datasets.filter(set => set !== item.id)
-                if (selectedRows.length) {
-                  navigate(location.pathname, { state: { sendingId, selectedRows } })
-                }
+                Modal.confirm({
+                  title: 'Вы действительно хотите удалить это место из услуги?',
+                  icon: <ExclamationCircleFilled />,
+                  okText: 'Да',
+                  okType: 'danger',
+                  cancelText: 'Нет',
+                  onOk() {
+                    const selectedRows = datasets.filter(set => set !== item.id)
+                    if (selectedRows.length) {
+                      navigate(location.pathname, { state: { sendingId, selectedRows } })
+                    }
+                  }
+                })
               }}
             />}
           </div>
@@ -172,7 +187,7 @@ export default function ServiceForm() {
   const columns = [
     {
       title: 'Отправка',
-      render: () => sendingNum || initialValues.sending_number,
+      dataIndex: 'sending_number',
       align: 'right'
     },
     {
@@ -263,7 +278,7 @@ export default function ServiceForm() {
     key: 'buttons',
   })
 
-  if (!isNew && service.isLoading) return null
+  if (!isNew && service.isFetching) return null
   // if (isNew && !newCreated) return null
 
   return (
@@ -329,13 +344,12 @@ export default function ServiceForm() {
           }
         }}
         onFinish={async (values) => {
-          const initialNumber = values.pole.number
+          const client = placesData[0].client
           const add = {}
           if (isDelivery) {
             add.driver_phone = driverMap[driverValue]?.phone
           }
-          const items = datasetsId.map((id, i) => ({
-            id_ref: id,
+          const item = {
             ref_tip: 'place',
             tip: 'service',
             status: 0,
@@ -343,19 +357,20 @@ export default function ServiceForm() {
               ...values.pole,
               type: serviceName,
               is_finished: 0,
-              number: initialNumber + i,
               is_got_client: isGotClient,
-              ...add
+              client,
+              ...add,
+              places: datasetsId
             })
-          }))
-          let promises = []
-          if (isNew) {
-            promises = items.map(item => axios.postWithAuth('/query/insert', { sql: sqlInsert('dataset', item) } ))
-          } else {
-            promises = items.map(item => axios.postWithAuth('/query/update', { sql: sqlUpdate('dataset', item, `id=${id}`) } ))
           }
-          await Promise.all(promises)
-          navigate(`/services/${serviceName}`)
+          const response = await axios.postWithAuth(`/query/${isNew ? 'insert' : 'update'}`, { sql: isNew ? sqlInsert('dataset', item) : sqlUpdate('dataset', item, `id=${id}`) })
+          if (isNew) {
+            const id = response.data?.data?.id || ''
+            navigate(`/services/${serviceName}/${id}`)
+          } else {
+            setSearchParams({})
+            service.refetch()
+          }
         }}
       >
         <Row gutter={[10, 20]} align='middle'>
@@ -603,7 +618,7 @@ export default function ServiceForm() {
           </Col>
         </Row>
       </Form>
-      <Typography.Title level={2} style={{ padding: '0 40px' }}>{datasets.length > 1 ? 'для мест' : 'для места'}</Typography.Title>
+      <Typography.Title level={2} style={{ padding: '0 40px' }}>{datasetsId.length > 1 ? 'для мест' : 'для места'}</Typography.Title>
       <Table
         columns={columns}
         isLoading={places.isLoading}

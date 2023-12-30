@@ -226,7 +226,7 @@ export const getPlaceById = (placeId, sendingId, params = {}) => async () => {
 export const getDatasetsById = (ids) => async () => {
   if (!ids || !Array.isArray(ids)) return []
   const where = ids.map(id => `d.id=${id}`).join(' OR ')
-  const response = await axios.postWithAuth('/query/select', { sql: `SELECT d.*, t.json as sending FROM dataset d LEFT JOIN trip t ON t.id_trip=d.id_ref WHERE ${where}` })
+  const response = await axios.postWithAuth('/query/select', { sql: `SELECT d.*, t.json as sending, t.from as sending_number FROM dataset d LEFT JOIN trip t ON t.id_trip=d.id_ref WHERE ${where}` })
   const data = response.data?.data || []
   return data.map(item => ({
     ...item,
@@ -354,23 +354,43 @@ export const useDictionary = name => useQuery(['dictionary', name], async () => 
 })
 
 export const useService = (name, id, params) => useQuery(['dataset', name, id], async () => {
-  const response = await axios.postWithAuth('/query/select', {
+  const response = await axios.select('dataset', '*',
+    {
+      where: {
+        'status': 0,
+        'tip': 'service',
+        'JSON_EXTRACT(pole, "$.type")': name,
+        id
+      }
+    }
+  )
+  const data = response.data?.data || []
+  let placesId = []
+  data.forEach(item => {
+    const json = parseJSON(item.pole)
+    placesId = placesId.concat(json.places || [])
+  })
+  const places = await getDatasetsById(placesId)()
+  const placeMap = keyBy(places, 'id')
+  /* await axios.postWithAuth('/query/select', {
     sql: `SELECT d.id as id, d.id_ref as id_ref, d.ref_tip as ref_tip, d.tip as tip, d.pole as pole, n.pole as place, s.id_trip as sending_id, s.from as sending_number, s.json as sending FROM dataset d
       LEFT JOIN dataset n ON d.id_ref=n.id AND n.tip='place'
       LEFT JOIN trip s ON n.id_ref=s.id_trip
       WHERE d.status=0 AND d.tip='service' AND JSON_EXTRACT(d.pole, '$.type')='${name}'${id ? ` AND d.id=${id}` : ''}`.replaceAll('\n', ' ')
-  })
-  const data = (response.data?.data || []).map(item => {
+  }) */
+  const res = data.map(item => {
     const pole = parseJSON(item.pole)
     pole.date = dayjs(pole.date)
     if (pole.start_date) pole.start_date = dayjs(pole.start_date)
     if (pole.end_date) pole.end_date = dayjs(pole.end_date)
+    const placeData = (pole.places || []).map(id => placeMap[id])
     return {
       ...item,
-      ...parseJSON(item.pole),
+      ...pole,
+      placeData,
       place: parseJSON(item.place),
       pole
     }
   })
-  return id ? data[0] : data
+  return id ? res[0] : res
 }, params)

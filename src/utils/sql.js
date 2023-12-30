@@ -11,7 +11,8 @@ const toPairs = obj => Object.keys(obj).reduce((acc, key) => {
   } else {
     field = isSqlFunc(key) || key.includes('.') ? key : `\`${key}\``
   }
-  let value = obj[key] ?? ''
+  let value = obj[key]
+  if (value === null || value === undefined) return acc
   if (typeof value === 'string' && value !== 'NULL' && !isSqlFunc(value)) {
     value = `'${value}'`
   }
