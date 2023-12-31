@@ -114,7 +114,7 @@ export default function Sending({
       }
     })
 
-  const handleAddService = type => setService({ type, state: { sendingNum: data?.from, sendingId, selectedRows } })
+  const handleAddService = type => setService({ type, state: { selectedRows } })
 
   const createServiceDisabled = useMemo(() => {
     const selectedPlaces = selectedRows.map(rowId => placesData.find(item => item.id === rowId))

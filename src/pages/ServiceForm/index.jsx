@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react'
-import { Typography, Row, Col, Space, Button, Form, Table, Checkbox, Select, Modal } from 'antd'
+import { Typography, Row, Col, Space, Button, Form, Table, Checkbox, Select, Modal, Dropdown } from 'antd'
 import { useParams, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery, useQueries } from 'react-query'
 import { SaveOutlined, ExclamationCircleFilled } from '@ant-design/icons'
@@ -53,7 +53,7 @@ export default function ServiceForm() {
   const isStorage = () => serviceName === 'storage'
   const isRepack = () => serviceName === 'repack'
 
-  const { sendingId, sendingNum, selectedRows: datasets = [] } = location.state || {}
+  const { selectedRows: datasets = [] } = location.state || {}
   const [ isGotClient, setIsGotClient ] = useState(false)
 
   const clients = useUsersWithRole(1)
@@ -152,7 +152,7 @@ export default function ServiceForm() {
                   onOk() {
                     const selectedRows = datasets.filter(set => set !== item.id)
                     if (selectedRows.length) {
-                      navigate(location.pathname, { state: { sendingId, selectedRows } })
+                      navigate(location.pathname, { state: { selectedRows } })
                     }
                   }
                 })
@@ -286,14 +286,51 @@ export default function ServiceForm() {
               </Button>
             </Space> :
             <Space>
-              <Button
-                type='primary'
-                size='large'
-                icon={<BiEdit />}
-                onClick={() => navigate(`${location.pathname}?edit`)}
-              >
-                Редактировать
-              </Button>
+              {initialValues?.pole?.is_finished === 0 &&
+                <Button
+                  type='primary'
+                  size='large'
+                  icon={<BiEdit />}
+                  onClick={() => navigate(`${location.pathname}?edit`)}
+                >
+                  Редактировать
+                </Button>
+              }
+              {initialValues?.pole?.is_finished === 1 && !isIssuance() && !isDelivery() && <Dropdown
+                  menu={{
+                    items: [
+                      {
+                        key: 'issuance',
+                        label: 'Выдача со склада',
+                        onClick: () => navigate('/services/issuance/create', { state: { selectedRows: placesData.map(item => item.id) } })
+                      },
+                      {
+                        key: 'delivery',
+                        label: 'Доставка',
+                        onClick: () => navigate('/services/delivery/create', { state: { selectedRows: placesData.map(item => item.id) } })
+                      },
+                      {
+                        key: 'fullfillment',
+                        label: 'Фулфилмент',
+                        onClick: () => navigate('/services/fullfillment/create', { state: { selectedRows: placesData.map(item => item.id) } })
+                      }
+                    ].concat(
+                      isRepack() ? [{
+                        key: 'storage',
+                        label: 'Хранение',
+                        onClick: () => navigate('/services/storage/create', { state: { selectedRows: placesData.map(item => item.id) } })
+                      }] : [])
+                    .filter(item => item.key !== serviceName)
+                  }}
+                >
+                  <Button
+                    type='primary'
+                    size='large'
+                  >
+                    Создать услугу
+                  </Button>
+                </Dropdown>
+              }
               {/* <Button
                 type='primary'
                 size='large'
@@ -360,7 +397,7 @@ export default function ServiceForm() {
               name={['pole', 'number']}
               label='Номер'
               type='number'
-              dependencies={[['pole', 'date']]}
+              dependencies={['pole.date']}
               rules={
                 [
                   { required: true },
@@ -628,9 +665,9 @@ export default function ServiceForm() {
         size='small'
         onRow={(record, index) => ({
           onClick: (e) => {
-            if (e.detail === 2) {
-              navigate(`/sendings/${sendingId || initialValues.sending_id}/${record.id}`)
-            }
+            // if (e.detail === 2) {
+            //   navigate(`/sendings/${sendingId || initialValues.sending_id}/${record.id}`)
+            // }
           },
         })}
         rowSelection={{
