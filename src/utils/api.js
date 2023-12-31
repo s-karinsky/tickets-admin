@@ -158,7 +158,7 @@ export const getPlacesBySendingId = sendingId => async () => {
   const [ response, responseProducts ] = await Promise.all([
     axios.select('dataset p', ['p.*', 's.id as service_id', 's.pole as service'], {
       leftJoin: {
-        'dataset s': 's.id_ref=p.id AND s.tip="service" AND JSON_EXTRACT(s.pole, "$.is_finished")=0'
+        'dataset s': `JSON_EXTRACT(s.pole, "$.places") LIKE CONCAT('%"', p.id ,'"%') AND s.tip="service" AND JSON_EXTRACT(s.pole, "$.is_finished")=0`
       },
       where: {
         'p.ref_tip': 'sending',
@@ -209,7 +209,7 @@ export const getPlaceById = (placeId, sendingId, params = {}) => async () => {
   if (params.copy) {
     sql = `SELECT * FROM dataset WHERE id=${params.copy}`
   } else {
-    sql = `SELECT p.*, s.pole as service FROM dataset p LEFT JOIN dataset s ON s.id_ref=p.id AND s.tip='service' AND JSON_EXTRACT(s.pole, '$.is_finished')=0 WHERE p.id=${placeId}`
+    sql = `SELECT p.*, s.pole as service FROM dataset p LEFT JOIN dataset s ON JSON_EXTRACT(s.pole, "$.places") LIKE CONCAT('%"', p.id ,'"%') AND s.tip='service' AND JSON_EXTRACT(s.pole, '$.is_finished')=0 WHERE p.id=${placeId}`
   }
   const response = await axios.postWithAuth('/query/select', { sql })
   const data = (response.data?.data || [])[0]

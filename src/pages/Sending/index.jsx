@@ -8,7 +8,7 @@ import {
 } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import { useQueries } from 'react-query'
-import { uniqBy } from 'lodash'
+import { uniqBy, get as _get } from 'lodash'
 import { BsTrash } from 'react-icons/bs'
 import { BiEdit } from 'react-icons/bi'
 import { PropertyGap } from '../Sendings'
@@ -18,7 +18,7 @@ import { useDictionary, useUsersWithRole, getLastId, getCount, createSending, up
 import { getColumnSearchProps } from '../../utils/components'
 import { required } from '../../utils/validationRules'
 import { declOfNum, numberFormatter, getPaginationSettings, filterOption } from '../../utils/utils'
-import { SENDING_STATUS, SERVICE_NAME } from '../../consts'
+import { SENDING_STATUS, SERVICE_STATUS, SERVICE_NAME } from '../../consts'
 
 const { Title, Link } = Typography
 
@@ -197,7 +197,7 @@ export default function Sending({
       title: 'Статус услуги',
       dataIndex: 'service',
       key: 'service_status',
-      render: service => service?.status,
+      render: (service, item) => _get(SERVICE_STATUS, [item.service?.type, service?.status]),
       sorter: (a, b) => (a.service?.status || '').localeCompare(b.service?.status || '')
     },
     {
