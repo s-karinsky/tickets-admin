@@ -42,6 +42,7 @@ export default function ServiceForm() {
   const navigate = useNavigate()
   const location = useLocation()
   const [ dynamicRequired, setDynamicRequired ] = useState({})
+  const [ selectedRows, setSelectedRows ] = useState([])
 
   const isNew = id === 'create'
   const isEdit = isNew || searchParams.get('edit') !== null
@@ -59,6 +60,10 @@ export default function ServiceForm() {
   const drivers = useUsersWithRole(2, { enabled: isDelivery() })
   const internalClients = useUsersWithRole(3)
   const tarifs = useDictionary('tarif')
+
+  // useEffect(() => {
+  //   axios.select('dataset', 'YEAR(SUBSTR(JSON_EXTRACT(pole, "$.date"), 2, 22)), YEAR("2023-12-31T05:38:30.456Z")', { where: { 'JSON_EXTRACT(pole, "$.number")': 1, tip: 'service', 'status': 0 } })
+  // }, [])
 
   const service = useService(serviceName, id, {
     refetchOnWindowFocus: false
@@ -367,7 +372,7 @@ export default function ServiceForm() {
                         '$.pole.number': id,
                         tip: 'service',
                         status: 0,
-                        // 'YEAR(JSON_EXTRACT(pole, "$.date"))': `YEAR('${getFieldValue(['pole', 'date'])?.format('YYYY-MM-DD')}')`
+                        'YEAR(SUBSTR(JSON_EXTRACT(pole, "$.date"), 2, 22))': `YEAR('${getFieldValue(['pole', 'date'])?.format('YYYY-MM-DD')}')`
                       })
                       return count > 0 ? Promise.reject(new Error('Номер уже используется')) : Promise.resolve()
                     },
@@ -612,7 +617,9 @@ export default function ServiceForm() {
           </Col>
         </Row>
       </Form>
-      <Typography.Title level={2} style={{ padding: '0 40px' }}>{datasetsId.length > 1 ? 'для мест' : 'для места'}</Typography.Title>
+      <Typography.Title level={2} style={{ padding: '0 40px' }}>
+        {isRepack() ? 'Первичные места' : (datasetsId.length > 1 ? 'для мест' : 'для места')}
+      </Typography.Title>
       <Table
         columns={columns}
         isLoading={places.isLoading}
@@ -626,6 +633,10 @@ export default function ServiceForm() {
             }
           },
         })}
+        rowSelection={{
+          type: Checkbox,
+          onChange: selectedKeys => setSelectedRows(selectedKeys)
+        }}
         pagination={false}
       />
     </>

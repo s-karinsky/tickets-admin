@@ -158,12 +158,11 @@ export default function ServiceList() {
             alert('Не выбрана дата')
             return
           }
-          const statusNum = SERVICE_STATUS[serviceName]?.indexOf(statusModalValue)
           const pole = {
             ...statusModalItem.pole,
             status: statusModalValue,
-            [`date_status_${statusNum}`]: statusModalDate.format('DD.MM.YYYY'),
-            is_finished: Number(statusNum === SERVICE_STATUS[serviceName]?.length - 1)
+            [`date_status_${statusModalValue}`]: statusModalDate.format('DD.MM.YYYY'),
+            is_finished: Number(statusModalValue === SERVICE_STATUS[serviceName]?.length - 1)
           }
           await updateDatasetById(statusModalItem.id, { pole: JSON.stringify(pole) })
           refetch()
