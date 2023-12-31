@@ -354,6 +354,23 @@ export const useDictionary = name => useQuery(['dictionary', name], async () => 
 })
 
 export const useService = (name, id, params) => useQuery(['dataset', name, id], async () => {
+  if (id === 'create') {
+    const maxNum = await axios.select('dataset', 'max(cast(JSON_EXTRACT(pole, "$.number") as decimal)) as max', {
+      where: {
+        tip: 'service',
+        '$.pole.is_finished': 0
+      }
+    })
+    const number = parseInt(_get(maxNum, ['data', 'data', 0, 'max'])) || 0
+    return {
+      pole: {
+        number: number + 1,
+        date: dayjs(),
+        status: 0
+      }
+    }
+  }
+
   const where = typeof name === 'object' ? name : {
     'JSON_EXTRACT(pole, "$.type")': name
   }

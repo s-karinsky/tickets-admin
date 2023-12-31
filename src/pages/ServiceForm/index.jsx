@@ -10,7 +10,7 @@ import { get as _get, set as _set } from 'lodash'
 import FormField from '../../components/FormField'
 import { VALIDATION_MESSAGES, SERVICE_STATUS } from '../../consts'
 import { numberRange } from '../../utils/validationRules'
-import { getDatasetsById, useUsersWithRole, useDictionary, useService, getProductsByPlaceId } from '../../utils/api'
+import { getDatasetsById, useUsersWithRole, useDictionary, useService, getProductsByPlaceId, getCount } from '../../utils/api'
 import { getColumnSearchProps } from '../../utils/components'
 import axios from '../../utils/axios'
 import { sqlInsert, sqlUpdate } from '../../utils/sql'
@@ -61,17 +61,11 @@ export default function ServiceForm() {
   const tarifs = useDictionary('tarif')
 
   const service = useService(serviceName, id, {
-    enabled: !isNew,
     refetchOnWindowFocus: false
   })
-  const initialValues = service.data || {
-    pole: {
-      status: 0
-    }
-  }
-  initialValues.statusName = SERVICE_STATUS[serviceName][initialValues.pole.status]
-  if (!service.data) {
-    _set(initialValues, ['pole', 'date'], dayjs())
+  const initialValues = service.data || {}
+  if (initialValues) {
+    initialValues.statusName = SERVICE_STATUS[serviceName][initialValues?.pole?.status]
   }
   const datasetsId = isNew ? datasets : (initialValues.places || [])
   const places = useQuery(['datasets', { id: datasetsId }], getDatasetsById(datasetsId), {
@@ -85,6 +79,7 @@ export default function ServiceForm() {
   })))
 
   useEffect(() => {
+    if (!initialValues) return
     if (initialValues.pole?.is_got_client) {
       setIsGotClient(initialValues.pole.is_got_client)
     }
@@ -257,8 +252,7 @@ export default function ServiceForm() {
     key: 'buttons',
   })
 
-  if (!isNew && service.isFetching) return null
-  // if (isNew && !newCreated) return null
+  if (service.isFetching) return null
 
   return (
     <>
@@ -361,7 +355,25 @@ export default function ServiceForm() {
               name={['pole', 'number']}
               label='Номер'
               type='number'
-              rules={[{ required: true }, ...numberRange({ min: 1, max: 99999 })]}
+              dependencies={[['pole', 'date']]}
+              rules={
+                [
+                  { required: true },
+                  ...numberRange({ min: 1, max: 99999 }),
+                  ({ getFieldValue }) => ({
+                    validator: async (_, id) => {
+                      if (!isNew && parseInt(id) === parseInt(initialValues?.pole?.number)) return Promise.resolve()
+                      const count = await getCount('dataset', {
+                        '$.pole.number': id,
+                        tip: 'service',
+                        status: 0,
+                        // 'YEAR(JSON_EXTRACT(pole, "$.date"))': `YEAR('${getFieldValue(['pole', 'date'])?.format('YYYY-MM-DD')}')`
+                      })
+                      return count > 0 ? Promise.reject(new Error('Номер уже используется')) : Promise.resolve()
+                    },
+                  })
+                ]
+              }
               isEdit={isEdit}
               width='100%'
             />  
