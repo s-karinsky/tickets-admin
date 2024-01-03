@@ -43,6 +43,7 @@ export default function ServiceForm() {
   const location = useLocation()
   const [ dynamicRequired, setDynamicRequired ] = useState({})
   const [ selectedRows, setSelectedRows ] = useState([])
+  const [ newPlaces, setNewPlaces ] = useState([])
 
   const isNew = id === 'create'
   const isEdit = isNew || searchParams.get('edit') !== null
@@ -61,10 +62,6 @@ export default function ServiceForm() {
   const internalClients = useUsersWithRole(3)
   const tarifs = useDictionary('tarif')
 
-  // useEffect(() => {
-  //   axios.select('dataset', 'YEAR(SUBSTR(JSON_EXTRACT(pole, "$.date"), 2, 22)), YEAR("2023-12-31T05:38:30.456Z")', { where: { 'JSON_EXTRACT(pole, "$.number")': 1, tip: 'service', 'status': 0 } })
-  // }, [])
-
   const service = useService(serviceName, id, {
     refetchOnWindowFocus: false
   })
@@ -73,7 +70,7 @@ export default function ServiceForm() {
     initialValues.statusName = SERVICE_STATUS[serviceName][initialValues?.pole?.status]
   }
   const datasetsId = isNew ? datasets : (initialValues.places || [])
-  const places = useQuery(['datasets', { id: datasetsId }], getDatasetsById(datasetsId), {
+  const places = useQuery(['datasets', { id: datasetsId }], getDatasetsById(datasetsId, true), {
     enabled: isNew ? datasets.length > 0 : service.status === 'success'
   })
 
@@ -82,6 +79,14 @@ export default function ServiceForm() {
     queryFn: getProductsByPlaceId(placeId),
     enabled: isNew ? datasets.length > 0 : service.status === 'success'
   })))
+
+  useEffect(() => {
+    if (serviceName !== 'repack' || isNew) return
+    const { new_places } = initialValues
+    getDatasetsById(new_places, true)().then(places => {
+      setNewPlaces(places)
+    })
+  }, [initialValues.new_places, serviceName, isNew])
 
   useEffect(() => {
     if (!initialValues) return
@@ -134,34 +139,89 @@ export default function ServiceForm() {
       return {
         ...item,
         count,
-        net_weight,
-        buttons: (
-          <div style={{ display: 'flex', gap: 10 }}>
-            {isNew && <BsTrash
+        net_weight
+      }
+    })
+
+  const expandedRowRender = item => {
+    const childColumns = [
+      {
+        title: 'Наименование',
+        dataIndex: 'name',
+        key: 'name',
+        sorter: (a, b) => a.name.localeCompare(b.name),
+        ...getColumnSearchProps('name')
+      },
+      {
+        title: 'Вес нетто',
+        dataIndex: 'net_weight',
+        key: 'net_weight',
+        align: 'right',
+        sorter: (a, b) => a.net_weight - b.net_weight,
+        ...getColumnSearchProps('net_weight', { type: 'number' })
+      },
+      {
+        title: 'Количество',
+        dataIndex: 'count',
+        key: 'count',
+        align: 'right',
+        sorter: (a, b) => a.count - b.count,
+        ...getColumnSearchProps('count', { type: 'number' })
+      },
+      {
+        title: 'Цена',
+        dataIndex: 'price',
+        key: 'price',
+        align: 'right',
+        sorter: (a, b) => a.price - b.price,
+        render: val => Number(val) ? Number(val).toFixed(2) : null,
+        ...getColumnSearchProps('price', { type: 'number' })
+      },
+      {
+        title: 'Сумма',
+        dataIndex: 'sum',
+        key: 'sum',
+        align: 'right',
+        sorter: (a, b) => a.sum - b.sum,
+        render: val => Number(val) ? Number(val).toFixed(2) : null,
+        ...getColumnSearchProps('sum', { type: 'number' })
+      },
+      {
+        title: '',
+        dataIndex: 'buttons',
+        key: 'buttons',
+        render: (_, product) => (
+          (isNew || item.status === 0) && isEdit && <div style={{ display: 'flex', gap: 10 }}>
+            <BsTrash
               style={{ marginLeft: 30, cursor: 'pointer' }} 
               size={17}
               color='red'
-              title='Удалить место из услуги'
+              title='Удалить товар из нового места'
               onClick={() => {
                 Modal.confirm({
-                  title: 'Вы действительно хотите удалить это место из услуги?',
+                  title: 'Вы действительно хотите удалить этот товар из нового места?',
                   icon: <ExclamationCircleFilled />,
                   okText: 'Да',
                   okType: 'danger',
                   cancelText: 'Нет',
-                  onOk() {
-                    const selectedRows = datasets.filter(set => set !== item.id)
-                    if (selectedRows.length) {
-                      navigate(location.pathname, { state: { selectedRows } })
-                    }
+                  onOk: () => {
+                    const placeIndex = newPlaces.findIndex(p => p.id === item.id)
+                    const child = newPlaces[placeIndex].child.filter(c => c.id !== product.id)
+                    const updatedPlaces = [ ...newPlaces ]
+                    updatedPlaces[placeIndex].child = child
+                    updatedPlaces[placeIndex].net_weight = child.reduce((sum, c) => sum + (c.net_weight * c.count), 0)
+                    setNewPlaces(updatedPlaces)
                   }
                 })
               }}
-            />}
+            />
           </div>
-        ),
-      }
-    })
+        )
+      },
+    ]
+
+    return <Table columns={childColumns} dataSource={item.child} pagination={false} />
+  }
   
   const columns = [
     {
@@ -255,6 +315,43 @@ export default function ServiceForm() {
     title: '',
     dataIndex: 'buttons',
     key: 'buttons',
+    render: (_, item) => (
+      <div style={{ display: 'flex', gap: 10 }}>
+        {(isNew || item.status === 0) && isEdit && <BsTrash
+          style={{ marginLeft: 30, cursor: 'pointer' }} 
+          size={17}
+          color='red'
+          title='Удалить место из услуги'
+          onClick={() => {
+            const isNewPlace = !item.id_ref || item.id_ref === '0'
+            Modal.confirm({
+              title: 'Вы действительно хотите удалить это место из услуги?',
+              icon: <ExclamationCircleFilled />,
+              okText: 'Да',
+              okType: 'danger',
+              cancelText: 'Нет',
+              onOk: async () => {
+                if (isNewPlace) {
+                  const places = newPlaces.filter(p => p.id === item.id)
+                  setNewPlaces(places)
+                  return
+                }
+                if (isNew) {
+                  const selectedRows = datasets.filter(set => set !== item.id)
+                  if (selectedRows.length) {
+                    navigate(location.pathname, { state: { selectedRows } })
+                  }
+                } else {
+                  const pole = JSON.stringify({ ...initialValues.pole, places: initialValues.places.filter(place => String(item.id) === place) })
+                  await axios.postWithAuth('/query/update', { sql: sqlUpdate('dataset', { pole }, `id=${id}`) })
+                  navigate(location.pathname)
+                }
+              }
+            })
+          }}
+        />}
+      </div>
+    )
   })
 
   if (service.isFetching) return null
@@ -302,23 +399,23 @@ export default function ServiceForm() {
                       {
                         key: 'issuance',
                         label: 'Выдача со склада',
-                        onClick: () => navigate('/services/issuance/create', { state: { selectedRows: placesData.map(item => item.id) } })
+                        onClick: () => navigate('/services/issuance/create', { state: { selectedRows: (isRepack() ? newPlaces : placesData).map(item => item.id) } })
                       },
                       {
                         key: 'delivery',
                         label: 'Доставка',
-                        onClick: () => navigate('/services/delivery/create', { state: { selectedRows: placesData.map(item => item.id) } })
+                        onClick: () => navigate('/services/delivery/create', { state: { selectedRows: (isRepack() ? newPlaces : placesData).map(item => item.id) } })
                       },
                       {
                         key: 'fullfillment',
                         label: 'Фулфилмент',
-                        onClick: () => navigate('/services/fullfillment/create', { state: { selectedRows: placesData.map(item => item.id) } })
+                        onClick: () => navigate('/services/fullfillment/create', { state: { selectedRows: (isRepack() ? newPlaces : placesData).map(item => item.id) } })
                       }
                     ].concat(
                       isRepack() ? [{
                         key: 'storage',
                         label: 'Хранение',
-                        onClick: () => navigate('/services/storage/create', { state: { selectedRows: placesData.map(item => item.id) } })
+                        onClick: () => navigate('/services/storage/create', { state: { selectedRows: (isRepack() ? newPlaces : placesData).map(item => item.id) } })
                       }] : [])
                     .filter(item => item.key !== serviceName)
                   }}
@@ -364,22 +461,41 @@ export default function ServiceForm() {
           if (isDelivery) {
             add.driver_phone = driverMap[driverValue]?.phone
           }
-          if (isNew) {
+          if (!values.pole.status) {
             values.pole.status = 0
           }
+
+          const pole = {
+            ...values.pole,
+            type: serviceName,
+            is_finished: 0,
+            is_got_client: isGotClient,
+            client,
+            ...add,
+            places: datasetsId
+          }
+
+          if (isRepack()) {
+            const placesKeys = ['tip', 'pole']
+            const productKeys = ['tip', 'pole', 'id_ref', 'ref_tip']
+            const promises = newPlaces.map(
+              p => axios.postWithAuth('/query/insert', {
+                sql: `INSERT INTO dataset (${placesKeys.join(',')}) VALUES (${placesKeys.map(key => `'${p[key]}'`).join(',')})`
+              }).then(res => ({ [p.id]: res.data?.data?.id }))
+            )
+            const res = await Promise.all(promises)
+            const placesMap = res.reduce((acc, item) => ({ ...acc, ...item }), {})
+            pole.new_places = Object.values(placesMap).map(String)
+            const products = newPlaces.reduce((p, item) => ([...p, ...item.child.map(c => ({ ...c, id_ref: placesMap[c.id_ref], pole: JSON.stringify(c.pole) }))]), [])
+            const insertProducts = `INSERT INTO dataset (${productKeys.join(',')}) VALUES (${products.map(p => productKeys.map(key => `'${p[key]}'`).join(',')).join('),(')})`
+            await axios.postWithAuth('/query/insert', { sql: insertProducts })
+          }
+
           const item = {
             ref_tip: 'place',
             tip: 'service',
             status: 0,
-            pole: JSON.stringify({
-              ...values.pole,
-              type: serviceName,
-              is_finished: 0,
-              is_got_client: isGotClient,
-              client,
-              ...add,
-              places: datasetsId
-            })
+            pole: JSON.stringify(pole)
           }
           const response = await axios.postWithAuth(`/query/${isNew ? 'insert' : 'update'}`, { sql: isNew ? sqlInsert('dataset', item) : sqlUpdate('dataset', item, `id=${id}`) })
           if (isNew) {
@@ -654,28 +770,52 @@ export default function ServiceForm() {
           </Col>
         </Row>
       </Form>
-      <Typography.Title level={2} style={{ padding: '0 40px' }}>
-        {isRepack() ? 'Первичные места' : (datasetsId.length > 1 ? 'для мест' : 'для места')}
-      </Typography.Title>
+      <Row align='bottom' style={{ padding: '0 40px' }}>
+        <Col span={12}>
+          <Typography.Title level={2}>
+            {isRepack() ? 'Первичные места' : (datasetsId.length > 1 ? 'для мест' : 'для места')}
+          </Typography.Title>
+        </Col>
+        {isRepack() && isEdit && <Col span={12} style={{ textAlign: 'right', paddingBottom: 20 }}>
+          <Button
+            type='primary'
+            disabled={!selectedRows.length}
+            onClick={() => {
+              const items = placesData.filter(item => selectedRows.includes(item.id))
+              setNewPlaces(newPlaces.concat(items))
+              setSelectedRows([])
+            }}
+          >
+            Создать новое место
+          </Button>
+        </Col>}
+      </Row>
       <Table
         columns={columns}
         isLoading={places.isLoading}
         dataSource={placesData}
         rowKey={({ id }) => id}
         size='small'
-        onRow={(record, index) => ({
-          onClick: (e) => {
-            // if (e.detail === 2) {
-            //   navigate(`/sendings/${sendingId || initialValues.sending_id}/${record.id}`)
-            // }
-          },
-        })}
         rowSelection={{
           type: Checkbox,
-          onChange: selectedKeys => setSelectedRows(selectedKeys)
+          onChange: selectedKeys => setSelectedRows(selectedKeys),
+          getCheckboxProps: item => ({
+            disabled: newPlaces.find(place => place.id === item.id)
+          })
         }}
         pagination={false}
       />
+      {isRepack() && <>
+        <Typography.Title level={2} style={{ padding: '0 40px' }}>Новые места</Typography.Title>
+        <Table
+          columns={columns.slice(2)}
+          dataSource={newPlaces}
+          rowKey={({ id }) => id}
+          size='small'
+          expandable={{ expandedRowRender, defaultExpandAllRows: true }}
+          pagination={false}
+        />
+      </>}
     </>
   )
 }

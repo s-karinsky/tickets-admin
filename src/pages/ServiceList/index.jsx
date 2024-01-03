@@ -16,7 +16,7 @@ const getColumns = (name, { ocStatusClick }) => {
     {
       title: 'Отправка / Место',
       dataIndex: 'placeData',
-      render: data => (data || []).map(item => <>{item.sending_number+' / '+item.place}<br /></>)
+      render: data => (data || []).map(item => <>{(item.sending_number || '—')+' / '+(item.place || '—')}<br /></>)
     },
     {
       title: 'Статус',

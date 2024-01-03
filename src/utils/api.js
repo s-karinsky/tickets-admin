@@ -223,15 +223,27 @@ export const getPlaceById = (placeId, sendingId, params = {}) => async () => {
   }
 }
 
-export const getDatasetsById = (ids) => async () => {
+export const getDatasetsById = (ids, withChildren) => async () => {
   if (!ids || !Array.isArray(ids)) return []
   const where = ids.map(id => `d.id=${id}`).join(' OR ')
   const response = await axios.postWithAuth('/query/select', { sql: `SELECT d.*, t.json as sending, t.from as sending_number FROM dataset d LEFT JOIN trip t ON t.id_trip=d.id_ref WHERE ${where}` })
+
+  let child = []
+  if (withChildren) {
+    const childResponse = await axios.select('dataset', '*', { where: ids.map(id => `id_ref=${id}`).join(' OR ') })
+    child = (childResponse.data?.data || []).map(item => ({
+      ...item,
+      ...parseJSON(item.pole),
+      pole: parseJSON(item.pole)
+    }))
+  }
+
   const data = response.data?.data || []
   return data.map(item => ({
     ...item,
     ...parseJSON(item.pole),
-    sending: parseJSON(item.sending)
+    sending: parseJSON(item.sending),
+    child: child.filter(sub => sub.id_ref === item.id)
   }))
 }
 
