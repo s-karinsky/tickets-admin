@@ -38,7 +38,7 @@ export default function Sending({
   const isEditPage = isNew || searchParams.get('edit') !== null
 
   const clients = useUsersWithRole(1)
-  const drivers = useUsersWithRole(2)
+  const { data: { list: driverOptions, map: driverMap } = {} } = useDictionary('drivers')
 
   const [ { isLoading, data, refetch }, places ] = useQueries([
     {
@@ -65,7 +65,7 @@ export default function Sending({
     return [ options, map ]
   }, [clients.data])
 
-  const [ driverOptions, driverMap ] = useMemo(() => {
+  /* const [ driverOptions, driverMap ] = useMemo(() => {
     if (!Array.isArray(drivers.data)) return [[], {}]
     const options = drivers.data.map(item => ({
       value: item.id_user,
@@ -73,7 +73,7 @@ export default function Sending({
     }))
     const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
     return [ options, map ]
-  }, [drivers.data])
+  }, [drivers.data]) */
 
   const placesData = (places.data || [])
     .map((item) => {
@@ -417,7 +417,7 @@ export default function Sending({
                   name={['json', 'transporter']}
                   isEdit={isEditPage}
                   options={driverOptions}
-                  text={driverMap[data.json?.transporter]}
+                  text={driverMap[data.json?.transporter]?.value}
                   rules={required()}
                   filterOption={filterOption}
                   showSearch

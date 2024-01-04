@@ -50,30 +50,20 @@ const getColumns = (name, params = {
         },
         {
           title: 'Компания',
-          dataIndex: 'company'
+          dataIndex: 'company_name'
         },
         {
           title: 'ФИО',
           key: 'name',
-          render: (_, item) => ([item.surname, item.name, item.middlename].join(' '))
+          render: (_, item) => ([item.family, item.name, item.middle].filter(Boolean).join(' '))
         },
         {
           title: 'Тел. ответственного',
-          dataIndex: 'user_phone'
+          dataIndex: 'phone'
         },
         {
           title: 'Тел. компании',
           dataIndex: 'company_phone'
-        },
-        {
-          title: 'Страна',
-          dataIndex: 'country',
-          render: val => (params.countries || {})[val]
-        },
-        {
-          title: 'Город',
-          dataIndex: 'city',
-          render: val => (params.cities || {})[val]
         },
         buttonsColumn
       ]
@@ -110,7 +100,7 @@ export default function Dictionary() {
   const navigate = useNavigate()
 
   const onDelete = useCallback(item => 
-    axios.postWithAuth('/query/delete', { sql: `DELETE FROM sprset WHERE id=${item.id}` }).then(() => refetch()),
+    axios.postWithAuth('/query/update', { sql: `UPDATE sprset SET status=1 WHERE id=${item.id}` }).then(() => refetch()),
   [axios, refetch])
 
   const columns = useMemo(() => getColumns(name, {

@@ -58,7 +58,7 @@ export default function ServiceForm() {
   const [ isGotClient, setIsGotClient ] = useState(false)
 
   const clients = useUsersWithRole(1)
-  const drivers = useUsersWithRole(2, { enabled: isDelivery() })
+  const { data: { list: driverOptions, map: driverMap } = {} } = useDictionary('drivers', { enabled: isDelivery() })
   const internalClients = useUsersWithRole(3)
   const tarifs = useDictionary('rates')
 
@@ -109,7 +109,7 @@ export default function ServiceForm() {
     return [ options, map ]
   }, [clients.data])
 
-  const [ driverOptions, driverMap ] = useMemo(() => {
+  /* const [ driverOptions, driverMap ] = useMemo(() => {
     if (!Array.isArray(drivers.data)) return [[], {}]
     const options = drivers.data.map(item => ({
       value: item.id_user,
@@ -118,7 +118,7 @@ export default function ServiceForm() {
     }))
     const map = options.reduce((acc, item) => ({ ...acc, [item.value]: { label: item.label, phone: item.phone } }), {})
     return [ options, map ]
-  }, [drivers.data])
+  }, [drivers.data]) */
 
   const [ internalClientsOptions ] = useMemo(() => {
     if (!Array.isArray(internalClients.data)) return [[], {}]
@@ -724,7 +724,7 @@ export default function ServiceForm() {
                 label='Перевозчик'
                 type='select'
                 options={driverOptions}
-                text={driverMap[initialValues.pole?.driver]?.label}
+                text={driverMap[initialValues.pole?.driver]?.value}
                 isEdit={isEdit}
                 rules={[ { required: true } ]}
               />

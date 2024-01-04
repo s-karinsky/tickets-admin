@@ -7,7 +7,7 @@ import dayjs from 'dayjs'
 import { BsTrash } from 'react-icons/bs'
 import { SendingsStatus } from '../../components/SendingsStatus'
 import { DateTableCell } from '../../components/DateTableCell'
-import { getCount, getSendings, deleteSendingById, updateSendingById, useUsersWithRole } from '../../utils/api'
+import { getCount, getSendings, deleteSendingById, updateSendingById, useDictionary } from '../../utils/api'
 import { declOfNum, getPaginationSettings } from '../../utils/utils'
 import { getColumnSearchProps } from '../../utils/components'
 import { SENDING_STATUS } from '../../consts'
@@ -25,11 +25,7 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
   const [ statusModalItem, setStatusModalItem ] = useState()
   const [ activeRow, setActiveRow ] = useState()
   const { isLoading, data, refetch } = useQuery(['sendings', { isAir: isSendingAir }], getSendings(isSendingAir))
-  const drivers = useUsersWithRole(2)
-  const driverMap = useMemo(() => {
-    if (!Array.isArray(drivers.data)) return {}
-    return drivers.data.reduce((acc, item) => ({ ...acc, [item.id_user]: item.json?.code }), {})
-  }, [drivers.data])
+  const { data: { map: driverMap } = {} } = useDictionary('drivers')
 
   let sendings = (data || [])
     .map(item => {
@@ -105,7 +101,7 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
       title: 'Перевозчик',
       dataIndex: 'transporter',
       key: 'transporter',
-      render: val => driverMap[val],
+      render: val => driverMap[val]?.value,
       sorter: (a, b) => a.transporter.localeCompare(b.transporter),
       ...getColumnSearchProps('transporter')
     },
