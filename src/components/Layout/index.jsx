@@ -34,10 +34,10 @@ const MENU_ITEMS = {
     getItem(<Link to='/services/repack'>Переупаковка</Link>, 'services-repack')
   ]),
   dictionary: getItem('Справочники', 'dictionaries', <FormOutlined />, [
-    getItem(<Link to='/dictionary/config'>Параметры учета</Link>, 'dictionary-config'),
+    // getItem(<Link to='/dictionary/config'>Параметры учета</Link>, 'dictionary-config'),
     getItem(<Link to='/dictionary/drivers'>Перевозчики</Link>, 'dictionary-drivers'),
     getItem(<Link to='/dictionary/rates'>Тарифы перевозок</Link>, 'dictionary-rates'),
-    getItem(<Link to='/dictionary/currency'>Валюта и курс</Link>, 'dictionary-currency')
+    // getItem(<Link to='/dictionary/currency'>Валюта и курс</Link>, 'dictionary-currency')
   ]),
   users: getItem(<Link to='/users'>Пользователи</Link>, 'users', <UserOutlined />),
   sendings: getItem(
