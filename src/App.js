@@ -10,6 +10,8 @@ import Sendings from './pages/Sendings'
 import Sending from './pages/Sending'
 import ServiceForm from './pages/ServiceForm'
 import ServiceList from './pages/ServiceList'
+import Dictionary from './pages/Dictionary'
+import DictionaryForm from './pages/Dictionary/form'
 import Place from './pages/Place'
 import Layout from './components/Layout'
 import { useAuthorization } from './utils/api'
@@ -65,6 +67,10 @@ function App() {
           <Route path='/services'>
             <Route path=':serviceName' element={<ServiceList />} />
             <Route path=':serviceName/:id' element={<ServiceForm />} />
+          </Route>
+          <Route path='/dictionary'>
+            <Route path=':name' element={<Dictionary />} />
+            <Route path=':name/:id' element={<DictionaryForm />} />
           </Route>
         </Route>
         <Route path='/login' element={<PageLogin />} />

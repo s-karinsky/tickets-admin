@@ -5,7 +5,8 @@ import {
   UnorderedListOutlined,
   MenuUnfoldOutlined,
   MenuFoldOutlined,
-  CarOutlined
+  CarOutlined,
+  FormOutlined
 } from '@ant-design/icons'
 import { Avatar, Button, Dropdown, Menu, Space, Layout, Row, Col } from 'antd'
 import { Outlet, Link, useNavigate } from 'react-router-dom'
@@ -32,6 +33,12 @@ const MENU_ITEMS = {
     getItem(<Link to='/services/storage'>Хранение</Link>, 'services-storage'),
     getItem(<Link to='/services/repack'>Переупаковка</Link>, 'services-repack')
   ]),
+  dictionary: getItem('Справочники', 'dictionaries', <FormOutlined />, [
+    getItem(<Link to='/dictionary/config'>Параметры учета</Link>, 'dictionary-config'),
+    getItem(<Link to='/dictionary/drivers'>Перевозчики</Link>, 'dictionary-drivers'),
+    getItem(<Link to='/dictionary/rates'>Тарифы перевозок</Link>, 'dictionary-rates'),
+    getItem(<Link to='/dictionary/currency'>Валюта и курс</Link>, 'dictionary-currency')
+  ]),
   users: getItem(<Link to='/users'>Пользователи</Link>, 'users', <UserOutlined />),
   sendings: getItem(
     <Link to='/sendings'>Отправки</Link>,
@@ -49,7 +56,8 @@ export default function PageLayout({ user }) {
       return [
         MENU_ITEMS.users,
         MENU_ITEMS.sendings,
-        MENU_ITEMS.services
+        MENU_ITEMS.services,
+        MENU_ITEMS.dictionary
       ]
     }
   }, [user.u_role])
