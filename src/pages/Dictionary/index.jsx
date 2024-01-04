@@ -3,8 +3,10 @@ import { Row, Col, Typography, Table, Button, Modal } from 'antd'
 import { ExclamationCircleFilled } from '@ant-design/icons'
 import { useParams, useNavigate } from 'react-router-dom'
 import { BsTrash } from 'react-icons/bs'
+import { localeCompare } from '../../utils/utils'
 import axios from '../../utils/axios'
 import { useDictionary } from '../../utils/api'
+import { getColumnSearchProps } from '../../utils/components'
 
 const TITLE = {
   drivers: 'Перевозчики',
@@ -46,24 +48,34 @@ const getColumns = (name, params = {
       return [
         {
           title: 'Код',
-          dataIndex: 'value'
+          dataIndex: 'value',
+          sorter: (a, b) => localeCompare(a.value, b.value),
+          ...getColumnSearchProps('value')
         },
         {
           title: 'Компания',
-          dataIndex: 'company_name'
+          dataIndex: 'company_name',
+          sorter: (a, b) => localeCompare(a.company_name, b.company_name),
+          ...getColumnSearchProps('company_name')
         },
         {
           title: 'ФИО',
           key: 'name',
-          render: (_, item) => ([item.family, item.name, item.middle].filter(Boolean).join(' '))
+          render: (_, item) => ([item.family, item.name, item.middle].filter(Boolean).join(' ')),
+          sorter: (a, b) => localeCompare([a.family, a.name, a.middle].filter(Boolean).join(' '), [b.family, b.name, b.middle].filter(Boolean).join(' ')),
+          ...getColumnSearchProps(item => ([item.family, item.name, item.middle].filter(Boolean).join(' ')))
         },
         {
           title: 'Тел. ответственного',
-          dataIndex: 'phone'
+          dataIndex: 'phone',
+          sorter: (a, b) => localeCompare(a.phone, b.phone),
+          ...getColumnSearchProps('phone')
         },
         {
           title: 'Тел. компании',
-          dataIndex: 'company_phone'
+          dataIndex: 'company_phone',
+          sorter: (a, b) => localeCompare(a.company_phone, b.company_phone),
+          ...getColumnSearchProps('company_phone')
         },
         buttonsColumn
       ]
@@ -72,19 +84,27 @@ const getColumns = (name, params = {
       return [
         {
           title: 'Код',
-          dataIndex: 'value'
+          dataIndex: 'value',
+          sorter: (a, b) => localeCompare(a.value, b.value),
+          ...getColumnSearchProps('value')
         },
         {
           title: 'Наименование',
-          dataIndex: 'label'
+          dataIndex: 'label',
+          sorter: (a, b) => localeCompare(a.label, b.label),
+          ...getColumnSearchProps('label')
         },
         {
           title: 'Тип оплаты',
-          dataIndex: 'pay_type'
+          dataIndex: 'pay_type',
+          sorter: (a, b) => localeCompare(a.pay_type, b.pay_type),
+          ...getColumnSearchProps('pay_type')
         },
         {
           title: 'Цена за 1 кг',
-          dataIndex: 'price_kg'
+          dataIndex: 'price_kg',
+          sorter: (a, b) => parseInt(a.price_kg || 0) - parseInt(b.price_kg || 0),
+          ...getColumnSearchProps('price_kg')
         },
         buttonsColumn
       ]

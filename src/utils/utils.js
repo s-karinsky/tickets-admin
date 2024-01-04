@@ -67,3 +67,5 @@ export const parseJSON = (str, isWarning) => {
   }
   return json
 }
+
+export const localeCompare = (str1, str2) => (str1 || '').localeCompare(str2 || '')
