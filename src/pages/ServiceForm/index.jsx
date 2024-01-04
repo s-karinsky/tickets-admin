@@ -60,7 +60,7 @@ export default function ServiceForm() {
   const clients = useUsersWithRole(1)
   const drivers = useUsersWithRole(2, { enabled: isDelivery() })
   const internalClients = useUsersWithRole(3)
-  const tarifs = useDictionary('tarif')
+  const tarifs = useDictionary('rates')
 
   const service = useService(serviceName, id, {
     refetchOnWindowFocus: false

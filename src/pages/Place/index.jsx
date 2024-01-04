@@ -47,7 +47,7 @@ export default function Place({ user }) {
     }
   ])
   const clients = useUsersWithRole(1)
-  const tarifs = useDictionary('tarif')
+  const tarifs = useDictionary('rates')
 
   const [ clientsOptions, clientsMap ] = useMemo(() => {
     if (!Array.isArray(clients.data)) return [[], {}]

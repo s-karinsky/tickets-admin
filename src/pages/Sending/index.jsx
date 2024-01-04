@@ -51,7 +51,7 @@ export default function Sending({
       queryFn: getPlacesBySendingId(sendingId)
     }
   ])
-  const tarifs = useDictionary('tarif')
+  const tarifs = useDictionary('rates')
 
   const isNotSending = data?.json?.status === 0
 
