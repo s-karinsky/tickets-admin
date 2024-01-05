@@ -72,6 +72,8 @@ function App() {
           <Route path='/dictionary'>
             <Route path='clients' element={<PageUsers role='1' />} />
             <Route path='clients/:id' element={<UserForm name='clients' />} />
+            <Route path='employees' element={<PageUsers role='2' />} />
+            <Route path='employees/:id' element={<UserForm name='employees' />} />
             <Route path=':name' element={<Dictionary />} />
             <Route path=':name/:id' element={<DictionaryForm />} />
           </Route>
