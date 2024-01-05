@@ -281,30 +281,29 @@ export const deleteProductById = async (productId) => {
   return response
 }
 
-export const useUsers = userId => useQuery(['users'].concat(userId || []), async () => {
+export const useUsers = (userId, where, params) => useQuery(['users', userId, where], async () => {
+  if (typeof userId === 'object' && !where) {
+    where = userId
+    userId = null
+  }
+
   if (userId === 'create') {
     return {
       id_role: '1'
     }
   }
 
-  const response = await axios.postWithAuth('/query/select', {
-    sql: `SELECT * FROM users WHERE active=1 AND deleted!=1${userId ? ` AND id_user=${userId}` : ''}`
-  })
+  const response = await axios.select('users', '*', { where: { active: 1, deleted: 0, id_user: userId, ...where } })
   const users = (response.data?.data || []).map(user => {
     if (!user.json) {
       user.json = {}
     } else {
-      try {
-        user.json = JSON.parse(user.json)
-      } catch (e) {
-        console.warn(e)
-      }
+      user.json = parseJSON(user.json)
     }
     return user
   })
   return userId ? users[0] : users
-})
+}, params)
 
 export const useUsersWithRole = (role, params) => useQuery(['usersWithRole', role], async () => {
   const response = await axios.postWithAuth('/query/select', { sql: `SELECT id_user, name, family, middle, json, phone FROM users WHERE id_role=${role} AND active=1 AND deleted!=1` })

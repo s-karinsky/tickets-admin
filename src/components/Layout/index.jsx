@@ -35,6 +35,7 @@ const MENU_ITEMS = {
   ]),
   dictionary: getItem('Справочники', 'dictionaries', <FormOutlined />, [
     // getItem(<Link to='/dictionary/config'>Параметры учета</Link>, 'dictionary-config'),
+    getItem(<Link to='/dictionary/clients'>Клиенты</Link>, 'dictionary-clients'),
     getItem(<Link to='/dictionary/drivers'>Перевозчики</Link>, 'dictionary-drivers'),
     getItem(<Link to='/dictionary/rates'>Тарифы перевозок</Link>, 'dictionary-rates'),
     // getItem(<Link to='/dictionary/currency'>Валюта и курс</Link>, 'dictionary-currency')

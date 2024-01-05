@@ -9,7 +9,7 @@ export const USER_ROLES_COLOR = {
 
 export const USER_ROLES = {
   '1': 'Клиент',
-  '2': 'Перевозчик',
+  '2': 'Сотрудник',
   '3': 'Внутренний клиент',
   '4': 'Админ'
 }

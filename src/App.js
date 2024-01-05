@@ -12,6 +12,7 @@ import ServiceForm from './pages/ServiceForm'
 import ServiceList from './pages/ServiceList'
 import Dictionary from './pages/Dictionary'
 import DictionaryForm from './pages/Dictionary/form'
+import UserForm from './pages/Dictionary/userForm'
 import Place from './pages/Place'
 import Layout from './components/Layout'
 import { useAuthorization } from './utils/api'
@@ -69,6 +70,8 @@ function App() {
             <Route path=':serviceName/:id' element={<ServiceForm />} />
           </Route>
           <Route path='/dictionary'>
+            <Route path='clients' element={<PageUsers role='1' />} />
+            <Route path='clients/:id' element={<UserForm name='clients' />} />
             <Route path=':name' element={<Dictionary />} />
             <Route path=':name/:id' element={<DictionaryForm />} />
           </Route>
