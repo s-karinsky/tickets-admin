@@ -58,7 +58,7 @@ export default function ServiceForm() {
   const [ isGotClient, setIsGotClient ] = useState(false)
 
   const clients = useUsersWithRole(1)
-  const { data: { list: driverOptions, map: driverMap } = {} } = useDictionary('drivers', { enabled: isDelivery() })
+  const { data: { list: driverOptions, map: driverMap } = {} } = useDictionary('drivers', {}, { enabled: isDelivery() })
   const internalClients = useUsersWithRole(3)
   const tarifs = useDictionary('rates')
 

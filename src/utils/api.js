@@ -347,27 +347,23 @@ export const useCities = (country) => useQuery(['cities', country], async () => 
   enabled: !!country
 })
 
-export const useDictionary = (name, id, params) => useQuery(['dictionary', name, id], async () => {
-  if (typeof id === 'object' && !params) {
-    params = id
-    id = null
-  }
-
-  if (id === 'create') {
+export const useDictionary = (name, where, params) => useQuery(['dictionary', name, where], async () => {
+  if (where && where.id === 'create') {
     return {
 
     }
   }
 
-  const response = await axios.postWithAuth('/query/select', { sql: `SELECT * FROM sprset WHERE status='0' AND tip='${name}'${id ? ` AND id=${id}` : ''}` })
+  const response = await axios.select('sprset', '*', { where: { status: 0, tip: name, ...where } })
   const list = (_get(response, ['data', 'data']) || []).map(item => {
     let json = parseJSON(item.pole)
     return {
       id: item.id,
+      ...item,
       ...json
     }
   })
-  if (id) return list[0]
+  if (where && where.id) return list[0]
   const map = keyBy(list, 'value')
   return { list, map }
 }, params)

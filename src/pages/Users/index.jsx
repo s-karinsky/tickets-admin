@@ -20,7 +20,7 @@ const LINK = {
   2: '/dictionary/employees'
 }
 
-const getColumns = (refetch = () => {}) => ([
+export const getColumns = ({ codeIndex = ['json', 'code'], refetch = () => {}, deleteUser }) => ([
   {
     title: 'Роль',
     dataIndex: 'id_role',
@@ -34,9 +34,8 @@ const getColumns = (refetch = () => {}) => ([
   },
   {
     title: 'Код',
-    dataIndex: 'json',
+    dataIndex: codeIndex,
     key: 'code',
-    render: json => json.code,
     sorter: (a, b) => localeCompare(a.json?.code, b.json?.code),
     ...getColumnSearchProps(record => record.json?.code)
   },
@@ -82,7 +81,11 @@ const getColumns = (refetch = () => {}) => ([
               okType: 'danger',
               cancelText: 'Нет',
               onOk: async () => {
-                await axios.postWithAuth('/query/update', { sql: `UPDATE users SET deleted=1 WHERE id_user=${item.id_user}` })
+                if (deleteUser) {
+                  await deleteUser(item)
+                } else {
+                  await axios.postWithAuth('/query/update', { sql: `UPDATE users SET deleted=1 WHERE id_user=${item.id_user}` })
+                }
                 refetch()
               }
             })
@@ -114,7 +117,7 @@ export default function PageUsers({ role }) {
         </Col>
       </Row>
       <Table
-        columns={getColumns(users.refetch).slice(role ? 1 : 0)}
+        columns={getColumns({ refetch: users.refetch }).slice(role ? 1 : 0)}
         dataSource={users.data}
         loading={users.isLoading}
         rowKey={({ id_user }) => id_user}
