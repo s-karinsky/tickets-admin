@@ -1,7 +1,9 @@
 import { useNavigate } from 'react-router-dom'
-import { Table, Tag, Row, Button, Col, Typography } from 'antd'
-import { PlusCircleFilled } from '@ant-design/icons'
+import { Table, Tag, Row, Button, Col, Typography, Modal } from 'antd'
+import { ExclamationCircleFilled } from '@ant-design/icons'
+import { BsTrash } from 'react-icons/bs'
 import { getColumnSearchProps } from '../../utils/components'
+import axios from '../../utils/axios'
 import { useUsers } from '../../utils/api'
 import { getPaginationSettings, localeCompare } from '../../utils/utils'
 import { USER_ROLES, USER_ROLES_COLOR } from '../../consts'
@@ -18,7 +20,7 @@ const LINK = {
   2: '/dictionary/employees'
 }
 
-const columns = [
+const getColumns = (refetch = () => {}) => ([
   {
     title: 'Роль',
     dataIndex: 'id_role',
@@ -60,8 +62,36 @@ const columns = [
     render: email => email || 'No email',
     sorter: (a, b) => localeCompare(a.email, b.email),
     ...getColumnSearchProps('email')
+  },
+  {
+    title: '',
+    width: 30,
+    key: 'buttons',
+    render: (_, item) => item.id_role !== '4' && (
+      <div>
+        <BsTrash
+          style={{ marginLeft: 30, cursor: 'pointer' }} 
+          size={17}
+          color='red'
+          title='Удалить запись'
+          onClick={() => {
+            Modal.confirm({
+              title: 'Вы действительно хотите удалить этого пользователя?',
+              icon: <ExclamationCircleFilled />,
+              okText: 'Да',
+              okType: 'danger',
+              cancelText: 'Нет',
+              onOk: async () => {
+                await axios.postWithAuth('/query/update', { sql: `UPDATE users SET deleted=1 WHERE id_user=${item.id_user}` })
+                refetch()
+              }
+            })
+          }}
+        />
+      </div>
+    )
   }
-]
+])
 
 export default function PageUsers({ role }) {
   const navigate = useNavigate()
@@ -84,7 +114,7 @@ export default function PageUsers({ role }) {
         </Col>
       </Row>
       <Table
-        columns={role ? columns.slice(1) : columns}
+        columns={getColumns(users.refetch).slice(role ? 1 : 0)}
         dataSource={users.data}
         loading={users.isLoading}
         rowKey={({ id_user }) => id_user}
