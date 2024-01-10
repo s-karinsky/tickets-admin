@@ -430,7 +430,7 @@ export default function Sending() {
                   name={['json', 'transporter']}
                   isEdit={isEditPage}
                   options={driverOptions}
-                  text={driverMap && driverMap[data.json?.transporter]?.value}
+                  text={driverMap && driverMap[data.json?.transporter]?.label}
                   rules={required()}
                   filterOption={filterOption}
                   showSearch
@@ -479,7 +479,7 @@ export default function Sending() {
                     name='net_weight'
                     style={{ width: 120 }}
                     isEdit={isEditPage}
-                    addonAfter={isEditPage && 'кг'}
+                    addonAfter={'кг'}
                     formatter={numberFormatter(3)}
                     disabled={isEditPage}
                   />
@@ -490,7 +490,7 @@ export default function Sending() {
                     name='gross_weight'
                     style={{ width: 120 }}
                     isEdit={isEditPage}
-                    addonAfter={isEditPage && 'кг'}
+                    addonAfter={'кг'}
                     formatter={numberFormatter(3)}
                     disabled={isEditPage}
                   />

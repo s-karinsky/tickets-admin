@@ -691,7 +691,7 @@ export default function ServiceForm() {
               <FormField
                 label='Сумма оплаты (₽)'
                 type='number'
-                addonAfter={isEdit && '₽'}
+                addonAfter={'₽'}
                 name={['pole', 'price_rub']}
                 disabled={!!priceUsd}
                 isEdit={isEdit}
@@ -701,7 +701,7 @@ export default function ServiceForm() {
               <FormField
                 label='Сумма оплаты ($)'
                 type='number'
-                addonAfter={isEdit && '$'}
+                addonAfter={'$'}
                 name={['pole', 'price_usd']}
                 disabled={!!priceRub}
                 isEdit={isEdit}
@@ -713,7 +713,7 @@ export default function ServiceForm() {
                 label='Перевозчик'
                 type='select'
                 options={driverOptions}
-                text={driverMap && driverMap[initialValues.pole?.driver]?.value}
+                text={driverMap && driverMap[initialValues.pole?.driver]?.label}
                 isEdit={isEdit}
                 rules={[ { required: true } ]}
               />

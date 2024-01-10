@@ -52,9 +52,10 @@ export default function Place({ user }) {
 
   const [ clientsOptions, clientsMap ] = useMemo(() => {
     if (!Array.isArray(clients.data)) return [[], {}]
-    const options = clients.data.map(item => ({
+    console.log(clients.data)
+    const options = clients.data.map(({ json = {}, ...item }) => ({
       value: item.id_user,
-      label: item.json?.code
+      label: `${json.code} (${[item.family, item.name, item.middle].filter(Boolean).join(' ')})`
     }))
     const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
     return [ options, map ]
@@ -483,7 +484,7 @@ export default function Place({ user }) {
                   name={['size', 'length']}
                   isEdit={isEditPage}
                   rules={[...required(), ...numberRange({ min: 1 })]}
-                  addonAfter={isEditPage && 'см'}
+                  addonAfter={'см'}
                 />
                 <FormField
                   type='number'
@@ -492,7 +493,7 @@ export default function Place({ user }) {
                   name={['size', 'width']}
                   isEdit={isEditPage}
                   rules={[...required(), ...numberRange({ min: 1 })]}
-                  addonAfter={isEditPage && 'см'}
+                  addonAfter={'см'}
                 />
                 <FormField
                   type='number'
@@ -501,7 +502,7 @@ export default function Place({ user }) {
                   name={['size', 'height']}
                   isEdit={isEditPage}
                   rules={[...required(), ...numberRange({ min: 1 })]}
-                  addonAfter={isEditPage && 'см'}
+                  addonAfter={'см'}
                 />
                 <FormField 
                   type='select'
@@ -543,7 +544,7 @@ export default function Place({ user }) {
                   type='number'
                   label='Цена за 1 кг'
                   name='pay_kg'
-                  addonAfter={isEditPage && '$'}
+                  addonAfter={'$'}
                   style={{ width: 200 }}
                   isEdit={isEditPage}
                   formatter={numberFormatter(2)}
@@ -552,7 +553,7 @@ export default function Place({ user }) {
                   type='number'
                   label='Сумма товара'
                   name='items_sum'
-                  addonAfter={isEditPage && '$'}
+                  addonAfter={'$'}
                   style={{ width: 200 }}
                   isEdit={isEditPage}
                   disabled={isSumDisabled}
@@ -563,7 +564,7 @@ export default function Place({ user }) {
                   label='Сумма оплаты'
                   labelType='calc'
                   name='pay_sum'
-                  addonAfter={isEditPage && '$'}
+                  addonAfter={'$'}
                   style={{ width: 200 }}
                   isEdit={isEditPage}  
                   formatter={numberFormatter(2)}
@@ -574,7 +575,7 @@ export default function Place({ user }) {
                   label='Вес нетто'
                   labelType='sum'
                   name='net_weight'
-                  addonAfter={isEditPage && 'кг'}
+                  addonAfter={'кг'}
                   style={{ width: 200 }}
                   isEdit={isEditPage}
                   disabled={isEditPage}
@@ -585,7 +586,7 @@ export default function Place({ user }) {
                   type='number'
                   label='Вес брутто'
                   name='gross_weight'
-                  addonAfter={isEditPage && 'кг'}
+                  addonAfter={'кг'}
                   style={{ width: 200 }}
                   isEdit={isEditPage}
                   rules={numberRange({ min: 0, max: 99999 })}

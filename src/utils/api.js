@@ -381,6 +381,15 @@ export const useDictionary = (name, where, params) => useQuery(['dictionary', na
   const response = await axios.select('sprset', '*', { where: { status: 0, tip: name, ...where } })
   const list = (_get(response, ['data', 'data']) || []).map(item => {
     let json = parseJSON(item.pole)
+
+    if (name === 'drivers') {
+      json.label = `${json.value} (${[json.family, json.name, json.middle].filter(Boolean).join(' ')})`
+    }
+
+    if (name === 'rates') {
+      json.label = `${json.value} (${json.label})`
+    }
+
     return {
       id: item.id,
       ...item,

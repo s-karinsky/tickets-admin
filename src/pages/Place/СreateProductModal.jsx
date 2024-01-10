@@ -187,7 +187,7 @@ export const CreateProductModal = ({
           type='number'
           label='Вес нетто'
           name='net_weight'
-          addonAfter={isEdit && 'кг'}
+          addonAfter={'кг'}
           rules={[...required(), ...numberRange({ min: 0.001, max: 99999 })]}
           formatter={numberFormatter(3)}
           disabled={!isNotSending}
@@ -289,7 +289,7 @@ export const CreateProductModal = ({
           label='Цена'
           labelType={isSumDisabled && 'calc'}
           name='price'
-          addonAfter={isEdit && '$'}
+          addonAfter={'$'}
           disabled={isSumDisabled}
           formatter={numberFormatter(2)}
         />
@@ -300,7 +300,7 @@ export const CreateProductModal = ({
           label='Сумма'
           labelType={isSumDisabled && 'calc'}
           name='sum'
-          addonAfter={isEdit && '$'}
+          addonAfter={'$'}
           disabled={isSumDisabled}
           formatter={numberFormatter(2)}
         />

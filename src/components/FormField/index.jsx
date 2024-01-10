@@ -25,13 +25,30 @@ export default function FormField({
     }
   }
 
+  const renderWithBorders = (child, styles) =>
+    <div
+      style={{
+        fontSize: 16,
+        fontWeight: 'normal',
+        border: '1px solid rgb(217, 217, 217)',
+        lineHeight: '38px',
+        height: '38px',
+        padding: '0 11px',
+        borderRadius: 6,
+        ...styles,
+        ...rest.style
+      }}
+    >{child}</div>
+
   switch (type) {
     case 'date':
       child = isEdit ?
-        <DatePicker format='DD.MM.YYYY' placeholder='Выберите дату' {...rest} /> :
-        <div style={{ fontSize: 16, fontWeight: 'normal', ...rest.style }}>
-          {text}
-        </div>
+        <DatePicker
+          format='DD.MM.YYYY'
+          placeholder='Выберите дату'
+          {...rest}
+        /> :
+        renderWithBorders(text, { textAlign: 'center' })
       break
 
     case 'select':
@@ -39,16 +56,13 @@ export default function FormField({
         <Select
           {...rest}
         /> :
-        <div style={{ fontSize: 16, fontWeight: 'normal', ...rest.style }}>
-          {text}
-        </div>
+        renderWithBorders(text)
       break
 
     case 'number':
       child = <InputNumber
         {...rest}
         decimalSeparator=','
-        bordered={isEdit}
         readOnly={!isEdit}
       />
       break
@@ -56,22 +70,18 @@ export default function FormField({
     case 'textarea':
       child = isEdit ?
         <Input.TextArea {...rest} autoSize /> :
-        <div style={{ fontSize: 16, fontWeight: 'normal', ...rest.style }}>
-          {text}
-        </div>
+        renderWithBorders(text)
       break
   
     default:
       child = mask ?
         <MaskedInput
           {...rest}
-          bordered={isEdit}
           readOnly={!isEdit}
           mask={mask}
         />
         : <Input
           {...rest}
-          bordered={isEdit}
           readOnly={!isEdit}
         />
       break

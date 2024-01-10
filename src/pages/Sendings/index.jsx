@@ -113,7 +113,7 @@ export default function Sendings() {
       title: 'Перевозчик',
       dataIndex: 'transporter',
       key: 'transporter',
-      render: val => driverMap && driverMap[val]?.value,
+      render: val => driverMap && driverMap[val]?.label,
       sorter: (a, b) => a.transporter.localeCompare(b.transporter),
       ...getColumnSearchProps('transporter')
     },
