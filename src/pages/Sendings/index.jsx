@@ -20,6 +20,7 @@ export default function Sendings() {
   const navigate = useNavigate()
   const location = useLocation()
   const [ searchParams ] = useSearchParams()
+  const [ activeOnly, setActiveOnly ] = useState(true)
   const isAir = searchParams.get('air') !== null
 
   const [ showStatusModal, setShowStatusModal ] = useState(false)
@@ -31,6 +32,7 @@ export default function Sendings() {
   const { data: { map: driverMap } = {} } = useDictionary('drivers')
 
   let sendings = (data || [])
+    .filter(item => activeOnly ? item.status !== 2 : item.status === 2)
     .map(item => {
       const isMaking = item.status === 0
       return {
@@ -192,6 +194,17 @@ export default function Sendings() {
             Отправка товаров
           </Link>
         </Typography>
+        <Switch
+          style={{
+            marginBottom: 20,
+            transform: 'scale(140%)',
+            marginRight: 20,
+          }}
+          checkedChildren='Активные'
+          unCheckedChildren='Завершенные'
+          checked={activeOnly}
+          onChange={setActiveOnly}
+        />
       </Row>
       <Row>
         <div
