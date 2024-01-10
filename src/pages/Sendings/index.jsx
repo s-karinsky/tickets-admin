@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Button, Row, Table, Typography, Switch, Modal, DatePicker, Select } from 'antd'
-import { ExclamationCircleFilled } from '@ant-design/icons'
+import { ExclamationCircleFilled, CopyOutlined } from '@ant-design/icons'
 import { useSearchParams } from 'react-router-dom'
 import { useQuery } from 'react-query'
 import dayjs from 'dayjs'
@@ -50,6 +50,13 @@ export default function Sendings() {
             >
               Создать счет
             </Button>
+            <CopyOutlined
+              size={17}
+              color='#141414'
+              onClick={() => {
+                navigate(`/sendings/create?copy=${item.id}${isAir ? '&air' : ''}`)
+              }}
+            />
             <BsTrash
               style={{ cursor: isMaking ? 'pointer' : 'auto' }}
               size={17}
@@ -106,7 +113,7 @@ export default function Sendings() {
       title: 'Перевозчик',
       dataIndex: 'transporter',
       key: 'transporter',
-      render: val => driverMap[val]?.value,
+      render: val => driverMap && driverMap[val]?.value,
       sorter: (a, b) => a.transporter.localeCompare(b.transporter),
       ...getColumnSearchProps('transporter')
     },
@@ -155,6 +162,11 @@ export default function Sendings() {
       render: (date, item) => item.json?.status > 1 && dayjs(item.json?.status_date_2).format('DD.MM.YYYY'),
       sorter: (a, b) => new Date(a.delivery).getTime() - new Date(b.delivery).getTime(),
       ...getColumnSearchProps('delivery', { type: 'date' })
+    },
+    {
+      title: 'Примечание',
+      dataIndex: ['json', 'note'],
+      render: note => <div style={{ maxWidth: 80, maxHeight: 55, overflow: 'hidden', textOverflow: 'ellipsis' }} title={note}>{note}</div>
     },
     {
       title: '',

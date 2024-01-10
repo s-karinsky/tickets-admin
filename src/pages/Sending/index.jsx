@@ -36,14 +36,15 @@ export default function Sending() {
   
   const isNew = sendingId === 'create'
   const isEditPage = isNew || searchParams.get('edit') !== null
+  const copy = searchParams.get('copy')
 
   const clients = useUsersWithRole(1)
   const { data: { list: driverOptions, map: driverMap } = {} } = useDictionary('drivers')
 
   const [ { isLoading, data, refetch }, places ] = useQueries([
     {
-      queryKey: ['sending', sendingId],
-      queryFn: getSendingById(sendingId),
+      queryKey: ['sending', sendingId, { copy }],
+      queryFn: getSendingById(sendingId, { copy }),
       cacheTime: 0
     },
     {

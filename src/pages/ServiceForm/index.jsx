@@ -109,17 +109,6 @@ export default function ServiceForm() {
     return [ options, map ]
   }, [clients.data])
 
-  /* const [ driverOptions, driverMap ] = useMemo(() => {
-    if (!Array.isArray(drivers.data)) return [[], {}]
-    const options = drivers.data.map(item => ({
-      value: item.id_user,
-      label: item.json?.code,
-      phone: item.phone
-    }))
-    const map = options.reduce((acc, item) => ({ ...acc, [item.value]: { label: item.label, phone: item.phone } }), {})
-    return [ options, map ]
-  }, [drivers.data]) */
-
   const [ internalClientsOptions ] = useMemo(() => {
     if (!Array.isArray(internalClients.data)) return [[], {}]
     const options = internalClients.data.map(item => ({
@@ -724,7 +713,7 @@ export default function ServiceForm() {
                 label='Перевозчик'
                 type='select'
                 options={driverOptions}
-                text={driverMap[initialValues.pole?.driver]?.value}
+                text={driverMap && driverMap[initialValues.pole?.driver]?.value}
                 isEdit={isEdit}
                 rules={[ { required: true } ]}
               />
@@ -732,7 +721,7 @@ export default function ServiceForm() {
             {isDelivery() && <Col span={7}>
               <FormField
                 label='Телефон перевозчика'
-                value={driverMap[driverValue]?.phone}
+                value={driverMap && driverMap[driverValue]?.phone}
                 isEdit={isEdit}
                 rules={[ { required: true } ]}
                 disabled

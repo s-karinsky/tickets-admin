@@ -93,21 +93,27 @@ export const getSendings = isAir => async () => {
   })
 }
 
-export const getSendingById = sendingId => async () => {
+export const getSendingById = (sendingId, { copy } = {}) => async () => {
+  let newNumber
   if (sendingId === 'create') {
     const response = await axios.select('trip', 'max(cast(`from` as decimal)) as max', { where: { canceled: 0, 'YEAR(create_datetime)': `YEAR('${dayjs().format('YYYY-MM-DD')}')` } })
     const data = response.data?.data || []
-    const number = parseInt(_get(data, [0, 'max'])) || 0
-    return {
-      from: number + 1,
-      create_datetime: dayjs(),
-      json: {
-        status: 0
+    newNumber = parseInt(_get(data, [0, 'max'])) || 0
+    if (!copy) {
+      return {
+        from: newNumber + 1,
+        create_datetime: dayjs(),
+        json: {
+          status: 0
+        }
       }
     }
-  } else {
-    const [ response, responseProducts ] = await Promise.all([
-      axios.select('trip', '*', { where: { id_trip: sendingId} }),
+  }
+
+  let promises
+  if (!copy) {
+    promises = await Promise.all([
+      axios.select('trip', '*', { where: { id_trip: sendingId } }),
       axios.select('trip t', sendingSummaryFields,
         {
           where: {
@@ -124,17 +130,35 @@ export const getSendingById = sendingId => async () => {
         }
       )
     ])
-    const products = (responseProducts.data?.data || [])[0] || {}
-    const item = (response.data?.data || [])[0] || {}
-    item.json = parseJSON((item.json || '').replaceAll("\n", ''))
-    item.create_datetime = dayjs(item.create_datetime)
-    item.start_datetime = item.json?.status > 0 && dayjs(item.json?.status_date_1)
-    item.complete_datetime = item.json?.status > 1 && dayjs(item.json?.status_date_2)
-    item.gross_weight = products.gross_weight
-    item.net_weight = products.net_weight
-    item.count = products.count
-    return item
+  } else {
+    promises = await axios.select('trip', '*', { where: { id_trip: copy } })
   }
+  let response
+  let responseProducts
+  if (Array.isArray(promises)) {
+    response = promises[0]
+    responseProducts = promises[1]
+  } else {
+    response = promises
+    responseProducts = {}
+  }
+
+  const products = (responseProducts?.data?.data || [])[0] || {}
+  const item = (response.data?.data || [])[0] || {}
+  item.json = parseJSON((item.json || '').replaceAll("\n", ''))
+  
+  item.create_datetime = dayjs(item.create_datetime)
+  item.start_datetime = item.json?.status > 0 && dayjs(item.json?.status_date_1)
+  item.complete_datetime = item.json?.status > 1 && dayjs(item.json?.status_date_2)
+  item.gross_weight = products.gross_weight
+  item.net_weight = products.net_weight
+  item.count = products.count
+
+  if (copy) {
+    item.json.status = 0
+    item.from = newNumber + 1
+  }
+  return item
 }
 
 export const deleteSendingById = async (sendingId) => {
