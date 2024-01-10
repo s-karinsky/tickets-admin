@@ -44,9 +44,13 @@ const MENU_ITEMS = {
   ]),
   users: getItem(<Link to='/users'>Пользователи</Link>, 'users', <UserOutlined />),
   sendings: getItem(
-    <Link to='/sendings'>Отправки</Link>,
+    'Отправки',
     'sendings',
-    <CarOutlined />
+    <CarOutlined />,
+    [
+      getItem(<Link to='/sendings'>Авто</Link>, 'sendings-auto'),
+      getItem(<Link to='/sendings?air'>Авиа</Link>, 'sendings-air')
+    ]
   ),
 }
 

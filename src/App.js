@@ -24,7 +24,6 @@ const cookies = new Cookies()
 function App() {
   const navigate = useNavigate()
   const location = useLocation()
-  const [ isSendingAir, setIsSendingAir ] = useState(false)
   const isLoginPage = location.pathname === '/login'
 
   const token = cookies.get('token')
@@ -63,8 +62,8 @@ function App() {
         <Route path='/' element={<Layout user={user.data} />}>
           <Route path='/users' element={<PageUsers />} />
           <Route path='/users/:id' element={<PageUser />} />
-          <Route path='/sendings' element={<Sendings isSendingAir={isSendingAir} setIsSendingAir={setIsSendingAir} />} />
-          <Route path='/sendings/:sendingId' element={<Sending isSendingAir={isSendingAir} />} />
+          <Route path='/sendings' element={<Sendings />} />
+          <Route path='/sendings/:sendingId' element={<Sending />} />
           <Route path='/sendings/:sendingId/:placeId' element={<Place user={user.data} />} />
           <Route path='/services'>
             <Route path=':serviceName' element={<ServiceList />} />

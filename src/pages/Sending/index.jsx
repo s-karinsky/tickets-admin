@@ -22,9 +22,7 @@ import { SENDING_STATUS, SERVICE_STATUS, SERVICE_NAME } from '../../consts'
 
 const { Title, Link } = Typography
 
-export default function Sending({
-  isSendingAir
-}) {
+export default function Sending() {
   const [ form ] = Form.useForm()
   const [ searchParams, setSearchParams ] = useSearchParams()
   const navigate = useNavigate()
@@ -33,6 +31,7 @@ export default function Sending({
   const [ activeRow, setActiveRow ] = useState()
   const [ selectedRows, setSelectedRows ] = useState([])
   const [ service, setService ] = useState({})
+  const isAir = searchParams.get('air') !== null
   
   const isNew = sendingId === 'create'
   const isEditPage = isNew || searchParams.get('edit') !== null
@@ -64,16 +63,6 @@ export default function Sending({
     const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
     return [ options, map ]
   }, [clients.data])
-
-  /* const [ driverOptions, driverMap ] = useMemo(() => {
-    if (!Array.isArray(drivers.data)) return [[], {}]
-    const options = drivers.data.map(item => ({
-      value: item.id_user,
-      label: item.json?.code
-    }))
-    const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
-    return [ options, map ]
-  }, [drivers.data]) */
 
   const placesData = (places.data || [])
     .map((item) => {
@@ -211,11 +200,11 @@ export default function Sending({
   const handleSubmit = useCallback(async (values) => {
     const valuesMap = {
       from: values.from,
-      to: isSendingAir ? '1' : '0',
       create_datetime: dayjs(values.create_datetime).format('YYYY-MM-DD'),
       json: JSON.stringify(values.json)
     }
     if (sendingId === 'create') {
+      valuesMap.to = isAir ? '1' : '0'
       await createSending(valuesMap)
       const id = await getLastId('trip', 'id_trip')
       navigate(`/sendings/${id}`)
@@ -224,7 +213,7 @@ export default function Sending({
       await refetch()
       setSearchParams({})
     }
-  }, [sendingId, isSendingAir, navigate, refetch, setSearchParams])
+  }, [sendingId, isAir, navigate, refetch, setSearchParams])
 
   return (
     <>
@@ -252,7 +241,7 @@ export default function Sending({
               {isNew ? 'Новая отправка' : sendingTitle}
             </Title>
             <Link
-              onClick={() => navigate(`/sendings`)}
+              onClick={() => navigate(`/sendings${data.to === '1' ? '?air' : ''}`)}
               style={{ color: 'blue' }}
             >
               Отправка товаров <span> </span>
@@ -417,7 +406,7 @@ export default function Sending({
                   name={['json', 'transporter']}
                   isEdit={isEditPage}
                   options={driverOptions}
-                  text={driverMap[data.json?.transporter]?.value}
+                  text={driverMap && driverMap[data.json?.transporter]?.value}
                   rules={required()}
                   filterOption={filterOption}
                   showSearch

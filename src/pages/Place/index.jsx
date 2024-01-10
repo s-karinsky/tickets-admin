@@ -259,7 +259,7 @@ export default function Place({ user }) {
             }
             {isDataLoaded && <div>
               <Link
-                onClick={() => navigate(`/sendings`)}
+                onClick={() => navigate(`/sendings${sendingData?.data?.to === '1' ? '?air' : ''}`)}
                 style={{ color: 'blue' }}
               >
                 Отправка товаров <span> </span>&gt;

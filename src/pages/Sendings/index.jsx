@@ -1,7 +1,8 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Button, Row, Table, Typography, Switch, Modal, DatePicker, Select } from 'antd'
 import { ExclamationCircleFilled } from '@ant-design/icons'
+import { useSearchParams } from 'react-router-dom'
 import { useQuery } from 'react-query'
 import dayjs from 'dayjs'
 import { BsTrash } from 'react-icons/bs'
@@ -15,16 +16,18 @@ import { SENDING_STATUS } from '../../consts'
 const { Title, Link } = Typography
 export let PropertyGap = 10
 
-export default function Sendings({ isSendingAir, setIsSendingAir }) {
+export default function Sendings() {
   const navigate = useNavigate()
   const location = useLocation()
+  const [ searchParams ] = useSearchParams()
+  const isAir = searchParams.get('air') !== null
 
   const [ showStatusModal, setShowStatusModal ] = useState(false)
   const [ statusModalValue, setStatusModalValue ] = useState()
   const [ statusModalDate, setStatusModalDate ] = useState()
   const [ statusModalItem, setStatusModalItem ] = useState()
   const [ activeRow, setActiveRow ] = useState()
-  const { isLoading, data, refetch } = useQuery(['sendings', { isAir: isSendingAir }], getSendings(isSendingAir))
+  const { isLoading, data, refetch } = useQuery(['sendings', { isAir }], getSendings(isAir))
   const { data: { map: driverMap } = {} } = useDictionary('drivers')
 
   let sendings = (data || [])
@@ -189,17 +192,6 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
             Отправка товаров
           </Link>
         </Typography>
-        <Switch
-          style={{
-            marginBottom: 20,
-            transform: 'scale(140%)',
-            marginRight: 20,
-          }}
-          checkedChildren='Авиа'
-          unCheckedChildren='Авто'
-          checked={isSendingAir}
-          onChange={setIsSendingAir}
-        />
       </Row>
       <Row>
         <div
@@ -213,7 +205,7 @@ export default function Sendings({ isSendingAir, setIsSendingAir }) {
           <Button
             type='primary'
             onClick={() => {
-              navigate(location.pathname + `/create`)
+              navigate(location.pathname + `/create${isAir ? '?air' : ''}`)
             }}
             size={'large'}
           >
