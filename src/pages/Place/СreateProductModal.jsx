@@ -54,7 +54,7 @@ export const CreateProductModal = ({
       }
       open={isModalOpen}
       onCancel={handleCancel}
-      footer={isEdit ? [
+      footer={[
         <Button
           key='1'
           onClick={() => handleCancel()}
@@ -72,7 +72,7 @@ export const CreateProductModal = ({
         >
           Сохранить
         </Button>,
-      ] : null}
+      ]}
     >
       <Form
         style={{
@@ -315,11 +315,10 @@ export const CreateProductModal = ({
         <div style={{ flexBasis: '100%' }} />
         <div style={{ flexGrow: 1 }}>
           <FormField
-            isEdit={isEdit}
+            isEdit={!isNotSending || isEdit}
             type='textarea'
             label='Примечание'
             name='note'
-            disabled={!isNotSending}
           />
         </div>
       </Form>

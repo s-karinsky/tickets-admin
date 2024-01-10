@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react'
 import { useNavigate, useLocation, useParams, useSearchParams } from 'react-router-dom'
-import { Button, Row, Table, Typography, Form, Modal, Checkbox, Dropdown } from 'antd'
+import { Button, Row, Table, Typography, Form, Modal, Checkbox, Dropdown, message } from 'antd'
 import {
   SaveOutlined,
   CopyOutlined,
@@ -31,6 +31,7 @@ export default function Sending() {
   const [ activeRow, setActiveRow ] = useState()
   const [ selectedRows, setSelectedRows ] = useState([])
   const [ service, setService ] = useState({})
+  const [ messageApi, contextHolder ] = message.useMessage()
   const isAir = searchParams.get('air') !== null
   
   const isNew = sendingId === 'create'
@@ -210,6 +211,10 @@ export default function Sending() {
       navigate(`/sendings/${id}`)
     } else {
       await updateSendingById(sendingId, valuesMap)
+      messageApi.open({
+        type: 'success',
+        content: 'Запись успешно обновлена'
+      })
       await refetch()
       setSearchParams({})
     }
@@ -217,6 +222,7 @@ export default function Sending() {
 
   return (
     <>
+      {contextHolder}
       <div
         style={{
           display: 'flex',
@@ -259,6 +265,23 @@ export default function Sending() {
             }}
           >
             {' '}
+            {!isNotSending &&
+              <Button
+                icon={<SaveOutlined />}
+                style={{
+                  gap: 10,
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+                type='primary'
+                size='large'
+                onClick={() => {
+                  form.submit()
+                }}
+              >
+                Сохранить
+              </Button>
+            }
             {isEditPage ? (
               <>
                 <Button
@@ -488,7 +511,7 @@ export default function Sending() {
                 type='textarea'
                 label='Примечание'
                 name={['json', 'note']}
-                isEdit={isEditPage}
+                isEdit={!isNotSending || isEditPage}
                 text={data.json?.note}
               />
             </Form>

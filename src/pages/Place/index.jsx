@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, useMemo } from 'react'
 import { useNavigate, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { useQueries } from 'react-query'
-import { Button, Row, Table, Typography, Input, Form, Modal, Space, Divider } from 'antd'
+import { Button, Row, Table, Typography, Input, Form, Modal, Space, Divider, message } from 'antd'
 import { BsTrash } from 'react-icons/bs'
 import { BiEdit } from 'react-icons/bi'
 import { SaveOutlined, CopyOutlined, ExclamationCircleFilled, LoadingOutlined } from '@ant-design/icons'
@@ -28,6 +28,7 @@ export default function Place({ user }) {
   const [ activeRow, setActiveRow ] = useState()
   const [ isSumDisabled, setIsSumDisabled ] = useState()
   const [ customPay, setCustomPay ] = useState('')
+  const [ messageApi, contextHolder ] = message.useMessage()
 
   const copy = searchParams.get('copy')
 
@@ -219,6 +220,10 @@ export default function Place({ user }) {
         })
       } else {
         await placeData.refetch()
+        messageApi.open({
+          type: 'success',
+          content: 'Запись успешно обновлена'
+        })
         setSearchParams()
       }
     }
@@ -226,6 +231,7 @@ export default function Place({ user }) {
 
   return (
     <>
+      {contextHolder}
       <div
         style={{
           display: 'flex',
@@ -293,6 +299,21 @@ export default function Place({ user }) {
               marginBottom: 20,
             }}
           >
+            {!isNotSending &&
+              <Button
+                style={{
+                  gap: 10,
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+                type='primary'
+                size={'large'}
+                onClick={() => form.submit()}
+              >
+                Сохранить
+                <SaveOutlined size={16} />
+              </Button>
+            }
             {isEditPage ? (
               <>
                 <Button
@@ -585,7 +606,7 @@ export default function Place({ user }) {
                 type='textarea'
                 label='Примечание'
                 name='note'
-                isEdit={isEditPage}
+                isEdit={!isNotSending || isEditPage}
                 text={initialPlace.note}
               />
             </Form>
