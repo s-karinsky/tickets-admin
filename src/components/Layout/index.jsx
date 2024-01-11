@@ -62,9 +62,9 @@ export default function PageLayout({ user }) {
     if (user.u_role === '4') {
       return [
         MENU_ITEMS.users,
+        MENU_ITEMS.dictionary,
         MENU_ITEMS.sendings,
-        MENU_ITEMS.services,
-        MENU_ITEMS.dictionary
+        MENU_ITEMS.services
       ]
     }
   }, [user.u_role])

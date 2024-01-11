@@ -36,6 +36,8 @@ export default function FormField({
         padding: '0 11px',
         borderRadius: 6,
         boxSizing: 'border-box',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
         ...styles,
         ...rest.style
       }}
