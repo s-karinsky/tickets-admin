@@ -269,6 +269,7 @@ export const getDatasetsById = (ids, withChildren) => async () => {
     ...item,
     ...parseJSON(item.pole),
     sending: parseJSON(item.sending),
+    pole: parseJSON(item.pole),
     child: child.filter(sub => sub.id_ref === item.id)
   }))
 }

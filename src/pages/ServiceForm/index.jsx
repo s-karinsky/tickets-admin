@@ -44,6 +44,8 @@ export default function ServiceForm() {
   const [ dynamicRequired, setDynamicRequired ] = useState({})
   const [ selectedRows, setSelectedRows ] = useState([])
   const [ newPlaces, setNewPlaces ] = useState([])
+  const [ newPlaceModal, setNewPlaceModal ] = useState()
+  const [ editNewPlace, setEditNewPlace ] = useState({})
 
   const isNew = id === 'create'
   const isEdit = isNew || searchParams.get('edit') !== null
@@ -448,7 +450,7 @@ export default function ServiceForm() {
           const client = placesData[0].client
           const add = {}
           if (isDelivery) {
-            add.driver_phone = driverMap[driverValue]?.phone
+            add.driver_phone = driverMap && driverMap[driverValue]?.phone
           }
           if (!values.pole.status) {
             values.pole.status = 0
@@ -469,7 +471,7 @@ export default function ServiceForm() {
             const productKeys = ['tip', 'pole', 'id_ref', 'ref_tip']
             const promises = newPlaces.map(
               p => axios.postWithAuth('/query/insert', {
-                sql: `INSERT INTO dataset (${placesKeys.join(',')}) VALUES (${placesKeys.map(key => `'${p[key]}'`).join(',')})`
+                sql: `INSERT INTO dataset (${placesKeys.join(',')}) VALUES (${placesKeys.map(key => typeof p[key] === 'object' ? `'${JSON.stringify(p[key])}'` : `'${p[key]}'`).join(',')})`
               }).then(res => ({ [p.id]: res.data?.data?.id }))
             )
             const res = await Promise.all(promises)
@@ -770,9 +772,7 @@ export default function ServiceForm() {
             type='primary'
             disabled={!selectedRows.length}
             onClick={() => {
-              const items = placesData.filter(item => selectedRows.includes(item.id))
-              setNewPlaces(newPlaces.concat(items))
-              setSelectedRows([])
+              setNewPlaceModal(true)
             }}
           >
             Создать новое место
@@ -797,14 +797,72 @@ export default function ServiceForm() {
       {isRepack() && <>
         <Typography.Title level={2} style={{ padding: '0 40px' }}>Новые места</Typography.Title>
         <Table
-          columns={columns.slice(2)}
+          columns={[{
+            title: 'Внутренний клиент',
+            dataIndex: 'innerclient'
+          }].concat(columns.slice(2), { title: 'Включено', dataIndex: 'countin' })}
           dataSource={newPlaces}
           rowKey={({ id }) => id}
           size='small'
           expandable={{ expandedRowRender, defaultExpandAllRows: true }}
           pagination={false}
+          onRow={(record, index) => ({
+            onClick: (e) => {
+              if (e.detail === 2) {
+                setEditNewPlace(record)
+                setNewPlaceModal(true)
+              }
+            },
+          })}
         />
       </>}
+      {isRepack() && newPlaceModal &&
+        <Modal
+          title='Введите данные'
+          footer={null}
+          open
+        >
+          <Form
+            layout='vertical'
+            size='large'
+            initialValues={editNewPlace}
+            onFinish={async (values) => {
+              if (!editNewPlace.id) {
+                const items = placesData
+                  .filter(item => selectedRows.includes(item.id))
+                  .map(item => ({ ...item, pole: { ...item.pole, ...values } }))
+                setNewPlaces(newPlaces.concat(items))
+                setSelectedRows([])
+                setNewPlaceModal(false)
+              } else {
+                await axios.postWithAuth('/query/update', { sql: sqlUpdate('dataset', { pole: JSON.stringify({ ...editNewPlace.pole, ...values }) }, `id=${editNewPlace.id}`)})
+                const places = await getDatasetsById(initialValues.new_places, true)()
+                setNewPlaces(places)
+                setNewPlaceModal(false)
+              }
+            }}
+          >
+            <FormField
+              type='select'
+              options={internalClientsOptions}
+              name='innerclient'
+              label='Внутренний клиент'
+              width='100%'
+            />
+            <FormField
+              type='number'
+              name='countin'
+              label='Количество товара'
+              width='100%'
+            />
+            <Row justify='end' gutter={10} style={{ marginTop: 10 }}>
+              <Col><Button onClick={() => setNewPlaceModal(false)} htmlType='button' danger>Отмена</Button></Col>
+              <Col>
+                <Button htmlType='submit' type='primary'>Сохранить</Button></Col>
+            </Row>
+          </Form>
+        </Modal>
+      }
     </>
   )
 }
