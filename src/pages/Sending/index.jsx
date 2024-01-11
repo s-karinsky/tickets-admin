@@ -4,7 +4,8 @@ import { Button, Row, Table, Typography, Form, Modal, Checkbox, Dropdown, messag
 import {
   SaveOutlined,
   CopyOutlined,
-  ExclamationCircleFilled
+  ExclamationCircleFilled,
+  CheckOutlined
 } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import { useQueries } from 'react-query'
@@ -130,6 +131,11 @@ export default function Sending() {
       render: id => clientsMap[id],
       sorter: (a, b) => (clientsMap[a.client] || '').localeCompare(clientsMap[b.client] || ''),
       ...getColumnSearchProps('client', { options: clientsOptions })
+    },
+    {
+      title: 'ЧЗ',
+      dataIndex: 'hasMark',
+      render: hasMark => hasMark ? <CheckOutlined /> : ''
     },
     {
       title: 'Вес брутто',
@@ -564,7 +570,7 @@ export default function Sending() {
                 >
                   Создать
                 </Button>}
-                <Dropdown
+                {data?.json?.status === 2 && <Dropdown
                   menu={{ items: [
                     {
                       key: 'issuance',
@@ -616,7 +622,7 @@ export default function Sending() {
                   >
                     Создать услугу
                   </Button>
-                </Dropdown>
+                </Dropdown>}
                 <Button
                   type='primary'
                   size='large'

@@ -190,7 +190,7 @@ export const getPlacesBySendingId = sendingId => async () => {
         'p.status': 0
       }
     }),
-    axios.select('dataset t', ['t.id', 'sum(JSON_EXTRACT(n.pole,"$.gross_weight")) AS gross_weight', 'sum(JSON_EXTRACT(n.pole,"$.count")) AS count'], {
+    axios.select('dataset t', ['t.id', 'JSON_EXTRACT(n.pole,"$.mark") as mark', 'sum(JSON_EXTRACT(n.pole,"$.gross_weight")) AS gross_weight', 'sum(JSON_EXTRACT(n.pole,"$.count")) AS count'], {
       where: {
         't.tip': 'place',
         't.id_ref': sendingId,
@@ -202,11 +202,12 @@ export const getPlacesBySendingId = sendingId => async () => {
       groupBy: 't.id'
     })
   ])
-  
-  const productsMap = (responseProducts.data?.data || []).reduce((acc, item) => ({
+  const productsList = (responseProducts.data?.data || [])
+  const productsMap = productsList.reduce((acc, item) => ({
     ...acc,
     [item.id]: item
   }), {})
+  
   const data = response.data?.data || []
   return data.map(item => {
     const json = parseJSON(item.pole)
@@ -215,6 +216,7 @@ export const getPlacesBySendingId = sendingId => async () => {
       ...item,
       ...json,
       count: productsMap[item.id]?.count,
+      hasMark: productsMap[item.id]?.mark === 'true',
       service
     }
   })

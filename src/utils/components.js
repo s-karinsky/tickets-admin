@@ -19,7 +19,6 @@ export const getColumnSearchProps = (dataIndex, { options = [], type } = {}) => 
     if (type === 'date') {
       return dayjs(dataValue).isAfter(value[0], 'day') && dayjs(dataValue).isBefore(value[1], 'day')
     }
-    console.log(value)
     if (type === 'number') {
       let result = true
       if (value[0]) {

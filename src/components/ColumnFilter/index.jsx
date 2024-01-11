@@ -26,7 +26,6 @@ export default function ColumnFilter({
   }, [options])
 
   const selectValue = (selectOptions.find(item => item.value === selectedKeys[0]) || {}).label
-  console.log(selectedKeys)
   return (
     <div style={{ padding: 10 }} onKeyDown={(e) => e.stopPropagation()}>
       <div style={{ minWidth: 200, maxWidth: 300 }}>

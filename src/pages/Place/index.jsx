@@ -4,7 +4,7 @@ import { useQueries } from 'react-query'
 import { Button, Row, Table, Typography, Input, Form, Modal, Space, Divider, message } from 'antd'
 import { BsTrash } from 'react-icons/bs'
 import { BiEdit } from 'react-icons/bi'
-import { SaveOutlined, CopyOutlined, ExclamationCircleFilled, LoadingOutlined } from '@ant-design/icons'
+import { SaveOutlined, CopyOutlined, ExclamationCircleFilled, LoadingOutlined, CheckOutlined } from '@ant-design/icons'
 import { PropertyGap } from '../Sendings'
 import CreateProductModal from './СreateProductModal'
 import FormField from '../../components/FormField'
@@ -52,7 +52,6 @@ export default function Place({ user }) {
 
   const [ clientsOptions, clientsMap ] = useMemo(() => {
     if (!Array.isArray(clients.data)) return [[], {}]
-    console.log(clients.data)
     const options = clients.data.map(({ json = {}, ...item }) => ({
       value: item.id_user,
       label: `${json.code} (${[item.family, item.name, item.middle].filter(Boolean).join(' ')})`
@@ -138,6 +137,11 @@ export default function Place({ user }) {
       key: 'name',
       sorter: (a, b) => a.name.localeCompare(b.name),
       ...getColumnSearchProps('name')
+    },
+    {
+      title: 'ЧЗ',
+      dataIndex: 'mark',
+      render: mark => mark ? <CheckOutlined /> : ''
     },
     {
       title: 'Вес нетто',
