@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
-import { Button, Calendar, Input, InputNumber, Select } from 'antd'
+import { Button, Input, InputNumber, Select, DatePicker } from 'antd'
+import { get as _get } from 'lodash'
 import { SearchOutlined } from '@ant-design/icons'
 
 export default function ColumnFilter({
@@ -25,7 +26,7 @@ export default function ColumnFilter({
   }, [options])
 
   const selectValue = (selectOptions.find(item => item.value === selectedKeys[0]) || {}).label
-
+  console.log(selectedKeys)
   return (
     <div style={{ padding: 10 }} onKeyDown={(e) => e.stopPropagation()}>
       <div style={{ minWidth: 200, maxWidth: 300 }}>
@@ -43,13 +44,24 @@ export default function ColumnFilter({
           />
         )}
         {isNumber && (
-          <InputNumber
-            placeholder={placeholder}
-            value={selectedKeys[0]}
-            onChange={num => setSelectedKeys(num ? [num] : [])}
-            onPressEnter={() => confirm()}
-            style={{ width: '100%', marginBottom: 8 }}
-          />
+          <>
+            с&nbsp;
+            <InputNumber
+              placeholder={placeholder}
+              value={_get(selectedKeys, [0, 0])}
+              onChange={num => setSelectedKeys(num ? [[num, _get(selectedKeys, [0, 1])]] : [[0, _get(selectedKeys, [0, 1])]])}
+              onPressEnter={() => confirm()}
+              style={{ width: '40%', marginBottom: 8 }}
+            />
+            &nbsp;по&nbsp;
+            <InputNumber
+              placeholder={placeholder}
+              value={_get(selectedKeys, [0, 1])}
+              onChange={num => setSelectedKeys(num ? [[_get(selectedKeys, [0, 0]), num]] : [[_get(selectedKeys, [0, 0]), 0]])}
+              onPressEnter={() => confirm()}
+              style={{ width: '40%', marginBottom: 8 }}
+            />
+          </>
         )}
         {isSelect && (
           <Select
@@ -70,10 +82,11 @@ export default function ColumnFilter({
           />
         )}
         {isDate && (
-          <Calendar
-            fullscreen={false}
+          <DatePicker.RangePicker
             value={selectedKeys[0]}
             onChange={(date) => setSelectedKeys([date])}
+            style={{ width: '100%', marginBottom: 8 }}
+            placeholder={['Начало диапазона', 'Конец диапазона']}
           />
         )}
       </div>
