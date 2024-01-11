@@ -35,6 +35,7 @@ export default function FormField({
         height: '38px',
         padding: '0 11px',
         borderRadius: 6,
+        boxSizing: 'border-box',
         ...styles,
         ...rest.style
       }}
