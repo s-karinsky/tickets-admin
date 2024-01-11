@@ -66,7 +66,7 @@ export default function Place({ user }) {
     ...placeData.data,
     pay_sum: (placeData.data?.pay_kg || 0) * (placeData.data?.gross_weight || 0),
     status: sendingData.data?.json?.status,
-    net_weight: (productsData.data || []).reduce((sum, item) => sum + (item.net_weight * item.count || 0), 0),
+    net_weight: (productsData.data || []).reduce((sum, item) => sum + item.net_weight, 0),
     items_sum: (productsData.data || []).reduce((sum, item) => sum + (item.sum || 0), 0),
     count: (productsData.data || []).reduce((sum, item) => sum + (item.count || 0), 0)
   }), [placeData, productsData, sendingData])
