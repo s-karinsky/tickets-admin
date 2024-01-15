@@ -440,10 +440,17 @@ export default function Place({ user }) {
                     [
                       ...required(),
                       ...numberRange({ min: 1 }),
-                      () => ({
+                      ({ getFieldValue }) => ({
                         validator: async (_, id) => {
                           if (!isNew && parseInt(id) === parseInt(initialPlace.place)) return Promise.resolve()
-                          const count = await getCount('dataset', { '$.pole.place': id, id_ref: sendingId, tip: 'place', status: 0 })
+                          const count = await getCount('dataset', {
+                            '$.pole.client': getFieldValue('client'),
+                            '$.pole.tarif': getFieldValue('tarif'),
+                            '$.pole.place': id,
+                            id_ref: sendingId,
+                            tip: 'place',
+                            status: 0
+                          })
                           return count > 0 ? Promise.reject(new Error('Место уже занято')) : Promise.resolve()
                         },
                       })

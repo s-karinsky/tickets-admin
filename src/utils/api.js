@@ -6,7 +6,13 @@ import axios from './axios'
 import { parseJSON, toFormData } from './utils'
 import { sqlUpdate, sqlInsert } from './sql'
 
-const sendingSummaryFields = ['id_trip', 'sum(JSON_EXTRACT(m.pole,"$.gross_weight")) AS gross_weight', 'sum(JSON_EXTRACT(n.pole,"$.net_weight")) AS net_weight', 'sum(JSON_EXTRACT(n.pole,"$.count")) AS count']
+const sendingSummaryFields = [
+  'id_trip',
+  'm.id as place_id',
+  'JSON_EXTRACT(m.pole,"$.gross_weight") as gross_weight',
+  'JSON_EXTRACT(n.pole,"$.net_weight") as net_weight',
+  'JSON_EXTRACT(n.pole,"$.count") as count'
+]
 
 export const useAuthorization = ({ token, u_hash }) => useQuery(['authorization', { token, u_hash }], async () => {
   if (!token || !u_hash) return { authorized: false }
@@ -57,21 +63,37 @@ export const getSendings = isAir => async () => {
       {
         where: {
           canceled: 0,
-          to: `${Number(isAir)}`
+          to: `${Number(isAir)}`,
+          'm.status': 0,
+          'n.status': 0
         },
         leftJoin: {
           'dataset m': 'm.id_ref=t.id_trip',
           'dataset n': 'n.id_ref=m.id'
-        },
-        groupBy: 'id_trip'
+        }
       }
     )
   ])
   
-  const productsMap = (responseProducts.data?.data || []).reduce((acc, item) => ({
-    ...acc,
-    [item.id_trip]: item
-  }), {})
+  const placeCountIdsMap = {}
+  const productsMap = (responseProducts.data?.data || []).reduce((acc, item) => {
+    const id = item.id_trip
+    if (!placeCountIdsMap[id]) placeCountIdsMap[id] = []
+    const count = Number(item.count)
+    const gross_weight = Number(item.gross_weight)
+    const net_weight = Number(item.net_weight)
+    if (!acc[id]) {
+      acc[id] = { count, gross_weight, net_weight }
+    } else {
+      acc[id].count += count
+      acc[id].net_weight += net_weight
+    }
+    if (!placeCountIdsMap[id].includes(item.place_id)) {
+      acc[id].gross_weight += gross_weight
+      placeCountIdsMap[id].push(item.place_id)
+    }
+    return acc
+  }, {})
 
   const data = response.data?.data || []
   return data.map(item => {
@@ -86,6 +108,7 @@ export const getSendings = isAir => async () => {
       count: productsMap[item.id_trip]?.count || 0,
       net_weight: productsMap[item.id_trip]?.net_weight || 0,
       gross_weight: productsMap[item.id_trip]?.gross_weight || 0,
+      places_count: placeCountIdsMap[item.id_trip]?.length || 0,
       departure: item.start_datetime,
       delivery: item.complete_datetime,
       json
@@ -125,8 +148,7 @@ export const getSendingById = (sendingId, { copy } = {}) => async () => {
           leftJoin: {
             'dataset m': 'm.id_ref=t.id_trip',
             'dataset n': 'n.id_ref=m.id'
-          },
-          groupBy: 'id_trip'
+          }
         }
       )
     ])
@@ -143,7 +165,20 @@ export const getSendingById = (sendingId, { copy } = {}) => async () => {
     responseProducts = {}
   }
 
-  const products = (responseProducts?.data?.data || [])[0] || {}
+  const placesId = []
+  const products = (responseProducts?.data?.data || []).reduce((acc, item) => {
+    acc.count += Number(item.count)
+    acc.net_weight += Number(item.net_weight)
+    if (!placesId.includes(item.place_id)) {
+      acc.gross_weight += Number(item.gross_weight)
+      placesId.push(item.place_id)
+    }
+    return acc
+  }, {
+    count: 0,
+    gross_weight: 0,
+    net_weight: 0
+  })
   const item = (response.data?.data || [])[0] || {}
   item.json = parseJSON((item.json || '').replaceAll("\n", ''))
   
@@ -252,7 +287,7 @@ export const getPlaceById = (placeId, sendingId, params = {}) => async () => {
 export const getDatasetsById = (ids, withChildren) => async () => {
   if (!ids || !Array.isArray(ids)) return []
   const where = ids.map(id => `d.id=${id}`).join(' OR ')
-  const response = await axios.postWithAuth('/query/select', { sql: `SELECT d.*, t.json as sending, t.from as sending_number FROM dataset d LEFT JOIN trip t ON t.id_trip=d.id_ref WHERE ${where}` })
+  const response = await axios.postWithAuth('/query/select', { sql: `SELECT d.*, t.json as sending, t.start_datetime as sendingDate, t.from as sending_number FROM dataset d LEFT JOIN trip t ON t.id_trip=d.id_ref WHERE ${where}` })
 
   let child = []
   if (withChildren) {

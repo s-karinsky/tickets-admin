@@ -16,8 +16,8 @@ const TITLE = {
 
 const LINK = {
   default: '/users/',
-  1: '/dictionary/clients',
-  2: '/dictionary/employees'
+  1: '/dictionary/clients/',
+  2: '/dictionary/employees/'
 }
 
 export const getColumns = ({ codeIndex = ['json', 'code'], refetch = () => {}, deleteUser }) => ([

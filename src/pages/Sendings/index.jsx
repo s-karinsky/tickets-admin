@@ -129,12 +129,12 @@ export default function Sendings() {
       ...getColumnSearchProps(record => record.status + 1, { options: SENDING_STATUS.map((label, value) => ({ value: value + 1, label })) })
     },
     {
-      title: 'Количество',
-      dataIndex: 'count',
-      key: 'count',
+      title: 'Места',
+      dataIndex: 'places_count',
+      key: 'places_count',
       align: 'right',
-      sorter: (a, b) => a.count - b.count,
-      ...getColumnSearchProps('count', { type: 'number' })
+      sorter: (a, b) => a.places_count - b.places_count,
+      ...getColumnSearchProps('places_count', { type: 'number' })
     },
     {
       title: 'Вес нетто',

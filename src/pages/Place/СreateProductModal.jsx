@@ -254,7 +254,6 @@ export const CreateProductModal = ({
             isEdit={isEdit}
             label='Номер'
             name='cert_number'
-            disabled={!isNotSending}
           />
           <FormField
             width={210}
@@ -262,7 +261,7 @@ export const CreateProductModal = ({
             type='date'
             label='Дата начала'
             name='cert_start_date'
-            disabled={!isNotSending}
+            text={initialValues.cert_start_date?.format('DD.MM.YYYY')}
           />
           <FormField
             width={210}
@@ -270,7 +269,7 @@ export const CreateProductModal = ({
             type='date'
             label='Дата окончания'
             name='cert_end_date'
-            disabled={!isNotSending}
+            text={initialValues.cert_end_date?.format('DD.MM.YYYY')}
           />
         </fieldset>
         <FormField
@@ -315,7 +314,7 @@ export const CreateProductModal = ({
         <div style={{ flexBasis: '100%' }} />
         <div style={{ flexGrow: 1 }}>
           <FormField
-            isEdit={!isNotSending || isEdit}
+            isEdit={isEdit}
             type='textarea'
             label='Примечание'
             name='note'

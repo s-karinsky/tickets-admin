@@ -213,12 +213,16 @@ export default function ServiceForm() {
 
     return <Table columns={childColumns} dataSource={item.child} pagination={false} />
   }
-  
+
   const columns = [
     {
       title: 'Отправка',
       dataIndex: 'sending_number',
       align: 'right'
+    },
+    {
+      title: 'Дата отправки',
+      dataIndex: 'sending_status_2'
     },
     {
       title: 'Место',
@@ -346,6 +350,9 @@ export default function ServiceForm() {
   })
 
   if (service.isFetching) return null
+  const totalCount = placesData.reduce((sum, item) => sum + (item.count || 0), 0)
+  const totalNetWeight = placesData.reduce((sum, item) => sum + (item.net_weight || 0), 0)
+  const totalGrossWeight = placesData.reduce((sum, item) => sum + (item.gross_weight || 0), 0)
 
   return (
     <>
@@ -538,7 +545,18 @@ export default function ServiceForm() {
               width='100%'
             />
           </Col>
-          <Col span={isStorage() ? 4 : 6}>
+          <Col span={3}>
+            <FormField
+              label='Клиент'
+              type='select'
+              options={[]}
+              text={clientsMap && clientsMap[placesData[0]?.client]}
+              isEdit={false}
+              width='100%'
+              disabled
+            />
+          </Col>
+          <Col span={3}>
             <FormField
               type='select'
               options={internalClientsOptions}
@@ -751,6 +769,36 @@ export default function ServiceForm() {
               isEdit={isEdit}
             />
           </Col>}
+          <Col span={3}>
+            <FormField
+              type='select'
+              options={[]}
+              label='Количество товара'
+              text={totalCount}
+              isEdit={false}
+              disabled
+            />
+          </Col>
+          <Col span={3}>
+            <FormField
+              type='select'
+              options={[]}
+              label='Вес нетто'
+              text={totalNetWeight}
+              isEdit={false}
+              disabled
+            />
+          </Col>
+          <Col span={3}>
+            <FormField
+              type='select'
+              options={[]}
+              label='Вес брутто'
+              text={totalGrossWeight}
+              isEdit={false}
+              disabled
+            />
+          </Col>
           <Col span={14}>
             <FormField
               type='textarea'

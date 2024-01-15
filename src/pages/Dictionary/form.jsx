@@ -232,6 +232,14 @@ export default function DictionaryForm() {
                     showSearch
                   />
                 </Col>
+                <Col span={24}>
+                  <FormField
+                    type='textarea'
+                    label='Примечание'
+                    name='note'
+                    text={data?.note}
+                  />
+                </Col>
               </>}
 
               {name === 'inclient' && <>
