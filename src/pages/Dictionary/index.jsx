@@ -3,7 +3,7 @@ import { Row, Col, Typography, Table, Button, Modal } from 'antd'
 import { ExclamationCircleFilled } from '@ant-design/icons'
 import { useParams, useNavigate } from 'react-router-dom'
 import { BsTrash } from 'react-icons/bs'
-import { localeCompare } from '../../utils/utils'
+import { localeCompare, getPaginationSettings } from '../../utils/utils'
 import axios from '../../utils/axios'
 import { useDictionary } from '../../utils/api'
 import { getColumnSearchProps } from '../../utils/components'
@@ -154,6 +154,7 @@ export default function Dictionary() {
             }
           },
         })}
+        pagination={getPaginationSettings(`dictionary-${name}`)}
       />
     </>
   )

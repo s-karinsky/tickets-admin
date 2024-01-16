@@ -134,6 +134,10 @@ export default function ServiceForm() {
       }
     })
 
+  if (isStorage()) {
+    initialValues.place = placesData[0]
+  }
+  
   const expandedRowRender = item => {
     const childColumns = [
       {
@@ -349,11 +353,11 @@ export default function ServiceForm() {
     )
   })
 
-  if (service.isFetching) return null
+  if (service.isFetching || (isStorage() && !initialValues.place)) return null
   const totalCount = placesData.reduce((sum, item) => sum + (item.count || 0), 0)
   const totalNetWeight = placesData.reduce((sum, item) => sum + (item.net_weight || 0), 0)
   const totalGrossWeight = placesData.reduce((sum, item) => sum + (item.gross_weight || 0), 0)
-
+  console.log(initialValues)
   return (
     <>
       <Row align='bottom' style={{ padding: '0 40px' }}>
@@ -545,6 +549,22 @@ export default function ServiceForm() {
               width='100%'
             />
           </Col>
+          {isStorage() && <>
+            <Col span={3}>
+              <FormField
+                label='Номер отправки'
+                name={['place', 'sending_number']}
+                isEdit={false}
+              />
+            </Col>
+            <Col span={3}>
+              <FormField
+                label='Дата отправки'
+                name={['place', 'sending', 'status_date_2']}
+                isEdit={false}
+              />
+            </Col>
+          </>}
           <Col span={3}>
             <FormField
               label='Клиент'
@@ -588,6 +608,47 @@ export default function ServiceForm() {
             />
           </Col>}
           {isStorage() && <>
+            <Col span={3}>
+              <FormField
+                label='Место'
+                name={['place', 'pole', 'place']}
+                isEdit={false}
+              />
+            </Col>
+            <Col span={3}>
+              <FormField
+                label='Тариф'
+                name={['place', 'pole', 'tarif']}
+                isEdit={false}
+              />
+            </Col>
+            <Col span={3}>
+              <FormField
+                type='number'
+                label='Длина'
+                name={['place', 'pole', 'size', 'length']}
+                isEdit={false}
+                addonAfter='см'
+              />
+            </Col>
+            <Col span={3}>
+              <FormField
+                type='number'
+                label='Ширина'
+                name={['place', 'pole', 'size', 'width']}
+                isEdit={false}
+                addonAfter='см'
+              />
+            </Col>
+            <Col span={3}>
+              <FormField
+                type='number'
+                label='Высота'
+                name={['place', 'pole', 'size', 'height']}
+                isEdit={false}
+                addonAfter='см'
+              />
+            </Col>
             <Col span={3}>
               <FormField
                 type='date'
@@ -810,11 +871,11 @@ export default function ServiceForm() {
         </Row>
       </Form>
       <Row align='bottom' style={{ padding: '0 40px' }}>
-        <Col span={12}>
+        {!isStorage() && <Col span={12}>
           <Typography.Title level={2}>
             {isRepack() ? 'Первичные места' : (datasetsId.length > 1 ? 'для мест' : 'для места')}
           </Typography.Title>
-        </Col>
+        </Col>}
         {isRepack() && isEdit && <Col span={12} style={{ textAlign: 'right', paddingBottom: 20 }}>
           <Button
             type='primary'
@@ -827,7 +888,7 @@ export default function ServiceForm() {
           </Button>
         </Col>}
       </Row>
-      <Table
+      {!isStorage() && <Table
         columns={columns}
         isLoading={places.isLoading}
         dataSource={placesData}
@@ -841,7 +902,7 @@ export default function ServiceForm() {
           })
         }}
         pagination={false}
-      />
+      />}
       {isRepack() && <>
         <Typography.Title level={2} style={{ padding: '0 40px' }}>Новые места</Typography.Title>
         <Table

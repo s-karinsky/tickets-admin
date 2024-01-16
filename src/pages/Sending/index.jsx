@@ -598,8 +598,10 @@ export default function Sending() {
                     },
                     {
                       key: 'storage',
+                      disabled: selectedRows.length > 1,
+                      title: selectedRows.length > 1 && 'Хранение можно создать только для одного места',
                       label: (
-                        <span onClick={() => handleAddService('storage')}>
+                        <span onClick={() => navigate(`/services/storage/create`, { state: { selectedRows } })}>
                           Хранение
                         </span>
                       )
