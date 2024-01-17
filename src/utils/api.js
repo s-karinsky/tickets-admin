@@ -504,8 +504,3 @@ export const useService = (name, id, params) => useQuery(['dataset', name, id], 
   })
   return id && typeof id !== 'object' ? res[0] : res
 }, params)
-
-export const getSendingReport = async (sendingId) => {
-  const res = await axios.postWithAuth('/script/template/1', { t_id: sendingId })
-  console.log(res)
-}
