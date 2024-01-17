@@ -284,7 +284,7 @@ export default function Sending() {
                 size='large'
                 htmlType='submit'
               >
-                Скачать отчет
+                Отчет
               </Button>
             </form>
             {' '}
