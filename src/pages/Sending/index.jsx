@@ -5,9 +5,11 @@ import {
   SaveOutlined,
   CopyOutlined,
   ExclamationCircleFilled,
-  CheckOutlined
+  CheckOutlined,
+  DownloadOutlined
 } from '@ant-design/icons'
 import dayjs from 'dayjs'
+import Cookies from 'universal-cookie'
 import { useQueries } from 'react-query'
 import { uniqBy, get as _get } from 'lodash'
 import { BsTrash } from 'react-icons/bs'
@@ -17,11 +19,13 @@ import FormField from '../../components/FormField'
 import ServiceModal from '../../components/ServiceModal'
 import { useDictionary, useUsersWithRole, getLastId, getCount, createSending, updateSendingById, getSendingById, deleteSendingById, getPlacesBySendingId, deletePlaceById } from '../../utils/api'
 import { getColumnSearchProps } from '../../utils/components'
+import { API_URL } from '../../consts'
 import { required } from '../../utils/validationRules'
 import { declOfNum, numberFormatter, getPaginationSettings, filterOption } from '../../utils/utils'
 import { SENDING_STATUS, SERVICE_STATUS, SERVICE_NAME } from '../../consts'
 
 const { Title, Link } = Typography
+const cookies = new Cookies()
 
 export default function Sending() {
   const [ form ] = Form.useForm()
@@ -271,6 +275,18 @@ export default function Sending() {
               marginBottom: 20,
             }}
           >
+            <form target='_blank' method='POST' action={`${API_URL}/script/template/1`}>
+              <input type='hidden' value={sendingId} name='t_id' />
+              <input type='hidden' value={cookies.get('token')} name='token' />
+              <input type='hidden' value={cookies.get('u_hash')} name='u_hash' />
+              <Button
+                icon={<DownloadOutlined />}
+                size='large'
+                htmlType='submit'
+              >
+                Скачать отчет
+              </Button>
+            </form>
             {' '}
             {!isNotSending &&
               <Button

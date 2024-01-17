@@ -1,20 +1,24 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Button, Row, Table, Typography, Switch, Modal, DatePicker, Select } from 'antd'
-import { ExclamationCircleFilled, CopyOutlined } from '@ant-design/icons'
+import { ExclamationCircleFilled, CopyOutlined, DownloadOutlined } from '@ant-design/icons'
 import { useSearchParams } from 'react-router-dom'
 import { useQuery } from 'react-query'
+import Cookies from 'universal-cookie'
 import dayjs from 'dayjs'
 import { BsTrash } from 'react-icons/bs'
+import { API_URL } from '../../consts'
 import { SendingsStatus } from '../../components/SendingsStatus'
 import { DateTableCell } from '../../components/DateTableCell'
-import { getCount, getSendings, deleteSendingById, updateSendingById, useDictionary } from '../../utils/api'
+import { getCount, getSendings, deleteSendingById, updateSendingById, useDictionary, getSendingReport } from '../../utils/api'
 import { declOfNum, getPaginationSettings } from '../../utils/utils'
 import { getColumnSearchProps } from '../../utils/components'
 import { SENDING_STATUS } from '../../consts'
 
 const { Title, Link } = Typography
 export let PropertyGap = 10
+
+const cookies = new Cookies()
 
 export default function Sendings() {
   const navigate = useNavigate()
@@ -50,6 +54,17 @@ export default function Sendings() {
             >
               Создать счет
             </Button>
+            <form target='_blank' method='POST' action={`${API_URL}/script/template/1`}>
+              <input type='hidden' value={item.id} name='t_id' />
+              <input type='hidden' value={cookies.get('token')} name='token' />
+              <input type='hidden' value={cookies.get('u_hash')} name='u_hash' />
+              <button type='submit' style={{ background: 'none', border: 0, outline: 'none', padding: 0, cursor: 'pointer' }}>
+                <DownloadOutlined
+                  size={17}
+                  color='#1677ff'
+                />
+              </button>
+            </form>
             <CopyOutlined
               size={17}
               color='#141414'
