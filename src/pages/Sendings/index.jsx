@@ -10,7 +10,7 @@ import { BsTrash } from 'react-icons/bs'
 import { API_URL } from '../../consts'
 import { SendingsStatus } from '../../components/SendingsStatus'
 import { DateTableCell } from '../../components/DateTableCell'
-import { getCount, getSendings, deleteSendingById, updateSendingById, useDictionary } from '../../utils/api'
+import { getCount, getSendings, deleteSendingById, updateSendingById, useDictionary, useTemplates } from '../../utils/api'
 import { declOfNum, getPaginationSettings } from '../../utils/utils'
 import { getColumnSearchProps } from '../../utils/components'
 import { SENDING_STATUS } from '../../consts'
@@ -26,6 +26,8 @@ export default function Sendings() {
   const [ searchParams ] = useSearchParams()
   const [ activeOnly, setActiveOnly ] = useState(true)
   const isAir = searchParams.get('air') !== null
+
+  const tpl = useTemplates()
 
   const [ showStatusModal, setShowStatusModal ] = useState(false)
   const [ statusModalValue, setStatusModalValue ] = useState()

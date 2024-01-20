@@ -504,3 +504,9 @@ export const useService = (name, id, params) => useQuery(['dataset', name, id], 
   })
   return id && typeof id !== 'object' ? res[0] : res
 }, params)
+
+export const useTemplates = id => useQuery(['template', id], async () => {
+  const response = await axios.select('script_template', '*', { where: id ? { id_script_template: id } : null })
+  const data = response.data?.data || []
+  return id ? data[0] : data
+})

@@ -14,6 +14,8 @@ import Dictionary from './pages/Dictionary'
 import DictionaryForm from './pages/Dictionary/form'
 import UserForm from './pages/Dictionary/userForm'
 import ConfigForm from './pages/Dictionary/config'
+import Templates from './pages/Templates'
+import Template from './pages/Template'
 import Place from './pages/Place'
 import Layout from './components/Layout'
 import { useAuthorization } from './utils/api'
@@ -78,6 +80,8 @@ function App() {
             <Route path=':name' element={<Dictionary />} />
             <Route path=':name/:id' element={<DictionaryForm />} />
           </Route>
+          <Route path='/templates' element={<Templates />} />
+          <Route path='/templates/:id' element={<Template />} />
         </Route>
         <Route path='/login' element={<PageLogin />} />
       </Routes>
