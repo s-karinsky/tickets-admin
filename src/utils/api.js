@@ -506,7 +506,19 @@ export const useService = (name, id, params) => useQuery(['dataset', name, id], 
 }, params)
 
 export const useTemplates = id => useQuery(['template', id], async () => {
+  if (id === 'create') {
+    return {}
+  } 
   const response = await axios.select('script_template', '*', { where: id ? { id_script_template: id } : null })
-  const data = response.data?.data || []
+  const data = (response.data?.data || []).map(item => ({
+    ...item,
+    active: item.active === '1'
+  }))
   return id ? data[0] : data
 })
+
+export const useScriptFile = (id, params) => useQuery(['private-data', id], async () => {
+  const response = await axios.postWithAuth('/data', { private: true })
+  const data = response.data?.data
+  return (data?.script_templates || {})[id]?.file || ''
+}, params)
