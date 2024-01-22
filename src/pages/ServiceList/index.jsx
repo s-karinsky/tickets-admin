@@ -4,19 +4,33 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { ExclamationCircleFilled } from '@ant-design/icons'
 import { BsTrash } from 'react-icons/bs'
 import dayjs from 'dayjs'
-import { useService, updateDatasetById } from '../../utils/api'
+import { useService, updateDatasetById, useUsers } from '../../utils/api'
 import { SERVICE_STATUS, SERVICE_NAME } from '../../consts'
 
-const getColumns = (name, { ocStatusClick }) => {
+const getEndDateTitle = name => {
+  if (name === 'fullfillment') return 'Дата передачи'
+  return 'Дата выдачи'
+}
+
+const getColumns = (name, { onStatusClick, clients = {} }) => {
   const commonColumns = [
     {
       title: 'Номер',
       dataIndex: 'number'
     },
     {
-      title: 'Отправка / Место',
-      dataIndex: 'placeData',
-      render: data => (data || []).map(item => <>{(item.sending_number || '—')+' / '+(item.place || '—')}<br /></>)
+      title: 'Дата',
+      dataIndex: 'date',
+      render: date => dayjs(date).format('DD.MM.YYYY')
+    },
+    {
+      title: 'Клиент',
+      dataIndex: 'client',
+      render: num => clients[num]?.code
+    },
+    name === 'fullfillment' && {
+      title: 'Маркетплейс',
+      dataIndex: 'marketplace'
     },
     {
       title: 'Статус',
@@ -24,7 +38,7 @@ const getColumns = (name, { ocStatusClick }) => {
       render: (val, item) => (
         <>
           {SERVICE_STATUS[name][val]} <Button
-            onClick={() => ocStatusClick(item)}
+            onClick={() => onStatusClick(item)}
             size='small'
             type='primary'
             ghost
@@ -34,21 +48,45 @@ const getColumns = (name, { ocStatusClick }) => {
         </>
       )
     },
-    {
-      title: 'Дата',
-      dataIndex: 'date',
-      render: date => dayjs(date).format('DD.MM.YYYY')
+    name === 'storage' && {
+      title: 'Дата начала',
+      dataIndex: 'start_date',
+      render: date => date && dayjs(date).format('DD.MM.YYYY')
+    },
+    name === 'storage' && {
+      title: 'Дата окончания',
+      dataIndex: 'end_date',
+      render: date => date && dayjs(date).format('DD.MM.YYYY')
+    },
+    name !== 'storage' && {
+      title: getEndDateTitle(name),
+      dataIndex: `date_status_${SERVICE_STATUS[name].length - 1}`
+    },
+    name === 'delivery' && {
+      title: 'Тип доставки',
+      dataIndex: 'delivery_type'
     },
     {
-      title: 'Внутренний клиент',
-      dataIndex: 'client'
+      title: 'Мест',
+      dataIndex: 'places',
+      render: places => Array.isArray(places) ? places.length : 0
+    },
+    {
+      title: 'Вес брутто',
+      dataIndex: 'placeData',
+      render: data => data.reduce((sum, item) => sum + (item?.pole?.gross_weight || 0), 0)
+    },
+    {
+      title: 'Примечание',
+      dataIndex: 'note',
+      render: note => <div style={{ maxWidth: 80, maxHeight: 55, overflow: 'hidden', textOverflow: 'ellipsis' }} title={note}>{note}</div>,
     },
     {
       title: '',
       dataIndex: 'buttons',
       key: 'buttons',
     }
-  ]
+  ].filter(Boolean)
 
   return commonColumns
 }
@@ -61,6 +99,7 @@ export default function ServiceList() {
   const [ statusModalDate, setStatusModalDate ] = useState()
   const [ statusModalItem, setStatusModalItem ] = useState()
   const [ isActive, setIsActive ] = useState(true)
+  const clients = useUsers({ id_role: '1' })
   const { data, isLoading, refetch } = useService(serviceName)
 
   const handleClickStatus = useCallback((item) => {
@@ -70,9 +109,20 @@ export default function ServiceList() {
     setShowStatusModal(true)
   }, [])
 
+  const clientsMap = useMemo(() => {
+    return (clients.data || []).reduce((acc, item) => {
+      return {
+        ...acc,
+        [item.id_user]: {
+          code: item.json.code,
+        }
+      }
+    }, {})
+  }, [clients.data])
+
   const columns = useMemo(
-    () => getColumns(serviceName, { ocStatusClick: handleClickStatus }),
-    [serviceName, handleClickStatus]
+    () => getColumns(serviceName, { onStatusClick: handleClickStatus, clients: clientsMap }),
+    [serviceName, handleClickStatus, clientsMap]
   )
 
   const serviceData = (data || [])

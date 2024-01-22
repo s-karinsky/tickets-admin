@@ -226,7 +226,9 @@ export default function ServiceForm() {
     },
     {
       title: 'Дата отправки',
-      dataIndex: 'sending_status_2'
+      dataIndex: 'sending',
+      key: 'status_date_2',
+      render: sending => !!sending.status_date_2 && dayjs(sending.status_date_2).format('DD.MM.YYYY')
     },
     {
       title: 'Место',
@@ -357,7 +359,7 @@ export default function ServiceForm() {
   const totalCount = placesData.reduce((sum, item) => sum + (item.count || 0), 0)
   const totalNetWeight = placesData.reduce((sum, item) => sum + (item.net_weight || 0), 0)
   const totalGrossWeight = placesData.reduce((sum, item) => sum + (item.gross_weight || 0), 0)
-  console.log(initialValues)
+
   return (
     <>
       <Row align='bottom' style={{ padding: '0 40px' }}>
@@ -549,6 +551,22 @@ export default function ServiceForm() {
               width='100%'
             />
           </Col>
+          {isRepack() && <>
+            <Col span={3}>
+              <FormField
+                label='Номер отправки'
+                value={_get(placesData, [0, 'sending_number'])}
+                isEdit={false}
+              />
+            </Col>
+            <Col span={3}>
+              <FormField
+                label='Дата отправки'
+                value={dayjs(_get(placesData, [0, 'sending', 'status_date_2'])).format('DD.MM.YYYY')}
+                isEdit={false}
+              />
+            </Col>
+          </>}
           {isStorage() && <>
             <Col span={3}>
               <FormField
@@ -748,13 +766,13 @@ export default function ServiceForm() {
           {(!isIssuance()) && <>
             {isFullFill() && <Col span={4}>
               <FormField
-                name={['pole', 'merketplace']}
+                name={['pole', 'marketplace']}
                 label='Маркетплейс'
                 type='select'
-                options={[{ value: 'Wilberries' }, { value: 'OZON' }, { value: 'Яндекс' }]}
+                options={[{ value: 'Wilberries' }, { value: 'OZON' }, { value: 'Яндекс' }, { value: 'Lamoda' }]}
                 rules={[{ required: true }]}
                 isEdit={isEdit}
-                text={initialValues.pole?.merketplace}
+                text={initialValues.pole?.marketplace}
               />
             </Col>}
             <Col span={3}>

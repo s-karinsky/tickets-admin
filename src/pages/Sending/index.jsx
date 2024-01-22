@@ -202,6 +202,12 @@ export default function Sending() {
       sorter: (a, b) => (a.service?.status || '').localeCompare(b.service?.status || '')
     },
     {
+      title: 'Примечание',
+      dataIndex: 'note',
+      render: note => <div style={{ maxWidth: 80, maxHeight: 55, overflow: 'hidden', textOverflow: 'ellipsis' }} title={note}>{note}</div>,
+      sorter: (a, b) => (a.note || '').localeCompare(b.note || '')
+    },
+    {
       title: '',
       dataIndex: 'buttons',
       key: 'buttons',
@@ -446,7 +452,7 @@ export default function Sending() {
                   rules={required()}
                 />
                 <FormField
-                  width={600}
+                  width={720}
                   type='select'
                   label='Перевозчик'
                   name={['json', 'transporter']}
@@ -469,17 +475,25 @@ export default function Sending() {
                     label='Дата отправки'
                     labelType='calc'
                     name='start_datetime'
-                    style={{ width: 150 }}
+                    width={150}
                     isEdit={isEditPage}
                     disabled={isEditPage}
                     text={data.start_datetime && data.start_datetime?.format('DD.MM.YYYY')}
+                  />
+                  <FormField
+                    label='Кол-во мест'
+                    labelType='calc'
+                    value={placesData.length}
+                    width={100}
+                    isEdit={false}
+                    disabled={isEditPage}
                   />
                   <FormField
                     type='date'
                     label='Дата поступления'
                     labelType='calc'
                     name='complete_datetime'
-                    style={{ width: 150 }}
+                    width={150}
                     isEdit={isEditPage}
                     disabled={isEditPage}
                     text={data.complete_datetime && data.complete_datetime?.format('DD.MM.YYYY')}
@@ -489,7 +503,7 @@ export default function Sending() {
                     label='Количество'
                     labelType='sum'
                     name='count'
-                    style={{ width: 120 }}
+                    width={120}
                     isEdit={isEditPage}
                     disabled={isEditPage}
                     formatter={val => val === '' ? '0' : val}
@@ -499,7 +513,7 @@ export default function Sending() {
                     label='Вес нетто'
                     labelType='sum'
                     name='net_weight'
-                    style={{ width: 120 }}
+                    width={120}
                     isEdit={isEditPage}
                     addonAfter={'кг'}
                     formatter={numberFormatter(3)}
@@ -510,7 +524,7 @@ export default function Sending() {
                     label='Вес брутто'
                     labelType='sum'
                     name='gross_weight'
-                    style={{ width: 120 }}
+                    width={120}
                     isEdit={isEditPage}
                     addonAfter={'кг'}
                     formatter={numberFormatter(3)}
@@ -521,7 +535,7 @@ export default function Sending() {
                     label='Статус'
                     labelType='calc'
                     name={['json', 'status']}
-                    style={{ width: 200 }}
+                    width={200}
                     isEdit={isEditPage}
                     disabled={isEditPage}
                     options={SENDING_STATUS.map((label, value) => ({ label, value }))}
@@ -530,7 +544,7 @@ export default function Sending() {
                 </div>
               </div>
               <FormField
-                width={960}
+                width={1080}
                 type='textarea'
                 label='Примечание'
                 name={['json', 'note']}

@@ -34,6 +34,7 @@ export default function UserForm({ name }) {
   const users = useUsers(id, {}, { cacheTime: 0 })
   const profile = users.data || EMPTY_OBJECT
   const isClient = name === 'clients'
+  const isEmployee = name === 'employees'
   const inner = useDictionary('inclient', { id_ref: id }, { enabled: isClient })
   const countries = useCountries()
   const cities = useCities(country)
@@ -128,21 +129,21 @@ export default function UserForm({ name }) {
           <Col span={8}>
             <FormField
               name='family'
-              label={isClient ? 'Фамилия' : 'Фамилия ответственного'}
+              label={isClient || isEmployee ? 'Фамилия' : 'Фамилия ответственного'}
               rules={!isClient && [{ required: true }]}
             />
           </Col>
           <Col span={8}>
             <FormField
               name='name'
-              label={isClient ? 'Имя' : 'Имя ответственного'}
+              label={isClient || isEmployee ? 'Имя' : 'Имя ответственного'}
               rules={!isClient && [{ required: true }]}
             />
           </Col>
           <Col span={8}>
             <FormField
               name='middle'
-              label={isClient ? 'Отчество' : 'Отчество ответственного'}
+              label={isClient || isEmployee ? 'Отчество' : 'Отчество ответственного'}
             />
           </Col>
           <Col span={8}>
@@ -155,13 +156,13 @@ export default function UserForm({ name }) {
           <Col span={8}>
             <FormField
               name='phone'
-              label={isClient ? 'Телефон' : 'Телефон ответственного'}
+              label={isClient ? 'Телефон' : (isEmployee ? 'Телефон рабочий' : 'Телефон ответственного')}
               rules={[{ required: true }]}
               size='large'
               mask='+000000000000'
             />
           </Col>
-          {!isClient && <Col span={8}>
+          {!isClient && !isEmployee && <Col span={8}>
             <FormField
               name={['json', 'companyName']}
               label='Название компании'
@@ -170,8 +171,8 @@ export default function UserForm({ name }) {
           </Col>}
           <Col span={8}>
             <FormField
-              name={isClient ? ['json', 'addPhone'] : ['json', 'companyPhone']}
-              label={isClient ? 'Дополнительный телефон' : 'Телефон компании'}
+              name={isClient || isEmployee ? ['json', 'addPhone'] : ['json', 'companyPhone']}
+              label={isClient ? 'Дополнительный телефон' : (isEmployee ? 'Телефон личный' : 'Телефон компании')}
               size='large'
               mask='+000000000000'
               rules={!isClient && [{ required: true }]}
@@ -207,7 +208,7 @@ export default function UserForm({ name }) {
                   </Button>
                 </>
               )}
-              filterOption={(input, { label, value } = {}) => (label ?? '').toLowerCase().includes(input.toLowerCase())}
+              filterOption={(input, { label } = {}) => (label ?? '').toLowerCase().includes(input.toLowerCase())}
               showSearch
             />
           </Col>

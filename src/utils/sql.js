@@ -36,7 +36,8 @@ export const sqlSelect = (
   {
     where,
     leftJoin,
-    groupBy
+    groupBy,
+    orderBy
   } = {}
 ) => {
   let sql = `SELECT ${[].concat(fields).join(',')} FROM ${table}`
@@ -65,6 +66,9 @@ export const sqlSelect = (
   }
   if (groupBy) {
     sql += ` GROUP BY ${groupBy}`
+  }
+  if (orderBy) {
+    sql += ` ORDER BY ${orderBy}`
   }
   return sql
 }

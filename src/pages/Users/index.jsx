@@ -4,7 +4,7 @@ import { ExclamationCircleFilled } from '@ant-design/icons'
 import { BsTrash } from 'react-icons/bs'
 import { getColumnSearchProps } from '../../utils/components'
 import axios from '../../utils/axios'
-import { useUsers } from '../../utils/api'
+import { useUsers, useCountries, useAllCities } from '../../utils/api'
 import { getPaginationSettings, localeCompare } from '../../utils/utils'
 import { USER_ROLES, USER_ROLES_COLOR } from '../../consts'
 
@@ -20,7 +20,7 @@ const LINK = {
   2: '/dictionary/employees/'
 }
 
-export const getColumns = ({ codeIndex = ['json', 'code'], refetch = () => {}, deleteUser }) => ([
+export const getColumns = ({ role, countries = {}, cities = {}, codeIndex = ['json', 'code'], refetch = () => {}, deleteUser }) => ([
   {
     title: 'Роль',
     dataIndex: 'id_role',
@@ -62,6 +62,25 @@ export const getColumns = ({ codeIndex = ['json', 'code'], refetch = () => {}, d
     sorter: (a, b) => localeCompare(a.email, b.email),
     ...getColumnSearchProps('email')
   },
+  ['1', '2'].includes(role) && {
+    title: 'Страна',
+    dataIndex: ['json', 'country'],
+    render: country => countries.map && countries.map[country]?.label
+  },
+  ['1', '2'].includes(role) && {
+    title: 'Город',
+    dataIndex: ['json', 'city'],
+    render: city => cities.map && cities.map[city]?.label
+  },
+  role === '1' && {
+    title: 'Компания',
+    dataIndex: ['json', 'company', 'name']
+  },
+  ['1', '2'].includes(role) && {
+    title: 'Примечание',
+    dataIndex: 'note',
+    render: note => <div style={{ maxWidth: 80, maxHeight: 55, overflow: 'hidden', textOverflow: 'ellipsis' }} title={note}>{note}</div>
+  },
   {
     title: '',
     width: 30,
@@ -94,11 +113,13 @@ export const getColumns = ({ codeIndex = ['json', 'code'], refetch = () => {}, d
       </div>
     )
   }
-])
+].filter(Boolean))
 
 export default function PageUsers({ role }) {
   const navigate = useNavigate()
   const users = useUsers({ id_role: role })
+  const countries = useCountries()
+  const cities = useAllCities()
 
   return (
     <>
@@ -117,14 +138,14 @@ export default function PageUsers({ role }) {
         </Col>
       </Row>
       <Table
-        columns={getColumns({ refetch: users.refetch }).slice(role ? 1 : 0)}
+        columns={getColumns({ role, refetch: users.refetch, countries: countries.data, cities: cities.data }).slice(role ? 1 : 0)}
         dataSource={users.data}
         loading={users.isLoading}
         rowKey={({ id_user }) => id_user}
         onRow={record => ({
           onClick: (e) => {
             if (e.detail === 2) {
-              navigate(`${LINK[role] || LINK.default}/${record.id_user}`)
+              navigate(`${LINK[role] || LINK.default}${record.id_user}`)
             }
           }
         })}

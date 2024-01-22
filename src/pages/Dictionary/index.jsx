@@ -77,6 +77,11 @@ const getColumns = (name, params = {
           sorter: (a, b) => localeCompare(a.company_phone, b.company_phone),
           ...getColumnSearchProps('company_phone')
         },
+        {
+          title: 'Примечание',
+          dataIndex: 'note',
+          render: note => <div style={{ maxWidth: 80, maxHeight: 55, overflow: 'hidden', textOverflow: 'ellipsis' }} title={note}>{note}</div>
+        },
         buttonsColumn
       ]
 
