@@ -58,6 +58,11 @@ body {
 
 .ant-input-number-readonly:hover,
 .ant-input-number-readonly:focus,
-.ant-input-number-readonly:active {
+.ant-input-number-readonly:active,
+input[readonly],
+input[readonly]:hover,
+input[readonly]:focus,
+input[readonly]:active {
+  background: transparent !important;
   border-color: rgb(217, 217, 217) !important;
 }
