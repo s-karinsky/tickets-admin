@@ -417,6 +417,11 @@ export const useCities = (country) => useQuery(['cities', country], async () => 
 })
 
 export const useDictionary = (name, where, params) => useQuery(['dictionary', name, where], async () => {
+  if (name === 'currency') {
+    const response = await axios.select('currency', 'iso4217_code_a as id, name_ru as name', { orderBy: 'iso4217_code_a' })
+    return { list: response.data?.data || [] }
+  }
+
   if (where && where.id === 'create') {
     return {
 
@@ -535,6 +540,14 @@ export const getLastCurrencyRate = async (currency, date) => {
   })
   return response.data?.data[0]?.rate
 }
+
+export const useCurrencyRates = currency => useQuery(['currency-rate', currency], async () => {
+  const response = await axios.select('currency_rate', '*', {
+    where: `currency='${currency}'`,
+    orderBy: 'date DESC'
+  })
+  return response.data?.data
+})
 
 export const useClientInvoices = (id, initialValues = {}) => useQuery(['client-invoices', id], async () => {
   const rate = await getLastCurrencyRate('USD', dayjs().format('YYYY-MM-DD'))

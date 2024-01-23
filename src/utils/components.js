@@ -17,7 +17,8 @@ export const getColumnSearchProps = (dataIndex, { options = [], type } = {}) => 
   onFilter: (value, record) => {
     const dataValue = (typeof dataIndex === 'function' ? dataIndex(record) : record[dataIndex]) || ''
     if (type === 'date') {
-      return dayjs(dataValue).isAfter(value[0], 'day') && dayjs(dataValue).isBefore(value[1], 'day')
+      return (dayjs(dataValue).isSame(value[0], 'day') || dayjs(dataValue).isAfter(value[0], 'day')) &&
+        (dayjs(dataValue).isSame(value[1], 'day') || dayjs(dataValue).isBefore(value[1], 'day'))
     }
     if (type === 'number') {
       let result = true

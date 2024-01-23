@@ -114,6 +114,22 @@ const getColumns = (name, params = {
         buttonsColumn
       ]
 
+    case 'currency':
+      return [
+        {
+          title: 'Код',
+          dataIndex: 'id',
+          sorter: (a, b) => localeCompare(a.id, b.id),
+          ...getColumnSearchProps('id')
+        },
+        {
+          title: 'Название',
+          dataIndex: 'name',
+          sorter: (a, b) => localeCompare(a.name, b.name),
+          ...getColumnSearchProps('name')
+        }
+      ]
+
     default:
       return []
   }

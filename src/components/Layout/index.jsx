@@ -42,7 +42,7 @@ const MENU_ITEMS = {
     getItem(<Link to='/dictionary/clients'>Клиенты</Link>, 'dictionary-clients'),
     getItem(<Link to='/dictionary/drivers'>Перевозчики</Link>, 'dictionary-drivers'),
     getItem(<Link to='/dictionary/rates'>Тарифы перевозок</Link>, 'dictionary-rates'),
-    // getItem(<Link to='/dictionary/currency'>Валюта и курс</Link>, 'dictionary-currency')
+    getItem(<Link to='/dictionary/currency'>Валюта и курс</Link>, 'dictionary-currency')
   ]),
   templates: getItem(<Link to='/templates'>Шаблоны</Link>, 'templates', <SnippetsOutlined />),
   users: getItem(<Link to='/users'>Пользователи</Link>, 'users', <UserOutlined />),

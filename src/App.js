@@ -14,12 +14,13 @@ import Dictionary from './pages/Dictionary'
 import DictionaryForm from './pages/Dictionary/form'
 import UserForm from './pages/Dictionary/userForm'
 import ConfigForm from './pages/Dictionary/config'
+import CurrencyRate from './pages/Dictionary/currencyRate'
 import Templates from './pages/Templates'
 import Template from './pages/Template'
 import Place from './pages/Place'
-import Layout from './components/Layout'
 import ClientInvoices from './pages/ClientInvoices'
 import ClientInvoicesForm from './pages/ClientInvoices/form'
+import Layout from './components/Layout'
 import { useAuthorization } from './utils/api'
 import './App.css'
 
@@ -75,6 +76,7 @@ function App() {
           </Route>
           <Route path='/dictionary'>
             <Route path='config' element={<ConfigForm />} />
+            <Route path='currency/:id' element={<CurrencyRate />} />
             <Route path='clients' element={<PageUsers role='1' />} />
             <Route path='clients/:id' element={<UserForm name='clients' />} />
             <Route path='employees' element={<PageUsers role='2' />} />
