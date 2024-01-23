@@ -1,5 +1,6 @@
 import { Modal, Form } from 'antd'
 import FormField from '../../components/FormField'
+import { VALIDATION_MESSAGES } from '../../consts'
 
 export default function CurrencyForm({
   name,
@@ -22,6 +23,7 @@ export default function CurrencyForm({
         initialValues={initialValues}
         size='large'
         onFinish={onSubmit}
+        validateMessages={VALIDATION_MESSAGES}
       >
         <FormField
           name='date'

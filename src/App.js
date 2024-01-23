@@ -20,6 +20,8 @@ import Template from './pages/Template'
 import Place from './pages/Place'
 import ClientInvoices from './pages/ClientInvoices'
 import ClientInvoicesForm from './pages/ClientInvoices/form'
+import ClientPayments from './pages/ClientPayments'
+import ClientPaymentsForm from './pages/ClientPayments/form'
 import Layout from './components/Layout'
 import { useAuthorization } from './utils/api'
 import './App.css'
@@ -88,6 +90,8 @@ function App() {
           <Route path='/templates/:id' element={<Template />} />
           <Route path='/client-invoices' element={<ClientInvoices />} />
           <Route path='/client-invoices/:id' element={<ClientInvoicesForm />} />
+          <Route path='/client-payments' element={<ClientPayments />} />
+          <Route path='/client-payments/:id' element={<ClientPaymentsForm />} />
         </Route>
         <Route path='/login' element={<PageLogin />} />
       </Routes>

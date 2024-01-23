@@ -1,24 +1,34 @@
-import { useState } from 'react'
-import { Row, Col, Typography, Form, Button } from 'antd'
+import { useState, useMemo } from 'react'
+import { Row, Col, Typography, Form, Button, Checkbox } from 'antd'
 import { useParams, useNavigate } from 'react-router-dom'
 import { LoadingOutlined } from '@ant-design/icons'
 import { get as _get } from 'lodash'
 import FormField from '../../components/FormField'
-import { useClientInvoices } from '../../utils/api'
+import { useClientInvoices, useUsersWithRole } from '../../utils/api'
 // import axios from '../../utils/axios'
 import { numberRange } from '../../utils/validationRules'
 import { VALIDATION_MESSAGES } from '../../consts'
 
-export default function ClientInvoicesForm() {
+export default function ClientPaymentsForm() {
   const [ isUpdating, setIsUpdating ] = useState(false)
   const [ form ] = Form.useForm()
   const { id } = useParams()
   const navigate = useNavigate()
   const isNew = id === 'create'
   const { data = {}, isLoading } = useClientInvoices(id)
+  const employe = useUsersWithRole('2')
 
-  const discountRub = Form.useWatch('discount_rub', form)
-  const discountUsd = Form.useWatch('discount_usd', form)
+  const employeOptions = useMemo(() => {
+    if (!employe.data) return []
+    console.log(employe.data)
+    return employe.data.map(item => ({
+      value: item.id_user,
+      label: item.json?.code
+    }))
+  }, [employe.data])
+
+  const payType = Form.useWatch('pay_type', form)
+  const isCash = payType?.toLowerCase() === 'Наличный'
 
   return isLoading ?
     <Row style={{ height: 'calc(100vh - 64px)' }} justify='center' align='middle'>
@@ -43,7 +53,7 @@ export default function ClientInvoicesForm() {
       >
         <Row align='middle' style={{ padding: '0 40px' }}>
           <Col span={12}>
-            <Typography.Title style={{ fontWeight: 'bold' }}>{isNew ? 'Новый счет на оплату клиента' : `Счет на оплату клиента`}</Typography.Title>
+            <Typography.Title style={{ fontWeight: 'bold' }}>{isNew ? 'Новая оплата клиента' : `Оплата клиента`}</Typography.Title>
           </Col>
           <Col span={12} style={{ textAlign: 'right' }}>
             <Button
@@ -59,14 +69,14 @@ export default function ClientInvoicesForm() {
               type='primary'
               size='large'
               htmlType='button'
-              onClick={() => navigate('/client-invoices')}
+              onClick={() => navigate('/client-payments')}
               danger
             >
               Отмена
             </Button>
           </Col>
           <Col span={24}>
-            <Row gutter={10}>
+            <Row gutter={10} align='bottom'>
               <Col span={4}>
                 <FormField
                   label='Номер'
@@ -92,6 +102,28 @@ export default function ClientInvoicesForm() {
                   disabled
                 />
               </Col>
+              <Col span={4}>
+                <FormField
+                  label='Клиент'
+                  name='inclient'
+                  disabled
+                />
+              </Col>
+              <Col span={4}>
+                <FormField
+                  label='Номер счета'
+                  name='invoice_number'
+                  disabled
+                />
+              </Col>
+              <Col span={4}>
+                <FormField
+                  label='Дата счета'
+                  name='invoice_date'
+                  type='date'
+                  disabled
+                />
+              </Col>
               <Col span={12}>
                 <FormField
                   label='Наименование'
@@ -109,6 +141,39 @@ export default function ClientInvoicesForm() {
                     { value: 'Безналичный', title: '' },
                   ]}
                   rules={[{ required: true }]}
+                />
+              </Col>
+              <Col span={4}>
+                <FormField
+                  label='Дата оплаты'
+                  name='payment_date'
+                  type='date'
+                />
+              </Col>
+              <Col span={4}>
+                <Form.Item
+                  width='100%'
+                  name='give_client'
+                  valuePropName='checked'
+                  rules={[ { required: isCash } ]}
+                >
+                  <Checkbox>Передал клиент</Checkbox>
+                </Form.Item>
+              </Col>
+              <Col span={8}>
+                <FormField
+                  label='Передал оплату ФИО'
+                  name='pay_name'
+                  rules={[ { required: isCash } ]}
+                />
+              </Col>
+              <Col span={4}>
+                <FormField
+                  label='Получил'
+                  name='get_employe'
+                  type='select'
+                  options={employeOptions}
+                  rules={[ { required: isCash } ]}
                 />
               </Col>
               <Col span={4}>
@@ -132,83 +197,6 @@ export default function ClientInvoicesForm() {
                   label='Сумма оплаты (₽)'
                   addonAfter='₽'
                   name='pay_rub'
-                  type='number'
-                />
-              </Col>
-              <Col span={4}>
-                <FormField
-                  label='Скидка ($)'
-                  addonAfter='$'
-                  name='discount_usd'
-                  type='number'
-                  disabled={!!discountRub}
-                />
-              </Col>
-              <Col span={4}>
-                <FormField
-                  label='Скидка (₽)'
-                  addonAfter='₽'
-                  name='discount_rub'
-                  type='number'
-                  disabled={!!discountUsd}
-                />
-              </Col>
-              <Col span={24}>
-                <FormField
-                  label='Описание скидки'
-                  name='discount_note'
-                  rules={[ { required: !!discountUsd || !!discountRub } ]}
-                />
-              </Col>
-              <Col span={4}>
-                <Form.Item dependencies={['pay_usd', 'discount_usd']}>
-                  {({ getFieldValue }) => {
-                    const pay = getFieldValue('pay_usd')
-                    const discount = getFieldValue('discount_usd')
-                    return (
-                      <FormField
-                        label='К оплате ($)'
-                        addonAfter='$'
-                        name='total_usd'
-                        type='number'
-                        value={pay - discount}
-                        disabled
-                      />
-                    )
-                  }}
-                </Form.Item>
-              </Col>
-              <Col span={4}>
-                <Form.Item dependencies={['pay_rub', 'discount_rub']}>
-                  {({ getFieldValue }) => {
-                    const pay = getFieldValue('pay_rub')
-                    const discount = getFieldValue('discount_rub')
-                    return (
-                      <FormField
-                        label='К оплате (₽)'
-                        addonAfter='₽'
-                        name='total_rub'
-                        type='number'
-                        value={pay - discount}
-                        disabled
-                      />
-                    )
-                  }}
-                </Form.Item>
-              </Col>
-              <Col span={4}>
-                <FormField
-                  label='Сумма товара ($)'
-                  addonAfter='$'
-                  name='total_usd'
-                  type='number'
-                />
-              </Col>
-              <Col span={4}>
-                <FormField
-                  label='Сумма товара (₽)'
-                  addonAfter='₽'
-                  name='total_rub'
                   type='number'
                 />
               </Col>

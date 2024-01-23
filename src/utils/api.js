@@ -595,3 +595,50 @@ export const useClientInvoices = (id, initialValues = {}) => useQuery(['client-i
     ...data[0]
   } : data
 })
+
+export const useClientPayments = (id, initialValues = {}) => useQuery(['client-payments', id], async () => {
+  const rate = await getLastCurrencyRate('USD', dayjs().format('YYYY-MM-DD'))
+  if (id === 'create') {
+    const response = await axios.select(
+      'dataset',
+      'max(cast(json_extract(pole, "$.number") as decimal)) as max',
+      {
+        where: {
+          status: 0,
+          tip: 'cl-payment',
+          'YEAR(json_extract(pole, "$.date"))': `YEAR('${dayjs().format('YYYY-MM-DD')}')`
+        }
+      }
+    )
+    const data = response.data?.data || []
+    const number = parseInt(_get(data, [0, 'max'])) || 0
+
+    // if (initialValues.sending) {
+    //   const response = await axios.select('trip', '*', { where: { id_trip: initialValues.sending } })
+    //   const item = (response.data?.data || [])[0]
+    // }
+
+    return {
+      number: number + 1,
+      date: dayjs(),
+      rate,
+      ...initialValues
+    }
+  }
+  const response = await axios.select('dataset', '*', {
+      where: {
+        status: 0,
+        tip: 'cl-payment',
+        id
+      }
+    }
+  )
+  const data = (response.data?.data || []).map(item => ({
+    ...item,
+    ...parseJSON(item.pole)
+  }))
+  return id ? {
+    rate,
+    ...data[0]
+  } : data
+})
