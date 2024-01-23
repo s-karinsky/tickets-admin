@@ -7,7 +7,8 @@ import {
   MenuFoldOutlined,
   CarOutlined,
   FormOutlined,
-  SnippetsOutlined
+  SnippetsOutlined,
+  DollarOutlined
 } from '@ant-design/icons'
 import { Avatar, Button, Dropdown, Menu, Space, Layout, Row, Col } from 'antd'
 import { Outlet, Link, useNavigate } from 'react-router-dom'
@@ -54,6 +55,22 @@ const MENU_ITEMS = {
       getItem(<Link to='/sendings?air'>Авиа</Link>, 'sendings-air')
     ]
   ),
+  finances: getItem(
+    'Финансы',
+    'finances',
+    <DollarOutlined />,
+    [
+      getItem(
+        'Клиенты',
+        'client-finances',
+        null,
+        [
+          getItem(<Link to='/client-invoices'>Счета на оплату</Link>, 'client-invoices'),
+          getItem(<Link to='/client-payments'>Оплаты</Link>, 'client-payments')
+        ]
+      )
+    ]
+  )
 }
 
 export default function PageLayout({ user }) {
@@ -67,6 +84,7 @@ export default function PageLayout({ user }) {
         MENU_ITEMS.dictionary,
         MENU_ITEMS.sendings,
         MENU_ITEMS.services,
+        MENU_ITEMS.finances,
         MENU_ITEMS.templates
       ]
     }

@@ -18,6 +18,8 @@ import Templates from './pages/Templates'
 import Template from './pages/Template'
 import Place from './pages/Place'
 import Layout from './components/Layout'
+import ClientInvoices from './pages/ClientInvoices'
+import ClientInvoicesForm from './pages/ClientInvoices/form'
 import { useAuthorization } from './utils/api'
 import './App.css'
 
@@ -82,6 +84,8 @@ function App() {
           </Route>
           <Route path='/templates' element={<Templates />} />
           <Route path='/templates/:id' element={<Template />} />
+          <Route path='/client-invoices' element={<ClientInvoices />} />
+          <Route path='/client-invoices/:id' element={<ClientInvoicesForm />} />
         </Route>
         <Route path='/login' element={<PageLogin />} />
       </Routes>
