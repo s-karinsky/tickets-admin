@@ -8,7 +8,7 @@ import { BsTrash } from 'react-icons/bs'
 import dayjs from 'dayjs'
 import { get as _get, set as _set } from 'lodash'
 import FormField from '../../components/FormField'
-import { VALIDATION_MESSAGES, SERVICE_STATUS } from '../../consts'
+import { VALIDATION_MESSAGES, SERVICE_STATUS, MARKETPLACES } from '../../consts'
 import { numberRange } from '../../utils/validationRules'
 import { getDatasetsById, useUsersWithRole, useDictionary, useService, getProductsByPlaceId, getCount } from '../../utils/api'
 import { getColumnSearchProps } from '../../utils/components'
@@ -220,7 +220,7 @@ export default function ServiceForm() {
 
   const columns = [
     {
-      title: 'Отправка',
+      title: '№ отправки',
       dataIndex: 'sending_number',
       align: 'right'
     },
@@ -239,12 +239,20 @@ export default function ServiceForm() {
       ...getColumnSearchProps('place', { type: 'number' })
     },
     {
-      title: 'Клиент',
-      dataIndex: 'client',
-      key: 'client',
-      render: id => clientsMap[id],
-      sorter: (a, b) => (clientsMap[a.client] || '').localeCompare(clientsMap[b.client] || ''),
-      ...getColumnSearchProps('client', { options: clientsOptions })
+      title: 'Тариф',
+      dataIndex: 'tarif',
+      key: 'tarif',
+      render: item => tarifs.data?.map[item]?.label,
+      sorter: (a, b) => (a.tarif || '').localeCompare(b.tarif || ''),
+      ...getColumnSearchProps('tarif', { options: tarifs.data?.label })
+    },
+    {
+      title: 'Кол. товара',
+      dataIndex: 'count',
+      key: 'count',
+      align: 'right',
+      sorter: (a, b) => a.count - b.count,
+      ...getColumnSearchProps('count', { type: 'number' })
     },
     {
       title: 'Вес нетто',
@@ -284,22 +292,6 @@ export default function ServiceForm() {
       key: 'height',
       render: size => typeof size === 'object' ? size.height : '',
       sorter: (a, b) => a.size?.height - b.size?.height
-    },
-    {
-      title: 'Тариф',
-      dataIndex: 'tarif',
-      key: 'tarif',
-      render: item => tarifs.data?.map[item]?.label,
-      sorter: (a, b) => (a.tarif || '').localeCompare(b.tarif || ''),
-      ...getColumnSearchProps('tarif', { options: tarifs.data?.label })
-    },
-    {
-      title: 'Количество товара',
-      dataIndex: 'count',
-      key: 'count',
-      align: 'right',
-      sorter: (a, b) => a.count - b.count,
-      ...getColumnSearchProps('count', { type: 'number' })
     }
   ]
 
@@ -758,7 +750,7 @@ export default function ServiceForm() {
                 name={['pole', 'got_phone']}
                 rules={[{ required: !isGotClient }]}
                 isEdit={isEdit}
-                mask='+000000000000'
+                mask='+00000000000'
                 size='large'
               />
             </Col>
@@ -769,7 +761,7 @@ export default function ServiceForm() {
                 name={['pole', 'marketplace']}
                 label='Маркетплейс'
                 type='select'
-                options={[{ value: 'Wilberries' }, { value: 'OZON' }, { value: 'Яндекс' }, { value: 'Lamoda' }]}
+                options={MARKETPLACES}
                 rules={[{ required: true }]}
                 isEdit={isEdit}
                 text={initialValues.pole?.marketplace}
@@ -860,20 +852,22 @@ export default function ServiceForm() {
           </Col>
           <Col span={3}>
             <FormField
-              type='select'
+              type='number'
               options={[]}
               label='Вес нетто'
-              text={totalNetWeight}
+              addonAfter='кг'
+              value={totalNetWeight}
               isEdit={false}
               disabled
             />
           </Col>
           <Col span={3}>
             <FormField
-              type='select'
+              type='number'
               options={[]}
               label='Вес брутто'
-              text={totalGrossWeight}
+              addonAfter='кг'
+              value={totalGrossWeight}
               isEdit={false}
               disabled
             />
@@ -891,7 +885,7 @@ export default function ServiceForm() {
       <Row align='bottom' style={{ padding: '0 40px' }}>
         {!isStorage() && <Col span={12}>
           <Typography.Title level={2}>
-            {isRepack() ? 'Первичные места' : (datasetsId.length > 1 ? 'для мест' : 'для места')}
+            {isRepack() ? 'Первичные места' : 'Места'}
           </Typography.Title>
         </Col>}
         {isRepack() && isEdit && <Col span={12} style={{ textAlign: 'right', paddingBottom: 20 }}>

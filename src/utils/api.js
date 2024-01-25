@@ -59,38 +59,33 @@ export const getLastId = async (table, id = 'id') => {
 export const getSendings = isAir => async () => {
   const [ response, responseProducts ] = await Promise.all([
     axios.select('trip', '*', { where: { to: `${Number(isAir)}`, canceled: 0 } }),
-    axios.select('trip t', sendingSummaryFields,
+    axios.select('trip t',
+      [
+        'id_trip',
+        'm.id as place_id',
+        'JSON_EXTRACT(m.pole,"$.gross_weight") as gross_weight',
+      ],
       {
         where: {
           canceled: 0,
           to: `${Number(isAir)}`,
-          'm.status': 0,
-          'n.status': 0
+          'm.status': 0
         },
         leftJoin: {
-          'dataset m': 'm.id_ref=t.id_trip',
-          'dataset n': 'n.id_ref=m.id'
+          'dataset m': 'm.id_ref=t.id_trip'
         }
       }
     )
   ])
-  
-  const placeCountIdsMap = {}
+
   const productsMap = (responseProducts.data?.data || []).reduce((acc, item) => {
     const id = item.id_trip
-    if (!placeCountIdsMap[id]) placeCountIdsMap[id] = []
-    const count = Number(item.count)
     const gross_weight = Number(item.gross_weight)
-    const net_weight = Number(item.net_weight)
     if (!acc[id]) {
-      acc[id] = { count, gross_weight, net_weight }
+      acc[id] = { places_count: 1, gross_weight }
     } else {
-      acc[id].count += count
-      acc[id].net_weight += net_weight
-    }
-    if (!placeCountIdsMap[id].includes(item.place_id)) {
       acc[id].gross_weight += gross_weight
-      placeCountIdsMap[id].push(item.place_id)
+      acc[id].places_count++
     }
     return acc
   }, {})
@@ -105,10 +100,8 @@ export const getSendings = isAir => async () => {
       date: item.create_datetime,
       transporter: json.transporter,
       status: json.status,
-      count: productsMap[item.id_trip]?.count || 0,
-      net_weight: productsMap[item.id_trip]?.net_weight || 0,
+      places_count: productsMap[item.id_trip]?.places_count || 0,
       gross_weight: productsMap[item.id_trip]?.gross_weight || 0,
-      places_count: placeCountIdsMap[item.id_trip]?.length || 0,
       departure: item.start_datetime,
       delivery: item.complete_datetime,
       json
@@ -137,6 +130,23 @@ export const getSendingById = (sendingId, { copy } = {}) => async () => {
   if (!copy) {
     promises = await Promise.all([
       axios.select('trip', '*', { where: { id_trip: sendingId } }),
+      axios.select('trip t',
+        [
+          'id_trip',
+          'm.id as place_id',
+          'JSON_EXTRACT(m.pole,"$.gross_weight") as gross_weight',
+        ],
+        {
+          where: {
+            canceled: 0,
+            'm.id_ref': sendingId,
+            'm.status': 0
+          },
+          leftJoin: {
+            'dataset m': 'm.id_ref=t.id_trip'
+          }
+        }
+      ),
       axios.select('trip t', sendingSummaryFields,
         {
           where: {
@@ -156,14 +166,21 @@ export const getSendingById = (sendingId, { copy } = {}) => async () => {
     promises = await axios.select('trip', '*', { where: { id_trip: copy } })
   }
   let response
+  let responsePlaces
   let responseProducts
   if (Array.isArray(promises)) {
     response = promises[0]
-    responseProducts = promises[1]
+    responsePlaces = promises[1]
+    responseProducts = promises[2]
   } else {
     response = promises
     responseProducts = {}
   }
+
+  const places = (responsePlaces?.data?.data || []).reduce((acc, item) => {
+    acc.gross_weight += Number(item.gross_weight)
+    return acc
+  }, { gross_weight: 0 })
 
   const placesId = []
   const products = (responseProducts?.data?.data || []).reduce((acc, item) => {
@@ -185,7 +202,7 @@ export const getSendingById = (sendingId, { copy } = {}) => async () => {
   item.create_datetime = dayjs(item.create_datetime)
   item.start_datetime = item.json?.status > 0 && dayjs(item.json?.status_date_1)
   item.complete_datetime = item.json?.status > 1 && dayjs(item.json?.status_date_2)
-  item.gross_weight = products.gross_weight
+  item.gross_weight = places.gross_weight
   item.net_weight = products.net_weight
   item.count = products.count
 

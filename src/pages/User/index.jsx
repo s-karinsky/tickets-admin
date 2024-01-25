@@ -210,7 +210,7 @@ export default function PageUser() {
                     rules={[{ required: true }]}
                     isEdit={isEdit}
                     size='large'
-                    mask='+000000000000'
+                    mask='+00000000000'
                   />
                 </Col>
                 {!isClient && <Col span={8}>
@@ -227,7 +227,7 @@ export default function PageUser() {
                     label={isClient ? 'Дополнительный телефон' : 'Телефон компании'}
                     isEdit={isEdit}
                     size='large'
-                    mask='+000000000000'
+                    mask='+00000000000'
                     rules={!isClient && [{ required: true }]}
                   />
                 </Col>
@@ -329,7 +329,7 @@ export default function PageUser() {
                       isEdit={isEdit}
                       name={['json', 'company', 'phone']}
                       size='large'
-                      mask='+000000000000'
+                      mask='+00000000000'
                     />
                   </Col>
                   <Col span={8}>
@@ -363,7 +363,7 @@ export default function PageUser() {
                   </Col>
                   <Col span={8}>
                     <FormField
-                      label='SWIFT'
+                      label='SWIFT или Кор. счет'
                       isEdit={isEdit}
                       name={['json', 'company', 'swift']}
                     />

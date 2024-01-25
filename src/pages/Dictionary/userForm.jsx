@@ -159,7 +159,7 @@ export default function UserForm({ name }) {
               label={isClient ? 'Телефон' : (isEmployee ? 'Телефон рабочий' : 'Телефон ответственного')}
               rules={[{ required: true }]}
               size='large'
-              mask='+000000000000'
+              mask='+00000000000'
             />
           </Col>
           {!isClient && !isEmployee && <Col span={8}>
@@ -174,7 +174,7 @@ export default function UserForm({ name }) {
               name={isClient || isEmployee ? ['json', 'addPhone'] : ['json', 'companyPhone']}
               label={isClient ? 'Дополнительный телефон' : (isEmployee ? 'Телефон личный' : 'Телефон компании')}
               size='large'
-              mask='+000000000000'
+              mask='+00000000000'
               rules={!isClient && [{ required: true }]}
             />
           </Col>
@@ -261,7 +261,7 @@ export default function UserForm({ name }) {
                   label='Телефон'
                   name={['json', 'company', 'phone']}
                   size='large'
-                  mask='+000000000000'
+                  mask='+00000000000'
                 />
               </Col>
               <Col span={8}>
@@ -291,7 +291,7 @@ export default function UserForm({ name }) {
               </Col>
               <Col span={8}>
                 <FormField
-                  label='SWIFT'
+                  label='SWIFT или Кор. счет'
                   name={['json', 'company', 'swift']}
                 />
               </Col>
@@ -328,7 +328,7 @@ export default function UserForm({ name }) {
           </Col>
         </Row>
         <Table
-          columns={getColumns({ codeIndex: 'value' }).slice(1, 4)}
+          columns={getColumns({ name, codeIndex: 'value' }).slice(1, 5)}
           isLoading={inner.isLoading}
           dataSource={inner.data?.list}
           onRow={(record, index) => ({

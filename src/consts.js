@@ -37,3 +37,5 @@ export const SERVICE_STATUS = {
 export const VALIDATION_MESSAGES = {
   required: 'Обязательное поле'
 }
+
+export const MARKETPLACES = [{ value: 'Wilberries' }, { value: 'OZON' }, { value: 'Яндекс' }, { value: 'Lamoda' }]

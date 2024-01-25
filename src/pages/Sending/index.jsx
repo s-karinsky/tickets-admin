@@ -481,7 +481,7 @@ export default function Sending() {
                     text={data.start_datetime && data.start_datetime?.format('DD.MM.YYYY')}
                   />
                   <FormField
-                    label='Кол-во мест'
+                    label='Мест'
                     labelType='calc'
                     value={placesData.length}
                     width={100}
@@ -500,7 +500,7 @@ export default function Sending() {
                   />
                   <FormField
                     type='number'
-                    label='Количество'
+                    label='Кол. товара'
                     labelType='sum'
                     name='count'
                     width={120}

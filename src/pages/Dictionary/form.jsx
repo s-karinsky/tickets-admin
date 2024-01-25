@@ -112,7 +112,7 @@ export default function DictionaryForm() {
           </Col>
           <Col span={24}>
             <Row gutter={10}>
-              <Col span={4}>
+              <Col span={name === 'inclient' ? 3 : 4}>
                 <FormField
                   label='Код'
                   name='value'
@@ -188,7 +188,7 @@ export default function DictionaryForm() {
                     name='phone'
                     rules={[{ required: true }]}
                     size='large'
-                    mask='+000000000000'
+                    mask='+00000000000'
                   />
                 </Col>
                 <Col span={6}>
@@ -197,7 +197,7 @@ export default function DictionaryForm() {
                     name='company_phone'
                     rules={[{ required: true }]}
                     size='large'
-                    mask='+000000000000'
+                    mask='+00000000000'
                   />
                 </Col>
                 <Col span={6}>
@@ -243,17 +243,24 @@ export default function DictionaryForm() {
               </>}
 
               {name === 'inclient' && <>
-                <Col span={10}>
+                <Col span={7}>
                   <FormField
                     name='family'
                     label='Фамилия'
                     rules={[{ required: true }]}
                   />
                 </Col>
-                <Col span={10}>
+                <Col span={7}>
                   <FormField
                     name='name'
                     label='Имя'
+                    rules={[{ required: true }]}
+                  />
+                </Col>
+                <Col span={7}>
+                  <FormField
+                    name='middle'
+                    label='Отчество'
                     rules={[{ required: true }]}
                   />
                 </Col>
@@ -263,7 +270,7 @@ export default function DictionaryForm() {
                     label={'Телефон'}
                     rules={[{ required: true }]}
                     size='large'
-                    mask='+000000000000'
+                    mask='+00000000000'
                   />
                 </Col>
                 <Col span={8}>
@@ -348,7 +355,7 @@ export default function DictionaryForm() {
                           label='Телефон'
                           name={['company', 'phone']}
                           size='large'
-                          mask='+000000000000'
+                          mask='+00000000000'
                         />
                       </Col>
                       <Col span={8}>
@@ -378,7 +385,7 @@ export default function DictionaryForm() {
                       </Col>
                       <Col span={8}>
                         <FormField
-                          label='SWIFT'
+                          label='SWIFT или Кор. счет'
                           name={['company', 'swift']}
                         />
                       </Col>

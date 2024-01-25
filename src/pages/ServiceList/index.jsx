@@ -6,6 +6,9 @@ import { BsTrash } from 'react-icons/bs'
 import dayjs from 'dayjs'
 import { useService, updateDatasetById, useUsers } from '../../utils/api'
 import { SERVICE_STATUS, SERVICE_NAME } from '../../consts'
+import { getColumnSearchProps } from '../../utils/components'
+import { localeCompare } from '../../utils/utils'
+import { MARKETPLACES } from '../../consts'
 
 const getEndDateTitle = name => {
   if (name === 'fullfillment') return 'Дата передачи'
@@ -16,21 +19,29 @@ const getColumns = (name, { onStatusClick, clients = {} }) => {
   const commonColumns = [
     {
       title: 'Номер',
-      dataIndex: 'number'
+      dataIndex: 'number',
+      sorter: (a, b) => a.number - b.number,
+      ...getColumnSearchProps('number', { type: 'number' })
     },
     {
       title: 'Дата',
       dataIndex: 'date',
-      render: date => dayjs(date).format('DD.MM.YYYY')
+      render: date => dayjs(date).format('DD.MM.YYYY'),
+      sorter: (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+      ...getColumnSearchProps('date', { type: 'date' })
     },
     {
       title: 'Клиент',
       dataIndex: 'client',
-      render: num => clients[num]?.code
+      render: num => clients[num]?.code,
+      sorter: (a, b) => Number(clients[a.client]?.code) - Number(clients[b.client]?.code),
+      ...getColumnSearchProps('client')
     },
     name === 'fullfillment' && {
       title: 'Маркетплейс',
-      dataIndex: 'marketplace'
+      dataIndex: 'marketplace',
+      sorter: (a, b) => localeCompare(a.marketplace, b.marketplace),
+      ...getColumnSearchProps('marketplace', { options: MARKETPLACES })
     },
     {
       title: 'Статус',
@@ -46,40 +57,56 @@ const getColumns = (name, { onStatusClick, clients = {} }) => {
             Изменить
           </Button>
         </>
-      )
+      ),
+      sorter: (a, b) => localeCompare(a.status, b.status),
+      ...getColumnSearchProps('status')
     },
     name === 'storage' && {
       title: 'Дата начала',
       dataIndex: 'start_date',
-      render: date => date && dayjs(date).format('DD.MM.YYYY')
+      render: date => date && dayjs(date).format('DD.MM.YYYY'),
+      sorter: (a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime(),
+      ...getColumnSearchProps('start_date', { type: 'date' })
     },
     name === 'storage' && {
       title: 'Дата окончания',
       dataIndex: 'end_date',
-      render: date => date && dayjs(date).format('DD.MM.YYYY')
+      render: date => date && dayjs(date).format('DD.MM.YYYY'),
+      sorter: (a, b) => new Date(a.end_date).getTime() - new Date(b.end_date).getTime(),
+      ...getColumnSearchProps('end_date', { type: 'date' })
     },
     name !== 'storage' && {
       title: getEndDateTitle(name),
-      dataIndex: `date_status_${SERVICE_STATUS[name].length - 1}`
+      dataIndex: `date_status_${SERVICE_STATUS[name].length - 1}`,
+      sorter: (a, b) => new Date(a[`date_status_${SERVICE_STATUS[name].length - 1}`]).getTime() - new Date(b[`date_status_${SERVICE_STATUS[name].length - 1}`]).getTime(),
+      ...getColumnSearchProps(`date_status_${SERVICE_STATUS[name].length - 1}`, { type: 'date' })
     },
     name === 'delivery' && {
       title: 'Тип доставки',
-      dataIndex: 'delivery_type'
+      dataIndex: 'delivery_type',
+      sorter: (a, b) => localeCompare(a.delivery_type, b.delivery_type),
+      ...getColumnSearchProps('delivery_type')
     },
     {
       title: 'Мест',
       dataIndex: 'places',
-      render: places => Array.isArray(places) ? places.length : 0
+      render: places => Array.isArray(places) ? places.length : 0,
+      sorter: (a, b) => a.places?.length - b.places?.length,
+      ...getColumnSearchProps(item => item.places?.length, { type: 'number' })
     },
     {
       title: 'Вес брутто',
       dataIndex: 'placeData',
-      render: data => data.reduce((sum, item) => sum + (item?.pole?.gross_weight || 0), 0)
+      render: data => data.reduce((sum, item) => sum + (item?.pole?.gross_weight || 0), 0),
+      sorter: (a, b) => a.placeData.reduce((sum, item) => sum + (item?.pole?.gross_weight || 0), 0) - b.placeData.reduce((sum, item) => sum + (item?.pole?.gross_weight || 0), 0),
+      ...getColumnSearchProps(item => item.placeData.reduce((sum, item) => sum + (item?.pole?.gross_weight || 0), 0), { type: 'number' })
     },
     {
       title: 'Примечание',
       dataIndex: 'note',
       render: note => <div style={{ maxWidth: 80, maxHeight: 55, overflow: 'hidden', textOverflow: 'ellipsis' }} title={note}>{note}</div>,
+      sorter: (a, b) => localeCompare(a.note, b.note),
+      ...getColumnSearchProps('note')
     },
     {
       title: '',

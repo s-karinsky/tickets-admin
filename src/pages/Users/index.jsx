@@ -20,7 +20,7 @@ const LINK = {
   2: '/dictionary/employees/'
 }
 
-export const getColumns = ({ role, countries = {}, cities = {}, codeIndex = ['json', 'code'], refetch = () => {}, deleteUser }) => ([
+export const getColumns = ({ name, role, countries = {}, cities = {}, codeIndex = ['json', 'code'], refetch = () => {}, deleteUser }) => ([
   {
     title: 'Роль',
     dataIndex: 'id_role',
@@ -50,9 +50,14 @@ export const getColumns = ({ role, countries = {}, cities = {}, codeIndex = ['js
   {
     title: 'Телефон',
     dataIndex: 'phone',
-    render: phone => phone || 'No phone',
+    render: phone => !phone || phone.startsWith('+') ? (phone || '') : `+${phone}`,
     sorter: (a, b) => localeCompare(a.phone, b.phone),
     ...getColumnSearchProps('email')
+  },
+  name === 'clients' && {
+    title: 'Компания/ИП',
+    dataIndex: 'company',
+    render: company => company?.name
   },
   {
     title: 'Email',

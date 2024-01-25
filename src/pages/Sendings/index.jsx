@@ -27,8 +27,6 @@ export default function Sendings() {
   const [ activeOnly, setActiveOnly ] = useState(true)
   const isAir = searchParams.get('air') !== null
 
-  const tpl = useTemplates()
-
   const [ showStatusModal, setShowStatusModal ] = useState(false)
   const [ statusModalValue, setStatusModalValue ] = useState()
   const [ statusModalDate, setStatusModalDate ] = useState()
@@ -146,7 +144,7 @@ export default function Sendings() {
       ...getColumnSearchProps(record => record.status + 1, { options: SENDING_STATUS.map((label, value) => ({ value: value + 1, label })) })
     },
     {
-      title: 'Места',
+      title: 'Мест',
       dataIndex: 'places_count',
       key: 'places_count',
       align: 'right',
@@ -154,13 +152,13 @@ export default function Sendings() {
       ...getColumnSearchProps('places_count', { type: 'number' })
     },
     {
-      title: 'Вес нетто',
-      dataIndex: 'net_weight',
-      key: 'net_weight',
+      title: 'Вес брутто',
+      dataIndex: 'gross_weight',
+      key: 'gross_weight',
       align: 'right',
       render: val => Number(val).toFixed(3),
-      sorter: (a, b) => a.weight - b.weight,
-      ...getColumnSearchProps('net_weight', { type: 'number' })
+      sorter: (a, b) => a.gross_weight - b.gross_weight,
+      ...getColumnSearchProps('gross-weight', { type: 'number' })
     },
     {
       title: 'Дата отправки',
