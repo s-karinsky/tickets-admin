@@ -395,11 +395,17 @@ export const useUsersWithRole = (role, params) => useQuery(['usersWithRole', rol
 
 export const updateUserById = async (userId, values = {}) => {
   const response = await axios.postWithAuth('/query/update', { sql: sqlUpdate('users', values, `id_user=${userId}`) })
+  if (response.data.status === 'error') {
+    throw response.data
+  }
   return response
 }
 
 export const createUser = async (values) => {
-  await axios.postWithAuth('/query/insert', { sql: sqlInsert('users', values) })
+  const response = await axios.postWithAuth('/query/insert', { sql: sqlInsert('users', values) })
+  if (response.data.status === 'error') {
+    throw response.data
+  }
   const lastId = await getLastId('users', 'id_user')
   return lastId
 }

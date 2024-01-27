@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
-import { Form, Button, Col, Row, Divider } from 'antd'
+import { Form, Button, Col, Row, Divider, message } from 'antd'
 import { CaretLeftFilled, SaveOutlined, PlusOutlined } from '@ant-design/icons'
 import { BiEdit } from 'react-icons/bi'
 import CreateCityModal from '../../components/CreateCityModal'
@@ -12,6 +12,7 @@ import { USER_ROLES, USER_ROLES_OPTIONS, VALIDATION_MESSAGES } from '../../const
 const EMPTY_OBJECT = {}
 
 export default function PageUser() {
+  const [ messageApi, contextHolder ] = message.useMessage()
   const [ form ] = Form.useForm()
   const { id } = useParams()
   const navigate = useNavigate()
@@ -62,14 +63,19 @@ export default function PageUser() {
           }
           values.json = JSON.stringify(values.json)
           setIsSending(true)
-          if (isNew) {
-            const lastId = await createUser(values)
-            navigate(`/users/${lastId}`)
-          } else {
-            await updateUserById(id, values)
-            setSearchParams({})
+          try {
+            if (isNew) {
+              const lastId = await createUser(values)
+              navigate(`/users/${lastId}`)
+            } else {
+              await updateUserById(id, values)
+              setSearchParams({})
+            }
+          } catch (e) {
+            messageApi.error(e.message)
+          } finally {
+            setIsSending(false)
           }
-          setIsSending(false)
         }}
       >
         <Row
@@ -404,6 +410,7 @@ export default function PageUser() {
         }}
         countries={countries.data?.list || []}
       />
+      {messageApi}
     </>
   )
 }

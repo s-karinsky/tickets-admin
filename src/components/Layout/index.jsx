@@ -100,13 +100,27 @@ export default function PageLayout({ user }) {
             type='link'
             onClick={e => {
               e.preventDefault()
+              navigate('/profile')
+            }}
+          >
+            Профиль
+          </Button>
+        ),
+        key: '0',
+      },
+      {
+        label: (
+          <Button
+            type='link'
+            onClick={e => {
+              e.preventDefault()
               const cookies = new Cookies()
               cookies.remove('token')
               cookies.remove('u_hash')
               navigate('/login')
             }}
           >
-            Logout
+            Выйти
           </Button>
         ),
         key: '0',

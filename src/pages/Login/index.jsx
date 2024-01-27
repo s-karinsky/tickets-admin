@@ -20,7 +20,7 @@ export default function PageLogin() {
             setIsLoading(true)
             login(values).then(role => {
               setIsLoading(false)
-              if (role) navigate(role === '4' ? '/users' : '/tickets')
+              navigate('/')
             })
           }}
           autoComplete="off"

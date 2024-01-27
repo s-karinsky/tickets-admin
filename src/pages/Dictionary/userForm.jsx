@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
-import { Form, Button, Col, Row, Divider, Typography, Table } from 'antd'
+import { useParams, useNavigate } from 'react-router-dom'
+import { Form, Button, Col, Row, Divider, Typography, Table, message } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import CreateCityModal from '../../components/CreateCityModal'
 import FormField from '../../components/FormField'
 import { getColumns } from '../Users'
+import axios from '../../utils/axios'
 import { useCountries, useCities, useUsers, createUser, updateUserById, useDictionary } from '../../utils/api'
 import { emailRule } from '../../utils/validationRules'
 import { VALIDATION_MESSAGES } from '../../consts'
@@ -24,10 +25,12 @@ const getTitle = (name, value, isNew) => {
   }
 }
 
-export default function UserForm({ name }) {
+export default function UserForm({ name, userId }) {
+  const [ messageApi, contextHolder ] = message.useMessage()
   const [ form ] = Form.useForm()
-  const { id } = useParams()
+  const { id = userId } = useParams()
   const navigate = useNavigate()
+  const [ isMakingPass, setIsMakingPass ] = useState(false)
   const [ isAddCity, setIsAddCity ] = useState(false)
   const [ country, setCountry ] = useState()
   const [ isSending, setIsSending ] = useState()
@@ -65,7 +68,8 @@ export default function UserForm({ name }) {
           setCountry(field.value)
         }}
         onFinish={async (values) => {
-          const isClient = values.id_role === '1'
+          if (isClient) values.id_role = '1'
+          if (isEmployee) values.id_role = '2'
           values.phone = values.phone.replaceAll('_', '')
           if (isClient) {
             values.json.addPhone = (values.addPhone || '').replaceAll('_', '')
@@ -75,14 +79,24 @@ export default function UserForm({ name }) {
           }
           values.json = JSON.stringify(values.json)
           setIsSending(true)
-          if (isNew) {
-            const lastId = await createUser(values)
-            navigate(`/dictionary/${name}/${lastId}`)
-          } else {
-            await updateUserById(id, values)
-            navigate(`/dictionary/${name}`)
+          let navTo = ''
+          try {
+            if (isNew) {
+              const lastId = await createUser(values)
+              await axios.postWithAuth('/remind', { u_email: values.email })
+              navTo = `/dictionary/${name}/${lastId}`
+              message.info('Пользватель успешно создан. Пароль для входа отправлен на e-mail')
+            } else {
+              await updateUserById(id, values)
+              navTo = `/dictionary/${name}`
+              message.info('Пользватель успешно обнолвен')
+            }
+            // navigate(navTo)
+          } catch (e) {
+            messageApi.error(e.message)
+          } finally {
+            setIsSending(false)
           }
-          setIsSending(false)
         }}
       >
         <Row align='middle' style={{ padding: '0 40px' }}>
@@ -90,6 +104,20 @@ export default function UserForm({ name }) {
             <Typography.Title style={{ fontWeight: 'bold' }}>{getTitle(name, profile?.json?.code || '', isNew)}</Typography.Title>
           </Col>
           <Col span={12} style={{ textAlign: 'right' }}>
+            {!isNew && <Button
+              style={{ marginRight: 20 }}
+              size='large'
+              htmlType='button'
+              onClick={async () => {
+                setIsMakingPass(true)
+                await axios.postWithAuth('/remind', { u_email: profile.email })
+                message.info('Пароль для входа отправлен на e-mail')
+                setIsMakingPass(false)
+              }}
+              loading={isMakingPass}
+            >
+              Сбросить пароль
+            </Button>}
             <Button
               style={{ marginRight: 20 }}
               type='primary'
@@ -356,6 +384,7 @@ export default function UserForm({ name }) {
         }}
         countries={countries.data?.list || []}
       />
+      {contextHolder}
     </>
   )
 }

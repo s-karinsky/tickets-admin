@@ -43,7 +43,7 @@ function App() {
     if (!role) {
       navigate('/login', { replace: true })
     } else if (isLoginPage) {
-      navigate(role === '4' ? '/users' : '/tickets', { replace: true })
+      navigate('/', { replace: true })
     }
   }, [user.isLoading, user.data?.u_role, isLoginPage, navigate])
 
@@ -67,6 +67,7 @@ function App() {
     <div className='App'>
       <Routes>
         <Route path='/' element={<Layout user={user.data} />}>
+          <Route path='/profile' element={<UserForm name={user.data?.u_role === '1' ? 'employees' : 'clients'} userId={user.data?.u_id} />} />
           <Route path='/users' element={<PageUsers />} />
           <Route path='/users/:id' element={<PageUser />} />
           <Route path='/sendings' element={<Sendings />} />
