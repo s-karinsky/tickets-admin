@@ -1,4 +1,4 @@
-import { Suspense, lazy, useCallback, useState } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useState } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { Form, Button, Col, Row, Typography, Checkbox } from 'antd'
 import { CaretLeftFilled, SaveOutlined, PlusOutlined } from '@ant-design/icons'
@@ -17,15 +17,18 @@ export default function Template() {
   const [ code, setCode ] = useState()
   const navigate = useNavigate()
   const template = useTemplates(id)
-  const file = useScriptFile(id)
   const isNew = id === 'create'
 
   const onChange = useCallback(val => {
     setCode(val)
   }, [])
 
+  useEffect(() => {
+    setCode(template.data?.file)
+  }, [template.data?.file])
+
   if (template.isLoading) return null
-  
+
   return (
     <Form
       initialValues={template.data}
@@ -34,13 +37,9 @@ export default function Template() {
       validateMessages={VALIDATION_MESSAGES}
       form={form}
       onFinish={async (values) => {
-        values.active = values.active ? '1' : '0'
-        if (isNew) {
-          await axios.postWithAuth('/query/insert', { sql: sqlInsert('script_template', values) })
-        } else {
-          await axios.postWithAuth('/query/update', { sql: sqlUpdate('script_template', values, `id_script_template=${id}`) })
-          await axios.postWithAuth('/data', { data: JSON.stringify({ script_templates:[{ id, file: code }] }) } )
-        }
+        if (!isNew) values.id = Number(id)
+        values.file = code
+        await axios.postWithAuth('/data', { data: JSON.stringify({ script_templates: [ values ] }) })
         navigate('/templates')
       }}
     >
@@ -71,14 +70,8 @@ export default function Template() {
           <Row gutter={10} align='bottom'>
             <Col span={6}>
               <FormField
-                name='name_ru'
+                name='ru'
                 label='Название'
-              />
-            </Col>
-            <Col span={6}>
-              <FormField
-                name='value'
-                label='value'
               />
             </Col>
             <Col span={6}>
@@ -87,21 +80,11 @@ export default function Template() {
                 label='var'
               />
             </Col>
-            <Col span={6}>
-              <Form.Item
-                width='100%'
-                style={{ alignSelf: 'flex-end' }}
-                name='active'
-                valuePropName='checked'
-              >
-                <Checkbox>Активный</Checkbox>
-              </Form.Item>
-            </Col>
             <Col span={24} style={{ marginTop: 20 }}>
               <Suspense>
                 <CodeMirror
                   height='400px'
-                  value={file.data}
+                  value={template.data?.file}
                   extensions={[php()]}
                   onChange={onChange}
                 />

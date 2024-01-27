@@ -15,34 +15,22 @@ export default function Templates() {
   const columns = [
     {
       title: 'id',
-      dataIndex: 'id_script_template',
-      sorter: (a, b) => a.id_script_template - b.id_script_template,
-      ...getColumnSearchProps('id_script_template')
+      dataIndex: 'id',
+      sorter: (a, b) => a.id - b.id,
+      ...getColumnSearchProps('id')
     },
     {
       title: 'Название',
-      dataIndex: 'name_ru',
-      sorter: (a, b) => localeCompare(a.name_ru, b.name_ru),
-      ...getColumnSearchProps('name_ru')
-    },
-    {
-      title: 'value',
-      dataIndex: 'value',
-      sorter: (a, b) => localeCompare(a.value, b.value),
-      ...getColumnSearchProps('value')
+      dataIndex: 'ru',
+      sorter: (a, b) => localeCompare(a.ru, b.ru),
+      ...getColumnSearchProps('ru')
     },
     {
       title: 'var',
       dataIndex: 'var',
       sorter: (a, b) => localeCompare(a.var, b.var),
       ...getColumnSearchProps('var')
-    },
-    {
-      title: 'Активный',
-      dataIndex: 'active',
-      sorter: (a, b) => Number(a.active) - Number(b.active),
-      render: mark => mark === '1' ? <CheckOutlined /> : ''
-    },
+    }/* ,
     {
       title: '',
       width: 30,
@@ -70,7 +58,7 @@ export default function Templates() {
           />
         </div>
       )
-    }
+    } */
   ]
 
   return (
@@ -93,11 +81,11 @@ export default function Templates() {
         columns={columns}
         dataSource={data}
         isLoading={isLoading}
-        rowKey={({ id_script_template }) => id_script_template}
+        rowKey={({ id }) => id}
         onRow={(record) => ({
           onClick: (e) => {
             if (e.detail === 2) {
-              navigate(`/templates/${record.id_script_template}`)
+              navigate(`/templates/${record.id}`)
             }
           },
         })}

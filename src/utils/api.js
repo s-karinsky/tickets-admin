@@ -540,8 +540,8 @@ export const useTemplates = id => useQuery(['template', id], async () => {
   } 
   const response = await axios.postWithAuth('/data', { private: true })
   const data = (response.data?.data || {})
-  return []
-  return id ? data[id] : data
+  const tpl = data.script_templates || {}
+  return id ? { ...tpl[id], id } : Object.keys(tpl).map(id => ({ ...tpl[id], id }))
 })
 
 export const useScriptFile = (id, params) => useQuery(['private-data', id], async () => {
