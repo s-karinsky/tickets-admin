@@ -8,7 +8,8 @@ import {
   CarOutlined,
   FormOutlined,
   SnippetsOutlined,
-  DollarOutlined
+  DollarOutlined,
+  SettingOutlined
 } from '@ant-design/icons'
 import { Avatar, Button, Dropdown, Menu, Space, Layout, Row, Col } from 'antd'
 import { Outlet, Link, useNavigate } from 'react-router-dom'
@@ -44,7 +45,9 @@ const MENU_ITEMS = {
     getItem(<Link to='/dictionary/rates'>Тарифы перевозок</Link>, 'dictionary-rates'),
     getItem(<Link to='/dictionary/currency'>Валюта и курс</Link>, 'dictionary-currency')
   ]),
-  templates: getItem(<Link to='/templates'>Шаблоны</Link>, 'templates', <SnippetsOutlined />),
+  settings: getItem('Настройки', 'settings', <SettingOutlined />, [
+    getItem(<Link to='/templates'>Шаблоны</Link>, 'templates', <SnippetsOutlined />)
+  ]),
   users: getItem(<Link to='/users'>Пользователи</Link>, 'users', <UserOutlined />),
   sendings: getItem(
     'Отправки',
@@ -80,12 +83,12 @@ export default function PageLayout({ user }) {
   const items = useMemo(() => {
     if (user.u_role === '4') {
       return [
+        MENU_ITEMS.settings,
         MENU_ITEMS.users,
         MENU_ITEMS.dictionary,
         MENU_ITEMS.sendings,
         MENU_ITEMS.services,
-        MENU_ITEMS.finances,
-        MENU_ITEMS.templates
+        MENU_ITEMS.finances
       ]
     }
   }, [user.u_role])

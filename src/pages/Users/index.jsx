@@ -150,7 +150,7 @@ export default function PageUsers({ role }) {
         onRow={record => ({
           onClick: (e) => {
             if (e.detail === 2) {
-              navigate(`${LINK[role] || LINK.default}${record.id_user}`)
+              navigate(`${LINK[record.id_role] || LINK.default}${record.id_user}`)
             }
           }
         })}
