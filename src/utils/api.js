@@ -572,7 +572,7 @@ export const useCurrencyRates = currency => useQuery(['currency-rate', currency]
   return response.data?.data
 })
 
-export const useClientInvoices = (id, initialValues = {}) => useQuery(['client-invoices', id], async () => {
+export const useClientInvoices = (id, initialValues = {}, params) => useQuery(['client-invoices', id], async () => {
   const rate = await getLastCurrencyRate('USD', dayjs().format('YYYY-MM-DD'))
   if (id === 'create') {
     const response = await axios.select(
@@ -582,7 +582,7 @@ export const useClientInvoices = (id, initialValues = {}) => useQuery(['client-i
         where: {
           status: 0,
           tip: 'cl-invoice',
-          'YEAR(json_extract(pole, "$.date"))': `YEAR('${dayjs().format('YYYY-MM-DD')}')`
+          'YEAR(created_at)': `YEAR('${dayjs().format('YYYY-MM-DD')}')`
         }
       }
     )
@@ -611,13 +611,15 @@ export const useClientInvoices = (id, initialValues = {}) => useQuery(['client-i
   )
   const data = (response.data?.data || []).map(item => ({
     ...item,
-    ...parseJSON(item.pole)
+    ...parseJSON(item.pole),
+    pole: parseJSON(item.pole),
+    date: dayjs(item.created_at)
   }))
   return id ? {
     rate,
     ...data[0]
   } : data
-})
+}, params)
 
 export const useClientPayments = (id, initialValues = {}) => useQuery(['client-payments', id], async () => {
   const rate = await getLastCurrencyRate('USD', dayjs().format('YYYY-MM-DD'))
