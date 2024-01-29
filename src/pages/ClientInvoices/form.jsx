@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { Row, Col, Typography, Form, Button, DatePicker, Modal } from 'antd'
 import { useParams, useNavigate } from 'react-router-dom'
 import { LoadingOutlined, ExclamationCircleFilled } from '@ant-design/icons'
 import { get as _get } from 'lodash'
 import FormField from '../../components/FormField'
-import { useClientInvoices } from '../../utils/api'
+import { useClientInvoices, useUsersWithRole } from '../../utils/api'
 import axios from '../../utils/axios'
 import { numberRange } from '../../utils/validationRules'
 import { VALIDATION_MESSAGES } from '../../consts'
@@ -19,6 +19,17 @@ export default function ClientInvoicesForm() {
   const navigate = useNavigate()
   const isNew = id === 'create'
   const { data = {}, isLoading, isRefetching, refetch } = useClientInvoices(id, {}, { staleTime: 0, refetchOnWindowFocus: false })
+  const clients = useUsersWithRole(1)
+
+  const [ clientsOptions, clientsMap ] = useMemo(() => {
+    if (!Array.isArray(clients.data)) return [[], {}]
+    const options = clients.data.map(({ json = {}, ...item }) => ({
+      value: item.id_user,
+      label: `${json.code} (${[item.family, item.name, item.middle].filter(Boolean).join(' ')})`
+    }))
+    const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
+    return [ options, map ]
+  }, [clients.data])
 
   const discountRub = Form.useWatch('discount_rub', form)
   const discountUsd = Form.useWatch('discount_usd', form)
@@ -136,7 +147,9 @@ export default function ClientInvoicesForm() {
                 <FormField
                   label='Клиент'
                   name='client'
-                  disabled
+                  type='select'
+                  options={clientsOptions}
+                  text={clientsMap[data.client]}
                 />
               </Col>
               <Col span={12}>

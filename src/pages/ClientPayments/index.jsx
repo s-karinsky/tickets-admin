@@ -1,7 +1,7 @@
 import { Row, Col, Button, Table, Typography } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import { getColumnSearchProps } from '../../utils/components'
-import { useClientInvoices } from '../../utils/api'
+import { useClientPayments } from '../../utils/api'
 import { localeCompare } from '../../utils/utils'
 
 const columns = [
@@ -38,7 +38,7 @@ const columns = [
 ]
 
 export default function ClientPayments() {
-  const { data, isLoading } = useClientInvoices()
+  const { data, isLoading } = useClientPayments()
   const navigate = useNavigate()
 
   return (
