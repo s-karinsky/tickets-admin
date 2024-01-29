@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { getColumnSearchProps } from '../../utils/components'
 import { useClientPayments } from '../../utils/api'
 import { localeCompare } from '../../utils/utils'
+import dayjs from 'dayjs'
 
 const columns = [
   {
@@ -13,8 +14,9 @@ const columns = [
   },
   {
     title: 'Дата',
-    dataIndex: 'date',
+    dataIndex: 'created_at',
     sorter: (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+    render: date => dayjs(date).format('DD.MM.YYYY'),
     ...getColumnSearchProps('date', { type: 'date' })
   },
   {

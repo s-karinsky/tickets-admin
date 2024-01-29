@@ -631,7 +631,7 @@ export const useClientPayments = (id, initialValues = {}) => useQuery(['client-p
         where: {
           status: 0,
           tip: 'cl-payment',
-          'YEAR(json_extract(pole, "$.date"))': `YEAR('${dayjs().format('YYYY-MM-DD')}')`
+          'YEAR(created_at)': `YEAR('${dayjs().format('YYYY-MM-DD')}')`
         }
       }
     )
@@ -660,7 +660,9 @@ export const useClientPayments = (id, initialValues = {}) => useQuery(['client-p
   )
   const data = (response.data?.data || []).map(item => ({
     ...item,
-    ...parseJSON(item.pole)
+    ...parseJSON(item.pole),
+    pole: parseJSON(item.pole),
+    date: dayjs(item.created_at)
   }))
   return id ? {
     rate,

@@ -4,8 +4,9 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { LoadingOutlined } from '@ant-design/icons'
 import { get as _get } from 'lodash'
 import FormField from '../../components/FormField'
-import { useClientInvoices, useUsersWithRole } from '../../utils/api'
-// import axios from '../../utils/axios'
+import { useClientPayments, useUsersWithRole, useDictionary } from '../../utils/api'
+import axios from '../../utils/axios'
+import { sqlInsert, sqlUpdate } from '../../utils/sql'
 import { numberRange } from '../../utils/validationRules'
 import { VALIDATION_MESSAGES } from '../../consts'
 
@@ -15,12 +16,36 @@ export default function ClientPaymentsForm() {
   const { id } = useParams()
   const navigate = useNavigate()
   const isNew = id === 'create'
-  const { data = {}, isLoading } = useClientInvoices(id)
-  const employe = useUsersWithRole('2')
+  const { data = {}, isLoading, isRefetching, refetch } = useClientPayments(id, {}, { staleTime: 0, refetchOnWindowFocus: false })
+  const employe = useUsersWithRole(2)
+  const clients = useUsersWithRole(1)
+
+  const client = Form.useWatch('client', form)
+  const inclient = useDictionary('inclient', { id_ref: client }, { enabled: !!client })
+
+  const [ clientsOptions, clientsMap ] = useMemo(() => {
+    if (!Array.isArray(clients.data)) return [[], {}]
+    const options = clients.data.map(({ json = {}, ...item }) => ({
+      value: item.id_user,
+      label: `${json.code} (${[item.family, item.name, item.middle].filter(Boolean).join(' ')})`
+    }))
+    const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
+    return [ options, map ]
+  }, [clients.data])
+
+  const [ inclientOptions, inclientMap ] = useMemo(() => {
+    if (!Array.isArray(inclient.data?.list)) return [[], {}]
+    console.log(inclient.data.list)
+    const options = inclient.data.list.map((item) => ({
+      value: item.id,
+      label: [item.family, item.name, item.middle].filter(Boolean).join(' ')
+    }))
+    const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
+    return [ options, map ]
+  }, [inclient.data])
 
   const employeOptions = useMemo(() => {
     if (!employe.data) return []
-    console.log(employe.data)
     return employe.data.map(item => ({
       value: item.id_user,
       label: item.json?.code
@@ -30,9 +55,9 @@ export default function ClientPaymentsForm() {
   const payType = Form.useWatch('pay_type', form)
   const isCash = payType?.toLowerCase() === 'Наличный'
 
-  return isLoading ?
+  return isLoading || isRefetching ?
     <Row style={{ height: 'calc(100vh - 64px)' }} justify='center' align='middle'>
-      <LoadingOutlined style={{ fontSize: '64px' }} /> : 
+      <LoadingOutlined style={{ fontSize: '64px' }} />
     </Row> :
     <>
       <Form
@@ -42,13 +67,26 @@ export default function ClientPaymentsForm() {
         initialValues={data}
         form={form}
         onFinish={async (values) => {
+          const { date, ...params } = values
           setIsUpdating(true)
           if (isNew) {
-            
+            await axios.postWithAuth('/query/insert', { sql:
+              sqlInsert('dataset', {
+                status: 0,
+                tip: 'cl-payment',
+                created_at: date.format('YYYY-MM-DD'),
+                pole: JSON.stringify(params)
+              })
+            })
           } else {
-
+            await axios.postWithAuth('/query/update', { sql:
+              sqlUpdate('dataset', {
+                created_at: date.format('YYYY-MM-DD'),
+                pole: JSON.stringify(params)
+              }, `id=${id}`)
+            })
           }
-          navigate('/client-invoices')
+          navigate('/client-payments')
         }}
       >
         <Row align='middle' style={{ padding: '0 40px' }}>
@@ -96,24 +134,28 @@ export default function ClientPaymentsForm() {
                 />
               </Col>
               <Col span={4}>
-                <FormField
+              <FormField
                   label='Клиент'
                   name='client'
-                  disabled
+                  type='select'
+                  options={clientsOptions}
+                  text={clientsMap[data.client]}
                 />
               </Col>
               <Col span={4}>
                 <FormField
-                  label='Клиент'
+                  label='Внутренний клиент'
                   name='inclient'
-                  disabled
+                  type='select'
+                  options={inclientOptions}
+                  text={inclientMap[data.inclient]}
+                  disabled={!client}
                 />
               </Col>
               <Col span={4}>
                 <FormField
                   label='Номер счета'
                   name='invoice_number'
-                  disabled
                 />
               </Col>
               <Col span={4}>
@@ -121,7 +163,6 @@ export default function ClientPaymentsForm() {
                   label='Дата счета'
                   name='invoice_date'
                   type='date'
-                  disabled
                 />
               </Col>
               <Col span={12}>
