@@ -921,7 +921,7 @@ export default function ServiceForm() {
           columns={[{
             title: 'Внутренний клиент',
             dataIndex: 'innerclient'
-          }].concat(columns.slice(2), { title: 'Включено', dataIndex: 'countin' })}
+          }].concat(columns.slice(2).filter(item => item.dataIndex !== 'count'), { title: 'Кол-во было', dataIndex: 'count' }, { title: 'Кол-во включено', dataIndex: 'countin' })}
           dataSource={newPlaces}
           rowKey={({ id }) => id}
           size='small'
