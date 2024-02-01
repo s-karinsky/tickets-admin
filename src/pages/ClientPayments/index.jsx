@@ -1,11 +1,14 @@
-import { Row, Col, Button, Table, Typography } from 'antd'
+import { Row, Col, Button, Table, Typography, Modal } from 'antd'
 import { useNavigate } from 'react-router-dom'
+import { BsTrash } from 'react-icons/bs'
+import { ExclamationCircleFilled } from '@ant-design/icons'
+import axios from '../../utils/axios'
 import { getColumnSearchProps } from '../../utils/components'
 import { useClientPayments } from '../../utils/api'
 import { localeCompare } from '../../utils/utils'
 import dayjs from 'dayjs'
 
-const columns = [
+const getColumns = (refetch, navigate) => ([
   {
     title: 'Номер',
     dataIndex: 'number',
@@ -36,11 +39,47 @@ const columns = [
     dataIndex: 'name',
     sorter: (a, b) => localeCompare(a.name, b.name),
     ...getColumnSearchProps('name')
+  },
+  {
+    title: '',
+    key: 'buttons',
+    render: (_, item) => {
+      return (
+        <>
+          <Button
+            type='primary'
+            size='small'
+            style={{ marginTop: 5 }}
+            onClick={() => navigate('/client-invoices/create', { state: { type: 'payment', id: item.id } })}
+          >
+            Создать счет на оплату
+          </Button>
+          <BsTrash
+            style={{ marginLeft: 30, cursor: 'pointer' }}
+            size={17}
+            color='red'
+            onClick={() => {
+              Modal.confirm({
+                title: 'Вы действительно хотите удалить этот счет?',
+                icon: <ExclamationCircleFilled />,
+                okText: 'Да',
+                okType: 'danger',
+                cancelText: 'Нет',
+                onOk: async () => {
+                  await axios.postWithAuth('/query/update', { sql: `update dataset set status=1 where id=${item.id}` })
+                  refetch()
+                }
+              })
+            }}
+          />
+        </>
+      )
+    }
   }
-]
+])
 
 export default function ClientPayments() {
-  const { data, isLoading } = useClientPayments()
+  const { data, isLoading, refetch } = useClientPayments()
   const navigate = useNavigate()
 
   return (
@@ -60,7 +99,7 @@ export default function ClientPayments() {
         </Col>
       </Row>
       <Table
-        columns={columns}
+        columns={getColumns(refetch, navigate)}
         dataSource={data}
         isLoading={isLoading}
         rowKey={({ id }) => id}

@@ -630,7 +630,6 @@ export const useClientInvoices = (id, initial = {}, params) => useQuery(['client
         const where = (sData.places || []).map(item => `id=${item}`).join(' OR ')
         const places = await axios.select('dataset', '*', { where })
         let weight = 0
-        console.log(sData)
         if (type === 'delivery') {
           rest.name = `Доставка № ${sData.number} от ${dayjs(sData.date).format('DD.MM.YYYY')} до ${sData.delivery_type} Адрес: ${sData.delivery_type === 'Терминал' ? sData.terminal_address : sData.client_address} Места: `
         } else if (type === 'fullfillment') {
@@ -650,6 +649,20 @@ export const useClientInvoices = (id, initial = {}, params) => useQuery(['client
         rest.pay_type = sData.pay_type
         rest.pay_usd = sData.price_usd
         rest.pay_rub = sData.price_rub
+      }
+      if (type === 'payment') {
+        const invoice = await axios.select('dataset', '*', { where: { status: 0, tip: 'cl-payment', id } })
+        let sData = (invoice.data?.data || [])[0]
+        sData = {
+          ...sData,
+          ...parseJSON(sData.pole)
+        }
+        rest.client = sData.client
+        rest.invoice_number = sData.number
+        rest.name = sData.name
+        rest.pay_type = sData.pay_type
+        rest.pay_rub = sData.pay_rub
+        rest.pay_usd = sData.pay_usd
       }
     }
 
@@ -680,7 +693,7 @@ export const useClientInvoices = (id, initial = {}, params) => useQuery(['client
   } : data
 }, params)
 
-export const useClientPayments = (id, initialValues = {}) => useQuery(['client-payments', id], async () => {
+export const useClientPayments = (id, initial = {}, params) => useQuery(['client-payments', id], async () => {
   const rate = await getLastCurrencyRate('USD', dayjs().format('YYYY-MM-DD'))
   if (id === 'create') {
     const response = await axios.select(
@@ -697,16 +710,28 @@ export const useClientPayments = (id, initialValues = {}) => useQuery(['client-p
     const data = response.data?.data || []
     const number = parseInt(_get(data, [0, 'max'])) || 0
 
-    // if (initialValues.sending) {
-    //   const response = await axios.select('trip', '*', { where: { id_trip: initialValues.sending } })
-    //   const item = (response.data?.data || [])[0]
-    // }
+    let rest = {}
+    if (initial.invoice) {
+      const invoice = await axios.select('dataset', '*', { where: { status: 0, tip: 'cl-invoice', id: initial.invoice } })
+      let sData = (invoice.data?.data || [])[0]
+      sData = {
+        ...sData,
+        ...parseJSON(sData.pole)
+      }
+      rest.client = sData.client
+      rest.invoice_number = sData.number
+      rest.invoice_date = dayjs(sData.date)
+      rest.name = sData.name
+      rest.pay_type = sData.pay_type
+      rest.pay_rub = sData.pay_rub
+      rest.pay_usd = sData.pay_usd
+    }
 
     return {
       number: number + 1,
       date: dayjs(),
       rate,
-      ...initialValues
+      ...rest
     }
   }
   const response = await axios.select('dataset', '*', {
@@ -721,10 +746,12 @@ export const useClientPayments = (id, initialValues = {}) => useQuery(['client-p
     ...item,
     ...parseJSON(item.pole),
     pole: parseJSON(item.pole),
-    date: dayjs(item.created_at)
+    date: dayjs(item.created_at),
+    invoice_date: dayjs(parseJSON(item.pole).invoice_date),
+    payment_date: dayjs(parseJSON(item.pole).payment_date)
   }))
   return id ? {
     rate,
     ...data[0]
   } : data
-})
+}, params)

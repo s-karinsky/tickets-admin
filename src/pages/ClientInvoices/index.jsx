@@ -8,7 +8,7 @@ import { useClientInvoices } from '../../utils/api'
 import { localeCompare } from '../../utils/utils'
 import { useEffect } from 'react'
 
-const getColumns = refetch => [
+const getColumns = (refetch, navigate) => [
   {
     title: 'Номер',
     dataIndex: 'number',
@@ -33,24 +33,34 @@ const getColumns = refetch => [
     key: 'buttons',
     render: (_, item) => {
       return (
-        <BsTrash
-          style={{ marginLeft: 30, cursor: 'pointer' }}
-          size={17}
-          color='red'
-          onClick={() => {
-            Modal.confirm({
-              title: 'Вы действительно хотите удалить этот счет?',
-              icon: <ExclamationCircleFilled />,
-              okText: 'Да',
-              okType: 'danger',
-              cancelText: 'Нет',
-              onOk: async () => {
-                await axios.postWithAuth('/query/update', { sql: `update dataset set status=1 where id=${item.id}` })
-                refetch()
-              }
-            })
-          }}
-        />
+        <>
+          <Button
+            type='primary'
+            size='small'
+            style={{ marginTop: 5 }}
+            onClick={() => navigate('/client-payments/create', { state: { invoice: item.id } })}
+          >
+            Создать оплату
+          </Button>
+          <BsTrash
+            style={{ marginLeft: 30, cursor: 'pointer' }}
+            size={17}
+            color='red'
+            onClick={() => {
+              Modal.confirm({
+                title: 'Вы действительно хотите удалить этот счет?',
+                icon: <ExclamationCircleFilled />,
+                okText: 'Да',
+                okType: 'danger',
+                cancelText: 'Нет',
+                onOk: async () => {
+                  await axios.postWithAuth('/query/update', { sql: `update dataset set status=1 where id=${item.id}` })
+                  refetch()
+                }
+              })
+            }}
+          />
+        </>
       )
     }
   }
@@ -84,7 +94,7 @@ export default function ClientInvoices() {
         </Col>
       </Row>
       <Table
-        columns={getColumns(refetch)}
+        columns={getColumns(refetch, navigate)}
         dataSource={data}
         isLoading={isLoading}
         rowKey={({ id }) => id}

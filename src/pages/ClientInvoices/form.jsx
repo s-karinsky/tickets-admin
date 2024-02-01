@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { Row, Col, Typography, Form, Button, DatePicker, Modal } from 'antd'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import dayjs from 'dayjs'
 import { LoadingOutlined, ExclamationCircleFilled } from '@ant-design/icons'
 import { get as _get } from 'lodash'
 import FormField from '../../components/FormField'
@@ -87,7 +88,10 @@ export default function ClientInvoicesForm() {
               htmlType='button'
               danger={data.done}
               onClick={() => {
-                if (!data.done) setIsModal(true)
+                if (!data.done) {
+                  setDoneDate(dayjs())
+                  setIsModal(true)
+                }
                 else {
                   Modal.confirm({
                     title: 'Отменить проведение счета?',

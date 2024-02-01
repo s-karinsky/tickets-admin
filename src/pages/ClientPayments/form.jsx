@@ -1,8 +1,9 @@
-import { useState, useMemo } from 'react'
-import { Row, Col, Typography, Form, Button, Checkbox } from 'antd'
-import { useParams, useNavigate } from 'react-router-dom'
-import { LoadingOutlined } from '@ant-design/icons'
+import { useState, useMemo, useEffect } from 'react'
+import { Row, Col, Typography, Form, Button, Checkbox, Modal, DatePicker } from 'antd'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import { LoadingOutlined, ExclamationCircleFilled } from '@ant-design/icons'
 import { get as _get } from 'lodash'
+import dayjs from 'dayjs'
 import FormField from '../../components/FormField'
 import { useClientPayments, useUsersWithRole, useDictionary } from '../../utils/api'
 import axios from '../../utils/axios'
@@ -10,18 +11,26 @@ import { sqlInsert, sqlUpdate } from '../../utils/sql'
 import { numberRange } from '../../utils/validationRules'
 import { VALIDATION_MESSAGES } from '../../consts'
 
-export default function ClientPaymentsForm() {
+export default function ClientPaymentsForm({ user }) {
+  const [ isModal, setIsModal ] = useState()
+  const [ doneDate, setDoneDate ] = useState(dayjs())
   const [ isUpdating, setIsUpdating ] = useState(false)
   const [ form ] = Form.useForm()
   const { id } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const isNew = id === 'create'
-  const { data = {}, isLoading, isRefetching, refetch } = useClientPayments(id, {}, { staleTime: 0, refetchOnWindowFocus: false })
+  const { data = {}, isLoading, isRefetching, refetch } = useClientPayments(id, location.state || {}, { staleTime: 0, refetchOnWindowFocus: false })
   const employe = useUsersWithRole(2)
   const clients = useUsersWithRole(1)
 
   const client = Form.useWatch('client', form)
   const inclient = useDictionary('inclient', { id_ref: client }, { enabled: !!client })
+
+  const payDate = Form.useWatch('payment_date', form)
+  useEffect(() => {
+    setDoneDate(payDate)
+  }, [payDate])
 
   const [ clientsOptions, clientsMap ] = useMemo(() => {
     if (!Array.isArray(clients.data)) return [[], {}]
@@ -35,7 +44,6 @@ export default function ClientPaymentsForm() {
 
   const [ inclientOptions, inclientMap ] = useMemo(() => {
     if (!Array.isArray(inclient.data?.list)) return [[], {}]
-    console.log(inclient.data.list)
     const options = inclient.data.list.map((item) => ({
       value: item.id,
       label: [item.family, item.name, item.middle].filter(Boolean).join(' ')
@@ -54,6 +62,7 @@ export default function ClientPaymentsForm() {
 
   const payType = Form.useWatch('pay_type', form)
   const isCash = payType?.toLowerCase() === 'Наличный'
+  data.get_employe = user.u_id
 
   return isLoading || isRefetching ?
     <Row style={{ height: 'calc(100vh - 64px)' }} justify='center' align='middle'>
@@ -94,6 +103,32 @@ export default function ClientPaymentsForm() {
             <Typography.Title style={{ fontWeight: 'bold' }}>{isNew ? 'Новая оплата клиента' : `Оплата клиента`}</Typography.Title>
           </Col>
           <Col span={12} style={{ textAlign: 'right' }}>
+          {!isNew && <Button
+              style={{ marginRight: 20 }}
+              size='large'
+              htmlType='button'
+              danger={data.done}
+              onClick={() => {
+                if (!data.done) {
+                  setIsModal(true)
+                }
+                else {
+                  Modal.confirm({
+                    title: 'Отменить проведение счета?',
+                    icon: <ExclamationCircleFilled />,
+                    okText: 'Да',
+                    okType: 'danger',
+                    cancelText: 'Нет',
+                    onOk: async () => {
+                      await axios.postWithAuth('/query/update', { sql: sqlUpdate('dataset', { pole: JSON.stringify({ ...data.pole, done: false, done_date: '' }) }, `id=${id}`) })
+                      refetch()
+                    }
+                  })
+                }
+              }}
+            >
+              {data.done ? 'Отменить проведение' : 'Провести'}
+            </Button>}
             <Button
               style={{ marginRight: 20 }}
               type='primary'
@@ -149,7 +184,6 @@ export default function ClientPaymentsForm() {
                   type='select'
                   options={inclientOptions}
                   text={inclientMap[data.inclient]}
-                  disabled={!client}
                 />
               </Col>
               <Col span={4}>
@@ -252,5 +286,28 @@ export default function ClientPaymentsForm() {
           </Col>
         </Row>
       </Form>
+      {isModal &&
+        <Modal
+          title='Выберите дату проведения'
+          onOk={async () => {
+            await axios.postWithAuth('/query/update', {
+              sql: sqlUpdate('dataset', { pole: JSON.stringify({ ...data.pole, done: true, done_date: doneDate.format('YYYY-MM-DD') }) }, `id=${id}`)
+            })
+            refetch()
+            setIsModal(false)
+          }}
+          onCancel={() => setIsModal(false)}
+          okText='Провести'
+          open
+        >
+          <DatePicker
+            size='large'
+            value={doneDate}
+            onChange={val => setDoneDate(val)}
+            format='DD.MM.YYYY'
+            style={{ width: '100%' }}
+          />
+        </Modal>
+      }
     </>
 }

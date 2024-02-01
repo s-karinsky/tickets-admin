@@ -92,7 +92,7 @@ function App() {
           <Route path='/client-invoices' element={<ClientInvoices />} />
           <Route path='/client-invoices/:id' element={<ClientInvoicesForm />} />
           <Route path='/client-payments' element={<ClientPayments />} />
-          <Route path='/client-payments/:id' element={<ClientPaymentsForm />} />
+          <Route path='/client-payments/:id' element={<ClientPaymentsForm user={user.data} />} />
         </Route>
         <Route path='/login' element={<PageLogin />} />
       </Routes>
