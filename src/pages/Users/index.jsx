@@ -20,7 +20,7 @@ const LINK = {
   2: '/dictionary/employees/'
 }
 
-export const getColumns = ({ name, role, countries = {}, cities = {}, codeIndex = ['json', 'code'], refetch = () => {}, deleteUser }) => ([
+export const getColumns = ({ name, role, countries = {}, cities = {}, noButtons, codeIndex = ['json', 'code'], refetch = () => {}, deleteUser }) => ([
   {
     title: 'Роль',
     dataIndex: 'id_role',
@@ -86,7 +86,7 @@ export const getColumns = ({ name, role, countries = {}, cities = {}, codeIndex 
     dataIndex: 'note',
     render: note => <div style={{ maxWidth: 80, maxHeight: 55, overflow: 'hidden', textOverflow: 'ellipsis' }} title={note}>{note}</div>
   },
-  {
+  !noButtons && {
     title: '',
     width: 30,
     key: 'buttons',
@@ -120,7 +120,7 @@ export const getColumns = ({ name, role, countries = {}, cities = {}, codeIndex 
   }
 ].filter(Boolean))
 
-export default function PageUsers({ role }) {
+export default function PageUsers({ role, balance }) {
   const navigate = useNavigate()
   const users = useUsers({ id_role: role })
   const countries = useCountries()
@@ -130,7 +130,7 @@ export default function PageUsers({ role }) {
     <>
       <Row align='middle' style={{ padding: '0 40px' }}>
         <Col span={12}>
-          <Typography.Title style={{ fontWeight: 'bold' }}>{TITLE[role] || TITLE.default}</Typography.Title>
+          <Typography.Title style={{ fontWeight: 'bold' }}>{balance ? 'Баланс по клиентам' : (TITLE[role] || TITLE.default)}</Typography.Title>
         </Col>
         <Col span={12} style={{ textAlign: 'right' }}>
           <Button
@@ -143,14 +143,18 @@ export default function PageUsers({ role }) {
         </Col>
       </Row>
       <Table
-        columns={getColumns({ role, refetch: users.refetch, countries: countries.data, cities: cities.data }).slice(role ? 1 : 0)}
+        columns={getColumns({ role, refetch: users.refetch, countries: countries.data, cities: cities.data, noButtons: balance }).slice(role ? 1 : 0)}
         dataSource={users.data}
         loading={users.isLoading}
         rowKey={({ id_user }) => id_user}
         onRow={record => ({
           onClick: (e) => {
             if (e.detail === 2) {
-              navigate(`${LINK[record.id_role] || LINK.default}${record.id_user}`)
+              if (balance) {
+                navigate(`/client-balance/${record.id_user}`)
+              } else {
+                navigate(`${LINK[record.id_role] || LINK.default}${record.id_user}`)
+              }
             }
           }
         })}

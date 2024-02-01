@@ -10,6 +10,7 @@ import axios from '../../utils/axios'
 import { numberRange } from '../../utils/validationRules'
 import { VALIDATION_MESSAGES } from '../../consts'
 import { sqlInsert, sqlUpdate } from '../../utils/sql'
+import { parseJSON } from '../../utils/utils'
 
 export default function ClientInvoicesForm() {
   const [ isModal, setIsModal ] = useState()
@@ -58,7 +59,7 @@ export default function ClientInvoicesForm() {
           const { date, ...params } = values
           setIsUpdating(true)
           if (isNew) {
-            await axios.postWithAuth('/query/insert', { sql:
+            const created = await axios.postWithAuth('/query/insert', { sql:
               sqlInsert('dataset', {
                 status: 0,
                 tip: 'cl-invoice',
@@ -66,6 +67,14 @@ export default function ClientInvoicesForm() {
                 pole: JSON.stringify(params)
               })
             })
+            if (location.state?.type === 'payment') {
+              const id = location.state?.id
+              const resp = await axios.select('dataset', 'pole', { where: { id }})
+              const payment = (resp.data?.data || [])[0]?.pole
+              const pole = parseJSON(payment)
+              pole.invoice_number = params.number
+              await axios.postWithAuth('/query/update', { sql: `UPDATE dataset SET pole='${JSON.stringify(pole)}' WHERE id=${id}` })
+            }
           } else {
             await axios.postWithAuth('/query/update', { sql:
               sqlUpdate('dataset', {

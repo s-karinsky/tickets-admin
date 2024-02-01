@@ -22,6 +22,7 @@ import ClientInvoices from './pages/ClientInvoices'
 import ClientInvoicesForm from './pages/ClientInvoices/form'
 import ClientPayments from './pages/ClientPayments'
 import ClientPaymentsForm from './pages/ClientPayments/form'
+import ClientBalance from './pages/ClientBalance'
 import Layout from './components/Layout'
 import { useAuthorization } from './utils/api'
 import './App.css'
@@ -93,6 +94,7 @@ function App() {
           <Route path='/client-invoices/:id' element={<ClientInvoicesForm />} />
           <Route path='/client-payments' element={<ClientPayments />} />
           <Route path='/client-payments/:id' element={<ClientPaymentsForm user={user.data} />} />
+          <Route path='/client-balance' element={<ClientBalance />} />
         </Route>
         <Route path='/login' element={<PageLogin />} />
       </Routes>

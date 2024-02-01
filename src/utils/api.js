@@ -755,3 +755,19 @@ export const useClientPayments = (id, initial = {}, params) => useQuery(['client
     ...data[0]
   } : data
 }, params)
+
+export const useClientBalance = () => useQuery(['client-balance'], async () => {
+  const response = await axios.select('dataset', '*', { where: { status: 0, tip: 'cl-payment', '$.pole.done': true } })
+  const payments = (response.data?.data || [])
+    .map(item => ({ ...item, ...parseJSON(item.pole) }))
+    .sort((a, b) => dayjs(a.done_date).valueOf() - dayjs(b.done_date).valueOf())
+  const numbers = payments.map(item => `JSON_EXTRACT(pole, '$.number')=${item.invoice_number}`).join(' OR ')
+  const invoice = await axios.select('dataset', '*', { where: `status=0 AND tip='cl-invoice' AND (${numbers})` })
+  let list = (invoice.data?.data || []).map(item => ({ ...item, ...parseJSON(item.pole) }))
+  list = keyBy(list, 'number')
+
+  return payments.map(payment => ({
+    ...payment,
+    invoice: list[payment.invoice_number]
+  }))
+})

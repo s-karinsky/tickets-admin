@@ -69,7 +69,8 @@ const MENU_ITEMS = {
         null,
         [
           getItem(<Link to='/client-invoices'>Счета на оплату</Link>, 'client-invoices'),
-          getItem(<Link to='/client-payments'>Оплаты</Link>, 'client-payments')
+          getItem(<Link to='/client-payments'>Оплаты</Link>, 'client-payments'),
+          getItem(<Link to='/client-balance'>Баланс по клиентам</Link>, 'client-balance')
         ]
       )
     ]
