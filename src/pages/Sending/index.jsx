@@ -264,7 +264,7 @@ export default function Sending() {
               {isNew ? 'Новая отправка' : sendingTitle}
             </Title>
             <Link
-              onClick={() => navigate(`/sendings${data.to === '1' ? '?air' : ''}`)}
+              onClick={() => navigate(`/sendings${data?.to === '1' ? '?air' : ''}`)}
               style={{ color: 'blue' }}
             >
               Отправка товаров <span> </span>

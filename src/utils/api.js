@@ -214,7 +214,13 @@ export const getSendingById = (sendingId, { copy } = {}) => async () => {
 }
 
 export const deleteSendingById = async (sendingId) => {
-  const response = await axios.postWithAuth('/query/update', { sql: sqlUpdate('trip', { canceled: 1 }, `id_trip=${sendingId}`) })
+  const places = await axios.select('dataset', '*', { where: { id_ref: sendingId } })
+  const updateWhere = (places.data?.data || []).map(item => `id=${item.id} OR id_ref=${item.id}`).join(' OR ')
+  const sql = `UPDATE dataset SET status=1 WHERE ${updateWhere}`
+  const [ response ] = await Promise.all([
+    axios.postWithAuth('/query/update', { sql: sqlUpdate('trip', { canceled: 1 }, `id_trip=${sendingId}`) }),
+    axios.postWithAuth('/query/update', { sql })
+  ])
   return response
 }
 
