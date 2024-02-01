@@ -320,22 +320,28 @@ export default function DictionaryForm() {
                     <Row
                       gutter={16}
                     >
-                      <Col span={8}>
+                      <Col span={6}>
                         <FormField
                           label='Компания/ИП'
                           name={['company', 'name']}
                         />
                       </Col>
-                      <Col span={8}>
+                      <Col span={6}>
                         <FormField
                           label='Руководитель'
                           name={['company', 'head']}
                         />
                       </Col>
-                      <Col span={8}>
+                      <Col span={6}>
                         <FormField
                           label='ИНН/УНП'
                           name={['company', 'inn']}
+                        />
+                      </Col>
+                      <Col span={6}>
+                        <FormField
+                          label='ОГРН/ОГРНИП'
+                          name={['company', 'ogrn']}
                         />
                       </Col>
                       <Col span={8}>

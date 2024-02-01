@@ -38,7 +38,6 @@ const MENU_ITEMS = {
   ]),
   dictionary: getItem('Справочники', 'dictionaries', <FormOutlined />, [
     // getItem(<Link to='/dictionary/config'>Параметры учета</Link>, 'dictionary-config'),
-    getItem(<Link to='/dictionary/config'>Параметры учёта</Link>, 'dictionary-config'),
     getItem(<Link to='/dictionary/employees'>Сотрудники</Link>, 'dictionary-employees'),
     getItem(<Link to='/dictionary/clients'>Клиенты</Link>, 'dictionary-clients'),
     getItem(<Link to='/dictionary/drivers'>Перевозчики</Link>, 'dictionary-drivers'),
@@ -46,9 +45,10 @@ const MENU_ITEMS = {
     getItem(<Link to='/dictionary/currency'>Валюта и курс</Link>, 'dictionary-currency')
   ]),
   settings: getItem('Настройки', 'settings', <SettingOutlined />, [
-    getItem(<Link to='/templates'>Шаблоны</Link>, 'templates', <SnippetsOutlined />)
+    getItem(<Link to='/templates'>Шаблоны</Link>, 'templates'),
+    getItem(<Link to='/users'>Пользователи</Link>, 'users'),
+    getItem(<Link to='/dictionary/config'>Параметры учёта</Link>, 'dictionary-config'),
   ]),
-  users: getItem(<Link to='/users'>Пользователи</Link>, 'users', <UserOutlined />),
   sendings: getItem(
     'Отправки',
     'sendings',
@@ -84,7 +84,6 @@ export default function PageLayout({ user }) {
     if (user.u_role === '4') {
       return [
         MENU_ITEMS.settings,
-        MENU_ITEMS.users,
         MENU_ITEMS.dictionary,
         MENU_ITEMS.sendings,
         MENU_ITEMS.services,

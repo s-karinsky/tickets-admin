@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { Form, Button, Col, Row, Divider, Typography, Table, message } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import CreateCityModal from '../../components/CreateCityModal'
@@ -7,8 +7,8 @@ import FormField from '../../components/FormField'
 import { getColumns } from '../Users'
 import axios from '../../utils/axios'
 import { useCountries, useCities, useUsers, createUser, updateUserById, useDictionary } from '../../utils/api'
-import { emailRule } from '../../utils/validationRules'
-import { VALIDATION_MESSAGES } from '../../consts'
+import { emailRule, numberRange } from '../../utils/validationRules'
+import { VALIDATION_MESSAGES, USER_ROLES_OPTIONS, USER_ROLES } from '../../consts'
 
 const EMPTY_OBJECT = {}
 
@@ -30,6 +30,7 @@ export default function UserForm({ name, userId }) {
   const [ form ] = Form.useForm()
   const { id = userId } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const [ isMakingPass, setIsMakingPass ] = useState(false)
   const [ isAddCity, setIsAddCity ] = useState(false)
   const [ country, setCountry ] = useState()
@@ -46,6 +47,15 @@ export default function UserForm({ name, userId }) {
     if (profile.isLoading) return
     setCountry(profile.json?.country)
   }, [profile])
+
+  const withRole = location.state?.withRole
+  const role = Form.useWatch('id_role', form)
+
+  useEffect(() => {
+    if (role === '1') navigate('/dictionary/clients/create', { state: { withRole: true }})
+    if (role === '2') navigate('/dictionary/employees/create', { state: { withRole: true } })
+    if (role === '3') navigate('/dictionary/inclient/create', { state: { withRole: true } })
+  }, [role])
 
   const isNew = id === 'create'
 
@@ -148,6 +158,15 @@ export default function UserForm({ name, userId }) {
               label='Код'
               rules={[{ required: true }]}
             />
+          </Col>
+          <Col span={5}>
+            {withRole && isNew && <FormField
+              type='select'
+              name='id_role'
+              label='Роль'
+              options={USER_ROLES_OPTIONS.map(value => ({ value, label: USER_ROLES[value] }))}
+              rules={[{ required: true }]}
+            />}
           </Col>
         </Row>
         <Row
@@ -254,22 +273,28 @@ export default function UserForm({ name, userId }) {
             <Row
               gutter={16}
             >
-              <Col span={8}>
+              <Col span={6}>
                 <FormField
                   label='Компания/ИП'
                   name={['json', 'company', 'name']}
                 />
               </Col>
-              <Col span={8}>
+              <Col span={6}>
                 <FormField
                   label='Руководитель'
                   name={['json', 'company', 'head']}
                 />
               </Col>
-              <Col span={8}>
+              <Col span={6}>
                 <FormField
                   label='ИНН/УНП'
                   name={['json', 'company', 'inn']}
+                />
+              </Col>
+              <Col span={6}>
+                <FormField
+                  label='ОГРН/ОГРНИП'
+                  name={['json', 'company', 'ogrn']}
                 />
               </Col>
               <Col span={8}>

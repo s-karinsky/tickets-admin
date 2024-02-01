@@ -33,6 +33,13 @@ export default function PageUser() {
 
   const isNew = id === 'create'
   const isEdit = isNew || searchParams.get('edit') !== null
+  const role = Form.useWatch('id_role', form)
+
+  useEffect(() => {
+    if (role === '1') navigate('/dictionary/clients/create', { state: { withRole: true }})
+    if (role === '2') navigate('/dictionary/employees/create', { state: { withRole: true } })
+    if (role === '3') navigate('/dictionary/inclient/create', { state: { withRole: true } })
+  }, [role])
 
   if (users.isLoading) return null
 

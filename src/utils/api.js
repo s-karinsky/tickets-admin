@@ -379,6 +379,9 @@ export const useUsers = (userId, where, params) => useQuery(['users', userId, wh
     } else {
       user.json = parseJSON(user.json)
     }
+    if (user.phone && !user.phone[0] !== '+') {
+      user.phone = `+${user.phone}`
+    }
     return user
   })
   return userId ? users[0] : users
@@ -441,7 +444,7 @@ export const useCities = (country) => useQuery(['cities', country], async () => 
 
 export const useDictionary = (name, where, params) => useQuery(['dictionary', name, where], async () => {
   if (name === 'currency') {
-    const response = await axios.select('currency', 'iso4217_code_a as id, name_ru as name', { orderBy: 'iso4217_code_a' })
+    const response = await axios.select('currency', 'iso4217_code_a as id, name_ru as name', { where: { active: 1 }, orderBy: 'iso4217_code_a' })
     return { list: response.data?.data || [] }
   }
 

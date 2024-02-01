@@ -194,6 +194,14 @@ export default function ServiceList() {
           <Typography.Title style={{ fontWeight: 'bold' }}>{SERVICE_NAME[serviceName]}</Typography.Title>
         </Col>
         <Col span={12} style={{ textAlign: 'right', paddingBottom: 20 }}>
+          {serviceName === 'fullfillment' && <Button
+            type='primary'
+            size='large'
+            onClick={() => navigate(`/services/${serviceName}/create`)}
+            style={{ marginRight: 40 }}
+          >
+            Создать услугу
+          </Button>}
           <Switch
             style={{
               transform: 'scale(140%)',
@@ -203,13 +211,6 @@ export default function ServiceList() {
             checked={isActive}
             onChange={setIsActive}
           />
-          {/* <Button
-            type='primary'
-            size='large'
-            onClick={() => navigate(`/services/${serviceName}/create`)}
-          >
-            Создать услугу
-          </Button> */}
         </Col>
       </Row>
       <Table
