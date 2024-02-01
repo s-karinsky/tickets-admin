@@ -97,7 +97,7 @@ const getColumns = (name, { onStatusClick, clients = {} }) => {
     {
       title: 'Вес брутто',
       dataIndex: 'placeData',
-      render: data => data.reduce((sum, item) => sum + (item?.pole?.gross_weight || 0), 0),
+      render: data => (data.reduce((sum, item) => sum + (item?.pole?.gross_weight || 0), 0)).toFixed(3),
       sorter: (a, b) => a.placeData.reduce((sum, item) => sum + (item?.pole?.gross_weight || 0), 0) - b.placeData.reduce((sum, item) => sum + (item?.pole?.gross_weight || 0), 0),
       ...getColumnSearchProps(item => item.placeData.reduce((sum, item) => sum + (item?.pole?.gross_weight || 0), 0), { type: 'number' })
     },
@@ -159,6 +159,14 @@ export default function ServiceList() {
         ...item,
         buttons: (
           <div style={{ display: 'flex', gap: 10 }}>
+            {['delivery', 'fullfillment', 'storage'].includes(serviceName) && <Button
+              type='primary'
+              size='small'
+              style={{ marginTop: 5 }}
+              onClick={() => navigate('/client-invoices/create', { state: { type: serviceName, id: item.id } })}
+            >
+              Создать счет
+            </Button>}
             {SERVICE_STATUS[serviceName]?.indexOf(item.status) === 0 && <BsTrash
               style={{ marginLeft: 30, cursor: 'pointer' }} 
               size={17}

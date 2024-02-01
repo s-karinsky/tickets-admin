@@ -581,7 +581,7 @@ export const useCurrencyRates = currency => useQuery(['currency-rate', currency]
   return response.data?.data
 })
 
-export const useClientInvoices = (id, initialValues = {}, params) => useQuery(['client-invoices', id], async () => {
+export const useClientInvoices = (id, initial = {}, params) => useQuery(['client-invoices', id], async () => {
   const rate = await getLastCurrencyRate('USD', dayjs().format('YYYY-MM-DD'))
   if (id === 'create') {
     const response = await axios.select(
@@ -598,16 +598,66 @@ export const useClientInvoices = (id, initialValues = {}, params) => useQuery(['
     const data = response.data?.data || []
     const number = parseInt(_get(data, [0, 'max'])) || 0
 
-    // if (initialValues.sending) {
-    //   const response = await axios.select('trip', '*', { where: { id_trip: initialValues.sending } })
-    //   const item = (response.data?.data || [])[0]
-    // }
+    const { type, id } = initial
+    let rest = {}
+    if (type && id) {
+      if (type === 'sending') {
+        const [ sending, places ] = await Promise.all([
+          axios.select('trip', '*', { where: { id_trip: id }}),
+          axios.select('dataset', '*', { where: { id_ref: id, tip: 'place' } })
+        ])
+        let sData = (sending.data?.data || [])[0]
+        sData = {
+          ...sData,
+          ...parseJSON(sData.json)
+        }
+        let weight = 0
+        rest.name = `Отправки партия № ${sData.from} от ${dayjs(sData.create_datetime).format('DD.MM.YYYY')} Места:`
+        const list = (places.data?.data || [])
+        list.map(place => ({ ...place, ...parseJSON(place.pole) })).forEach(place => {
+          weight += Number(place.gross_weight)
+          rest.name += ` ${place.place}`
+        })
+        rest.name += ` Вес брутто: ${weight.toFixed(3)} кг.`
+      }
+      if (['delivery', 'fullfillment', 'storage'].includes(type)) {
+        const delivery = await axios.select('dataset', '*', { where: { id } })
+        let sData = (delivery.data?.data || [])[0]
+        sData = {
+          ...sData,
+          ...parseJSON(sData.pole)
+        }
+        const where = (sData.places || []).map(item => `id=${item}`).join(' OR ')
+        const places = await axios.select('dataset', '*', { where })
+        let weight = 0
+        console.log(sData)
+        if (type === 'delivery') {
+          rest.name = `Доставка № ${sData.number} от ${dayjs(sData.date).format('DD.MM.YYYY')} до ${sData.delivery_type} Адрес: ${sData.delivery_type === 'Терминал' ? sData.terminal_address : sData.client_address} Места: `
+        } else if (type === 'fullfillment') {
+          const products = await axios.select('dataset', 'count(*) as count', { where: `tip='product' AND (${(sData.places || []).map(item => `id_ref=${item}`).join(' OR ')})` })
+          const productsCount = (products.data?.data || [])[0]?.count
+          rest.name = `Фулфилмент № ${sData.number} от ${dayjs(sData.date).format('DD.MM.YYYY')} для площадки ${sData.marketplace} Количество единиц: ${productsCount} Места: `
+        } else if (type === 'storage') {
+          rest.name = `Хранение № ${sData.number} от ${dayjs(sData.date).format('DD.MM.YYYY')} с ${dayjs(sData.start_date).format('DD.MM.YYYY')} по: ${dayjs(sData.end_date).format('DD.MM.YYYY')} Количество дней: ${sData.storage_days || ''} Места: `
+        }
+        const list = (places.data?.data || [])
+        list.map(place => ({ ...place, ...parseJSON(place.pole) })).forEach(place => {
+          weight += (Number(place.gross_weight) || 0)
+          rest.name += ` ${place.place}`
+        })
+        rest.name += ` Вес брутто: ${weight.toFixed(3)} кг.`
+        rest.client = sData.client
+        rest.pay_type = sData.pay_type
+        rest.pay_usd = sData.price_usd
+        rest.pay_rub = sData.price_rub
+      }
+    }
 
     return {
       number: number + 1,
       date: dayjs(),
       rate,
-      ...initialValues
+      ...rest
     }
   }
   const response = await axios.select('dataset', '*', {

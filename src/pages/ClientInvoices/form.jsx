@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react'
 import { Row, Col, Typography, Form, Button, DatePicker, Modal } from 'antd'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { LoadingOutlined, ExclamationCircleFilled } from '@ant-design/icons'
 import { get as _get } from 'lodash'
 import FormField from '../../components/FormField'
@@ -17,8 +17,9 @@ export default function ClientInvoicesForm() {
   const [ form ] = Form.useForm()
   const { id } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const isNew = id === 'create'
-  const { data = {}, isLoading, isRefetching, refetch } = useClientInvoices(id, {}, { staleTime: 0, refetchOnWindowFocus: false })
+  const { data = {}, isLoading, isRefetching, refetch } = useClientInvoices(id, location.state || {}, { staleTime: 0, refetchOnWindowFocus: false })
   const clients = useUsersWithRole(1)
 
   const [ clientsOptions, clientsMap ] = useMemo(() => {
@@ -150,6 +151,7 @@ export default function ClientInvoicesForm() {
                   type='select'
                   options={clientsOptions}
                   text={clientsMap[data.client]}
+                  disabled={!!data.client}
                 />
               </Col>
               <Col span={12}>
@@ -228,6 +230,7 @@ export default function ClientInvoicesForm() {
                     return (
                       <FormField
                         label='К оплате ($)'
+                        labelType='calc'
                         addonAfter='$'
                         name='total_usd'
                         type='number'
@@ -246,6 +249,7 @@ export default function ClientInvoicesForm() {
                     return (
                       <FormField
                         label='К оплате (₽)'
+                        labelType='calc'
                         addonAfter='₽'
                         name='total_rub'
                         type='number'

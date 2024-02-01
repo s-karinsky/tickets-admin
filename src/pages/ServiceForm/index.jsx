@@ -681,6 +681,7 @@ export default function ServiceForm() {
               <FormField
                 width='100%'
                 type='number'
+                name={['pole', 'storage_days']}
                 label='Дней хранения'
                 disabled={isEdit}
                 isEdit={isEdit}
