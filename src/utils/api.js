@@ -333,7 +333,7 @@ export const getDatasetsById = (ids, withChildren) => async () => {
 }
 
 export const deletePlaceById = async (placeId) => {
-  const response = await axios.postWithAuth('/query/update', { sql: sqlUpdate('dataset', { status: 1 }, `id=${placeId}`) })
+  const response = await axios.postWithAuth('/query/update', { sql: sqlUpdate('dataset', { status: 1 }, `id=${placeId} OR id_ref=${placeId}`) })
   return response
 }
 
