@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { Form, Button, Col, Row, Divider, Typography, Table, message } from 'antd'
-import { PlusOutlined } from '@ant-design/icons'
+import { Form, Button, Col, Row, Divider, Typography, Table, Modal, message } from 'antd'
+import { BsTrash } from 'react-icons/bs'
+import { PlusOutlined, ExclamationCircleFilled } from '@ant-design/icons'
 import CreateCityModal from '../../components/CreateCityModal'
 import FormField from '../../components/FormField'
 import { getColumns } from '../Users'
@@ -382,7 +383,33 @@ export default function UserForm({ name, userId }) {
         </Row>
         <Table
           size='small'
-          columns={getColumns({ name, codeIndex: 'value' }).slice(1, 5)}
+          columns={getColumns({ name, codeIndex: 'value' }).slice(1, 5).concat([
+            {
+              title: '',
+              dataIndex: 'buttons',
+              render: (_, item) => (
+                <BsTrash
+                  style={{ marginLeft: 30, cursor: 'pointer' }} 
+                  size={17}
+                  color='red'
+                  title='Удалить запись'
+                  onClick={() => {
+                    Modal.confirm({
+                      title: 'Вы действительно хотите удалить этого внутреннего клиента?',
+                      icon: <ExclamationCircleFilled />,
+                      okText: 'Да',
+                      okType: 'danger',
+                      cancelText: 'Нет',
+                      onOk: async () => {
+                        await axios.postWithAuth('/query/update', { sql: `UPDATE sprset SET status=1 WHERE id=${item.id}` })
+                        inner.refetch()
+                      }
+                    })
+                  }}
+                />
+              )
+            }
+          ])}
           isLoading={inner.isLoading}
           dataSource={inner.data?.list}
           onRow={(record, index) => ({
