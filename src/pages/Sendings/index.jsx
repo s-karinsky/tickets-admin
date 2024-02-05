@@ -45,16 +45,18 @@ export default function Sendings() {
         'delivery-date': <DateTableCell date={new Date(item.delivery)} />,
         buttons: (
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <Button
+            {item.status === 2 && <Button
               type='primary'
               size='small'
               style={{ marginTop: 5 }}
+              disabled
+              title='Функция в разработке'
               onClick={() => navigate('/client-invoices/create', { state: { type: 'sending', id: item.id } })}
             >
               Создать счет
-            </Button>
+            </Button>}
             <form target='_blank' method='POST' action={`${API_URL}/script/template/1`}>
-              <input type='hidden' value={item.id} name='t_id' />
+              <input type='hidden' value={`{"t_id": ${item.id}, "cf": "vigruzka", "da": 0 }`} name='s_t_data' />
               <input type='hidden' value={cookies.get('token')} name='token' />
               <input type='hidden' value={cookies.get('u_hash')} name='u_hash' />
               <button type='submit' style={{ background: 'none', border: 0, outline: 'none', padding: 0, cursor: 'pointer' }}>
