@@ -94,6 +94,7 @@ export default function ClientInvoices() {
         </Col>
       </Row>
       <Table
+        size='small'
         columns={getColumns(refetch, navigate)}
         dataSource={data}
         isLoading={isLoading}

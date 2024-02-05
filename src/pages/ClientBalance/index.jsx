@@ -137,6 +137,7 @@ export default function ClientBalance() {
         </Col>
       </Row>
       <Table
+        size='small'
         columns={columns}
         dataSource={data}
         isLoading={isLoading}

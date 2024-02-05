@@ -381,6 +381,7 @@ export default function UserForm({ name, userId }) {
           </Col>
         </Row>
         <Table
+          size='small'
           columns={getColumns({ name, codeIndex: 'value' }).slice(1, 5)}
           isLoading={inner.isLoading}
           dataSource={inner.data?.list}

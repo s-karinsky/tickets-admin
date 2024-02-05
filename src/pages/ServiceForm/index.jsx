@@ -215,7 +215,7 @@ export default function ServiceForm() {
       },
     ]
 
-    return <Table columns={childColumns} dataSource={item.child} pagination={false} />
+    return <Table size='small' columns={childColumns} dataSource={item.child} pagination={false} />
   }
 
   const columns = [

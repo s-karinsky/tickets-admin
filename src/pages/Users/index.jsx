@@ -143,6 +143,7 @@ export default function PageUsers({ role, balance }) {
         </Col>
       </Row>
       <Table
+        size='small'
         columns={getColumns({ role, refetch: users.refetch, countries: countries.data, cities: cities.data, noButtons: balance }).slice(role ? 1 : 0)}
         dataSource={users.data}
         loading={users.isLoading}

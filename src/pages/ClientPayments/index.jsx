@@ -99,6 +99,7 @@ export default function ClientPayments() {
         </Col>
       </Row>
       <Table
+        size='small'
         columns={getColumns(refetch, navigate)}
         dataSource={data}
         isLoading={isLoading}

@@ -164,6 +164,7 @@ export default function Dictionary() {
         </Col>
       </Row>
       <Table
+        size='small'
         columns={columns}
         dataSource={data.list || []}
         isLoading={isLoading}

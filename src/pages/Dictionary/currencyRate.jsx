@@ -46,6 +46,7 @@ export default function CurrencyRate() {
         </Col>
       </Row>
       <Table
+        size='small'
         columns={columns}
         dataSource={data}
         isLoading={isLoading}

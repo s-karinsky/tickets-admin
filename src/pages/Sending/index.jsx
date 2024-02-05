@@ -666,6 +666,7 @@ export default function Sending() {
               </Row>
             </div>
             <Table
+              size='small'
               columns={columns}
               isLoading={places.isLoading}
               dataSource={placesData}
@@ -680,7 +681,6 @@ export default function Sending() {
                   }
                 },
               })}
-              size='small'
               style={{ overflow: 'scroll' }}
               rowSelection={{
                 type: Checkbox,

@@ -78,6 +78,7 @@ export default function Templates() {
         </Col>
       </Row>
       <Table
+        size='small'
         columns={columns}
         dataSource={data}
         isLoading={isLoading}

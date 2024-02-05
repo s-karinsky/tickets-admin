@@ -222,6 +222,7 @@ export default function ServiceList() {
         </Col>
       </Row>
       <Table
+        size='small'
         columns={columns}
         isLoading={isLoading}
         dataSource={serviceData}
