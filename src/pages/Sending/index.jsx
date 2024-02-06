@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
 import { useNavigate, useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { Button, Row, Table, Typography, Form, Modal, Checkbox, Dropdown, message } from 'antd'
 import {
@@ -36,6 +36,7 @@ export default function Sending() {
   const { sendingId } = useParams()
   const [ activeRow, setActiveRow ] = useState()
   const [ selectedRows, setSelectedRows ] = useState([])
+  const [ selectedGroups, setSelectedGroups ] = useState([])
   const [ service, setService ] = useState({})
   const [ messageApi, contextHolder ] = message.useMessage()
   const isAir = searchParams.get('air') !== null
@@ -71,6 +72,43 @@ export default function Sending() {
     const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
     return [ options, map ]
   }, [clients.data])
+
+  const groupPlaces = useMemo(() => {
+    if (!places.data || !Array.isArray(places.data)) return []
+    return places.data.reduce((acc, place) => {
+      const index = acc.findIndex(item => item.tarif === place.tarif && item.client === place.client)
+      if (index === -1) {
+        acc.push({ id: place.id, tarif: place.tarif, client: place.client, count: 1 })
+      } else {
+        acc[index].count++
+      }
+      return acc
+    }, [])
+  }, [places.data])
+
+  const groupColumns = useMemo(() => [
+    {
+      title: 'Клиент',
+      dataIndex: 'client',
+      key: 'client',
+      render: id => clientsMap[id],
+      sorter: (a, b) => (clientsMap[a.client] || '').localeCompare(clientsMap[b.client] || ''),
+      ...getColumnSearchProps('client', { options: clientsOptions })
+    },
+    {
+      title: 'Тариф',
+      dataIndex: 'tarif',
+      key: 'tarif',
+      render: item => tarifs.data?.map[item]?.label,
+      sorter: (a, b) => (a.tarif || '').localeCompare(b.tarif || ''),
+      ...getColumnSearchProps('tarif', { options: tarifs.data?.label })
+    },
+    {
+      title: 'Количество мест',
+      dataIndex: 'count',
+      sorter: (a, b) => a.count - b.count
+    }
+  ], [clientsMap, clientsOptions])
 
   const placesData = (places.data || [])
     .map((item) => {
@@ -111,6 +149,16 @@ export default function Sending() {
       }
     })
 
+  useEffect(() => {
+    let newSelectedRows = []
+    selectedGroups.forEach(group => {
+      const place = placesData.find(item => item.id === group)
+      const items = placesData.filter(item => item.client === place.client && item.tarif === place.tarif).map(item => item.id)
+      newSelectedRows = newSelectedRows.concat(items)
+    })
+    setSelectedRows(newSelectedRows)
+  }, [selectedGroups])
+
   const handleAddService = type => setService({ type, state: { selectedRows } })
 
   const createServiceDisabled = useMemo(() => {
@@ -125,7 +173,7 @@ export default function Sending() {
     return selectedPlaces.filter(item => item.service_id).map(item => item.service_id)
   }, [selectedRows, placesData])
 
-  const columns = [
+  const columns = useMemo(() => [
     {
       title: 'Место',
       dataIndex: 'place',
@@ -218,7 +266,7 @@ export default function Sending() {
       dataIndex: 'buttons',
       key: 'buttons',
     },
-  ]
+  ], [clientsMap, clientsOptions, tarifs.data])
   const sendingTitle = `Отправка №${data?.from}`
 
   const handleSubmit = useCallback(async (values) => {
@@ -606,6 +654,14 @@ export default function Sending() {
                 >
                   Создать
                 </Button>}
+                {data?.json?.status === 2 && <Button
+                  type='primary'
+                  size='large'
+                  onClick={() => navigate('/client-invoices/create', { state: { type: 'sending', id: sendingId, group: selectedGroups[0] } })}
+                  disabled={selectedGroups.length !== 1}
+                >
+                  Создать счет
+                </Button>}
                 {data?.json?.status === 2 && <Dropdown
                   menu={{ items: [
                     {
@@ -685,26 +741,41 @@ export default function Sending() {
             </div>
             <Table
               size='small'
-              columns={columns}
+              columns={groupColumns}
+              dataSource={groupPlaces}
               isLoading={places.isLoading}
-              dataSource={placesData}
-              rowClassName={(r, index) => index === activeRow ? 'active-row' : ''}
               rowKey={({ id }) => id}
-              onRow={(record, index) => ({
-                onClick: (e) => {
-                  if (e.detail === 2) {
-                    navigate(`${location.pathname}/${record.id}`)
-                  } else {
-                    setActiveRow(index)
-                  }
-                },
-              })}
-              style={{ overflow: 'scroll' }}
               rowSelection={{
                 type: Checkbox,
-                onChange: selectedKeys => setSelectedRows(selectedKeys)
+                onChange: selectedKeys => setSelectedGroups(selectedKeys)
               }}
-              pagination={getPaginationSettings('sending')}
+              expandable={{
+                expandedRowRender: (record) => {
+                  return <Table
+                    size='small'
+                    columns={columns}
+                    isLoading={places.isLoading}
+                    dataSource={placesData.filter(item => item.client === record.client && item.tarif === record.tarif)}
+                    rowClassName={(r, index) => index === activeRow ? 'active-row' : ''}
+                    rowKey={({ id }) => id}
+                    onRow={(record, index) => ({
+                      onClick: (e) => {
+                        if (e.detail === 2) {
+                          navigate(`${location.pathname}/${record.id}`)
+                        } else {
+                          setActiveRow(index)
+                        }
+                      },
+                    })}
+                    rowSelection={{
+                      selectedRowKeys: selectedRows,
+                      type: Checkbox,
+                      onChange: selectedKeys => setSelectedRows(selectedKeys)
+                    }}
+                    pagination={false}
+                  />
+                }
+              }}
             />
           </>
         }

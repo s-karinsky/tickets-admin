@@ -598,7 +598,7 @@ export const useClientInvoices = (id, initial = {}, params) => useQuery(['client
     const data = response.data?.data || []
     const number = parseInt(_get(data, [0, 'max'])) || 0
 
-    const { type, id } = initial
+    const { type, id, group } = initial
     let rest = {}
     if (type && id) {
       if (type === 'sending') {
@@ -613,11 +613,17 @@ export const useClientInvoices = (id, initial = {}, params) => useQuery(['client
         }
         let weight = 0
         rest.name = `Отправки партия № ${sData.from} от ${dayjs(sData.create_datetime).format('DD.MM.YYYY')} Места:`
-        const list = (places.data?.data || [])
-        list.map(place => ({ ...place, ...parseJSON(place.pole) })).forEach(place => {
+        let list = (places.data?.data || []).map(place => ({ ...place, ...parseJSON(place.pole) }))
+        const placeLikeInGroup = list.find(item => item.id === group)
+        if (placeLikeInGroup) {
+          list = list.filter(item => item.client === placeLikeInGroup.client && item.tarif === placeLikeInGroup.tarif)
+        }
+        list.forEach(place => {
           weight += Number(place.gross_weight)
           rest.name += ` ${place.place}`
         })
+        rest.client = placeLikeInGroup?.client
+        rest.inclient = placeLikeInGroup?.inclient
         rest.name += ` Вес брутто: ${weight.toFixed(3)} кг.`
       }
       if (['delivery', 'fullfillment', 'storage'].includes(type)) {
@@ -639,13 +645,20 @@ export const useClientInvoices = (id, initial = {}, params) => useQuery(['client
         } else if (type === 'storage') {
           rest.name = `Хранение № ${sData.number} от ${dayjs(sData.date).format('DD.MM.YYYY')} с ${dayjs(sData.start_date).format('DD.MM.YYYY')} по: ${dayjs(sData.end_date).format('DD.MM.YYYY')} Количество дней: ${sData.storage_days || ''} Места: `
         }
-        const list = (places.data?.data || [])
+        let list = (places.data?.data || [])
+        const placeLikeInGroup = list.find(item => item.id === group)
+        if (placeLikeInGroup) {
+          list = list.filter(item => item.client === placeLikeInGroup.client && item.tarif === placeLikeInGroup.tarif)
+        }
+
         list.map(place => ({ ...place, ...parseJSON(place.pole) })).forEach(place => {
           weight += (Number(place.gross_weight) || 0)
           rest.name += ` ${place.place}`
         })
         rest.name += ` Вес брутто: ${weight.toFixed(3)} кг.`
-        rest.client = sData.client
+
+        rest.client = placeLikeInGroup?.client
+        rest.inclient = placeLikeInGroup?.inclient
         rest.pay_type = sData.pay_type
         rest.pay_usd = sData.price_usd
         rest.pay_rub = sData.price_rub
