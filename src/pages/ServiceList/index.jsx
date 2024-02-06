@@ -167,7 +167,7 @@ export default function ServiceList() {
             >
               Создать счет
             </Button>}
-            {SERVICE_STATUS[serviceName]?.indexOf(item.status) === 0 && <BsTrash
+            {(SERVICE_STATUS[serviceName]?.indexOf(item.status) === 0 || !item.status) && <BsTrash
               style={{ marginLeft: 30, cursor: 'pointer' }} 
               size={17}
               color='red'

@@ -14,6 +14,7 @@ import { useQueries } from 'react-query'
 import { uniqBy, get as _get } from 'lodash'
 import { BsTrash } from 'react-icons/bs'
 import { BiEdit } from 'react-icons/bi'
+import axios from '../../utils/axios'
 import { PropertyGap } from '../Sendings'
 import FormField from '../../components/FormField'
 import ServiceModal from '../../components/ServiceModal'
@@ -117,6 +118,11 @@ export default function Sending() {
     const withActiveService = selectedPlaces.filter(item => !!item.service_id).length > 0
     const sameClient = uniqBy(selectedPlaces, 'client')
     return withActiveService || sameClient.length > 1
+  }, [selectedRows, placesData])
+
+  const cancelServiceSelected = useMemo(() => {
+    const selectedPlaces = selectedRows.map(rowId => placesData.find(item => item.id === rowId))
+    return selectedPlaces.filter(item => item.service_id).map(item => item.service_id)
   }, [selectedRows, placesData])
 
   const columns = [
@@ -655,14 +661,26 @@ export default function Sending() {
                     Создать услугу
                   </Button>
                 </Dropdown>}
-                <Button
+                {data?.json?.status === 2 && <Button
                   type='primary'
                   size='large'
-                  title='Функция в разработке'
-                  disabled
+                  onClick={() => {
+                    Modal.confirm({
+                      title: 'Вы действительно хотите услуги выбранных мест?',
+                      icon: <ExclamationCircleFilled />,
+                      okText: 'Да',
+                      okType: 'danger',
+                      cancelText: 'Нет',
+                      onOk: async () => {
+                        await axios.postWithAuth('/query/update', { sql: `UPDATE dataset SET status=1 WHERE ${cancelServiceSelected.map(id => `id=${id}`).join(' OR ')}` })
+                        places.refetch()
+                      }
+                    })
+                  }}
+                  disabled={selectedRows.length === 0 || cancelServiceSelected.length === 0}
                 >
                   Отменить услугу
-                </Button>
+                </Button>}
               </Row>
             </div>
             <Table

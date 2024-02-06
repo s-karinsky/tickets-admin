@@ -50,6 +50,16 @@ export default function Place({ user }) {
   const clients = useUsersWithRole(1)
   const tarifs = useDictionary('rates')
 
+  const rate = Form.useWatch('tarif', form)
+  
+  useEffect(() => {
+    const item = (tarifs.data?.list || []).find(item => item.value === rate)
+    if (!item) return
+
+    form.setFieldValue('pay_type', item.pay_type)
+    form.setFieldValue('pay_kg', item.price_kg)
+  }, [rate, tarifs.data?.list])
+
   const [ clientsOptions, clientsMap ] = useMemo(() => {
     if (!Array.isArray(clients.data)) return [[], {}]
     const options = clients.data.map(({ json = {}, ...item }) => ({
@@ -524,6 +534,7 @@ export default function Place({ user }) {
                   text={(tarifs.data?.map || {})[initialPlace.tarif]?.label}
                   isEdit={isEditPage}
                   rules={required()}
+                  showSearch
                 />
                 <FormField
                   type='select'

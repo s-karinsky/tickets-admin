@@ -5,7 +5,7 @@ import dayjs from 'dayjs'
 import { LoadingOutlined, ExclamationCircleFilled } from '@ant-design/icons'
 import { get as _get } from 'lodash'
 import FormField from '../../components/FormField'
-import { useClientInvoices, useUsersWithRole } from '../../utils/api'
+import { useClientInvoices, useUsersWithRole, useDictionary } from '../../utils/api'
 import axios from '../../utils/axios'
 import { numberRange } from '../../utils/validationRules'
 import { VALIDATION_MESSAGES } from '../../consts'
@@ -23,6 +23,8 @@ export default function ClientInvoicesForm() {
   const isNew = id === 'create'
   const { data = {}, isLoading, isRefetching, refetch } = useClientInvoices(id, location.state || {}, { staleTime: 0, refetchOnWindowFocus: false })
   const clients = useUsersWithRole(1)
+  const client = Form.useWatch('client', form)
+  const inclient = useDictionary('inclient', { id_ref: client }, { enabled: !!client })
 
   const [ clientsOptions, clientsMap ] = useMemo(() => {
     if (!Array.isArray(clients.data)) return [[], {}]
@@ -33,11 +35,22 @@ export default function ClientInvoicesForm() {
     const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
     return [ options, map ]
   }, [clients.data])
+  
+  const [ inclientOptions, inclientMap ] = useMemo(() => {
+    if (!Array.isArray(inclient.data?.list)) return [[], {}]
+    const options = inclient.data.list.map((item) => ({
+      value: item.id,
+      label: [item.family, item.name, item.middle].filter(Boolean).join(' ')
+    }))
+    const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
+    return [ options, map ]
+  }, [inclient.data])
 
   const discountRub = Form.useWatch('discount_rub', form)
   const discountUsd = Form.useWatch('discount_usd', form)
   const payUsd = Form.useWatch('pay_usd', form)
   const rate = Form.useWatch('rate', form)
+  const payType = Form.useWatch('pay_type', form)
 
   useEffect(() => {
     if (!Number(payUsd) || !Number(rate)) return
@@ -58,6 +71,8 @@ export default function ClientInvoicesForm() {
         onFinish={async (values) => {
           const { date, ...params } = values
           setIsUpdating(true)
+          params.total_usd = params.pay_usd - params.discount_usd
+          params.total_rub = params.pay_rub - params.discount_rub
           if (isNew) {
             const created = await axios.postWithAuth('/query/insert', { sql:
               sqlInsert('dataset', {
@@ -165,9 +180,21 @@ export default function ClientInvoicesForm() {
                   options={clientsOptions}
                   text={clientsMap[data.client]}
                   disabled={!!data.client}
+                  showSearch
                 />
               </Col>
-              <Col span={12}>
+              <Col span={4}>
+                <FormField
+                  label='Внутренний клиент'
+                  name='inclient'
+                  type='select'
+                  options={inclientOptions}
+                  text={inclientMap[data.client]}
+                  disabled={!client}
+                  showSearch
+                />
+              </Col>
+              <Col span={8}>
                 <FormField
                   label='Наименование'
                   name='name'
@@ -238,14 +265,13 @@ export default function ClientInvoicesForm() {
               <Col span={4}>
                 <Form.Item dependencies={['pay_usd', 'discount_usd']}>
                   {({ getFieldValue }) => {
-                    const pay = getFieldValue('pay_usd')
-                    const discount = getFieldValue('discount_usd')
+                    const pay = getFieldValue('pay_usd') || 0
+                    const discount = getFieldValue('discount_usd') || 0
                     return (
                       <FormField
                         label='К оплате ($)'
                         labelType='calc'
                         addonAfter='$'
-                        name='total_usd'
                         type='number'
                         value={pay - discount}
                         disabled
@@ -255,16 +281,15 @@ export default function ClientInvoicesForm() {
                 </Form.Item>
               </Col>
               <Col span={4}>
-                <Form.Item dependencies={['pay_rub', 'discount_rub']}>
+                <Form.Item dependencies={['pay_rub', 'discount_rub']} shouldUpdate>
                   {({ getFieldValue }) => {
-                    const pay = getFieldValue('pay_rub')
-                    const discount = getFieldValue('discount_rub')
+                    const pay = getFieldValue('pay_rub') || 0
+                    const discount = getFieldValue('discount_rub') || 0
                     return (
                       <FormField
                         label='К оплате (₽)'
                         labelType='calc'
                         addonAfter='₽'
-                        name='total_rub'
                         type='number'
                         value={pay - discount}
                         disabled
@@ -277,16 +302,18 @@ export default function ClientInvoicesForm() {
                 <FormField
                   label='Сумма товара ($)'
                   addonAfter='$'
-                  name='total_usd'
+                  name='sum_usd'
                   type='number'
+                  disabled={payType === 'Наличный'}
                 />
               </Col>
               <Col span={4}>
                 <FormField
                   label='Сумма товара (₽)'
                   addonAfter='₽'
-                  name='total_rub'
+                  name='sum_rub'
                   type='number'
+                  disabled={payType === 'Наличный'}
                 />
               </Col>
               <Col span={4}>

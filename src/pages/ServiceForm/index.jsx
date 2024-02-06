@@ -590,9 +590,9 @@ export default function ServiceForm() {
             <FormField
               type='select'
               options={internalClientsOptions}
-              name={['pole', 'client']}
+              name={['pole', 'inclient']}
               label='Внутренний клиент'
-              text={initialValues?.pole?.client}
+              text={initialValues?.pole?.inclient}
               isEdit={isEdit}
               width='100%'
             />
@@ -773,7 +773,7 @@ export default function ServiceForm() {
                 label='Тип оплаты'
                 name={['pole', 'pay_type']}
                 type='select'
-                options={[{ value: 'Бесплатно' }, { value: 'Наличными' }, { value: 'Безналичными' }]}
+                options={[{ value: 'Бесплатно' }, { value: 'Наличный' }, { value: 'Безналичный' }]}
                 rules={[ { required: true }]}
                 isEdit={isEdit}
                 text={initialValues.pole?.pay_type}

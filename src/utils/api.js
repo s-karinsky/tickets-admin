@@ -240,7 +240,7 @@ export const getPlacesBySendingId = sendingId => async () => {
   const [ response, responseProducts ] = await Promise.all([
     axios.select('dataset p', ['p.*', 's.id as service_id', 's.pole as service'], {
       leftJoin: {
-        'dataset s': `JSON_EXTRACT(s.pole, "$.places") LIKE CONCAT('%"', p.id ,'"%') AND s.tip="service" AND JSON_EXTRACT(s.pole, "$.is_finished")=0`
+        'dataset s': `JSON_EXTRACT(s.pole, "$.places") LIKE CONCAT('%"', p.id ,'"%') AND s.tip="service" AND s.status=0 AND JSON_EXTRACT(s.pole, "$.is_finished")=0`
       },
       where: {
         'p.ref_tip': 'sending',
@@ -757,7 +757,7 @@ export const useClientPayments = (id, initial = {}, params) => useQuery(['client
 }, params)
 
 export const useClientBalance = () => useQuery(['client-balance'], async () => {
-  const response = await axios.select('dataset', '*', { where: { status: 0, tip: 'cl-payment', '$.pole.done': true } })
+  const response = await axios.select('dataset', '*', { where: `status=0 AND (tip='cl-payment' OR tip='cl-invoice') AND JSON_EXTRACT(pole, '$.done')=true` })
   const payments = (response.data?.data || [])
     .map(item => ({ ...item, ...parseJSON(item.pole) }))
     .sort((a, b) => dayjs(a.done_date).valueOf() - dayjs(b.done_date).valueOf())

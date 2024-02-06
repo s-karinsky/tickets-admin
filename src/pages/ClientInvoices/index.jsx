@@ -1,14 +1,14 @@
+import { useEffect, useMemo } from 'react'
 import { Row, Col, Button, Table, Typography, Modal } from 'antd'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { ExclamationCircleFilled } from '@ant-design/icons'
 import { BsTrash } from 'react-icons/bs'
 import axios from '../../utils/axios'
 import { getColumnSearchProps } from '../../utils/components'
-import { useClientInvoices } from '../../utils/api'
+import { useClientInvoices, useUsersWithRole, useDictionary } from '../../utils/api'
 import { localeCompare } from '../../utils/utils'
-import { useEffect } from 'react'
 
-const getColumns = (refetch, navigate) => [
+const getColumns = ({ refetch, navigate, clientsMap, inclientMap }) => [
   {
     title: 'Номер',
     dataIndex: 'number',
@@ -23,24 +23,68 @@ const getColumns = (refetch, navigate) => [
     ...getColumnSearchProps('date', { type: 'date' })
   },
   {
+    title: 'Клиент',
+    dataIndex: 'client',
+    sorter: (a, b) => localeCompare(clientsMap[a.client], clientsMap[b.client]),
+    render: (client) => clientsMap[client],
+    ...getColumnSearchProps(client => clientsMap[client])
+  },
+  {
+    title: 'Внутренний клиент',
+    dataIndex: 'inclient',
+    sorter: (a, b) => localeCompare(inclientMap[a.inclient], inclientMap[b.inclient]),
+    render: (inclient) => inclientMap[inclient],
+    ...getColumnSearchProps(inclient => inclientMap[inclient])
+  },
+  {
+    title: 'Тип оплаты',
+    dataIndex: 'pay_type',
+    sorter: (a, b) => localeCompare(a.pay_type, b.pay_type),
+    ...getColumnSearchProps('pay_type', { options: [{ value: 'Наличный' }, { value: 'Безналичный' }] })
+  },
+  {
+    title: 'К оплате ($)',
+    dataIndex: 'pay_usd',
+    sorter: (a, b) => a.pay_usd - b.pay_usd,
+    ...getColumnSearchProps('pay_usd', { type: 'number' })
+  },
+  {
+    title: 'К оплате (₽)',
+    dataIndex: 'pay_rub',
+    sorter: (a, b) => a.pay_rub - b.pay_rub,
+    ...getColumnSearchProps('pay_rub', { type: 'number' })
+  },
+  {
+    title: 'Дата учета',
+    dataIndex: 'done_date',
+    sorter: (a, b) => new Date(a.done_date).getTime() - new Date(b.done_date).getTime(),
+    ...getColumnSearchProps('done_date', { type: 'date' })
+  },
+  {
     title: 'Наименование',
     dataIndex: 'name',
     sorter: (a, b) => localeCompare(a.name, b.name),
     ...getColumnSearchProps('name')
   },
   {
+    title: 'Примечание',
+    dataIndex: 'note',
+    sorter: (a, b) => localeCompare(a.note, b.note),
+    ...getColumnSearchProps('note')
+  },
+  {
     title: '',
     key: 'buttons',
     render: (_, item) => {
       return (
-        <>
+        <div style={{ whiteSpace: 'nowrap' }}>
           <Button
             type='primary'
             size='small'
             style={{ marginTop: 5 }}
             onClick={() => navigate('/client-payments/create', { state: { invoice: item.id } })}
           >
-            Создать оплату
+            Оплатить
           </Button>
           <BsTrash
             style={{ marginLeft: 30, cursor: 'pointer' }}
@@ -60,7 +104,7 @@ const getColumns = (refetch, navigate) => [
               })
             }}
           />
-        </>
+        </div>
       )
     }
   }
@@ -76,6 +120,28 @@ export default function ClientInvoices() {
       refetch()
     }
   }, [location.state?.refetch])
+
+  const clients = useUsersWithRole(1)
+  const [ clientsOptions, clientsMap ] = useMemo(() => {
+    if (!Array.isArray(clients.data)) return [[], {}]
+    const options = clients.data.map(({ json = {}, ...item }) => ({
+      value: item.id_user,
+      label: `${json.code} (${[item.family, item.name, item.middle].filter(Boolean).join(' ')})`
+    }))
+    const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
+    return [ options, map ]
+  }, [clients.data])
+
+  const inclient = useDictionary('inclient')
+  const [ inclientOptions, inclientMap ] = useMemo(() => {
+    if (!Array.isArray(inclient.data?.list)) return [[], {}]
+    const options = inclient.data.list.map((item) => ({
+      value: item.id,
+      label: [item.family, item.name, item.middle].filter(Boolean).join(' ')
+    }))
+    const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
+    return [ options, map ]
+  }, [inclient.data])
 
   return (
     <>
@@ -95,7 +161,12 @@ export default function ClientInvoices() {
       </Row>
       <Table
         size='small'
-        columns={getColumns(refetch, navigate)}
+        columns={getColumns({
+          refetch,
+          navigate,
+          clientsMap,
+          inclientMap
+        })}
         dataSource={data}
         isLoading={isLoading}
         rowKey={({ id }) => id}

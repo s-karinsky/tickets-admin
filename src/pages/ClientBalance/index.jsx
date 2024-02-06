@@ -37,8 +37,16 @@ export default function ClientBalance() {
 
   const columns = [
     {
-      title: 'Дата учета',
+      title: 'Тип',
+      dataIndex: 'tip',
+      render: tip => tip === 'cl-invoice' ? 'Счет' : 'Оплата',
+      sorter: (a, b) => localeCompare(a.tip, b.tip),
+      ...getColumnSearchProps('tip', { options: [{ value: 'cl-invoice', label: 'Счет' }, { value: 'cl-payment', label: 'Оплата' }] })
+    },
+    {
+      title: 'Учет',
       dataIndex: 'done_date',
+      render: date => dayjs(date).format('DD.MM.YYYY'),
       sorter: (a, b) => dayjs(a.done_date).valueOf() - dayjs(b.done_date).valueOf(),
       ...getColumnSearchProps('done_date', { type: 'date' })
     },
@@ -59,14 +67,9 @@ export default function ClientBalance() {
     {
       title: 'Номер счета',
       dataIndex: 'invoice_number',
-      sorter: (a, b) => a.invoice_number > b.invoice_number ? 1 : -1,
-      ...getColumnSearchProps('invoice_number')
-    },
-    {
-      title: 'Дата счета',
-      dataIndex: 'invoice_date',
-      sorter: (a, b) => dayjs(a.invoice_date).valueOf() - dayjs(b.invoice_date).valueOf(),
-      ...getColumnSearchProps('invoice_date', { type: 'date' })
+      render: (_, item) => item.invoice_number || item.number,
+      sorter: (a, b) => (a.invoice_number || a.number) > (b.invoice_number || b.number) ? 1 : -1,
+      ...getColumnSearchProps(item => item.invoice_number || item.number)
     },
     {
       title: 'Наименование',
@@ -81,34 +84,34 @@ export default function ClientBalance() {
       ...getColumnSearchProps('pay_type', { options: [ { value: 'Наличный' }, { value: 'Безналичный' } ] })
     },
     {
-      title: 'Курс 1$',
-      dataIndex: 'rate',
-      sorter: (a, b) => a.rate > b.rate ? 1 : -1,
-      ...getColumnSearchProps('rate', { type: 'number' })
-    },
-    {
-      title: 'Сумма начислено ($)',
-      dataIndex: ['invoice', 'pay_usd'],
-      sorter: (a, b) => a.invoice?.pay_usd > b.invoice?.pay_usd ? 1 : -1,
-      ...getColumnSearchProps(item => item.invoice?.pay_usd, { type: 'number' })
-    },
-    {
-      title: 'Сумма начислено (₽)',
-      dataIndex: ['invoice', 'pay_rub'],
-      sorter: (a, b) => a.invoice?.pay_rub > b.invoice?.pay_rub ? 1 : -1,
-      ...getColumnSearchProps(item => item.invoice?.pay_rub, { type: 'number' })
-    },
-    {
-      title: 'Сумма оплачено ($)',
+      title: 'Начислено ($)',
       dataIndex: 'pay_usd',
-      sorter: (a, b) => a.pay_usd > b.pay_usd ? 1 : -1,
-      ...getColumnSearchProps('pay_usd', { type: 'number' })
+      render: (val, item) => item.tip === 'cl-invoice' ? val : '',
+      sorter: (a, b) => a.tip === 'cl-invoice' ? (a.pay_usd > b.pay_usd ? 1 : -1) : -1,
+      ...getColumnSearchProps(item => item.tip === 'cl-invoice' ? item.pay_usd : 0, { type: 'number' })
     },
     {
-      title: 'Сумма оплачено (₽)',
+      title: 'Начислено (₽)',
       dataIndex: 'pay_rub',
-      sorter: (a, b) => a.pay_rub > b.pay_rub ? 1 : -1,
-      ...getColumnSearchProps('pay_rub', { type: 'number' })
+      render: (val, item) => item.tip === 'cl-invoice' ? val : '',
+      sorter: (a, b) => a.tip === 'cl-invoice' ? (a.pay_rub > b.pay_rub ? 1 : -1) : -1,
+      ...getColumnSearchProps(item => item.tip === 'cl-invoice' ? item.pay_rub : 0, { type: 'number' })
+    },
+    {
+      title: 'Оплачено ($)',
+      dataIndex: 'pay_usd',
+      key: 'payment_usd',
+      render: (val, item) => item.tip === 'cl-payment' ? val : '',
+      sorter: (a, b) => a.tip === 'cl-payment' ? (a.pay_usd > b.pay_usd ? 1 : -1) : -1,
+      ...getColumnSearchProps(item => item.tip === 'cl-invoice' ? item.pay_usd : 0, { type: 'number' })
+    },
+    {
+      title: 'Оплачено (₽)',
+      dataIndex: 'pay_rub',
+      key: 'payment_rub',
+      render: (val, item) => item.tip === 'cl-payment' ? val : '',
+      sorter: (a, b) => a.tip === 'cl-payment' ? (a.pay_rub > b.pay_rub ? 1 : -1) : -1,
+      ...getColumnSearchProps(item => item.tip === 'cl-invoice' ? item.pay_rub : 0, { type: 'number' })
     },
     {
       title: 'Примечание',
@@ -118,22 +121,11 @@ export default function ClientBalance() {
     }
   ]
 
-  console.log(data)
-
   return (
     <>
       <Row align='middle' style={{ padding: '0 40px' }}>
         <Col span={12}>
-          <Typography.Title style={{ fontWeight: 'bold' }}>Счета на оплату клиентам</Typography.Title>
-        </Col>
-        <Col span={12} style={{ textAlign: 'right' }}>
-          <Button
-            type='primary'
-            size='large'
-            onClick={() => navigate(`/client-invoices/create`)}
-          >
-            Создать
-          </Button>
+          <Typography.Title style={{ fontWeight: 'bold' }}>Баланс по клиентам</Typography.Title>
         </Col>
       </Row>
       <Table
@@ -145,10 +137,55 @@ export default function ClientBalance() {
         onRow={(record, index) => ({
           onClick: (e) => {
             if (e.detail === 2) {
-              navigate(`/client-invoices/${record.id}`)
+              const type = record.tip === 'cl-payment' ? 'payments' : 'invoices'
+              navigate(`/client-${type}/${record.id}`)
             }
           },
         })}
+        summary={(pageData) => {
+          let totalInvoiceUsd = 0
+          let totalInvoiceRub = 0
+          let totalPaymentUsd = 0
+          let totalPaymentRub = 0
+          pageData.forEach((item) => {
+            if (item.tip === 'cl-invoice') {
+              totalInvoiceUsd += item.pay_usd || 0
+              totalInvoiceRub += item.pay_rub || 0
+            } else {
+              totalPaymentUsd += item.pay_usd || 0
+              totalPaymentRub += item.pay_rub || 0
+            }
+          })
+  
+          return (
+            <>
+              <Table.Summary.Row>
+                <Table.Summary.Cell index={0} colSpan={7}>Итого</Table.Summary.Cell>
+                <Table.Summary.Cell index={1}>
+                  {totalInvoiceUsd}
+                </Table.Summary.Cell>
+                <Table.Summary.Cell index={2}>
+                  {totalInvoiceRub}
+                </Table.Summary.Cell>
+                <Table.Summary.Cell index={3}>
+                  {totalPaymentUsd}
+                </Table.Summary.Cell>
+                <Table.Summary.Cell index={4}>
+                  {totalPaymentRub}
+                </Table.Summary.Cell>
+              </Table.Summary.Row>
+              <Table.Summary.Row>
+                <Table.Summary.Cell index={0} colSpan={7}>Разница</Table.Summary.Cell>
+                <Table.Summary.Cell index={1} colSpan={2}>
+                  <nobr>Оплачено - Начислено = <b>{(totalPaymentUsd - totalInvoiceUsd).toFixed(2)}$</b></nobr>
+                </Table.Summary.Cell>
+                <Table.Summary.Cell index={1} colSpan={2}>
+                  <nobr>Оплачено - Начислено = <b>{(totalPaymentRub - totalInvoiceRub).toFixed()}₽</b></nobr>
+                </Table.Summary.Cell>
+              </Table.Summary.Row>
+            </>
+          );
+        }}
       />
     </>
   )
