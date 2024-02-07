@@ -22,7 +22,12 @@ import ClientInvoices from './pages/ClientInvoices'
 import ClientInvoicesForm from './pages/ClientInvoices/form'
 import ClientPayments from './pages/ClientPayments'
 import ClientPaymentsForm from './pages/ClientPayments/form'
+import DriversInvoices from './pages/DriversInvoices'
+import DriversInvoicesForm from './pages/DriversInvoices/form'
+import DriversPayments from './pages/DriversPayments'
+import DriversPaymentsForm from './pages/DriversPayments/form'
 import ClientBalance from './pages/ClientBalance'
+
 import Layout from './components/Layout'
 import { useAuthorization } from './utils/api'
 import './App.css'
@@ -95,6 +100,10 @@ function App() {
           <Route path='/client-payments' element={<ClientPayments />} />
           <Route path='/client-payments/:id' element={<ClientPaymentsForm user={user.data} />} />
           <Route path='/client-balance' element={<ClientBalance />} />
+          <Route path='/drivers-invoices' element={<DriversInvoices />} />
+          <Route path='/drivers-invoices/:id' element={<DriversInvoicesForm />} />
+          <Route path='/drivers-payments' element={<DriversPayments />} />
+          <Route path='/drivers-payments/:id' element={<DriversPaymentsForm />} />
         </Route>
         <Route path='/login' element={<PageLogin />} />
       </Routes>

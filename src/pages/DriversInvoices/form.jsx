@@ -1,68 +1,47 @@
-import { useState, useMemo, useEffect } from 'react'
-import { Row, Col, Typography, Form, Button, Checkbox, Modal, DatePicker } from 'antd'
+import { useEffect, useState, useMemo } from 'react'
+import { Row, Col, Typography, Form, Button, DatePicker, Modal } from 'antd'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import dayjs from 'dayjs'
 import { LoadingOutlined, ExclamationCircleFilled } from '@ant-design/icons'
 import { get as _get } from 'lodash'
-import dayjs from 'dayjs'
 import FormField from '../../components/FormField'
-import { useClientPayments, useUsersWithRole, useDictionary } from '../../utils/api'
+import { useDriversInvoices, useDictionary } from '../../utils/api'
 import axios from '../../utils/axios'
-import { sqlInsert, sqlUpdate } from '../../utils/sql'
 import { numberRange } from '../../utils/validationRules'
 import { VALIDATION_MESSAGES } from '../../consts'
+import { sqlInsert, sqlUpdate } from '../../utils/sql'
+import { parseJSON } from '../../utils/utils'
 
-export default function ClientPaymentsForm({ user }) {
+export default function DriversInvoicesForm() {
   const [ isModal, setIsModal ] = useState()
-  const [ doneDate, setDoneDate ] = useState(dayjs())
+  const [ doneDate, setDoneDate ] = useState()
   const [ isUpdating, setIsUpdating ] = useState(false)
   const [ form ] = Form.useForm()
   const { id } = useParams()
   const navigate = useNavigate()
   const location = useLocation()
   const isNew = id === 'create'
-  const { data = {}, isLoading, isRefetching, refetch } = useClientPayments(id, location.state || {}, { staleTime: 0, refetchOnWindowFocus: false })
-  const employe = useUsersWithRole(2)
-  const clients = useUsersWithRole(1)
+  const { data = {}, isLoading, isRefetching, refetch } = useDriversInvoices(id, location.state || {}, { staleTime: 0, refetchOnWindowFocus: false })
+  const drivers = useDictionary('drivers')
 
-  const client = Form.useWatch('client', form)
-  const inclient = useDictionary('inclient', { id_ref: client }, { enabled: !!client })
-
-  const payDate = Form.useWatch('payment_date', form)
-  useEffect(() => {
-    setDoneDate(payDate)
-  }, [payDate])
-
-  const [ clientsOptions, clientsMap ] = useMemo(() => {
-    if (!Array.isArray(clients.data)) return [[], {}]
-    const options = clients.data.map(({ json = {}, ...item }) => ({
-      value: item.id_user,
-      label: `${json.code} (${[item.family, item.name, item.middle].filter(Boolean).join(' ')})`
-    }))
-    const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
-    return [ options, map ]
-  }, [clients.data])
-
-  const [ inclientOptions, inclientMap ] = useMemo(() => {
-    if (!Array.isArray(inclient.data?.list)) return [[], {}]
-    const options = inclient.data.list.map((item) => ({
+  const [ driversOptions, driversMap ] = useMemo(() => {
+    if (!Array.isArray(drivers.data?.list)) return [[], {}]
+    const options = drivers.data.list.map(({ pole = {}, ...item }) => ({
       value: item.id,
-      label: [item.family, item.name, item.middle].filter(Boolean).join(' ')
+      label: `${item.value} (${[item.family, item.name, item.middle].filter(Boolean).join(' ')})`
     }))
-    const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
-    return [ options, map ]
-  }, [inclient.data])
+    return [ options, drivers.data.map ]
+  }, [drivers.data])
 
-  const employeOptions = useMemo(() => {
-    if (!employe.data) return []
-    return employe.data.map(item => ({
-      value: item.id_user,
-      label: item.json?.code
-    }))
-  }, [employe.data])
+  const discountRub = Form.useWatch('discount_rub', form)
+  const discountUsd = Form.useWatch('discount_usd', form)
+  const payUsd = Form.useWatch('pay_usd', form)
+  const rate = Form.useWatch('rate', form)
 
-  const payType = Form.useWatch('pay_type', form)
-  const isCash = payType?.toLowerCase() === 'наличный'
-  data.get_employe = user.u_id
+  useEffect(() => {
+    if (!Number(payUsd) || !Number(rate)) return
+    form.setFieldValue('pay_rub', Number(payUsd) * Number(rate))
+  }, [payUsd, rate])
 
   return isLoading || isRefetching ?
     <Row style={{ height: 'calc(100vh - 64px)' }} justify='center' align='middle'>
@@ -78,15 +57,25 @@ export default function ClientPaymentsForm({ user }) {
         onFinish={async (values) => {
           const { date, ...params } = values
           setIsUpdating(true)
+          params.total_usd = params.pay_usd - params.discount_usd
+          params.total_rub = params.pay_rub - params.discount_rub
           if (isNew) {
-            await axios.postWithAuth('/query/insert', { sql:
+            const created = await axios.postWithAuth('/query/insert', { sql:
               sqlInsert('dataset', {
                 status: 0,
-                tip: 'cl-payment',
+                tip: 'dr-invoice',
                 created_at: date.format('YYYY-MM-DD'),
                 pole: JSON.stringify(params)
               })
             })
+            if (location.state?.type === 'payment') {
+              const id = location.state?.id
+              const resp = await axios.select('dataset', 'pole', { where: { id }})
+              const payment = (resp.data?.data || [])[0]?.pole
+              const pole = parseJSON(payment)
+              pole.invoice_number = params.number
+              await axios.postWithAuth('/query/update', { sql: `UPDATE dataset SET pole='${JSON.stringify(pole)}' WHERE id=${id}` })
+            }
           } else {
             await axios.postWithAuth('/query/update', { sql:
               sqlUpdate('dataset', {
@@ -95,21 +84,22 @@ export default function ClientPaymentsForm({ user }) {
               }, `id=${id}`)
             })
           }
-          navigate('/client-payments')
+          navigate('/drivers-invoices')
         }}
       >
         <Row align='middle' style={{ padding: '0 40px' }}>
           <Col span={12}>
-            <Typography.Title style={{ fontWeight: 'bold' }}>{isNew ? 'Новая оплата клиента' : `Оплата клиента`}</Typography.Title>
+            <Typography.Title style={{ fontWeight: 'bold' }}>{isNew ? 'Новый счет перевозчика' : `Счет перевозчика`}</Typography.Title>
           </Col>
           <Col span={12} style={{ textAlign: 'right' }}>
-          {!isNew && <Button
+            {!isNew && <Button
               style={{ marginRight: 20 }}
               size='large'
               htmlType='button'
               danger={data.done}
               onClick={() => {
                 if (!data.done) {
+                  setDoneDate(dayjs())
                   setIsModal(true)
                 }
                 else {
@@ -142,14 +132,14 @@ export default function ClientPaymentsForm({ user }) {
               type='primary'
               size='large'
               htmlType='button'
-              onClick={() => navigate('/client-payments')}
+              onClick={() => navigate('/drivers-invoices', { state: { refetch: 1 }})}
               danger
             >
               Отмена
             </Button>
           </Col>
           <Col span={24}>
-            <Row gutter={10} align='bottom'>
+            <Row gutter={10}>
               <Col span={4}>
                 <FormField
                   label='Номер'
@@ -169,34 +159,14 @@ export default function ClientPaymentsForm({ user }) {
                 />
               </Col>
               <Col span={4}>
-              <FormField
-                  label='Клиент'
-                  name='client'
+                <FormField
+                  label='Перевозчик'
+                  name='driver'
                   type='select'
-                  options={clientsOptions}
-                  text={clientsMap[data.client]}
-                />
-              </Col>
-              <Col span={4}>
-                <FormField
-                  label='Внутренний клиент'
-                  name='inclient'
-                  type='select'
-                  options={inclientOptions}
-                  text={inclientMap[data.inclient]}
-                />
-              </Col>
-              <Col span={4}>
-                <FormField
-                  label='Номер счета'
-                  name='invoice_number'
-                />
-              </Col>
-              <Col span={4}>
-                <FormField
-                  label='Дата счета'
-                  name='invoice_date'
-                  type='date'
+                  options={driversOptions}
+                  text={driversMap[data.driver]}
+                  disabled={!!data.driver}
+                  showSearch
                 />
               </Col>
               <Col span={12}>
@@ -212,43 +182,11 @@ export default function ClientPaymentsForm({ user }) {
                   name='pay_type'
                   type='select'
                   options={[
+                    { value: 'Бесплатно', title: '' },
                     { value: 'Наличный', title: '' },
                     { value: 'Безналичный', title: '' },
                   ]}
                   rules={[{ required: true }]}
-                />
-              </Col>
-              <Col span={4}>
-                <FormField
-                  label='Дата оплаты'
-                  name='payment_date'
-                  type='date'
-                />
-              </Col>
-              <Col span={4}>
-                <Form.Item
-                  width='100%'
-                  name='give_client'
-                  valuePropName='checked'
-                  rules={[ { required: isCash } ]}
-                >
-                  <Checkbox>Передал клиент</Checkbox>
-                </Form.Item>
-              </Col>
-              <Col span={8}>
-                <FormField
-                  label='Передал оплату ФИО'
-                  name='pay_name'
-                  rules={[ { required: isCash } ]}
-                />
-              </Col>
-              <Col span={4}>
-                <FormField
-                  label='Получил'
-                  name='get_employe'
-                  type='select'
-                  options={employeOptions}
-                  rules={[ { required: isCash } ]}
                 />
               </Col>
               <Col span={4}>
@@ -274,6 +212,67 @@ export default function ClientPaymentsForm({ user }) {
                   name='pay_rub'
                   type='number'
                 />
+              </Col>
+              <Col span={4}>
+                <FormField
+                  label='Скидка ($)'
+                  addonAfter='$'
+                  name='discount_usd'
+                  type='number'
+                  disabled={!!discountRub}
+                />
+              </Col>
+              <Col span={4}>
+                <FormField
+                  label='Скидка (₽)'
+                  addonAfter='₽'
+                  name='discount_rub'
+                  type='number'
+                  disabled={!!discountUsd}
+                />
+              </Col>
+              <Col span={24}>
+                <FormField
+                  label='Описание скидки'
+                  name='discount_note'
+                  rules={[ { required: !!discountUsd || !!discountRub } ]}
+                />
+              </Col>
+              <Col span={4}>
+                <Form.Item dependencies={['pay_usd', 'discount_usd']}>
+                  {({ getFieldValue }) => {
+                    const pay = getFieldValue('pay_usd') || 0
+                    const discount = getFieldValue('discount_usd') || 0
+                    return (
+                      <FormField
+                        label='К оплате ($)'
+                        labelType='calc'
+                        addonAfter='$'
+                        type='number'
+                        value={pay - discount}
+                        disabled
+                      />
+                    )
+                  }}
+                </Form.Item>
+              </Col>
+              <Col span={4}>
+                <Form.Item dependencies={['pay_rub', 'discount_rub']} shouldUpdate>
+                  {({ getFieldValue }) => {
+                    const pay = getFieldValue('pay_rub') || 0
+                    const discount = getFieldValue('discount_rub') || 0
+                    return (
+                      <FormField
+                        label='К оплате (₽)'
+                        labelType='calc'
+                        addonAfter='₽'
+                        type='number'
+                        value={pay - discount}
+                        disabled
+                      />
+                    )
+                  }}
+                </Form.Item>
               </Col>
               <Col span={24}>
                 <FormField

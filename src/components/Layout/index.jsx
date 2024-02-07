@@ -72,6 +72,16 @@ const MENU_ITEMS = {
           getItem(<Link to='/client-payments'>Оплаты</Link>, 'client-payments'),
           getItem(<Link to='/client-balance'>Баланс по клиентам</Link>, 'client-balance')
         ]
+      ),
+      getItem(
+        'Перевозчики',
+        'drivers-finances',
+        null,
+        [
+          getItem(<Link to='/drivers-invoices'>Счета перевозчика</Link>, 'drivers-invoices'),
+          getItem(<Link to='/drivers-payments'>Оплаты перевозчику</Link>, 'drivers-payments'),
+          // getItem(<Link to='/drivers-balance'>Баланс по перевозчикам</Link>, 'drivers-balance')
+        ]
       )
     ]
   )

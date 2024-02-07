@@ -49,9 +49,7 @@ export default function Sendings() {
               type='primary'
               size='small'
               style={{ marginTop: 5 }}
-              onClick={() => navigate('/client-invoices/create', { state: { type: 'sending', id: item.id } })}
-              title='Функция в разработке'
-              disabled
+              onClick={() => navigate('/drivers-invoices/create', { state: { type: 'sending', id: item.id } })}
             >
               Создать счет
             </Button>}

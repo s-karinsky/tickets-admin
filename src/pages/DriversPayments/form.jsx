@@ -5,13 +5,13 @@ import { LoadingOutlined, ExclamationCircleFilled } from '@ant-design/icons'
 import { get as _get } from 'lodash'
 import dayjs from 'dayjs'
 import FormField from '../../components/FormField'
-import { useClientPayments, useUsersWithRole, useDictionary } from '../../utils/api'
+import { useDriversPayments, useUsersWithRole, useDictionary } from '../../utils/api'
 import axios from '../../utils/axios'
 import { sqlInsert, sqlUpdate } from '../../utils/sql'
 import { numberRange } from '../../utils/validationRules'
 import { VALIDATION_MESSAGES } from '../../consts'
 
-export default function ClientPaymentsForm({ user }) {
+export default function DriversPaymentsForm({ user }) {
   const [ isModal, setIsModal ] = useState()
   const [ doneDate, setDoneDate ] = useState(dayjs())
   const [ isUpdating, setIsUpdating ] = useState(false)
@@ -20,38 +20,19 @@ export default function ClientPaymentsForm({ user }) {
   const navigate = useNavigate()
   const location = useLocation()
   const isNew = id === 'create'
-  const { data = {}, isLoading, isRefetching, refetch } = useClientPayments(id, location.state || {}, { staleTime: 0, refetchOnWindowFocus: false })
-  const employe = useUsersWithRole(2)
-  const clients = useUsersWithRole(1)
+  const { data = {}, isLoading, isRefetching, refetch } = useDriversPayments(id, location.state || {}, { staleTime: 0, refetchOnWindowFocus: false })
 
-  const client = Form.useWatch('client', form)
-  const inclient = useDictionary('inclient', { id_ref: client }, { enabled: !!client })
-
-  const payDate = Form.useWatch('payment_date', form)
-  useEffect(() => {
-    setDoneDate(payDate)
-  }, [payDate])
-
-  const [ clientsOptions, clientsMap ] = useMemo(() => {
-    if (!Array.isArray(clients.data)) return [[], {}]
-    const options = clients.data.map(({ json = {}, ...item }) => ({
-      value: item.id_user,
-      label: `${json.code} (${[item.family, item.name, item.middle].filter(Boolean).join(' ')})`
-    }))
-    const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
-    return [ options, map ]
-  }, [clients.data])
-
-  const [ inclientOptions, inclientMap ] = useMemo(() => {
-    if (!Array.isArray(inclient.data?.list)) return [[], {}]
-    const options = inclient.data.list.map((item) => ({
+  const drivers = useDictionary('drivers')
+  const [ driversOptions, driversMap ] = useMemo(() => {
+    if (!Array.isArray(drivers.data?.list)) return [[], {}]
+    const options = drivers.data.list.map(({ pole = {}, ...item }) => ({
       value: item.id,
-      label: [item.family, item.name, item.middle].filter(Boolean).join(' ')
+      label: `${item.value} (${[item.family, item.name, item.middle].filter(Boolean).join(' ')})`
     }))
-    const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
-    return [ options, map ]
-  }, [inclient.data])
+    return [ options, drivers.data.map ]
+  }, [drivers.data])
 
+  const employe = useUsersWithRole(2)
   const employeOptions = useMemo(() => {
     if (!employe.data) return []
     return employe.data.map(item => ({
@@ -60,9 +41,13 @@ export default function ClientPaymentsForm({ user }) {
     }))
   }, [employe.data])
 
+  const payDate = Form.useWatch('payment_date', form)
+  useEffect(() => {
+    setDoneDate(payDate)
+  }, [payDate])
+
   const payType = Form.useWatch('pay_type', form)
   const isCash = payType?.toLowerCase() === 'наличный'
-  data.get_employe = user.u_id
 
   return isLoading || isRefetching ?
     <Row style={{ height: 'calc(100vh - 64px)' }} justify='center' align='middle'>
@@ -82,7 +67,7 @@ export default function ClientPaymentsForm({ user }) {
             await axios.postWithAuth('/query/insert', { sql:
               sqlInsert('dataset', {
                 status: 0,
-                tip: 'cl-payment',
+                tip: 'dr-payment',
                 created_at: date.format('YYYY-MM-DD'),
                 pole: JSON.stringify(params)
               })
@@ -95,12 +80,12 @@ export default function ClientPaymentsForm({ user }) {
               }, `id=${id}`)
             })
           }
-          navigate('/client-payments')
+          navigate('/drivers-payments')
         }}
       >
         <Row align='middle' style={{ padding: '0 40px' }}>
           <Col span={12}>
-            <Typography.Title style={{ fontWeight: 'bold' }}>{isNew ? 'Новая оплата клиента' : `Оплата клиента`}</Typography.Title>
+            <Typography.Title style={{ fontWeight: 'bold' }}>{isNew ? 'Новая оплата перевозчику' : `Оплата перевозчику`}</Typography.Title>
           </Col>
           <Col span={12} style={{ textAlign: 'right' }}>
           {!isNew && <Button
@@ -142,7 +127,7 @@ export default function ClientPaymentsForm({ user }) {
               type='primary'
               size='large'
               htmlType='button'
-              onClick={() => navigate('/client-payments')}
+              onClick={() => navigate('/drivers-payments')}
               danger
             >
               Отмена
@@ -170,20 +155,11 @@ export default function ClientPaymentsForm({ user }) {
               </Col>
               <Col span={4}>
               <FormField
-                  label='Клиент'
-                  name='client'
+                  label='Перевозчик'
+                  name='driver'
                   type='select'
-                  options={clientsOptions}
-                  text={clientsMap[data.client]}
-                />
-              </Col>
-              <Col span={4}>
-                <FormField
-                  label='Внутренний клиент'
-                  name='inclient'
-                  type='select'
-                  options={inclientOptions}
-                  text={inclientMap[data.inclient]}
+                  options={driversOptions}
+                  text={driversMap[data.driver]}
                 />
               </Col>
               <Col span={4}>
@@ -197,13 +173,7 @@ export default function ClientPaymentsForm({ user }) {
                   label='Дата счета'
                   name='invoice_date'
                   type='date'
-                />
-              </Col>
-              <Col span={12}>
-                <FormField
-                  label='Наименование'
-                  name='name'
-                  rules={[{ required: true }]}
+                  width='100%'
                 />
               </Col>
               <Col span={4}>
@@ -218,37 +188,35 @@ export default function ClientPaymentsForm({ user }) {
                   rules={[{ required: true }]}
                 />
               </Col>
+              <Col span={12}>
+                <FormField
+                  label='Наименование'
+                  name='name'
+                  rules={[{ required: true }]}
+                />
+              </Col>
               <Col span={4}>
                 <FormField
                   label='Дата оплаты'
                   name='payment_date'
                   type='date'
+                  width='100%'
                 />
               </Col>
               <Col span={4}>
-                <Form.Item
-                  width='100%'
-                  name='give_client'
-                  valuePropName='checked'
-                  rules={[ { required: isCash } ]}
-                >
-                  <Checkbox>Передал клиент</Checkbox>
-                </Form.Item>
-              </Col>
-              <Col span={8}>
                 <FormField
-                  label='Передал оплату ФИО'
-                  name='pay_name'
+                  label='Передал'
+                  name='give_employe'
+                  type='select'
+                  options={employeOptions}
                   rules={[ { required: isCash } ]}
                 />
               </Col>
               <Col span={4}>
                 <FormField
                   label='Получил'
-                  name='get_employe'
-                  type='select'
-                  options={employeOptions}
-                  rules={[ { required: isCash } ]}
+                  name='get_name'
+                  rules={[ { required: true } ]}
                 />
               </Col>
               <Col span={4}>

@@ -784,3 +784,150 @@ export const useClientBalance = () => useQuery(['client-balance'], async () => {
     invoice: list[payment.invoice_number]
   }))
 })
+
+export const useDriversInvoices = (id, initial = {}, params) => useQuery(['drivers-invoices', id], async () => {
+  const rate = await getLastCurrencyRate('USD', dayjs().format('YYYY-MM-DD'))
+  if (id === 'create') {
+    const response = await axios.select(
+      'dataset',
+      'max(cast(json_extract(pole, "$.number") as decimal)) as max',
+      {
+        where: {
+          status: 0,
+          tip: 'dr-invoice',
+          'YEAR(created_at)': `YEAR('${dayjs().format('YYYY-MM-DD')}')`
+        }
+      }
+    )
+    const data = response.data?.data || []
+    const number = parseInt(_get(data, [0, 'max'])) || 0
+
+    const { type, id } = initial
+    let rest = {}
+    if (type && id) {
+      if (type === 'sending') {
+        const [ sending, places ] = await Promise.all([
+          axios.select('trip', '*', { where: { id_trip: id }}),
+          axios.select('dataset', '*', { where: { id_ref: id, tip: 'place' } })
+        ])
+        let sData = (sending.data?.data || [])[0]
+        sData = {
+          ...sData,
+          ...parseJSON(sData.json)
+        }
+        let weight = 0
+        rest.name = `За отправку партии № ${sData.from} от ${dayjs(sData.create_datetime).format('DD.MM.YYYY')} Места:`
+        let list = (places.data?.data || []).map(place => ({ ...place, ...parseJSON(place.pole) }))
+        list.forEach(place => {
+          weight += Number(place.gross_weight)
+          rest.name += ` ${place.place}`
+        })
+        rest.driver = sData.transporter
+        rest.inclient = sData.inclient
+        rest.name += ` Вес: ${weight.toFixed(3)} кг.`
+      }
+      if (type === 'payment') {
+        const invoice = await axios.select('dataset', '*', { where: { status: 0, tip: 'dr-payment', id } })
+        let sData = (invoice.data?.data || [])[0]
+        sData = {
+          ...sData,
+          ...parseJSON(sData.pole)
+        }
+        rest.driver = sData.driver
+        rest.invoice_number = sData.number
+        rest.name = sData.name
+        rest.pay_type = sData.pay_type
+        rest.pay_rub = sData.pay_rub
+        rest.pay_usd = sData.pay_usd
+      }
+    }
+
+    return {
+      number: number + 1,
+      date: dayjs(),
+      rate,
+      ...rest
+    }
+  }
+  const response = await axios.select('dataset', '*', {
+      where: {
+        status: 0,
+        tip: 'dr-invoice',
+        id
+      }
+    }
+  )
+  const data = (response.data?.data || []).map(item => ({
+    ...item,
+    ...parseJSON(item.pole),
+    pole: parseJSON(item.pole),
+    date: dayjs(item.created_at)
+  }))
+  return id ? {
+    rate,
+    ...data[0]
+  } : data
+}, params)
+
+export const useDriversPayments = (id, initial = {}, params) => useQuery(['client-payments', id], async () => {
+  const rate = await getLastCurrencyRate('USD', dayjs().format('YYYY-MM-DD'))
+  if (id === 'create') {
+    const response = await axios.select(
+      'dataset',
+      'max(cast(json_extract(pole, "$.number") as decimal)) as max',
+      {
+        where: {
+          status: 0,
+          tip: 'dr-payment',
+          'YEAR(created_at)': `YEAR('${dayjs().format('YYYY-MM-DD')}')`
+        }
+      }
+    )
+    const data = response.data?.data || []
+    const number = parseInt(_get(data, [0, 'max'])) || 0
+
+    let rest = {}
+    if (initial.invoice) {
+      const invoice = await axios.select('dataset', '*', { where: { status: 0, tip: 'dr-invoice', id: initial.invoice } })
+      let sData = (invoice.data?.data || [])[0]
+      sData = {
+        ...sData,
+        ...parseJSON(sData.pole)
+      }
+      rest.client = sData.client
+      rest.invoice_number = sData.number
+      rest.invoice_date = dayjs(sData.date)
+      rest.name = sData.name
+      rest.pay_type = sData.pay_type
+      rest.pay_rub = sData.pay_rub
+      rest.pay_usd = sData.pay_usd
+    }
+
+    return {
+      number: number + 1,
+      date: dayjs(),
+      rate,
+      ...rest
+    }
+  }
+  const response = await axios.select('dataset', '*', {
+      where: {
+        status: 0,
+        tip: 'dr-payment',
+        id
+      }
+    }
+  )
+  const data = (response.data?.data || []).map(item => ({
+    ...item,
+    ...parseJSON(item.pole),
+    pole: parseJSON(item.pole),
+    date: dayjs(item.created_at),
+    invoice_date: dayjs(parseJSON(item.pole).invoice_date),
+    payment_date: dayjs(parseJSON(item.pole).payment_date)
+  }))
+  return id ? {
+    rate,
+    ...data[0]
+  } : data
+}, params)
