@@ -36,9 +36,10 @@ export default function PageUser() {
   const role = Form.useWatch('id_role', form)
 
   useEffect(() => {
-    if (role === '1') navigate('/dictionary/clients/create', { state: { withRole: true }})
-    if (role === '2') navigate('/dictionary/employees/create', { state: { withRole: true } })
-    if (role === '3') navigate('/dictionary/inclient/create', { state: { withRole: true } })
+    if (role === '1') navigate(`/dictionary/clients/${id}`, { state: { withRole: true }})
+    if (role === '2') navigate(`/dictionary/employees/${id}`, { state: { withRole: true } })
+    if (role === '3') navigate(`/dictionary/inclient/${id}`, { state: { withRole: true } })
+    if (role === '4') navigate(`/users/${id}?edit`, { state: { withRole: true } })
   }, [role])
 
   if (users.isLoading) return null
@@ -69,6 +70,7 @@ export default function PageUser() {
             values.json.companyPhone = (values.json.companyPhone || '').replaceAll('_', '')
           }
           values.json = JSON.stringify(values.json)
+          values.id_role = '4'
           setIsSending(true)
           try {
             if (isNew) {
@@ -172,8 +174,6 @@ export default function PageUser() {
               options={USER_ROLES_OPTIONS.map(value => ({ value, label: USER_ROLES[value] }))}
               text={USER_ROLES[profile.id_role]}
               rules={[{ required: true }]}
-              disabled={isEdit && !isNew}
-              isEdit={isEdit}
             />
           </Col>
         </Row>

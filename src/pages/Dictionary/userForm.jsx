@@ -53,10 +53,12 @@ export default function UserForm({ name, userId }) {
   const role = Form.useWatch('id_role', form)
 
   useEffect(() => {
-    if (role === '1') navigate('/dictionary/clients/create', { state: { withRole: true }})
-    if (role === '2') navigate('/dictionary/employees/create', { state: { withRole: true } })
-    if (role === '3') navigate('/dictionary/inclient/create', { state: { withRole: true } })
-  }, [role])
+    if (profile.id_role === role) return
+    if (role === '1') navigate(`/dictionary/clients/${id}`, { state: { withRole: true }})
+    if (role === '2') navigate(`/dictionary/employees/${id}`, { state: { withRole: true } })
+    if (role === '3') navigate(`/dictionary/inclient/${id}`, { state: { withRole: true } })
+    if (role === '4') navigate(`/users/${id}?edit`, { state: { withRole: true } })
+  }, [role, id, profile.id_role])
 
   const isNew = id === 'create'
 
@@ -161,13 +163,13 @@ export default function UserForm({ name, userId }) {
             />
           </Col>
           <Col span={5}>
-            {withRole && isNew && <FormField
+            <FormField
               type='select'
               name='id_role'
               label='Роль'
               options={USER_ROLES_OPTIONS.map(value => ({ value, label: USER_ROLES[value] }))}
               rules={[{ required: true }]}
-            />}
+            />
           </Col>
         </Row>
         <Row

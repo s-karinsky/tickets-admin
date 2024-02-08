@@ -14,7 +14,7 @@ export const USER_ROLES = {
   '4': 'Админ'
 }
 
-export const USER_ROLES_OPTIONS = ['1', '2', '3']
+export const USER_ROLES_OPTIONS = ['1', '2', '3', '4']
 
 export const SENDING_STATUS = ['Формирование', 'В пути', 'Поступила', 'Приостановлен']
 

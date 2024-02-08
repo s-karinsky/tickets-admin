@@ -456,7 +456,7 @@ export const useDictionary = (name, where, params) => useQuery(['dictionary', na
 
   if (where && where.id === 'create') {
     return {
-
+      id_role: name === 'inclient' ? '4' : undefined
     }
   }
 
