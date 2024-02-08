@@ -1,44 +1,37 @@
-import { useMemo } from 'react'
-import { Row, Col, Table, Typography } from 'antd'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useMemo } from 'react'
+import { Row, Col, Button, Table, Typography, Modal } from 'antd'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import { ExclamationCircleFilled } from '@ant-design/icons'
 import dayjs from 'dayjs'
+import { BsTrash } from 'react-icons/bs'
+import axios from '../../utils/axios'
 import { getColumnSearchProps } from '../../utils/components'
-import { useClientBalance, useUsersWithRole } from '../../utils/api'
+import { useDriversBalance, useDictionary } from '../../utils/api'
 import { localeCompare } from '../../utils/utils'
 
-export default function ClientBalance() {
-  const { data, isLoading } = useClientBalance()
+export default function DriversBalance() {
+  const { data, isLoading, refetch } = useDriversBalance()
   const navigate = useNavigate()
   
-  const clients = useUsersWithRole(1)
-  const [ clientsOptions, clientsMap ] = useMemo(() => {
-    if (!Array.isArray(clients.data)) return [[], {}]
-    const options = clients.data.map(item => ({
-      value: item.id_user,
-      label: item.json?.code
-    }))
-    const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
-    return [ options, map ]
-  }, [clients.data])
-
-  const inclient = useUsersWithRole(4)
-  const [ inclientOptions, inclientMap ] = useMemo(() => {
-    if (!Array.isArray(inclient.data?.list)) return [[], {}]
-    const options = inclient.data.list.map((item) => ({
+  const drivers = useDictionary('drivers')
+  const [ driversOptions, driversMap ] = useMemo(() => {
+    if (!Array.isArray(drivers.data?.list)) return [[], {}]
+    const options = drivers.data.list.map(({ pole = {}, ...item }) => ({
       value: item.id,
-      label: [item.family, item.name, item.middle].filter(Boolean).join(' ')
+      label: item.label
     }))
     const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
     return [ options, map ]
-  }, [inclient.data])
+  }, [drivers.data])
+
 
   const columns = [
     {
       title: 'Тип',
       dataIndex: 'tip',
-      render: tip => tip === 'cl-invoice' ? 'Счет' : 'Оплата',
+      render: tip => tip === 'dr-invoice' ? 'Счет' : 'Оплата',
       sorter: (a, b) => localeCompare(a.tip, b.tip),
-      ...getColumnSearchProps('tip', { options: [{ value: 'cl-invoice', label: 'Счет' }, { value: 'cl-payment', label: 'Оплата' }] })
+      ...getColumnSearchProps('tip', { options: [{ value: 'dr-invoice', label: 'Счет' }, { value: 'dr-payment', label: 'Оплата' }] })
     },
     {
       title: 'Учет',
@@ -48,18 +41,11 @@ export default function ClientBalance() {
       ...getColumnSearchProps('done_date', { type: 'date' })
     },
     {
-      title: 'Клиент',
-      dataIndex: 'client',
-      render: id => clientsMap[id],
-      sorter: (a, b) => (clientsMap[a.client] || '').localeCompare(clientsMap[b.client] || ''),
-      ...getColumnSearchProps('client', { options: clientsOptions })
-    },
-    {
-      title: 'Внутренний клиент',
-      dataIndex: 'inclient',
-      render: id => inclientMap[id],
-      sorter: (a, b) => (inclientMap[a.client] || '').localeCompare(inclientMap[b.client] || ''),
-      ...getColumnSearchProps('inclient', { options: inclientOptions })
+      title: 'Перевозчик',
+      dataIndex: 'driver',
+      render: id => driversMap[id],
+      sorter: (a, b) => (driversMap[a.driver] || '').localeCompare(driversMap[b.driver] || ''),
+      ...getColumnSearchProps('driver', { options: driversOptions })
     },
     {
       title: 'Номер счета',
@@ -83,32 +69,32 @@ export default function ClientBalance() {
     {
       title: 'Начислено ($)',
       dataIndex: 'pay_usd',
-      render: (val, item) => item.tip === 'cl-invoice' ? val : '',
-      sorter: (a, b) => a.tip === 'cl-invoice' ? (a.pay_usd > b.pay_usd ? 1 : -1) : -1,
-      ...getColumnSearchProps(item => item.tip === 'cl-invoice' ? item.pay_usd : 0, { type: 'number' })
+      render: (val, item) => item.tip === 'dr-invoice' ? val : '',
+      sorter: (a, b) => a.tip === 'dr-invoice' ? (a.pay_usd > b.pay_usd ? 1 : -1) : -1,
+      ...getColumnSearchProps(item => item.tip === 'dr-invoice' ? item.pay_usd : 0, { type: 'number' })
     },
     {
       title: 'Начислено (₽)',
       dataIndex: 'pay_rub',
-      render: (val, item) => item.tip === 'cl-invoice' ? val : '',
-      sorter: (a, b) => a.tip === 'cl-invoice' ? (a.pay_rub > b.pay_rub ? 1 : -1) : -1,
-      ...getColumnSearchProps(item => item.tip === 'cl-invoice' ? item.pay_rub : 0, { type: 'number' })
+      render: (val, item) => item.tip === 'dr-invoice' ? val : '',
+      sorter: (a, b) => a.tip === 'dr-invoice' ? (a.pay_rub > b.pay_rub ? 1 : -1) : -1,
+      ...getColumnSearchProps(item => item.tip === 'dr-invoice' ? item.pay_rub : 0, { type: 'number' })
     },
     {
       title: 'Оплачено ($)',
       dataIndex: 'pay_usd',
       key: 'payment_usd',
-      render: (val, item) => item.tip === 'cl-payment' ? val : '',
-      sorter: (a, b) => a.tip === 'cl-payment' ? (a.pay_usd > b.pay_usd ? 1 : -1) : -1,
-      ...getColumnSearchProps(item => item.tip === 'cl-invoice' ? item.pay_usd : 0, { type: 'number' })
+      render: (val, item) => item.tip === 'dr-payment' ? val : '',
+      sorter: (a, b) => a.tip === 'dr-payment' ? (a.pay_usd > b.pay_usd ? 1 : -1) : -1,
+      ...getColumnSearchProps(item => item.tip === 'dr-invoice' ? item.pay_usd : 0, { type: 'number' })
     },
     {
       title: 'Оплачено (₽)',
       dataIndex: 'pay_rub',
       key: 'payment_rub',
-      render: (val, item) => item.tip === 'cl-payment' ? val : '',
-      sorter: (a, b) => a.tip === 'cl-payment' ? (a.pay_rub > b.pay_rub ? 1 : -1) : -1,
-      ...getColumnSearchProps(item => item.tip === 'cl-invoice' ? item.pay_rub : 0, { type: 'number' })
+      render: (val, item) => item.tip === 'dr-payment' ? val : '',
+      sorter: (a, b) => a.tip === 'dr-payment' ? (a.pay_rub > b.pay_rub ? 1 : -1) : -1,
+      ...getColumnSearchProps(item => item.tip === 'dr-invoice' ? item.pay_rub : 0, { type: 'number' })
     },
     {
       title: 'Примечание',
@@ -122,7 +108,7 @@ export default function ClientBalance() {
     <>
       <Row align='middle' style={{ padding: '0 40px' }}>
         <Col span={12}>
-          <Typography.Title style={{ fontWeight: 'bold' }}>Баланс по клиентам</Typography.Title>
+          <Typography.Title style={{ fontWeight: 'bold' }}>Баланс перевозчиков</Typography.Title>
         </Col>
       </Row>
       <Table
@@ -134,7 +120,7 @@ export default function ClientBalance() {
         onRow={(record, index) => ({
           onClick: (e) => {
             if (e.detail === 2) {
-              const type = record.tip === 'cl-payment' ? 'payments' : 'invoices'
+              const type = record.tip === 'dr-payment' ? 'payments' : 'invoices'
               navigate(`/client-${type}/${record.id}`)
             }
           },
@@ -145,7 +131,7 @@ export default function ClientBalance() {
           let totalPaymentUsd = 0
           let totalPaymentRub = 0
           pageData.forEach((item) => {
-            if (item.tip === 'cl-invoice') {
+            if (item.tip === 'dr-invoice') {
               totalInvoiceUsd += item.pay_usd || 0
               totalInvoiceRub += item.pay_rub || 0
             } else {
@@ -157,7 +143,7 @@ export default function ClientBalance() {
           return (
             <>
               <Table.Summary.Row>
-                <Table.Summary.Cell index={0} colSpan={7}>Итого</Table.Summary.Cell>
+                <Table.Summary.Cell index={0} colSpan={6}>Итого</Table.Summary.Cell>
                 <Table.Summary.Cell index={1}>
                   {totalInvoiceUsd}
                 </Table.Summary.Cell>
@@ -172,7 +158,7 @@ export default function ClientBalance() {
                 </Table.Summary.Cell>
               </Table.Summary.Row>
               <Table.Summary.Row>
-                <Table.Summary.Cell index={0} colSpan={7}>Разница</Table.Summary.Cell>
+                <Table.Summary.Cell index={0} colSpan={6}>Разница</Table.Summary.Cell>
                 <Table.Summary.Cell index={1} colSpan={2}>
                   <nobr>Оплачено - Начислено = <b>{(totalPaymentUsd - totalInvoiceUsd).toFixed(2)}$</b></nobr>
                 </Table.Summary.Cell>
@@ -181,7 +167,7 @@ export default function ClientBalance() {
                 </Table.Summary.Cell>
               </Table.Summary.Row>
             </>
-          );
+          )
         }}
       />
     </>

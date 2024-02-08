@@ -869,7 +869,7 @@ export const useDriversInvoices = (id, initial = {}, params) => useQuery(['drive
   } : data
 }, params)
 
-export const useDriversPayments = (id, initial = {}, params) => useQuery(['client-payments', id], async () => {
+export const useDriversPayments = (id, initial = {}, params) => useQuery(['drivers-payments', id], async () => {
   const rate = await getLastCurrencyRate('USD', dayjs().format('YYYY-MM-DD'))
   if (id === 'create') {
     const response = await axios.select(
@@ -931,3 +931,19 @@ export const useDriversPayments = (id, initial = {}, params) => useQuery(['clien
     ...data[0]
   } : data
 }, params)
+
+export const useDriversBalance = () => useQuery(['drivers-balance'], async () => {
+  const response = await axios.select('dataset', '*', { where: `status=0 AND (tip='dr-payment' OR tip='dr-invoice') AND JSON_EXTRACT(pole, '$.done')=true` })
+  const payments = (response.data?.data || [])
+    .map(item => ({ ...item, ...parseJSON(item.pole) }))
+    .sort((a, b) => dayjs(a.done_date).valueOf() - dayjs(b.done_date).valueOf())
+  const numbers = payments.map(item => `JSON_EXTRACT(pole, '$.number')=${item.invoice_number}`).join(' OR ')
+  const invoice = await axios.select('dataset', '*', { where: `status=0 AND tip='cl-invoice' AND (${numbers})` })
+  let list = (invoice.data?.data || []).map(item => ({ ...item, ...parseJSON(item.pole) }))
+  list = keyBy(list, 'number')
+
+  return payments.map(payment => ({
+    ...payment,
+    invoice: list[payment.invoice_number]
+  }))
+})

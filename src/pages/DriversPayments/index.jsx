@@ -115,10 +115,10 @@ export default function DriversPayments() {
   const navigate = useNavigate()
   const drivers = useDictionary('drivers')
   const [ driversOptions, driversMap ] = useMemo(() => {
-    if (!Array.isArray(drivers.data)) return [[], {}]
-    const options = drivers.data.map(({ pole = {}, ...item }) => ({
-      value: item.id_user,
-      label: `${pole.code} (${[item.family, item.name, item.middle].filter(Boolean).join(' ')})`
+    if (!Array.isArray(drivers.data?.list)) return [[], {}]
+    const options = drivers.data.list.map(({ pole = {}, ...item }) => ({
+      value: item.id,
+      label: item.label
     }))
     const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
     return [ options, map ]

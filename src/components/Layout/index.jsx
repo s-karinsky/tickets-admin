@@ -80,7 +80,7 @@ const MENU_ITEMS = {
         [
           getItem(<Link to='/drivers-invoices'>Счета перевозчика</Link>, 'drivers-invoices'),
           getItem(<Link to='/drivers-payments'>Оплаты перевозчику</Link>, 'drivers-payments'),
-          // getItem(<Link to='/drivers-balance'>Баланс по перевозчикам</Link>, 'drivers-balance')
+          getItem(<Link to='/drivers-balance'>Баланс по перевозчикам</Link>, 'drivers-balance')
         ]
       )
     ]
