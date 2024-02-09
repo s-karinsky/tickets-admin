@@ -92,15 +92,13 @@ export default function PageLayout({ user }) {
   const navigate = useNavigate()
 
   const items = useMemo(() => {
-    if (user.u_role === '4') {
-      return [
-        MENU_ITEMS.settings,
-        MENU_ITEMS.dictionary,
-        MENU_ITEMS.sendings,
-        MENU_ITEMS.services,
-        MENU_ITEMS.finances
-      ]
-    }
+    return [
+      MENU_ITEMS.settings,
+      MENU_ITEMS.dictionary,
+      MENU_ITEMS.sendings,
+      MENU_ITEMS.services,
+      MENU_ITEMS.finances
+    ]
   }, [user.u_role])
 
   const toggleCollapsed = () => setCollapsed(!collapsed)
