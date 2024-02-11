@@ -374,10 +374,13 @@ export const useUsers = (userId, where, params) => useQuery(['users', userId, wh
 
   if (userId === 'create') {
     return {
-      id_role: '1'
+      id_role: typeof where === 'string' ? where : '1'
     }
   }
 
+  if (typeof where === 'string') {
+    where = {}
+  }
   const response = await axios.select('users', '*', { where: { active: 1, deleted: 0, id_user: userId, ...where } })
   const users = (response.data?.data || []).map(user => {
     if (!user.json) {

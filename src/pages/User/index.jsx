@@ -5,6 +5,7 @@ import { CaretLeftFilled, SaveOutlined, PlusOutlined } from '@ant-design/icons'
 import { BiEdit } from 'react-icons/bi'
 import CreateCityModal from '../../components/CreateCityModal'
 import FormField from '../../components/FormField'
+import axios from '../../utils/axios'
 import { useCountries, useCities, useUsers, createUser, updateUserById } from '../../utils/api'
 import { emailRule } from '../../utils/validationRules'
 import { USER_ROLES, USER_ROLES_OPTIONS, VALIDATION_MESSAGES } from '../../consts'
@@ -18,9 +19,10 @@ export default function PageUser() {
   const navigate = useNavigate()
   const [ isAddCity, setIsAddCity ] = useState(false)
   const [ country, setCountry ] = useState()
+  const [ isMakingPass, setIsMakingPass ] = useState(false)
   const [ isSending, setIsSending ] = useState()
   const [ searchParams, setSearchParams ] = useSearchParams()
-  const users = useUsers(id)
+  const users = useUsers(id, '4')
   const profile = users.data || EMPTY_OBJECT
 
   const countries = useCountries()
@@ -43,7 +45,7 @@ export default function PageUser() {
   }, [role])
 
   if (users.isLoading) return null
-
+  console.log(profile)
   return (
     <>
       <Form
@@ -103,6 +105,20 @@ export default function PageUser() {
             </Button>
           </Col>
           <Col>
+            {!isNew && <Button
+              style={{ marginRight: 20 }}
+              size='large'
+              htmlType='button'
+              onClick={async () => {
+                setIsMakingPass(true)
+                await axios.postWithAuth('/remind', { u_email: profile.email })
+                message.info('Пароль для входа отправлен на e-mail')
+                setIsMakingPass(false)
+              }}
+              loading={isMakingPass}
+            >
+              Сбросить пароль
+            </Button>}
             {isEdit ?
               <Button
                 icon={<SaveOutlined />}
