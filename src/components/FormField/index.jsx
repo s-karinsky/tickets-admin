@@ -66,6 +66,7 @@ export default function FormField({
       child = <InputNumber
         {...rest}
         decimalSeparator=','
+        formatter={(value) => Number(value).toLocaleString()}
         readOnly={!isEdit}
       />
       break

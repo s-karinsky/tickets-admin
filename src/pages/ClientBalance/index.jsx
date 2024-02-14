@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { getColumnSearchProps } from '../../utils/components'
 import { useClientBalance, useUsersWithRole } from '../../utils/api'
-import { localeCompare } from '../../utils/utils'
+import { localeCompare, localeNumber } from '../../utils/utils'
 
 export default function ClientBalance() {
   const { data, isLoading } = useClientBalance()
@@ -44,6 +44,7 @@ export default function ClientBalance() {
       title: 'Учет',
       dataIndex: 'done_date',
       render: date => dayjs(date).format('DD.MM.YYYY'),
+      align: 'center',
       sorter: (a, b) => dayjs(a.done_date).valueOf() - dayjs(b.done_date).valueOf(),
       ...getColumnSearchProps('done_date', { type: 'date' })
     },
@@ -83,30 +84,34 @@ export default function ClientBalance() {
     {
       title: 'Начислено ($)',
       dataIndex: 'pay_usd',
-      render: (val, item) => item.tip === 'cl-invoice' ? val : '',
+      align: 'right',
+      render: (val, item) => item.tip === 'cl-invoice' ? localeNumber(val) : '',
       sorter: (a, b) => a.tip === 'cl-invoice' ? (a.pay_usd > b.pay_usd ? 1 : -1) : -1,
       ...getColumnSearchProps(item => item.tip === 'cl-invoice' ? item.pay_usd : 0, { type: 'number' })
     },
     {
       title: 'Начислено (₽)',
       dataIndex: 'pay_rub',
-      render: (val, item) => item.tip === 'cl-invoice' ? val : '',
+      align: 'right',
+      render: (val, item) => item.tip === 'cl-invoice' ? localeNumber(val) : '',
       sorter: (a, b) => a.tip === 'cl-invoice' ? (a.pay_rub > b.pay_rub ? 1 : -1) : -1,
       ...getColumnSearchProps(item => item.tip === 'cl-invoice' ? item.pay_rub : 0, { type: 'number' })
     },
     {
       title: 'Оплачено ($)',
       dataIndex: 'pay_usd',
+      align: 'right',
       key: 'payment_usd',
-      render: (val, item) => item.tip === 'cl-payment' ? val : '',
+      render: (val, item) => item.tip === 'cl-payment' ? localeNumber(val) : '',
       sorter: (a, b) => a.tip === 'cl-payment' ? (a.pay_usd > b.pay_usd ? 1 : -1) : -1,
       ...getColumnSearchProps(item => item.tip === 'cl-invoice' ? item.pay_usd : 0, { type: 'number' })
     },
     {
       title: 'Оплачено (₽)',
       dataIndex: 'pay_rub',
+      align: 'right',
       key: 'payment_rub',
-      render: (val, item) => item.tip === 'cl-payment' ? val : '',
+      render: (val, item) => item.tip === 'cl-payment' ? localeNumber(val) : '',
       sorter: (a, b) => a.tip === 'cl-payment' ? (a.pay_rub > b.pay_rub ? 1 : -1) : -1,
       ...getColumnSearchProps(item => item.tip === 'cl-invoice' ? item.pay_rub : 0, { type: 'number' })
     },
@@ -159,25 +164,25 @@ export default function ClientBalance() {
               <Table.Summary.Row>
                 <Table.Summary.Cell index={0} colSpan={7}>Итого</Table.Summary.Cell>
                 <Table.Summary.Cell index={1}>
-                  {totalInvoiceUsd}
+                  {localeNumber(totalInvoiceUsd)}
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={2}>
-                  {totalInvoiceRub}
+                  {localeNumber(totalInvoiceRub)}
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={3}>
-                  {totalPaymentUsd}
+                  {localeNumber(totalPaymentUsd)}
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={4}>
-                  {totalPaymentRub}
+                  {localeNumber(totalPaymentRub)}
                 </Table.Summary.Cell>
               </Table.Summary.Row>
               <Table.Summary.Row>
                 <Table.Summary.Cell index={0} colSpan={7}>Разница</Table.Summary.Cell>
                 <Table.Summary.Cell index={1} colSpan={2}>
-                  <nobr>Оплачено - Начислено = <b>{(totalPaymentUsd - totalInvoiceUsd).toFixed(2)}$</b></nobr>
+                  <nobr>Оплачено - Начислено = <b>{localeNumber((totalPaymentUsd - totalInvoiceUsd).toFixed(2))}$</b></nobr>
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={1} colSpan={2}>
-                  <nobr>Оплачено - Начислено = <b>{(totalPaymentRub - totalInvoiceRub).toFixed()}₽</b></nobr>
+                  <nobr>Оплачено - Начислено = <b>{localeNumber((totalPaymentRub - totalInvoiceRub).toFixed())}₽</b></nobr>
                 </Table.Summary.Cell>
               </Table.Summary.Row>
             </>

@@ -12,7 +12,7 @@ import { useDictionary, useUsersWithRole, getLastId, getCount, getSendingById, g
 import { SENDING_STATUS, SERVICE_NAME } from '../../consts'
 import { getColumnSearchProps } from '../../utils/components'
 import { required, numberRange } from '../../utils/validationRules'
-import { declOfNum, numberFormatter, getPaginationSettings, filterOption } from '../../utils/utils'
+import { declOfNum, numberFormatter, getPaginationSettings, filterOption, localeNumber } from '../../utils/utils'
 
 const { Title, Link } = Typography
 
@@ -158,6 +158,7 @@ export default function Place({ user }) {
       dataIndex: 'net_weight',
       key: 'net_weight',
       align: 'right',
+      render: weight => localeNumber(weight),
       sorter: (a, b) => a.net_weight - b.net_weight,
       ...getColumnSearchProps('net_weight', { type: 'number' })
     },
@@ -175,7 +176,7 @@ export default function Place({ user }) {
       key: 'price',
       align: 'right',
       sorter: (a, b) => a.price - b.price,
-      render: val => Number(val) ? Number(val).toFixed(2) : null,
+      render: val => Number(val) ? localeNumber(Number(val).toFixed(2)) : null,
       ...getColumnSearchProps('price', { type: 'number' })
     },
     {
@@ -184,7 +185,7 @@ export default function Place({ user }) {
       key: 'sum',
       align: 'right',
       sorter: (a, b) => a.sum - b.sum,
-      render: val => Number(val) ? Number(val).toFixed(2) : null,
+      render: val => Number(val) ? localeNumber(Number(val).toFixed(2)) : null,
       ...getColumnSearchProps('sum', { type: 'number' })
     },
     {

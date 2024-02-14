@@ -11,12 +11,14 @@ const columns = [
   {
     title: 'Дата',
     dataIndex: 'date',
+    align: 'center',
     sorder: (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
     ...getColumnSearchProps('date', { type: 'date' })
   },
   {
     title: 'Курс',
     dataIndex: 'rate',
+    align: 'right',
     sorter: (a, b) => a.rate - b.rate,
     ...getColumnSearchProps('rate', { type: 'number' }) 
   }

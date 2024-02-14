@@ -1,13 +1,10 @@
-import { useEffect, useMemo } from 'react'
-import { Row, Col, Button, Table, Typography, Modal } from 'antd'
-import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { ExclamationCircleFilled } from '@ant-design/icons'
+import { useMemo } from 'react'
+import { Row, Col, Table, Typography } from 'antd'
+import { useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
-import { BsTrash } from 'react-icons/bs'
-import axios from '../../utils/axios'
 import { getColumnSearchProps } from '../../utils/components'
 import { useDriversBalance, useDictionary } from '../../utils/api'
-import { localeCompare } from '../../utils/utils'
+import { localeCompare, localeNumber } from '../../utils/utils'
 
 export default function DriversBalance() {
   const { data, isLoading, refetch } = useDriversBalance()
@@ -36,6 +33,7 @@ export default function DriversBalance() {
     {
       title: 'Учет',
       dataIndex: 'done_date',
+      align: 'center',
       render: date => dayjs(date).format('DD.MM.YYYY'),
       sorter: (a, b) => dayjs(a.done_date).valueOf() - dayjs(b.done_date).valueOf(),
       ...getColumnSearchProps('done_date', { type: 'date' })
@@ -69,14 +67,16 @@ export default function DriversBalance() {
     {
       title: 'Начислено ($)',
       dataIndex: 'pay_usd',
-      render: (val, item) => item.tip === 'dr-invoice' ? val : '',
+      align: 'right',
+      render: (val, item) => item.tip === 'dr-invoice' ? localeNumber(val) : '',
       sorter: (a, b) => a.tip === 'dr-invoice' ? (a.pay_usd > b.pay_usd ? 1 : -1) : -1,
       ...getColumnSearchProps(item => item.tip === 'dr-invoice' ? item.pay_usd : 0, { type: 'number' })
     },
     {
       title: 'Начислено (₽)',
       dataIndex: 'pay_rub',
-      render: (val, item) => item.tip === 'dr-invoice' ? val : '',
+      align: 'right',
+      render: (val, item) => item.tip === 'dr-invoice' ? localeNumber(val) : '',
       sorter: (a, b) => a.tip === 'dr-invoice' ? (a.pay_rub > b.pay_rub ? 1 : -1) : -1,
       ...getColumnSearchProps(item => item.tip === 'dr-invoice' ? item.pay_rub : 0, { type: 'number' })
     },
@@ -84,7 +84,8 @@ export default function DriversBalance() {
       title: 'Оплачено ($)',
       dataIndex: 'pay_usd',
       key: 'payment_usd',
-      render: (val, item) => item.tip === 'dr-payment' ? val : '',
+      align: 'right',
+      render: (val, item) => item.tip === 'dr-payment' ? localeNumber(val) : '',
       sorter: (a, b) => a.tip === 'dr-payment' ? (a.pay_usd > b.pay_usd ? 1 : -1) : -1,
       ...getColumnSearchProps(item => item.tip === 'dr-invoice' ? item.pay_usd : 0, { type: 'number' })
     },
@@ -92,7 +93,8 @@ export default function DriversBalance() {
       title: 'Оплачено (₽)',
       dataIndex: 'pay_rub',
       key: 'payment_rub',
-      render: (val, item) => item.tip === 'dr-payment' ? val : '',
+      align: 'right',
+      render: (val, item) => item.tip === 'dr-payment' ? localeNumber(val) : '',
       sorter: (a, b) => a.tip === 'dr-payment' ? (a.pay_rub > b.pay_rub ? 1 : -1) : -1,
       ...getColumnSearchProps(item => item.tip === 'dr-invoice' ? item.pay_rub : 0, { type: 'number' })
     },
@@ -145,25 +147,25 @@ export default function DriversBalance() {
               <Table.Summary.Row>
                 <Table.Summary.Cell index={0} colSpan={6}>Итого</Table.Summary.Cell>
                 <Table.Summary.Cell index={1}>
-                  {totalInvoiceUsd}
+                  {localeNumber(totalInvoiceUsd)}
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={2}>
-                  {totalInvoiceRub}
+                  {localeNumber(totalInvoiceRub)}
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={3}>
-                  {totalPaymentUsd}
+                  {localeNumber(totalPaymentUsd)}
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={4}>
-                  {totalPaymentRub}
+                  {localeNumber(totalPaymentRub)}
                 </Table.Summary.Cell>
               </Table.Summary.Row>
               <Table.Summary.Row>
                 <Table.Summary.Cell index={0} colSpan={6}>Разница</Table.Summary.Cell>
                 <Table.Summary.Cell index={1} colSpan={2}>
-                  <nobr>Оплачено - Начислено = <b>{(totalPaymentUsd - totalInvoiceUsd).toFixed(2)}$</b></nobr>
+                  <nobr>Оплачено - Начислено = <b>{localeNumber((totalPaymentUsd - totalInvoiceUsd).toFixed(2))}$</b></nobr>
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={1} colSpan={2}>
-                  <nobr>Оплачено - Начислено = <b>{(totalPaymentRub - totalInvoiceRub).toFixed()}₽</b></nobr>
+                  <nobr>Оплачено - Начислено = <b>{localeNumber((totalPaymentRub - totalInvoiceRub).toFixed(2))}₽</b></nobr>
                 </Table.Summary.Cell>
               </Table.Summary.Row>
             </>

@@ -7,7 +7,7 @@ import dayjs from 'dayjs'
 import { useService, updateDatasetById, useUsers } from '../../utils/api'
 import { SERVICE_STATUS, SERVICE_NAME } from '../../consts'
 import { getColumnSearchProps } from '../../utils/components'
-import { localeCompare } from '../../utils/utils'
+import { localeCompare, localeNumber } from '../../utils/utils'
 import { MARKETPLACES } from '../../consts'
 
 const getEndDateTitle = name => {
@@ -26,6 +26,7 @@ const getColumns = (name, { onStatusClick, clients = {} }) => {
     {
       title: 'Дата',
       dataIndex: 'date',
+      align: 'center',
       render: date => dayjs(date).format('DD.MM.YYYY'),
       sorter: (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
       ...getColumnSearchProps('date', { type: 'date' })
@@ -64,6 +65,7 @@ const getColumns = (name, { onStatusClick, clients = {} }) => {
     name === 'storage' && {
       title: 'Дата начала',
       dataIndex: 'start_date',
+      align: 'center',
       render: date => date && dayjs(date).format('DD.MM.YYYY'),
       sorter: (a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime(),
       ...getColumnSearchProps('start_date', { type: 'date' })
@@ -71,12 +73,14 @@ const getColumns = (name, { onStatusClick, clients = {} }) => {
     name === 'storage' && {
       title: 'Дата окончания',
       dataIndex: 'end_date',
+      align: 'center',
       render: date => date && dayjs(date).format('DD.MM.YYYY'),
       sorter: (a, b) => new Date(a.end_date).getTime() - new Date(b.end_date).getTime(),
       ...getColumnSearchProps('end_date', { type: 'date' })
     },
     name !== 'storage' && {
       title: getEndDateTitle(name),
+      align: 'center',
       dataIndex: `date_status_${SERVICE_STATUS[name].length - 1}`,
       sorter: (a, b) => new Date(a[`date_status_${SERVICE_STATUS[name].length - 1}`]).getTime() - new Date(b[`date_status_${SERVICE_STATUS[name].length - 1}`]).getTime(),
       ...getColumnSearchProps(`date_status_${SERVICE_STATUS[name].length - 1}`, { type: 'date' })
@@ -90,6 +94,7 @@ const getColumns = (name, { onStatusClick, clients = {} }) => {
     {
       title: 'Мест',
       dataIndex: 'places',
+      align: 'right',
       render: places => Array.isArray(places) ? places.length : 0,
       sorter: (a, b) => a.places?.length - b.places?.length,
       ...getColumnSearchProps(item => item.places?.length, { type: 'number' })
@@ -97,7 +102,8 @@ const getColumns = (name, { onStatusClick, clients = {} }) => {
     {
       title: 'Вес брутто',
       dataIndex: 'placeData',
-      render: data => (data.reduce((sum, item) => sum + (item?.pole?.gross_weight || 0), 0)).toFixed(3),
+      align: 'right',
+      render: data => localeNumber((data.reduce((sum, item) => sum + (item?.pole?.gross_weight || 0), 0)).toFixed(3)),
       sorter: (a, b) => a.placeData.reduce((sum, item) => sum + (item?.pole?.gross_weight || 0), 0) - b.placeData.reduce((sum, item) => sum + (item?.pole?.gross_weight || 0), 0),
       ...getColumnSearchProps(item => item.placeData.reduce((sum, item) => sum + (item?.pole?.gross_weight || 0), 0), { type: 'number' })
     },
@@ -141,7 +147,7 @@ export default function ServiceList() {
       return {
         ...acc,
         [item.id_user]: {
-          code: item.json.code,
+          code: item.json?.code,
         }
       }
     }, {})

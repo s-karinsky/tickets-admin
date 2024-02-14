@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { Modal, Select, Table } from 'antd'
 import { useService } from '../../utils/api'
 import axios from '../../utils/axios'
+import { localeNumber } from '../../utils/utils'
 import { SERVICE_NAME } from '../../consts'
 
 const columns = [
@@ -21,31 +22,34 @@ const columns = [
     dataIndex: 'net_weight',
     key: 'net_weight',
     align: 'right',
-    render: val => Number(val) ? Number(val).toFixed(3) : ''
+    render: val => Number(val) ? localeNumber(Number(val).toFixed(3)) : ''
   },
   {
     title: 'Вес брутто',
     dataIndex: 'gross_weight',
     key: 'gross_weight',
     align: 'right',
-    render: val => Number(val) ? Number(val).toFixed(3) : ''
+    render: val => Number(val) ? localeNumber(Number(val).toFixed(3)) : ''
   },
   {
     title: 'Длина',
     dataIndex: 'size',
     key: 'length',
+    align: 'right',
     render: size => typeof size === 'object' ? size.length : ''
   },
   {
     title: 'Ширина',
     dataIndex: 'size',
     key: 'width',
+    align: 'right',
     render: size => typeof size === 'object' ? size.width : ''
   },
   {
     title: 'Высота',
     dataIndex: 'size',
     key: 'height',
+    align: 'right',
     render: size => typeof size === 'object' ? size.height : ''
   },
   {

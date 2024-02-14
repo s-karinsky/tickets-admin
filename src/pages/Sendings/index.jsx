@@ -11,7 +11,7 @@ import { API_URL } from '../../consts'
 import { SendingsStatus } from '../../components/SendingsStatus'
 import { DateTableCell } from '../../components/DateTableCell'
 import { getCount, getSendings, deleteSendingById, updateSendingById, useDictionary, useTemplates } from '../../utils/api'
-import { declOfNum, getPaginationSettings } from '../../utils/utils'
+import { declOfNum, getPaginationSettings, localeNumber } from '../../utils/utils'
 import { getColumnSearchProps } from '../../utils/components'
 import { SENDING_STATUS } from '../../consts'
 
@@ -155,7 +155,7 @@ export default function Sendings() {
       dataIndex: 'gross_weight',
       key: 'gross_weight',
       align: 'right',
-      render: val => Number(val).toFixed(3),
+      render: val => Number(val) ? localeNumber(Number(val).toFixed(3)) : '',
       sorter: (a, b) => a.gross_weight - b.gross_weight,
       ...getColumnSearchProps('gross-weight', { type: 'number' })
     },

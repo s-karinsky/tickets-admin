@@ -14,6 +14,7 @@ import { getDatasetsById, useUsersWithRole, useDictionary, useService, getProduc
 import { getColumnSearchProps } from '../../utils/components'
 import axios from '../../utils/axios'
 import { sqlInsert, sqlUpdate } from '../../utils/sql'
+import { localeNumber } from '../../utils/utils'
 
 const getTitle = (name, id) => {
   const isNew = id === 'create'
@@ -152,6 +153,7 @@ export default function ServiceForm() {
         dataIndex: 'net_weight',
         key: 'net_weight',
         align: 'right',
+        render: val => localeNumber(val),
         sorter: (a, b) => a.net_weight - b.net_weight,
         ...getColumnSearchProps('net_weight', { type: 'number' })
       },
@@ -169,7 +171,7 @@ export default function ServiceForm() {
         key: 'price',
         align: 'right',
         sorter: (a, b) => a.price - b.price,
-        render: val => Number(val) ? Number(val).toFixed(2) : null,
+        render: val => Number(val) ? localeNumber(Number(val).toFixed(2)) : null,
         ...getColumnSearchProps('price', { type: 'number' })
       },
       {
@@ -178,7 +180,7 @@ export default function ServiceForm() {
         key: 'sum',
         align: 'right',
         sorter: (a, b) => a.sum - b.sum,
-        render: val => Number(val) ? Number(val).toFixed(2) : null,
+        render: val => Number(val) ? localeNumber(Number(val).toFixed(2)) : null,
         ...getColumnSearchProps('sum', { type: 'number' })
       },
       {

@@ -108,6 +108,7 @@ const getColumns = (name, params = {
         {
           title: 'Цена за 1 кг',
           dataIndex: 'price_kg',
+          align: 'right',
           sorter: (a, b) => parseInt(a.price_kg || 0) - parseInt(b.price_kg || 0),
           ...getColumnSearchProps('price_kg')
         },

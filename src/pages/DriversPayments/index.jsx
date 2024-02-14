@@ -6,8 +6,8 @@ import { BsTrash } from 'react-icons/bs'
 import { ExclamationCircleFilled } from '@ant-design/icons'
 import axios from '../../utils/axios'
 import { getColumnSearchProps } from '../../utils/components'
-import { useDriversPayments, useUsersWithRole, useDictionary } from '../../utils/api'
-import { localeCompare } from '../../utils/utils'
+import { useDriversPayments, useDictionary } from '../../utils/api'
+import { localeCompare, localeNumber } from '../../utils/utils'
 
 const getColumns = ({ refetch, navigate, driversMap }) => ([
   {
@@ -19,6 +19,7 @@ const getColumns = ({ refetch, navigate, driversMap }) => ([
   {
     title: 'Дата',
     dataIndex: 'created_at',
+    align: 'center',
     sorter: (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
     render: date => dayjs(date).format('DD.MM.YYYY'),
     ...getColumnSearchProps('date', { type: 'date' })
@@ -45,18 +46,24 @@ const getColumns = ({ refetch, navigate, driversMap }) => ([
   {
     title: 'К оплате ($)',
     dataIndex: 'pay_usd',
+    align: 'right',
+    render: pay => localeNumber(pay),
     sorter: (a, b) => a.pay_usd - b.pay_usd,
     ...getColumnSearchProps('pay_usd', { type: 'number' })
   },
   {
     title: 'К оплате (₽)',
     dataIndex: 'pay_rub',
+    align: 'right',
+    render: pay => localeNumber(pay),
     sorter: (a, b) => a.pay_rub - b.pay_rub,
     ...getColumnSearchProps('pay_rub', { type: 'number' })
   },
   {
     title: 'Дата учета',
     dataIndex: 'done_date',
+    align: 'center',
+    render: date => date && dayjs(date).format('DD.MM.YYYY'),
     sorter: (a, b) => new Date(a.done_date).getTime() - new Date(b.done_date).getTime(),
     ...getColumnSearchProps('done_date', { type: 'date' })
   },

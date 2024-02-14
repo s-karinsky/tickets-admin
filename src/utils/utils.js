@@ -69,3 +69,8 @@ export const parseJSON = (str, isWarning) => {
 }
 
 export const localeCompare = (str1, str2) => (str1 || '').localeCompare(str2 || '')
+
+export const localeNumber = number => {
+  if (!Number(number) && Number(number) !== 0) return ''
+  return Number(number).toLocaleString()
+}
