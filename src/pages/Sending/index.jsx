@@ -354,7 +354,7 @@ export default function Sending() {
             }}
           >
             <form target='_blank' method='POST' action={`${API_URL}/script/template/1`}>
-              <input type='hidden' value={`{"t_id": ${sendingId}, "cf": "vigruzka", "da": 0 }`} name='s_t_data' />
+              <input type='hidden' value={`{"t_id": ${sendingId}, "cf": "vigruzka", "sf": "0", "da": 0 }`} name='s_t_data' />
               <input type='hidden' value={cookies.get('token')} name='token' />
               <input type='hidden' value={cookies.get('u_hash')} name='u_hash' />
               <Button
