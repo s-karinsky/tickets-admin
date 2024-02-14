@@ -704,7 +704,7 @@ export default function ServiceForm() {
                 name={['pole', 'terminal_phone']}
                 label='Телефон терминала'
                 rules={[ { required: dynamicRequired.terminal_phone }]}
-                mask='+00000000000'
+                mask='+00000000000[0]'
                 size='large'
                 isEdit={isEdit}
               />  
@@ -751,7 +751,7 @@ export default function ServiceForm() {
                 name={['pole', 'got_phone']}
                 rules={[{ required: !isGotClient }]}
                 isEdit={isEdit}
-                mask='+00000000000'
+                mask='+00000000000[0]'
                 size='large'
               />
             </Col>

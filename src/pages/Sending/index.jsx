@@ -78,9 +78,10 @@ export default function Sending() {
     return places.data.reduce((acc, place) => {
       const index = acc.findIndex(item => item.tarif === place.tarif && item.client === place.client)
       if (index === -1) {
-        acc.push({ id: place.id, tarif: place.tarif, client: place.client, count: 1 })
+        acc.push({ id: place.id, tarif: place.tarif, client: place.client, gross_weight: place.gross_weight, count: 1 })
       } else {
         acc[index].count++
+        acc[index].gross_weight += place.gross_weight
       }
       return acc
     }, [])
@@ -106,7 +107,14 @@ export default function Sending() {
     {
       title: 'Количество мест',
       dataIndex: 'count',
+      align: 'right',
       sorter: (a, b) => a.count - b.count
+    },
+    {
+      title: 'Вес брутто',
+      dataIndex: 'gross_weight',
+      align: 'right',
+      sorter: (a, b) => a.gross_weight - b.gross_weight
     }
   ], [clientsMap, clientsOptions])
 
@@ -208,6 +216,7 @@ export default function Sending() {
       title: 'Длина',
       dataIndex: 'size',
       key: 'length',
+      align: 'right',
       render: size => typeof size === 'object' ? size.length : '',
       sorter: (a, b) => a.size?.length - b.size?.length
     },
@@ -215,6 +224,7 @@ export default function Sending() {
       title: 'Ширина',
       dataIndex: 'size',
       key: 'width',
+      align: 'right',
       render: size => typeof size === 'object' ? size.width : '',
       sorter: (a, b) => a.size?.width - b.size?.width
     },
@@ -222,6 +232,7 @@ export default function Sending() {
       title: 'Высота',
       dataIndex: 'size',
       key: 'height',
+      align: 'right',
       render: size => typeof size === 'object' ? size.height : '',
       sorter: (a, b) => a.size?.height - b.size?.height
     },
@@ -240,13 +251,6 @@ export default function Sending() {
       align: 'right',
       sorter: (a, b) => a.count - b.count,
       ...getColumnSearchProps('count', { type: 'number' })
-    },
-    {
-      title: 'Услуга',
-      dataIndex: 'service',
-      key: 'service_name',
-      render: service => SERVICE_NAME[service?.type] || '',
-      sorter: (a, b) => (SERVICE_NAME[a.service?.type] || '').localeCompare(SERVICE_NAME[b.service?.type] || '')
     },
     {
       title: 'Статус услуги',
@@ -537,6 +541,7 @@ export default function Sending() {
                   <FormField
                     label='Мест'
                     labelType='calc'
+                    type='number'
                     value={placesData.length}
                     width={100}
                     isEdit={false}

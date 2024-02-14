@@ -209,7 +209,7 @@ export default function UserForm({ name, userId }) {
               label={isClient ? 'Телефон' : (isEmployee ? 'Телефон рабочий' : 'Телефон ответственного')}
               rules={[{ required: true }]}
               size='large'
-              mask='+00000000000'
+              mask='+00000000000[0]'
             />
           </Col>
           {!isClient && !isEmployee && <Col span={8}>
@@ -224,8 +224,7 @@ export default function UserForm({ name, userId }) {
               name={isClient || isEmployee ? ['json', 'addPhone'] : ['json', 'companyPhone']}
               label={isClient ? 'Дополнительный телефон' : (isEmployee ? 'Телефон личный' : 'Телефон компании')}
               size='large'
-              mask='+00000000000'
-              rules={!isClient && [{ required: true }]}
+              mask='+00000000000[0]'
             />
           </Col>
           <Col span={8}>
@@ -317,7 +316,7 @@ export default function UserForm({ name, userId }) {
                   label='Телефон'
                   name={['json', 'company', 'phone']}
                   size='large'
-                  mask='+00000000000'
+                  mask='+00000000000[0]'
                 />
               </Col>
               <Col span={8}>

@@ -18,3 +18,8 @@ code {
   height: 40px;
   line-height: 40px;
 }
+
+.ant-input-number-disabled .ant-input-number-input,
+.ant-input-number-readonly .ant-input-number-input {
+  padding-right: 5px !important;
+}

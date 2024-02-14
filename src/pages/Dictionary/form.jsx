@@ -188,7 +188,7 @@ export default function DictionaryForm() {
                     name='phone'
                     rules={[{ required: true }]}
                     size='large'
-                    mask='+00000000000'
+                    mask='+00000000000[0]'
                   />
                 </Col>
                 <Col span={6}>
@@ -197,7 +197,7 @@ export default function DictionaryForm() {
                     name='company_phone'
                     rules={[{ required: true }]}
                     size='large'
-                    mask='+00000000000'
+                    mask='+00000000000[0]'
                   />
                 </Col>
                 <Col span={6}>
@@ -270,7 +270,7 @@ export default function DictionaryForm() {
                     label={'Телефон'}
                     rules={[{ required: true }]}
                     size='large'
-                    mask='+00000000000'
+                    mask='+00000000000[0]'
                   />
                 </Col>
                 <Col span={8}>
@@ -361,7 +361,7 @@ export default function DictionaryForm() {
                           label='Телефон'
                           name={['company', 'phone']}
                           size='large'
-                          mask='+00000000000'
+                          mask='+00000000000[0]'
                         />
                       </Col>
                       <Col span={8}>

@@ -819,7 +819,7 @@ export const useDriversInvoices = (id, initial = {}, params) => useQuery(['drive
           ...parseJSON(sData.json)
         }
         let weight = 0
-        rest.name = `За отправку партии № ${sData.from} от ${dayjs(sData.create_datetime).format('DD.MM.YYYY')} Места:`
+        rest.name = `За отправку № ${sData.from} от ${dayjs(sData.create_datetime).format('DD.MM.YYYY')}, Мест: ${(places.data?.data || []).length}`
         let list = (places.data?.data || []).map(place => ({ ...place, ...parseJSON(place.pole) }))
         list.forEach(place => {
           weight += Number(place.gross_weight)
@@ -827,7 +827,7 @@ export const useDriversInvoices = (id, initial = {}, params) => useQuery(['drive
         })
         rest.driver = sData.transporter
         rest.inclient = sData.inclient
-        rest.name += ` Вес: ${weight.toFixed(3)} кг.`
+        rest.name += `, Вес брутто: ${weight.toFixed(3)} кг.`
       }
       if (type === 'payment') {
         const invoice = await axios.select('dataset', '*', { where: { status: 0, tip: 'dr-payment', id } })
