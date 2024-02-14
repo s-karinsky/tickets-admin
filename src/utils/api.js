@@ -238,9 +238,10 @@ export const getPlacesBySendingId = sendingId => async () => {
   if (sendingId === 'create') return []
 
   const [ response, responseProducts ] = await Promise.all([
-    axios.select('dataset p', ['p.*', 's.id as service_id', 's.pole as service'], {
+    axios.select('dataset p', ['p.*', 's.id as service_id', 's.pole as service', 'i.pole as invoice', 'i.id as invoice_id'], {
       leftJoin: {
-        'dataset s': `JSON_EXTRACT(s.pole, "$.places") LIKE CONCAT('%"', p.id ,'"%') AND s.tip="service" AND s.status=0 AND JSON_EXTRACT(s.pole, "$.is_finished")=0`
+        'dataset s': `JSON_EXTRACT(s.pole, "$.places") LIKE CONCAT('%"', p.id ,'"%') AND s.tip="service" AND s.status=0 AND JSON_EXTRACT(s.pole, "$.is_finished")=0`,
+        'dataset i': `JSON_EXTRACT(i.pole, "$.parent_trip")="${sendingId}" AND JSON_EXTRACT(i.pole, "$.client")=JSON_EXTRACT(p.pole, "$.client") AND i.status=0`
       },
       where: {
         'p.ref_tip': 'sending',
@@ -270,12 +271,14 @@ export const getPlacesBySendingId = sendingId => async () => {
   return data.map(item => {
     const json = parseJSON(item.pole)
     const service = parseJSON(item.service)
+    const invoice = parseJSON(item.invoice)
     return {
       ...item,
       ...json,
       count: productsMap[item.id]?.count,
       hasMark: productsMap[item.id]?.mark === 'true',
-      service
+      service,
+      invoice
     }
   })
 }

@@ -73,6 +73,9 @@ export default function ClientInvoicesForm() {
           setIsUpdating(true)
           params.total_usd = params.pay_usd - params.discount_usd
           params.total_rub = params.pay_rub - params.discount_rub
+          if (location.state?.id) {
+            params.parent_trip = location.state?.id
+          }
           if (isNew) {
             const created = await axios.postWithAuth('/query/insert', { sql:
               sqlInsert('dataset', {

@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, useEffect } from 'react'
-import { useNavigate, useLocation, useParams, useSearchParams } from 'react-router-dom'
+import { useNavigate, useLocation, useParams, useSearchParams, Link as RouterLink } from 'react-router-dom'
 import { Button, Row, Table, Typography, Form, Modal, Checkbox, Dropdown, message } from 'antd'
 import {
   SaveOutlined,
@@ -78,7 +78,15 @@ export default function Sending() {
     return places.data.reduce((acc, place) => {
       const index = acc.findIndex(item => item.tarif === place.tarif && item.client === place.client)
       if (index === -1) {
-        acc.push({ id: place.id, tarif: place.tarif, client: place.client, gross_weight: place.gross_weight, count: 1 })
+        acc.push({
+          id: place.id,
+          tarif: place.tarif,
+          client: place.client,
+          gross_weight: place.gross_weight,
+          count: 1,
+          invoice: place.invoice,
+          invoiceId: place.invoice_id
+        })
       } else {
         acc[index].count++
         acc[index].gross_weight += place.gross_weight
@@ -114,7 +122,13 @@ export default function Sending() {
       title: 'Вес брутто',
       dataIndex: 'gross_weight',
       align: 'right',
+      render: weight => weight.toFixed(3),
       sorter: (a, b) => a.gross_weight - b.gross_weight
+    },
+    {
+      title: 'Счет',
+      dataIndex: 'invoice',
+      render: (invoice, item) => invoice && <RouterLink to={`/client-invoices/${item.invoice_id}`}>Счет № {invoice.number} от {dayjs(invoice.date).format('DD.MM.YYYY')}</RouterLink>
     }
   ], [clientsMap, clientsOptions])
 
