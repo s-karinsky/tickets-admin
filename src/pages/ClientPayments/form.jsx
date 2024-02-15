@@ -66,6 +66,7 @@ export default function ClientPaymentsForm({ user }) {
 
   const payType = Form.useWatch('pay_type', form)
   const isCash = payType?.toLowerCase() === 'наличный'
+  const isGiveClient = Form.useWatch('give_client', form)
   data.get_employe = user.u_id
 
   return isLoading || isRefetching ?
@@ -243,7 +244,7 @@ export default function ClientPaymentsForm({ user }) {
                 <FormField
                   label='Передал оплату ФИО'
                   name='pay_name'
-                  rules={[ { required: isCash } ]}
+                  rules={[ { required: !isGiveClient } ]}
                 />
               </Col>
               <Col span={4}>

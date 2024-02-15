@@ -1,15 +1,16 @@
-import { useEffect, useMemo } from 'react'
-import { Row, Col, Button, Table, Typography, Modal } from 'antd'
+import { useEffect, useMemo, useState } from 'react'
+import { Row, Col, Button, Table, Typography, Modal, DatePicker } from 'antd'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { ExclamationCircleFilled } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import { BsTrash } from 'react-icons/bs'
 import axios from '../../utils/axios'
+import { sqlUpdate } from '../../utils/sql'
 import { getColumnSearchProps } from '../../utils/components'
 import { useClientInvoices, useUsersWithRole, useDictionary } from '../../utils/api'
 import { localeCompare, localeNumber, getSurnameWithInitials } from '../../utils/utils'
 
-const getColumns = ({ refetch, navigate, clientsMap, inclientMap }) => [
+const getColumns = ({ refetch, navigate, clientsMap, inclientMap, setModal }) => [
   {
     title: 'Номер',
     dataIndex: 'number',
@@ -87,6 +88,32 @@ const getColumns = ({ refetch, navigate, clientsMap, inclientMap }) => [
       return (
         <div style={{ whiteSpace: 'nowrap' }}>
           <Button
+            style={{ marginRight: 15 }}
+            size='small'
+            htmlType='button'
+            danger={item.pole?.done}
+            onClick={() => {
+              if (!item.pole?.done) {
+                setModal(item)
+              }
+              else {
+                Modal.confirm({
+                  title: 'Отменить проведение счета?',
+                  icon: <ExclamationCircleFilled />,
+                  okText: 'Да',
+                  okType: 'danger',
+                  cancelText: 'Нет',
+                  onOk: async () => {
+                    await axios.postWithAuth('/query/update', { sql: sqlUpdate('dataset', { pole: JSON.stringify({ ...item.pole, done: false, done_date: '' }) }, `id=${item.id}`) })
+                    refetch()
+                  }
+                })
+              }
+            }}
+          >
+            {item.pole?.done ? 'Отменить проведение' : 'Провести'}
+          </Button>
+          <Button
             type='primary'
             size='small'
             style={{ marginTop: 5 }}
@@ -95,7 +122,7 @@ const getColumns = ({ refetch, navigate, clientsMap, inclientMap }) => [
             Оплатить
           </Button>
           <BsTrash
-            style={{ marginLeft: 30, cursor: 'pointer' }}
+            style={{ marginLeft: 15, cursor: 'pointer' }}
             size={17}
             color='red'
             onClick={() => {
@@ -119,6 +146,8 @@ const getColumns = ({ refetch, navigate, clientsMap, inclientMap }) => [
 ]
 
 export default function ClientInvoices() {
+  const [ modal, setModal ] = useState()
+  const [ doneDate, setDoneDate ] = useState(dayjs())
   const { data, isLoading, refetch } = useClientInvoices()
   const navigate = useNavigate()
   const location = useLocation()
@@ -176,7 +205,8 @@ export default function ClientInvoices() {
           refetch,
           navigate,
           clientsMap,
-          inclientMap
+          inclientMap,
+          setModal
         })}
         dataSource={data}
         isLoading={isLoading}
@@ -189,6 +219,29 @@ export default function ClientInvoices() {
           },
         })}
       />
+      {!!modal &&
+        <Modal
+          title='Выберите дату проведения'
+          onOk={async () => {
+            await axios.postWithAuth('/query/update', {
+              sql: sqlUpdate('dataset', { pole: JSON.stringify({ ...modal.pole, done: true, done_date: doneDate.format('YYYY-MM-DD') }) }, `id=${modal.id}`)
+            })
+            refetch()
+            setModal(false)
+          }}
+          onCancel={() => setModal(false)}
+          okText='Провести'
+          open
+        >
+          <DatePicker
+            size='large'
+            value={doneDate}
+            onChange={val => setDoneDate(val)}
+            format='DD.MM.YYYY'
+            style={{ width: '100%' }}
+          />
+        </Modal>
+      }
     </>
   )
 }
