@@ -22,8 +22,8 @@ import { useDictionary, useUsersWithRole, getLastId, getCount, createSending, up
 import { getColumnSearchProps } from '../../utils/components'
 import { API_URL } from '../../consts'
 import { required } from '../../utils/validationRules'
-import { declOfNum, numberFormatter, localeNumber, filterOption } from '../../utils/utils'
-import { SENDING_STATUS, SERVICE_STATUS, SERVICE_NAME } from '../../consts'
+import { declOfNum, numberFormatter, localeNumber, filterOption, getSurnameWithInitials } from '../../utils/utils'
+import { SENDING_STATUS, SERVICE_STATUS } from '../../consts'
 
 const { Title, Link } = Typography
 const cookies = new Cookies()
@@ -65,10 +65,13 @@ export default function Sending() {
 
   const [ clientsOptions, clientsMap ] = useMemo(() => {
     if (!Array.isArray(clients.data)) return [[], {}]
-    const options = clients.data.map(item => ({
-      value: item.id_user,
-      label: item.json?.code
-    }))
+    const options = clients.data.map(({ json = {}, ...item }) => {
+      const fullname = getSurnameWithInitials(item.family, item.name, item.middle)
+      return {
+        value: item.id_user,
+        label: `${item.json?.code || ''}${fullname ? ` (${fullname})` : ''}`
+      }
+    })
     const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
     return [ options, map ]
   }, [clients.data])

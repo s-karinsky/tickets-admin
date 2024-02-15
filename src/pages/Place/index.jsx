@@ -12,7 +12,7 @@ import { useDictionary, useUsersWithRole, getLastId, getCount, getSendingById, g
 import { SENDING_STATUS, SERVICE_NAME } from '../../consts'
 import { getColumnSearchProps } from '../../utils/components'
 import { required, numberRange } from '../../utils/validationRules'
-import { declOfNum, numberFormatter, getPaginationSettings, filterOption, localeNumber } from '../../utils/utils'
+import { declOfNum, numberFormatter, getPaginationSettings, filterOption, localeNumber, getSurnameWithInitials } from '../../utils/utils'
 
 const { Title, Link } = Typography
 
@@ -62,10 +62,13 @@ export default function Place({ user }) {
 
   const [ clientsOptions, clientsMap ] = useMemo(() => {
     if (!Array.isArray(clients.data)) return [[], {}]
-    const options = clients.data.map(({ json = {}, ...item }) => ({
-      value: item.id_user,
-      label: `${json.code} (${[item.family, item.name, item.middle].filter(Boolean).join(' ')})`
-    }))
+    const options = clients.data.map(({ json = {}, ...item }) => {
+      const fullname = getSurnameWithInitials(item.family, item.name, item.middle)
+      return {
+        value: item.id_user,
+        label: `${json.code}${fullname ? ` (${fullname})` : ''}`
+      }
+    })
     const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
     return [ options, map ]
   }, [clients.data])

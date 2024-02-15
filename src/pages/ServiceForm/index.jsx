@@ -14,7 +14,7 @@ import { getDatasetsById, useUsersWithRole, useDictionary, useService, getProduc
 import { getColumnSearchProps } from '../../utils/components'
 import axios from '../../utils/axios'
 import { sqlInsert, sqlUpdate } from '../../utils/sql'
-import { localeNumber } from '../../utils/utils'
+import { localeNumber, getSurnameWithInitials } from '../../utils/utils'
 
 const getTitle = (name, id) => {
   const isNew = id === 'create'
@@ -104,10 +104,13 @@ export default function ServiceForm() {
 
   const [ clientsOptions, clientsMap ] = useMemo(() => {
     if (!Array.isArray(clients.data)) return [[], {}]
-    const options = clients.data.map(item => ({
-      value: item.id_user,
-      label: item.json?.code
-    }))
+    const options = clients.data.map(({ json = {}, ...item }) => {
+      const fullname = getSurnameWithInitials(item.family, item.name, item.middle)
+      return {
+        value: item.id_user,
+        label: `${item.json?.code || ''}${fullname ? ` (${fullname})` : ''}`
+      }
+    })
     const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
     return [ options, map ]
   }, [clients.data])
@@ -358,7 +361,7 @@ export default function ServiceForm() {
     <>
       <Row align='bottom' style={{ padding: '0 40px' }}>
         <Col span={12}>
-          <Typography.Title style={{ fontWeight: 'bold' }}>{getTitle(serviceName, id)}</Typography.Title>
+          <Typography.Title style={{ fontWeight: 'bold' }}>{getTitle(serviceName, initialValues?.pole?.number)}</Typography.Title>
         </Col>
         <Col span={12} style={{ textAlign: 'right', paddingBottom: 20 }}>
           {isEdit ?

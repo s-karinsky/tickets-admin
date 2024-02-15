@@ -55,6 +55,11 @@ export default function FormField({
       break
 
     case 'select':
+      if (rest.showSearch) {
+        rest.filterOption = (inputValue, option) => {
+          return String(option.label).toLowerCase().includes(inputValue.toLowerCase())
+        }
+      }
       child = isEdit ?
         <Select
           {...rest}
@@ -66,7 +71,7 @@ export default function FormField({
       child = <InputNumber
         {...rest}
         decimalSeparator=','
-        formatter={(value) => Number(value).toLocaleString()}
+        formatter={(value) => value === '' ? '' : Number(value).toLocaleString()}
         readOnly={!isEdit}
       />
       break

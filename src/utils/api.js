@@ -3,7 +3,7 @@ import { get as _get, keyBy } from 'lodash'
 import { useQuery } from 'react-query'
 import Cookies from 'universal-cookie'
 import axios from './axios'
-import { parseJSON, toFormData } from './utils'
+import { parseJSON, toFormData, localeNumber } from './utils'
 import { sqlUpdate, sqlInsert } from './sql'
 
 const sendingSummaryFields = [
@@ -494,6 +494,7 @@ export const useService = (name, id, params) => useQuery(['dataset', name, id], 
     const maxNum = await axios.select('dataset', 'max(cast(JSON_EXTRACT(pole, "$.number") as decimal)) as max', {
       where: {
         tip: 'service',
+        '$.pole.type': name,
         '$.pole.is_finished': 0
       }
     })
@@ -618,19 +619,27 @@ export const useClientInvoices = (id, initial = {}, params) => useQuery(['client
           ...parseJSON(sData.json)
         }
         let weight = 0
-        rest.name = `Отправки партия № ${sData.from} от ${dayjs(sData.create_datetime).format('DD.MM.YYYY')} Места:`
+        rest.name = `За отправку № ${sData.from} от ${dayjs(sData.create_datetime).format('DD.MM.YYYY')}, Мест:`
         let list = (places.data?.data || []).map(place => ({ ...place, ...parseJSON(place.pole) }))
         const placeLikeInGroup = list.find(item => item.id === group)
         if (placeLikeInGroup) {
           list = list.filter(item => item.client === placeLikeInGroup.client && item.tarif === placeLikeInGroup.tarif)
         }
+        rest.name += ` ${list.length},`
         list.forEach(place => {
           weight += Number(place.gross_weight)
-          rest.name += ` ${place.place}`
         })
+        
+        if (placeLikeInGroup?.tarif) {
+          const rate = await axios.select('sprset', 'JSON_EXTRACT(pole, "$.price_kg") as price_kg', { where: { '$.pole.value': placeLikeInGroup?.tarif } })
+          const tarif = (rate.data?.data || [])[0]?.price_kg
+          rest.pay_usd = localeNumber((tarif * weight).toFixed(2))
+        }
+
+        rest.pay_type = placeLikeInGroup?.pay_type
         rest.client = placeLikeInGroup?.client
         rest.inclient = placeLikeInGroup?.inclient
-        rest.name += ` Вес брутто: ${weight.toFixed(3)} кг.`
+        rest.name += ` Вес брутто: ${localeNumber(weight.toFixed(3))} кг.`
       }
       if (['delivery', 'fullfillment', 'storage'].includes(type)) {
         const delivery = await axios.select('dataset', '*', { where: { id } })
@@ -643,13 +652,13 @@ export const useClientInvoices = (id, initial = {}, params) => useQuery(['client
         const places = await axios.select('dataset', '*', { where })
         let weight = 0
         if (type === 'delivery') {
-          rest.name = `Доставка № ${sData.number} от ${dayjs(sData.date).format('DD.MM.YYYY')} до ${sData.delivery_type} Адрес: ${sData.delivery_type === 'Терминал' ? sData.terminal_address : sData.client_address} Места: `
+          rest.name = `Доставка № ${sData.number} от ${dayjs(sData.date).format('DD.MM.YYYY')}${!!sData.delivery_type && ` до ${sData.delivery_type}`}, Адрес: ${sData.delivery_type === 'Терминал' ? sData.terminal_address : sData.client_address}, Мест: `
         } else if (type === 'fullfillment') {
           const products = await axios.select('dataset', 'count(*) as count', { where: `tip='product' AND (${(sData.places || []).map(item => `id_ref=${item}`).join(' OR ')})` })
           const productsCount = (products.data?.data || [])[0]?.count
-          rest.name = `Фулфилмент № ${sData.number} от ${dayjs(sData.date).format('DD.MM.YYYY')} для площадки ${sData.marketplace} Количество единиц: ${productsCount} Места: `
+          rest.name = `Фулфилмент № ${sData.number} от ${dayjs(sData.date).format('DD.MM.YYYY')} для площадки ${sData.marketplace}, Количество единиц: ${productsCount}, Мест: `
         } else if (type === 'storage') {
-          rest.name = `Хранение № ${sData.number} от ${dayjs(sData.date).format('DD.MM.YYYY')} с ${dayjs(sData.start_date).format('DD.MM.YYYY')} по: ${dayjs(sData.end_date).format('DD.MM.YYYY')} Количество дней: ${sData.storage_days || ''} Места: `
+          rest.name = `Хранение № ${sData.number} от ${dayjs(sData.date).format('DD.MM.YYYY')} с ${dayjs(sData.start_date).format('DD.MM.YYYY')} по ${dayjs(sData.end_date).format('DD.MM.YYYY')}, Количество дней: ${sData.storage_days || ''}, Мест: `
         }
         let list = (places.data?.data || [])
         const placeLikeInGroup = list.find(item => item.id === group)
@@ -657,13 +666,12 @@ export const useClientInvoices = (id, initial = {}, params) => useQuery(['client
           list = list.filter(item => item.client === placeLikeInGroup.client && item.tarif === placeLikeInGroup.tarif)
         }
 
+        rest.name += ` ${list.length},`
         list.map(place => ({ ...place, ...parseJSON(place.pole) })).forEach(place => {
           weight += (Number(place.gross_weight) || 0)
-          rest.name += ` ${place.place}`
         })
-        rest.name += ` Вес брутто: ${weight.toFixed(3)} кг.`
-
-        rest.client = placeLikeInGroup?.client
+        rest.name += ` Вес брутто: ${localeNumber(weight.toFixed(3))} кг.`
+        rest.client = placeLikeInGroup?.client || sData.client
         rest.inclient = placeLikeInGroup?.inclient
         rest.pay_type = sData.pay_type
         rest.pay_usd = sData.price_usd

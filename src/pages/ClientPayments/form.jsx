@@ -10,6 +10,7 @@ import axios from '../../utils/axios'
 import { sqlInsert, sqlUpdate } from '../../utils/sql'
 import { numberRange } from '../../utils/validationRules'
 import { VALIDATION_MESSAGES } from '../../consts'
+import { getSurnameWithInitials } from '../../utils/utils'
 
 export default function ClientPaymentsForm({ user }) {
   const [ isModal, setIsModal ] = useState()
@@ -34,10 +35,13 @@ export default function ClientPaymentsForm({ user }) {
 
   const [ clientsOptions, clientsMap ] = useMemo(() => {
     if (!Array.isArray(clients.data)) return [[], {}]
-    const options = clients.data.map(({ json = {}, ...item }) => ({
-      value: item.id_user,
-      label: `${json.code} (${[item.family, item.name, item.middle].filter(Boolean).join(' ')})`
-    }))
+    const options = clients.data.map(({ json = {}, ...item }) => {
+      const fullname = getSurnameWithInitials(item.family, item.name, item.middle)
+      return {
+        value: item.id_user,
+        label: `${json.code}${fullname ? ` (${fullname})` : ''}`
+      }
+    })
     const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
     return [ options, map ]
   }, [clients.data])

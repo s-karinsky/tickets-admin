@@ -74,3 +74,11 @@ export const localeNumber = number => {
   if (!Number(number) && Number(number) !== 0) return ''
   return Number(number).toLocaleString()
 }
+
+export const getSurnameWithInitials = (surname, name = '', middle = '') => {
+  if (!surname) return ''
+  if (surname && !name) return surname
+  let result = `${surname} ${name[0]}.`
+  if (middle) result += ` ${middle[0]}.`
+  return result
+}

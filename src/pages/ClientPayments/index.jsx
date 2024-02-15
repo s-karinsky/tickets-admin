@@ -7,7 +7,7 @@ import { ExclamationCircleFilled } from '@ant-design/icons'
 import axios from '../../utils/axios'
 import { getColumnSearchProps } from '../../utils/components'
 import { useClientPayments, useUsersWithRole, useDictionary } from '../../utils/api'
-import { localeCompare, localeNumber } from '../../utils/utils'
+import { localeCompare, localeNumber, getSurnameWithInitials } from '../../utils/utils'
 
 const getColumns = ({ refetch, navigate, clientsMap, inclientMap, employeMap }) => ([
   {
@@ -137,10 +137,13 @@ export default function ClientPayments() {
   const clients = useUsersWithRole(1)
   const [ clientsOptions, clientsMap ] = useMemo(() => {
     if (!Array.isArray(clients.data)) return [[], {}]
-    const options = clients.data.map(({ json = {}, ...item }) => ({
-      value: item.id_user,
-      label: `${json.code} (${[item.family, item.name, item.middle].filter(Boolean).join(' ')})`
-    }))
+    const options = clients.data.map(({ json = {}, ...item }) => {
+      const fullname = getSurnameWithInitials(item.family, item.name, item.middle)
+      return {
+        value: item.id_user,
+        label: `${json.code}${fullname ? ` (${fullname})` : ''}`
+      }
+    })
     const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
     return [ options, map ]
   }, [clients.data])

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { getColumnSearchProps } from '../../utils/components'
 import { useClientBalance, useUsersWithRole } from '../../utils/api'
-import { localeCompare, localeNumber } from '../../utils/utils'
+import { localeCompare, localeNumber, getSurnameWithInitials } from '../../utils/utils'
 
 export default function ClientBalance() {
   const { data, isLoading } = useClientBalance()
@@ -13,10 +13,13 @@ export default function ClientBalance() {
   const clients = useUsersWithRole(1)
   const [ clientsOptions, clientsMap ] = useMemo(() => {
     if (!Array.isArray(clients.data)) return [[], {}]
-    const options = clients.data.map(item => ({
-      value: item.id_user,
-      label: item.json?.code
-    }))
+    const options = clients.data.map(item => {
+      const fullname = getSurnameWithInitials(item.family, item.name, item.middle)
+      return {
+        value: item.id_user,
+        label: `${item.json?.code}${fullname ? ` (${fullname})` : ''}`
+      }
+    })
     const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
     return [ options, map ]
   }, [clients.data])
