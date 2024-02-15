@@ -108,7 +108,7 @@ export default function ServiceForm() {
       const fullname = getSurnameWithInitials(item.family, item.name, item.middle)
       return {
         value: item.id_user,
-        label: `${item.json?.code || ''}${fullname ? ` (${fullname})` : ''}`
+        label: `${json?.code || ''}${fullname ? ` (${fullname})` : ''}`
       }
     })
     const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
