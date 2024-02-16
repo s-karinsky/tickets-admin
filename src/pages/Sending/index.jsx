@@ -131,7 +131,7 @@ export default function Sending() {
     {
       title: 'Счет',
       dataIndex: 'invoice',
-      render: (invoice, item) => invoice && <RouterLink to={`/client-invoices/${item.invoice_id}`}>Счет № {invoice.number} от {dayjs(invoice.date).format('DD.MM.YYYY')}</RouterLink>
+      render: (invoice, item) => invoice && <RouterLink to={`/client-invoices/${item.invoiceId}`}>Счет № {invoice.number} от {dayjs(invoice.date).format('DD.MM.YYYY')}</RouterLink>
     }
   ], [clientsMap, clientsOptions])
 
@@ -679,8 +679,48 @@ export default function Sending() {
                 {data?.json?.status === 2 && <Button
                   type='primary'
                   size='large'
-                  onClick={() => navigate('/client-invoices/create', { state: { type: 'sending', id: sendingId, group: selectedGroups[0] } })}
-                  disabled={selectedGroups.length !== 1}
+                  onClick={async () => {
+                    let create = selectedGroups.filter(item => !groupPlaces.find(group => group.id === item)?.invoiceId)
+                    if (create.length === 1) {
+                      navigate('/client-invoices/create', { state: { type: 'sending', id: sendingId, group: create[0] } })
+                      return
+                    }
+                    const response = await axios.select(
+                      'dataset',
+                      'max(cast(json_extract(pole, "$.number") as decimal)) as max',
+                      {
+                        where: {
+                          status: 0,
+                          tip: 'cl-invoice',
+                          'YEAR(created_at)': `YEAR('${dayjs().format('YYYY-MM-DD')}')`
+                        }
+                      }
+                    )
+                    const data = response.data?.data || []
+                    const number = parseInt(_get(data, [0, 'max'])) || 0
+                    create = create.map(id => placesData.find(place => place.id === id))
+                    const vals = create.map((item, i) => {
+                      const places = placesData.filter(place => item.client === place.client && item.tarif === place.tarif)
+                      let weight = 0
+                      places.forEach(place => {
+                        weight += Number(place.gross_weight)
+                      })
+                      const pole = {
+                        number: number + i + 1,
+                        parent_trip: sendingId,
+                        client: item.client,
+                        inclient: item.inclient,
+                        name: `За отправку № ${data.from} от ${dayjs(data.create_datetime).format('DD.MM.YYYY')}, Мест: ${places.length}, Вес брутто: ${weight} кг.`,
+                        pay_type: item.pay_type,
+                      }
+                      return `(0, 'cl-invoice', '${dayjs().format('YYYY-MM-DD')}', '${JSON.stringify(pole)}')`
+                    })
+                    await axios.postWithAuth('/query/insert', { sql:
+                      `INSERT INTO dataset (status, tip, created_at, pole) VALUES ${vals.join(',')}`
+                    })
+                    places.refetch()
+                  }}
+                  disabled={!selectedGroups.filter(item => !groupPlaces.find(group => group.id === item)?.invoiceId).length}
                 >
                   Создать счет
                 </Button>}
