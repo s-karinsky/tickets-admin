@@ -1,16 +1,17 @@
 import { useState, useMemo } from 'react'
-import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import { useParams, useNavigate, useLocation, Link } from 'react-router-dom'
 import { Form, Button, Col, Row, Table, Typography, message } from 'antd'
 import { get, set } from 'lodash'
-import { CaretLeftFilled, SaveOutlined } from '@ant-design/icons'
+import { SaveOutlined } from '@ant-design/icons'
 import { getFieldsByRole, commonFields, companyFields } from './forms'
+import Wrapper from '../../components/Wrapper'
 import DeleteButton from '../../components/DeleteButton'
 import SelectCity from '../../components/SelectCity'
 import FormField from '../../components/FormField'
 import axios from '../../utils/axios'
-import { useUsers, createUser, updateUserById, useDictionary } from '../../utils/api'
+import { useUsers, createUser, updateUserById } from '../../utils/api'
 import { getKeyFromName } from '../../utils/utils'
-import { VALIDATION_MESSAGES, COLUMNS } from '../../consts'
+import { VALIDATION_MESSAGES, COLUMNS, USER_ROLES, USER_ROLES_PLURAL } from '../../consts'
 
 const EMPTY_OBJECT = {}
 
@@ -20,6 +21,12 @@ const inclientColumns = [
   COLUMNS.phone,
   COLUMNS.company
 ]
+
+const USER_LINK = {
+  '1': '/dictionary/clients',
+  '2': '/dictionary/employees',
+  '4': '/users'
+}
 
 export default function PageUser() {
   const location = useLocation()
@@ -35,7 +42,18 @@ export default function PageUser() {
 
   const isNew = id === 'create'
   const role = Form.useWatch('id_role', form)
-  const inclients = useUsers({ id_role: '3', create_user: id }, '', { enabled: role === '1' }) // useDictionary('inclient', { id_ref: id }, { enabled: role === '1' })
+  const inclients = useUsers({ id_role: '3', create_user: id }, '', { enabled: role === '1' })
+  const title = isNew ? 'Новый пользователь' : `${USER_ROLES[profile.id_role]} ${profile.json?.code}`
+
+  const breadcrumbs = useMemo(() => {
+    const crumbs = [{ title: <Link to={USER_LINK[profile.id_role]}>{USER_ROLES_PLURAL[profile.id_role]}</Link> }]
+    if (isNew) {
+      crumbs.push({ title: `Новый ${USER_ROLES[profile.id_role]?.toLowerCase()}` })
+    } else {
+      crumbs.push({ title })
+    }
+    return crumbs
+  }, [profile.id_role, isNew, title])
   
   const columns = useMemo(() => [
     ...inclientColumns,
@@ -55,7 +73,37 @@ export default function PageUser() {
   if (users.isLoading) return null
 
   return (
-    <>
+    <Wrapper
+      title={title}
+      breadcrumbs={breadcrumbs}
+      buttons={[
+        !isNew && <Button
+          style={{ marginRight: 20 }}
+          size='large'
+          htmlType='button'
+          onClick={async () => {
+            setIsMakingPass(true)
+            await axios.postWithAuth('/remind', { u_email: profile.email })
+            message.info('Пароль для входа отправлен на e-mail')
+            setIsMakingPass(false)
+          }}
+          loading={isMakingPass}
+        >
+          Сбросить пароль
+        </Button>,
+        <Button
+          icon={<SaveOutlined />}
+          type='primary'
+          htmlType='submit'
+          style={{ marginRight: 10 }}
+          size='large'
+          onClick={() => form.submit()}
+          disabled={isSending}
+        >
+          Сохранить
+        </Button>
+      ].filter(Boolean)}
+    >
       <Form
         initialValues={profile}
         layout='vertical'
@@ -89,47 +137,6 @@ export default function PageUser() {
           }
         }}
       >
-        <Row
-          style={{
-            borderBottom: '1px solid #ccc',
-            padding: '10px 20px',
-          }}
-          justify='space-between'
-        >
-          <Col>
-            <Button
-              icon={<CaretLeftFilled />}
-              onClick={() => navigate('/users')}
-            >
-              К списку пользователей
-            </Button>
-          </Col>
-          <Col>
-            {!isNew && <Button
-              style={{ marginRight: 20 }}
-              size='large'
-              htmlType='button'
-              onClick={async () => {
-                setIsMakingPass(true)
-                await axios.postWithAuth('/remind', { u_email: profile.email })
-                message.info('Пароль для входа отправлен на e-mail')
-                setIsMakingPass(false)
-              }}
-              loading={isMakingPass}
-            >
-              Сбросить пароль
-            </Button>}
-            <Button
-              icon={<SaveOutlined />}
-              type='primary'
-              htmlType='submit'
-              style={{ marginRight: 10 }}
-              disabled={isSending}
-            >
-              Сохранить
-            </Button>
-          </Col>
-        </Row>
         <Row
           gutter={16}
           style={{ margin: 10 }}
@@ -225,6 +232,6 @@ export default function PageUser() {
         />
       </>}
       {contextHolder}
-    </>
+    </Wrapper>
   )
 }

@@ -18,6 +18,13 @@ export const USER_ROLES = {
   '4': 'Админ'
 }
 
+export const USER_ROLES_PLURAL = {
+  '1': 'Клиенты',
+  '2': 'Сотрудники',
+  '3': 'Внутренние клиенты',
+  '4': 'Пользователи'
+}
+
 export const USER_ROLES_OPTIONS = ['1', '2', '3', '4']
 
 export const SENDING_STATUS = ['Формирование', 'В пути', 'Поступила', 'Приостановлен']

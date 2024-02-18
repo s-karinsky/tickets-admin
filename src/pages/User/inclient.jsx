@@ -1,15 +1,15 @@
 import { useState, useMemo } from 'react'
-import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import { Form, Button, Col, Row, Table, Typography, message } from 'antd'
 import { get, set } from 'lodash'
 import { CaretLeftFilled, SaveOutlined } from '@ant-design/icons'
 import { getFieldsByRole, commonFields, companyFields } from './forms'
+import Wrapper from '../../components/Wrapper'
 import SelectCity from '../../components/SelectCity'
 import FormField from '../../components/FormField'
-import axios from '../../utils/axios'
-import { useUsers, createUser, updateUserById, useDictionary } from '../../utils/api'
+import { useUsers, createUser, updateUserById } from '../../utils/api'
 import { getKeyFromName } from '../../utils/utils'
-import { VALIDATION_MESSAGES, COLUMNS } from '../../consts'
+import { VALIDATION_MESSAGES } from '../../consts'
 
 const EMPTY_OBJECT = {}
 
@@ -19,15 +19,42 @@ export default function PageInclient() {
   const { client, id } = useParams()
   const navigate = useNavigate()
   const [ isSending, setIsSending ] = useState()
+  const clientData = useUsers(client)
   const users = useUsers(id, '3')
   const profile = users.data || EMPTY_OBJECT
 
   const isNew = id === 'create'
+  const title = isNew ? 'Новый внутренний клиент' : `Внутренний клиент ${profile.json?.code}`
+
+  const breadcrumbs = useMemo(() => {
+    const crumbs = [{ title: <Link to='/dictionary/clients'>Клиенты</Link> }]
+    if (clientData.data) {
+      crumbs.push({ title: <Link to={`/users/${clientData.data.id_user}`}>{`Клиент ${clientData.data.json?.code}`}</Link> })
+    }
+    crumbs.push({ title })
+    return crumbs
+  }, [clientData.data, isNew, title])
 
   if (users.isLoading) return null
 
   return (
-    <>
+    <Wrapper
+      title={title}
+      breadcrumbs={breadcrumbs}
+      buttons={
+        <Button
+          icon={<SaveOutlined />}
+          type='primary'
+          htmlType='submit'
+          style={{ marginRight: 10 }}
+          disabled={isSending}
+          onClick={() => form.submit()}
+          size='large'
+        >
+          Сохранить
+        </Button>
+      }
+    >
       <Form
         initialValues={profile}
         layout='vertical'
@@ -50,7 +77,7 @@ export default function PageInclient() {
           try {
             if (isNew) {
               const lastId = await createUser(values)
-              navigate(`/users/${lastId}`)
+              navigate(`/users/${client}/${lastId}`)
               messageApi.success('Пользователь успешно создан')
             } else {
               await updateUserById(id, values)
@@ -63,33 +90,6 @@ export default function PageInclient() {
           }
         }}
       >
-        <Row
-          style={{
-            borderBottom: '1px solid #ccc',
-            padding: '10px 20px',
-          }}
-          justify='space-between'
-        >
-          <Col>
-            <Button
-              icon={<CaretLeftFilled />}
-              onClick={() => navigate('/users')}
-            >
-              К списку пользователей
-            </Button>
-          </Col>
-          <Col>
-            <Button
-              icon={<SaveOutlined />}
-              type='primary'
-              htmlType='submit'
-              style={{ marginRight: 10 }}
-              disabled={isSending}
-            >
-              Сохранить
-            </Button>
-          </Col>
-        </Row>
         <Row
           gutter={16}
           style={{ margin: 10 }}
@@ -159,6 +159,6 @@ export default function PageInclient() {
         </fieldset>
       </Form>
       {contextHolder}
-    </>
+    </Wrapper>
   )
 }

@@ -1,23 +1,16 @@
 import { useNavigate } from 'react-router-dom'
-import { Table, Tag, Row, Button, Col, Typography, Modal } from 'antd'
-import { ExclamationCircleFilled } from '@ant-design/icons'
-import { BsTrash } from 'react-icons/bs'
+import { Table, Tag, Row, Button, Col, Typography } from 'antd'
 import { getColumnSearchProps } from '../../utils/components'
+import DeleteButton from '../../components/DeleteButton'
 import axios from '../../utils/axios'
 import { useUsers, useCountries, useAllCities } from '../../utils/api'
-import { getPaginationSettings, localeCompare, getSurnameWithInitials } from '../../utils/utils'
+import { getPaginationSettings, localeCompare } from '../../utils/utils'
 import { USER_ROLES, USER_ROLES_COLOR } from '../../consts'
 
 const TITLE = {
   default: 'Список пользователей',
   1: 'Клиенты',
   2: 'Сотрудники'
-}
-
-const LINK = {
-  default: '/users/',
-  1: '/dictionary/clients/',
-  2: '/dictionary/employees/'
 }
 
 export const getColumns = ({ name, role, countries = {}, cities = {}, noButtons, codeIndex = ['json', 'code'], refetch = () => {}, deleteUser }) => ([
@@ -91,31 +84,18 @@ export const getColumns = ({ name, role, countries = {}, cities = {}, noButtons,
     width: 30,
     key: 'buttons',
     render: (_, item) => item.id_role !== '4' && (
-      <div>
-        <BsTrash
-          style={{ marginLeft: 30, cursor: 'pointer' }} 
-          size={17}
-          color='red'
-          title='Удалить запись'
-          onClick={() => {
-            Modal.confirm({
-              title: 'Вы действительно хотите удалить этого пользователя?',
-              icon: <ExclamationCircleFilled />,
-              okText: 'Да',
-              okType: 'danger',
-              cancelText: 'Нет',
-              onOk: async () => {
-                if (deleteUser) {
-                  await deleteUser(item)
-                } else {
-                  await axios.postWithAuth('/query/update', { sql: `UPDATE users SET deleted=1 WHERE id_user=${item.id_user}` })
-                }
-                refetch()
-              }
-            })
-          }}
-        />
-      </div>
+      <DeleteButton
+        title='Удалить запись'
+        confirm='Вы действительно хотите удалить этого пользователя?'
+        onOk={async () => {
+          if (deleteUser) {
+            await deleteUser(item)
+          } else {
+            await axios.postWithAuth('/query/update', { sql: `UPDATE users SET deleted=1 WHERE id_user=${item.id_user}` })
+          }
+          refetch()
+        }}
+      />
     )
   }
 ].filter(Boolean))
@@ -136,7 +116,7 @@ export default function PageUsers({ role, balance }) {
           <Button
             type='primary'
             size='large'
-            onClick={() => navigate(`${LINK[role] || LINK.default}create`)}
+            onClick={() => navigate(`/users/create`, { state: { role } })}
           >
             Создать
           </Button>
@@ -154,7 +134,7 @@ export default function PageUsers({ role, balance }) {
               if (balance) {
                 navigate(`/client-balance/${record.id_user}`)
               } else {
-                navigate(`${LINK.default}${record.id_user}`)
+                navigate(`/users/${record.id_user}`)
               }
             }
           }
