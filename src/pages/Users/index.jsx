@@ -5,7 +5,7 @@ import { BsTrash } from 'react-icons/bs'
 import { getColumnSearchProps } from '../../utils/components'
 import axios from '../../utils/axios'
 import { useUsers, useCountries, useAllCities } from '../../utils/api'
-import { getPaginationSettings, localeCompare } from '../../utils/utils'
+import { getPaginationSettings, localeCompare, getSurnameWithInitials } from '../../utils/utils'
 import { USER_ROLES, USER_ROLES_COLOR } from '../../consts'
 
 const TITLE = {
@@ -26,7 +26,7 @@ export const getColumns = ({ name, role, countries = {}, cities = {}, noButtons,
     dataIndex: 'id_role',
     key: 'id_role',
     render: text => (<Tag color={USER_ROLES_COLOR[text]}>{USER_ROLES[text]}</Tag>),
-    filters: Object.keys(USER_ROLES).map(id => ({
+    filters: Object.keys(USER_ROLES).filter(key => key !== '3').map(id => ({
       text: USER_ROLES[id],
       value: id
     })),
@@ -154,7 +154,7 @@ export default function PageUsers({ role, balance }) {
               if (balance) {
                 navigate(`/client-balance/${record.id_user}`)
               } else {
-                navigate(`${LINK[record.id_role] || LINK.default}${record.id_user}`)
+                navigate(`${LINK.default}${record.id_user}`)
               }
             }
           }

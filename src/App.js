@@ -6,6 +6,7 @@ import Cookies from 'universal-cookie'
 import PageLogin from './pages/Login'
 import PageUsers from './pages/Users'
 import PageUser from './pages/User'
+import PageInclient from './pages/User/inclient'
 import Sendings from './pages/Sendings'
 import Sending from './pages/Sending'
 import ServiceForm from './pages/ServiceForm'
@@ -77,6 +78,7 @@ function App() {
           <Route path='/profile' element={<UserForm name={user.data?.u_role === '1' ? 'employees' : 'clients'} userId={user.data?.u_id} />} />
           <Route path='/users' element={<PageUsers />} />
           <Route path='/users/:id' element={<PageUser />} />
+          <Route path='/users/:client/:id' element={<PageInclient />} />
           <Route path='/sendings' element={<Sendings />} />
           <Route path='/sendings/:sendingId' element={<Sending />} />
           <Route path='/sendings/:sendingId/:placeId' element={<Place user={user.data} />} />

@@ -4,7 +4,6 @@ import { Form, Button, Col, Row, Table, Typography, message } from 'antd'
 import { get, set } from 'lodash'
 import { CaretLeftFilled, SaveOutlined } from '@ant-design/icons'
 import { getFieldsByRole, commonFields, companyFields } from './forms'
-import DeleteButton from '../../components/DeleteButton'
 import SelectCity from '../../components/SelectCity'
 import FormField from '../../components/FormField'
 import axios from '../../utils/axios'
@@ -14,43 +13,16 @@ import { VALIDATION_MESSAGES, COLUMNS } from '../../consts'
 
 const EMPTY_OBJECT = {}
 
-const inclientColumns = [
-  COLUMNS.code,
-  COLUMNS.name,
-  COLUMNS.phone,
-  COLUMNS.company
-]
-
-export default function PageUser() {
-  const location = useLocation()
+export default function PageInclient() {
   const [ messageApi, contextHolder ] = message.useMessage()
   const [ form ] = Form.useForm()
-  const { id } = useParams()
+  const { client, id } = useParams()
   const navigate = useNavigate()
-  const [ isMakingPass, setIsMakingPass ] = useState(false)
   const [ isSending, setIsSending ] = useState()
-  const initialRole = location.state?.role || '1'
-  const users = useUsers(id, initialRole)
+  const users = useUsers(id, '3')
   const profile = users.data || EMPTY_OBJECT
 
   const isNew = id === 'create'
-  const role = Form.useWatch('id_role', form)
-  const inclients = useUsers({ id_role: '3', create_user: id }, '', { enabled: role === '1' }) // useDictionary('inclient', { id_ref: id }, { enabled: role === '1' })
-  
-  const columns = useMemo(() => [
-    ...inclientColumns,
-    {
-      title: '',
-      dataIndex: 'buttons',
-      render: (_, item) => (<DeleteButton
-        confirm='Вы действительно хотите удалить этого внутреннего клиента?'
-        onOk={async () => {
-          await axios.postWithAuth('/query/update', { sql: `UPDATE users SET deleted=1 WHERE id_user=${item.id_user}` })
-          inclients.refetch()
-        }}
-      />)
-    }
-  ], [inclients])
 
   if (users.isLoading) return null
 
@@ -63,6 +35,8 @@ export default function PageUser() {
         validateMessages={VALIDATION_MESSAGES}
         form={form}
         onFinish={async (values) => {
+          values.id_role = '3'
+          values.create_user = client
           const fields = getFieldsByRole(values.id_role)
           fields.forEach(field => {
             if (!field.mask) return
@@ -105,20 +79,6 @@ export default function PageUser() {
             </Button>
           </Col>
           <Col>
-            {!isNew && <Button
-              style={{ marginRight: 20 }}
-              size='large'
-              htmlType='button'
-              onClick={async () => {
-                setIsMakingPass(true)
-                await axios.postWithAuth('/remind', { u_email: profile.email })
-                message.info('Пароль для входа отправлен на e-mail')
-                setIsMakingPass(false)
-              }}
-              loading={isMakingPass}
-            >
-              Сбросить пароль
-            </Button>}
             <Button
               icon={<SaveOutlined />}
               type='primary'
@@ -134,10 +94,14 @@ export default function PageUser() {
           gutter={16}
           style={{ margin: 10 }}
         >
-          {commonFields.map(({ span, ...field }) => (
+          {commonFields.slice(0, 1).map(({ span, ...field }) => (
             <Col span={span} key={getKeyFromName(field.name)}>
               <FormField
                 {...field}
+                rules={[
+                  ...(field.rules || []),
+                  { required: field.required }
+                ]}
               />
             </Col>
           ))}
@@ -176,7 +140,7 @@ export default function PageUser() {
             )
           }}
         </Form.Item>
-        {role === '1' && <fieldset style={{ padding: 10, margin: '20px 10px' }}>
+        <fieldset style={{ padding: 10, margin: '20px 10px' }}>
           <legend>Юридическое лицо</legend>
           <Row gutter={16}>
             {companyFields.map(({ span, ...field }) => (
@@ -192,38 +156,8 @@ export default function PageUser() {
               </Col>
             ))}
           </Row>
-        </fieldset>}
+        </fieldset>
       </Form>
-      {role === '1' && !isNew && <>
-        <Row align='middle' style={{ padding: '0 40px' }}>
-          <Col span={12}>
-            <Typography.Title style={{ fontWeight: 'bold' }}>Внутренние клиенты</Typography.Title>
-          </Col>
-          <Col span={12} style={{ textAlign: 'right' }}>
-            <Button
-              style={{ marginRight: 20 }}
-              type='primary'
-              size='large'
-              onClick={() => navigate(`/users/${id}/create`, { state: { clientId: id }})}
-            >
-              Создать
-            </Button>
-          </Col>
-        </Row>
-        <Table
-          size='small'
-          columns={columns}
-          isLoading={inclients.isLoading}
-          dataSource={inclients.data}
-          onRow={record => ({
-            onClick: (e) => {
-              if (e.detail === 2) {
-                navigate(`/users/${id}/${record.id_user}`)
-              }
-            },
-          })}
-        />
-      </>}
       {contextHolder}
     </>
   )

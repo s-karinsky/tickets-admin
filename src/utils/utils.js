@@ -82,3 +82,5 @@ export const getSurnameWithInitials = (surname, name = '', middle = '') => {
   if (middle) result += ` ${middle[0]}.`
   return result
 }
+
+export const getKeyFromName = name => [].concat(name).join('-')

@@ -6,6 +6,7 @@ import { getLastId } from '../../utils/api'
 export default function CreateCityModal({
   onOk = () => {},
   onClose = () => {},
+  onFail = () => {},
   countries,
   initialValues,
   isOpen
@@ -26,12 +27,16 @@ export default function CreateCityModal({
         layout='vertical'
         size='large'
         onFinish={async (values) => {
-          await axios.postWithAuth('/query/insert', {
+          const resp = await axios.postWithAuth('/query/insert', {
             sql: sqlInsert('city', values)
           })
-          const id = await getLastId('city', 'id_city')
-          onOk({ id, ...values })
-          onClose()
+          if (resp.data?.status === 'error') {
+            onFail(resp.data)
+          } else {
+            const id = await getLastId('city', 'id_city')
+            onOk({ id, ...values })
+            onClose()
+          }
         }}
         form={form}
         footer={[
