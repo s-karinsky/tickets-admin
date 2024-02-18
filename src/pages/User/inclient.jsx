@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { Form, Button, Col, Row, Table, Typography, message } from 'antd'
+import { Form, Button, Col, Row, message } from 'antd'
 import { get, set } from 'lodash'
-import { CaretLeftFilled, SaveOutlined } from '@ant-design/icons'
+import { SaveOutlined } from '@ant-design/icons'
 import { getFieldsByRole, commonFields, companyFields } from './forms'
 import Wrapper from '../../components/Wrapper'
 import SelectCity from '../../components/SelectCity'
@@ -33,7 +33,7 @@ export default function PageInclient() {
     }
     crumbs.push({ title })
     return crumbs
-  }, [clientData.data, isNew, title])
+  }, [clientData.data, title])
 
   if (users.isLoading) return null
 

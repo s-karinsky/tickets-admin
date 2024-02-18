@@ -1,13 +1,11 @@
 import { useMemo, useState } from 'react'
 import {
-  UserOutlined,
   DownOutlined,
   UnorderedListOutlined,
   MenuUnfoldOutlined,
   MenuFoldOutlined,
   CarOutlined,
   FormOutlined,
-  SnippetsOutlined,
   DollarOutlined,
   SettingOutlined
 } from '@ant-design/icons'
