@@ -1,5 +1,6 @@
-import { map, uniq, orderBy } from 'lodash'
+import { map, uniq, orderBy, get, omit } from 'lodash'
 import dayjs from 'dayjs'
+import axios from './axios'
 
 export const capitalizeFirstLetter = str => {
   return str[0].toUpperCase() + str.substr(1)
@@ -84,3 +85,60 @@ export const getSurnameWithInitials = (surname, name = '', middle = '') => {
 }
 
 export const getKeyFromName = name => [].concat(name).join('-')
+
+export const getMaxNumber = async (tableName, fieldName, where) => {
+  if (fieldName[0] === '$') {
+    const parts = fieldName.split('.')
+    fieldName = `JSON_EXTRACT(${parts[1]}, "$.${parts.slice(2).join('.')}")`
+  }
+  const maxNum = await axios.select(tableName, `max(cast(\`${fieldName}\` as decimal)) as max`, { where })
+  return parseInt(get(maxNum, ['data', 'data', 0, 'max'])) || 0
+}
+
+export const copySending = async (id) => {
+  let response
+  response = await axios.select('trip', ['`id_trip`', '`from`', '`json`'], { where: { id_trip: id } })
+  const sending = (response.data?.data || [])[0]
+  if (!sending) return
+  sending.json = parseJSON(sending.json)
+
+  response = await axios.select('dataset', '*', { where: `id_ref=${id} AND tip="place"` })
+  const places = (response.data?.data || []).map(place => {
+    place.pole = parseJSON(place.pole)
+    return place
+  })
+  const placesId = places.map(item => item.id)
+  response = await axios.select('dataset', '*', { where: `(${placesId.map(id => `id_ref=${id}`).join(' OR ')}) AND tip="product"` })
+  let products = (response.data?.data || []).map(product => {
+    product.pole = parseJSON(product.pole)
+    return product
+  })
+
+  const sendingNumber = await getMaxNumber('trip', 'from', { canceled: 0, 'YEAR(create_datetime)': `YEAR('${dayjs().format('YYYY-MM-DD')}')` }) + 1
+  sending.create_datetime = dayjs().format('YYYY-MM-DD')
+  sending.from = sendingNumber
+  sending.canceled = 0
+  sending.to = 0
+  sending.json.status = 0
+  sending.json.status_date_0 = undefined
+  sending.json.status_date_1 = undefined
+
+  const insertSending = omit(sending, ['id_trip'])
+  response = await axios.insert('trip', insertSending)
+  const sendingId = response.data?.data?.id
+  const [ placesOrder, insertPlaces ] = places.reduce((acc, place) => {
+    acc[0].push(place.id)
+    place.id_ref = sendingId
+    acc[1].push(omit(place, ['id']))
+    return acc
+  }, [[], []])
+  response = await axios.insert('dataset', insertPlaces)
+  const insertPlacesId = response.data?.data?.id
+  const placesIdMap = placesOrder.reduce((acc, id, i) => ({ ...acc, [id]: insertPlacesId + i }), {})
+  products = products.map(product => {
+    product.id_ref = placesIdMap[product.id_ref]
+    return omit(product, ['id'])
+  })
+  response = await axios.insert('dataset', products)
+  return sendingId
+}

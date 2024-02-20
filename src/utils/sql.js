@@ -74,8 +74,26 @@ export const sqlSelect = (
 }
 
 export const sqlInsert = (table, values) => {
-  if (Array.isArray(values)) {
+  if (Array.isArray(values) && typeof values[0] !== 'object') {
     return `INSERT INTO ${table} VALUES (${values.map(val => typeof val === 'string' && val !== 'NULL' ? `'${val}'` : val).join(', ')})`
+  }
+
+  if (Array.isArray(values)) {
+    const orderFields = Object.keys(values[0])
+    const vals = values.map(value => {
+      const valArr = orderFields.map(field => {
+        let val = value[field] ?? ''
+        if (typeof val === 'string' && val !== 'NULL') {
+          val = `'${val}'`
+        }
+        if (typeof val === 'object') {
+          val = `'${JSON.stringify(val)}'`
+        }
+        return val
+      })
+      return `(${valArr.join(',')})`
+    })
+    return `INSERT INTO ${table} (${orderFields.map(key => `\`${key}\``).join(',')}) VALUES ${vals.join(',')}`
   }
 
   const [ fields, vals ] = Object.keys(values).reduce((acc, key) => {
@@ -83,6 +101,9 @@ export const sqlInsert = (table, values) => {
     let value = values[key] ?? ''
     if (typeof value === 'string' && value !== 'NULL') {
       value = `'${value}'`
+    }
+    if (typeof value === 'object') {
+      value = `'${JSON.stringify(value)}'`
     }
     acc[1] = acc[1].concat(value)
     return acc

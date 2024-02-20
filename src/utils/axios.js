@@ -1,7 +1,7 @@
 import axios from 'axios'
 import Cookies from 'universal-cookie'
 import { toFormData } from './utils'
-import { sqlSelect } from './sql'
+import { sqlInsert, sqlSelect } from './sql'
 import { API_URL } from '../consts'
 
 const instance = axios.create({
@@ -25,6 +25,10 @@ instance.postWithAuth = function(url, params, options) {
 
 instance.select = (...args) => {
   return instance.postWithAuth('/query/select', { sql: sqlSelect(...args) } )
+}
+
+instance.insert = (...args) => {
+  return instance.postWithAuth('/query/insert', { sql: sqlInsert(...args) })
 }
 
 export default instance

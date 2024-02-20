@@ -11,7 +11,7 @@ import { API_URL } from '../../consts'
 import { SendingsStatus } from '../../components/SendingsStatus'
 import { DateTableCell } from '../../components/DateTableCell'
 import { getCount, getSendings, deleteSendingById, updateSendingById, useDictionary, useTemplates } from '../../utils/api'
-import { declOfNum, getPaginationSettings, localeNumber } from '../../utils/utils'
+import { declOfNum, getPaginationSettings, localeNumber, copySending } from '../../utils/utils'
 import { getColumnSearchProps } from '../../utils/components'
 import { SENDING_STATUS } from '../../consts'
 
@@ -67,8 +67,9 @@ export default function Sendings() {
             <CopyOutlined
               size={17}
               color='#141414'
-              onClick={() => {
-                navigate(`/sendings/create?copy=${item.id}${isAir ? '&air' : ''}`)
+              onClick={async () => {
+                const newId = await copySending(item.id)
+                navigate(`/sendings/${newId}`)
               }}
             />
             <BsTrash
