@@ -125,7 +125,7 @@ export default function Sending() {
       title: 'Вес брутто',
       dataIndex: 'gross_weight',
       align: 'right',
-      render: weight => weight.toFixed(3),
+      render: weight => Number(weight) ? Number(weight).toFixed(3) : '',
       sorter: (a, b) => a.gross_weight - b.gross_weight
     },
     {
