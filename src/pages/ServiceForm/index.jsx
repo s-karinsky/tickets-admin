@@ -129,7 +129,7 @@ export default function ServiceForm() {
   const placesData = (places.data || [])
     .map((item) => {
       const placeProducts = products.find(product => _get(product, 'data.0.id_ref') === item.id)?.data || []
-      const net_weight = placeProducts.reduce((sum, product) => sum + (product.net_weight * product.count), 0)
+      const net_weight = placeProducts.reduce((sum, product) => sum + product.net_weight, 0)
       const count = placeProducts.reduce((sum, product) => sum + product.count, 0)
       return {
         ...item,

@@ -67,6 +67,7 @@ export default function ClientPaymentsForm({ user }) {
   const payType = Form.useWatch('pay_type', form)
   const isCash = payType?.toLowerCase() === 'наличный'
   const isGiveClient = Form.useWatch('give_client', form)
+  const payName = Form.useWatch('pay_name', form)
   data.get_employe = user.u_id
 
   return isLoading || isRefetching ?
@@ -195,6 +196,8 @@ export default function ClientPaymentsForm({ user }) {
                 <FormField
                   label='Номер счета'
                   name='invoice_number'
+                  type='number'
+                  width='100%'
                 />
               </Col>
               <Col span={4}>
@@ -235,7 +238,7 @@ export default function ClientPaymentsForm({ user }) {
                   width='100%'
                   name='give_client'
                   valuePropName='checked'
-                  rules={[ { required: isCash } ]}
+                  rules={[ { required: isCash && !payName } ]}
                 >
                   <Checkbox>Передал клиент</Checkbox>
                 </Form.Item>
@@ -244,7 +247,7 @@ export default function ClientPaymentsForm({ user }) {
                 <FormField
                   label='Передал оплату ФИО'
                   name='pay_name'
-                  rules={[ { required: !isGiveClient } ]}
+                  rules={[ { required: isCash && !isGiveClient } ]}
                 />
               </Col>
               <Col span={4}>

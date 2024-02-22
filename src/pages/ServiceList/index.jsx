@@ -82,6 +82,7 @@ const getColumns = (name, { onStatusClick, clients = {} }) => {
       title: getEndDateTitle(name),
       align: 'center',
       dataIndex: `date_status_${SERVICE_STATUS[name].length - 1}`,
+      render: (val, item) => item.pole?.is_finished ? val : '',
       sorter: (a, b) => new Date(a[`date_status_${SERVICE_STATUS[name].length - 1}`]).getTime() - new Date(b[`date_status_${SERVICE_STATUS[name].length - 1}`]).getTime(),
       ...getColumnSearchProps(`date_status_${SERVICE_STATUS[name].length - 1}`, { type: 'date' })
     },

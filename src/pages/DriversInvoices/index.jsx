@@ -1,5 +1,5 @@
-import { useEffect, useMemo } from 'react'
-import { Row, Col, Button, Table, Typography, Modal } from 'antd'
+import { useEffect, useMemo, useState } from 'react'
+import { Row, Col, Button, Table, Typography, Modal, DatePicker } from 'antd'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { ExclamationCircleFilled } from '@ant-design/icons'
 import dayjs from 'dayjs'
@@ -8,8 +8,9 @@ import axios from '../../utils/axios'
 import { getColumnSearchProps } from '../../utils/components'
 import { useDriversInvoices, useDictionary } from '../../utils/api'
 import { localeCompare, localeNumber } from '../../utils/utils'
+import { sqlUpdate } from '../../utils/sql'
 
-const getColumns = ({ refetch, navigate, driversMap }) => [
+const getColumns = ({ refetch, navigate, driversMap, setModal }) => [
   {
     title: 'Номер',
     dataIndex: 'number',
@@ -25,10 +26,10 @@ const getColumns = ({ refetch, navigate, driversMap }) => [
     ...getColumnSearchProps('date', { type: 'date' })
   },
   {
-    title: 'Клиент',
+    title: 'Перевозчик',
     dataIndex: 'driver',
     sorter: (a, b) => localeCompare(driversMap[a.driver], driversMap[b.driver]),
-    render: (driver) => driversMap[driver],
+    render: (driver) => `${driversMap[driver]?.value} (${driversMap[driver]?.name})`,
     ...getColumnSearchProps(driver => driversMap[driver])
   },
   {
@@ -80,6 +81,32 @@ const getColumns = ({ refetch, navigate, driversMap }) => [
       return (
         <div style={{ whiteSpace: 'nowrap' }}>
           <Button
+            style={{ marginRight: 15 }}
+            size='small'
+            htmlType='button'
+            danger={item.pole?.done}
+            onClick={() => {
+              if (!item.pole?.done) {
+                setModal(item)
+              }
+              else {
+                Modal.confirm({
+                  title: 'Отменить проведение счета?',
+                  icon: <ExclamationCircleFilled />,
+                  okText: 'Да',
+                  okType: 'danger',
+                  cancelText: 'Нет',
+                  onOk: async () => {
+                    await axios.postWithAuth('/query/update', { sql: sqlUpdate('dataset', { pole: JSON.stringify({ ...item.pole, done: false, done_date: '' }) }, `id=${item.id}`) })
+                    refetch()
+                  }
+                })
+              }
+            }}
+          >
+            {item.pole?.done ? 'Отменить' : 'Провести'}
+          </Button>
+          <Button
             type='primary'
             size='small'
             style={{ marginTop: 5 }}
@@ -112,6 +139,8 @@ const getColumns = ({ refetch, navigate, driversMap }) => [
 ]
 
 export default function DriversInvoices() {
+  const [ modal, setModal ] = useState()
+  const [ doneDate, setDoneDate ] = useState(dayjs())
   const { data, isLoading, refetch } = useDriversInvoices()
   const navigate = useNavigate()
   const location = useLocation()
@@ -123,15 +152,6 @@ export default function DriversInvoices() {
   }, [location.state?.refetch])
 
   const drivers = useDictionary('drivers')
-  const [ driversOptions, driversMap ] = useMemo(() => {
-    if (!Array.isArray(drivers.data)) return [[], {}]
-    const options = drivers.data.map(({ pole = {}, ...item }) => ({
-      value: item.id_user,
-      label: `${pole.code} (${[item.family, item.name, item.middle].filter(Boolean).join(' ')})`
-    }))
-    const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
-    return [ options, map ]
-  }, [drivers.data])
 
   return (
     <>
@@ -154,7 +174,8 @@ export default function DriversInvoices() {
         columns={getColumns({
           refetch,
           navigate,
-          driversMap
+          driversMap: drivers.data?.map || {},
+          setModal
         })}
         dataSource={data}
         isLoading={isLoading}
@@ -167,6 +188,29 @@ export default function DriversInvoices() {
           },
         })}
       />
+      {!!modal &&
+        <Modal
+          title='Выберите дату проведения'
+          onOk={async () => {
+            await axios.postWithAuth('/query/update', {
+              sql: sqlUpdate('dataset', { pole: JSON.stringify({ ...modal.pole, done: true, done_date: doneDate.format('YYYY-MM-DD') }) }, `id=${modal.id}`)
+            })
+            refetch()
+            setModal(false)
+          }}
+          onCancel={() => setModal(false)}
+          okText='Провести'
+          open
+        >
+          <DatePicker
+            size='large'
+            value={doneDate}
+            onChange={val => setDoneDate(val)}
+            format='DD.MM.YYYY'
+            style={{ width: '100%' }}
+          />
+        </Modal>
+      }
     </>
   )
 }

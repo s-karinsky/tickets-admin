@@ -56,8 +56,11 @@ export default function ClientInvoicesForm() {
   const payType = Form.useWatch('pay_type', form)
 
   useEffect(() => {
-    if (!Number(payUsd) || !Number(rate)) return
-    form.setFieldValue('pay_rub', Number(payUsd) * Number(rate))
+    let pay = payUsd
+    if (typeof pay === 'string') {
+      pay = pay.replaceAll(' ', '').replaceAll(',', '.')
+    }
+    form.setFieldValue('pay_rub', Number(pay) * Number(rate))
   }, [payUsd, rate])
 
   return isLoading || isRefetching ?

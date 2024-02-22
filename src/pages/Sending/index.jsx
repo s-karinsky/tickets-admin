@@ -18,7 +18,7 @@ import axios from '../../utils/axios'
 import { PropertyGap } from '../Sendings'
 import FormField from '../../components/FormField'
 import ServiceModal from '../../components/ServiceModal'
-import { useDictionary, useUsersWithRole, getLastId, getCount, createSending, updateSendingById, getSendingById, deleteSendingById, getPlacesBySendingId, deletePlaceById } from '../../utils/api'
+import { useDictionary, useUsersWithRole, getLastCurrencyRate, getLastId, getCount, createSending, updateSendingById, getSendingById, deleteSendingById, getPlacesBySendingId, deletePlaceById } from '../../utils/api'
 import { getColumnSearchProps } from '../../utils/components'
 import { API_URL } from '../../consts'
 import { required } from '../../utils/validationRules'
@@ -696,25 +696,31 @@ export default function Sending() {
                         }
                       }
                     )
-                    const data = response.data?.data || []
-                    const number = parseInt(_get(data, [0, 'max'])) || 0
+                    const rate = await getLastCurrencyRate('USD', dayjs().format('YYYY-MM-DD'))
+                    const numberData = response.data?.data || []
+                    const number = parseInt(_get(numberData, [0, 'max'])) || 0
                     create = create.map(id => placesData.find(place => place.id === id))
-                    const vals = create.map((item, i) => {
+                    const vals = await Promise.all(create.map(async (item, i) => {
                       const places = placesData.filter(place => item.client === place.client && item.tarif === place.tarif)
                       let weight = 0
                       places.forEach(place => {
                         weight += Number(place.gross_weight)
                       })
+                      const placeLikeInGroup = places[0]
+                      const tarifRate = await axios.select('sprset', 'JSON_EXTRACT(pole, "$.price_kg") as price_kg', { where: { '$.pole.value': placeLikeInGroup?.tarif } })
+                      const tarif = (tarifRate.data?.data || [])[0]?.price_kg
                       const pole = {
                         number: number + i + 1,
                         parent_trip: sendingId,
                         client: item.client,
                         inclient: item.inclient,
-                        name: `За отправку № ${data.from} от ${dayjs(data.create_datetime).format('DD.MM.YYYY')}, Мест: ${places.length}, Вес брутто: ${weight} кг.`,
+                        name: `За отправку № ${data.from} от ${dayjs(data.create_datetime).format('DD.MM.YYYY')}, Мест: ${places.length}, Вес брутто: ${weight.toFixed(3)} кг.`,
                         pay_type: item.pay_type,
+                        pay_usd: (tarif * weight).toFixed(2),
+                        rate
                       }
                       return `(0, 'cl-invoice', '${dayjs().format('YYYY-MM-DD')}', '${JSON.stringify(pole)}')`
-                    })
+                    }))
                     await axios.postWithAuth('/query/insert', { sql:
                       `INSERT INTO dataset (status, tip, created_at, pole) VALUES ${vals.join(',')}`
                     })

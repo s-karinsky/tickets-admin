@@ -166,6 +166,8 @@ export default function DriversPaymentsForm({ user }) {
                 <FormField
                   label='Номер счета'
                   name='invoice_number'
+                  type='number'
+                  width='100%'
                 />
               </Col>
               <Col span={4}>
@@ -215,8 +217,8 @@ export default function DriversPaymentsForm({ user }) {
               <Col span={4}>
                 <FormField
                   label='Получил'
-                  name='get_name'
-                  rules={[ { required: true } ]}
+                  name='get_name' 
+                  rules={[ { required: isCash } ]}
                 />
               </Col>
               <Col span={4}>

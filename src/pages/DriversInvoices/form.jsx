@@ -14,7 +14,7 @@ import { parseJSON } from '../../utils/utils'
 
 export default function DriversInvoicesForm() {
   const [ isModal, setIsModal ] = useState()
-  const [ doneDate, setDoneDate ] = useState()
+  const [ doneDate, setDoneDate ] = useState(dayjs())
   const [ isUpdating, setIsUpdating ] = useState(false)
   const [ form ] = Form.useForm()
   const { id } = useParams()

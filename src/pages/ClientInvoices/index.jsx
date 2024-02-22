@@ -66,7 +66,7 @@ const getColumns = ({ refetch, navigate, clientsMap, inclientMap, setModal }) =>
     dataIndex: 'done_date',
     align: 'center',
     sorter: (a, b) => new Date(a.done_date).getTime() - new Date(b.done_date).getTime(),
-    render: (date) => dayjs(date).format('DD.MM.YYYY'),
+    render: (date) => date && dayjs(date).format('DD.MM.YYYY'),
     ...getColumnSearchProps('done_date', { type: 'date' })
   },
   {
@@ -111,7 +111,7 @@ const getColumns = ({ refetch, navigate, clientsMap, inclientMap, setModal }) =>
               }
             }}
           >
-            {item.pole?.done ? 'Отменить проведение' : 'Провести'}
+            {item.pole?.done ? 'Отменить' : 'Провести'}
           </Button>
           <Button
             type='primary'

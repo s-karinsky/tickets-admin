@@ -834,7 +834,6 @@ export const useDriversInvoices = (id, initial = {}, params) => useQuery(['drive
         let list = (places.data?.data || []).map(place => ({ ...place, ...parseJSON(place.pole) }))
         list.forEach(place => {
           weight += Number(place.gross_weight)
-          rest.name += ` ${place.place}`
         })
         rest.driver = sData.transporter
         rest.inclient = sData.inclient
