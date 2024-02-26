@@ -1,12 +1,24 @@
 import { emailRule } from '../../utils/validationRules'
 import { USER_ROLES_OPTIONS, USER_ROLES } from '../../consts'
+import axios from '../../utils/axios'
 
-export const commonFields = [
+export const getCommonFields = (initialValues, isNew) => [
   {
     name: ['json', 'code'],
     label: 'Код',
     required: true,
-    span: 3
+    span: 3,
+    rules: [
+      ({ getFieldValue }) => ({
+        validator: async (_, code) => {
+          if (!isNew && parseInt(code) === parseInt(initialValues?.json?.code)) return Promise.resolve()
+          const resposne = await axios.select('users', '*', { where: { '$.json.code': code, deleted: 0 } })
+          console.log(resposne.data?.data)
+          const count = (resposne.data?.data || []).length
+          return count > 0 ? Promise.reject(new Error('Номер уже используется')) : Promise.resolve()
+        },
+      })
+    ]
   },
   {
     name: 'id_role',

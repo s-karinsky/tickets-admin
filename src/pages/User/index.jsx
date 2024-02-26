@@ -3,7 +3,7 @@ import { useParams, useNavigate, useLocation, Link } from 'react-router-dom'
 import { Form, Button, Col, Row, Table, Typography, message } from 'antd'
 import { get, set } from 'lodash'
 import { SaveOutlined } from '@ant-design/icons'
-import { getFieldsByRole, commonFields, companyFields } from './forms'
+import { getFieldsByRole, getCommonFields, companyFields } from './forms'
 import Wrapper from '../../components/Wrapper'
 import DeleteButton from '../../components/DeleteButton'
 import SelectCity from '../../components/SelectCity'
@@ -141,7 +141,7 @@ export default function PageUser() {
           gutter={16}
           style={{ margin: 10 }}
         >
-          {commonFields.map(({ span, ...field }) => (
+          {getCommonFields(profile, isNew).map(({ span, ...field }) => (
             <Col span={span} key={getKeyFromName(field.name)}>
               <FormField
                 {...field}

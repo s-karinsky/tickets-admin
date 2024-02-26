@@ -369,7 +369,7 @@ export const deleteProductById = async (productId) => {
   return response
 }
 
-export const useUsers = (userId, where, params) => useQuery(['users', userId, where], async () => {
+export const useUsers = (userId, where, params = {}) => useQuery(['users', userId, where], async () => {
   if (typeof userId === 'object' && !where) {
     where = userId
     userId = null

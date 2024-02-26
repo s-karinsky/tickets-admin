@@ -10,7 +10,7 @@ import { BsTrash } from 'react-icons/bs'
 import { API_URL } from '../../consts'
 import { SendingsStatus } from '../../components/SendingsStatus'
 import { DateTableCell } from '../../components/DateTableCell'
-import { getCount, getSendings, deleteSendingById, updateSendingById, useDictionary, useTemplates } from '../../utils/api'
+import { getCount, getSendings, deleteSendingById, updateSendingById, useDictionary } from '../../utils/api'
 import { declOfNum, getPaginationSettings, localeNumber, copySending } from '../../utils/utils'
 import { getColumnSearchProps } from '../../utils/components'
 import { SENDING_STATUS } from '../../consts'
@@ -34,7 +34,7 @@ export default function Sendings() {
   const [ activeRow, setActiveRow ] = useState()
   const { isLoading, data, refetch } = useQuery(['sendings', { isAir }], getSendings(isAir))
   const drivers = useDictionary('drivers')
-  const [ driverOptions, driverMap ] = useMemo(() => {
+  const [ , driverMap ] = useMemo(() => {
     if (!Array.isArray(drivers.data?.list)) return [[], {}]
     const options = drivers.data.list.map(({ pole = {}, ...item }) => ({
       value: item.id,

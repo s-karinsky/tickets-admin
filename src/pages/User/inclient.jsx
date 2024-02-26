@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { Form, Button, Col, Row, message } from 'antd'
 import { get, set } from 'lodash'
 import { SaveOutlined } from '@ant-design/icons'
-import { getFieldsByRole, commonFields, companyFields } from './forms'
+import { getFieldsByRole, getCommonFields, companyFields } from './forms'
 import Wrapper from '../../components/Wrapper'
 import SelectCity from '../../components/SelectCity'
 import FormField from '../../components/FormField'
@@ -94,7 +94,7 @@ export default function PageInclient() {
           gutter={16}
           style={{ margin: 10 }}
         >
-          {commonFields.slice(0, 1).map(({ span, ...field }) => (
+          {getCommonFields(profile, isNew).slice(0, 1).map(({ span, ...field }) => (
             <Col span={span} key={getKeyFromName(field.name)}>
               <FormField
                 {...field}
