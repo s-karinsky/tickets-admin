@@ -6,15 +6,15 @@ import { ExclamationCircleFilled } from '@ant-design/icons'
 import axios from '../../utils/axios'
 import MakePaymentModal from '../../components/MakePaymentModal'
 import Wrapper from '../../components/Wrapper'
-import { useCompanyIncome } from '../../utils/hooks'
+import { useCompanyCost } from '../../utils/hooks'
 import { getColumnSearchProps } from '../../utils/components'
 import { NEW_ID } from '../../consts'
 
-export const ROOT_PATH = '/company-income'
+export const ROOT_PATH = '/company-cost'
 
-export default function CompanyIncome() {
+export default function CompanyCost() {
   const navigate = useNavigate()
-  const { data, isLoading, refetch } = useCompanyIncome()
+  const { data, isLoading, refetch } = useCompanyCost()
   const [ modal, setModal ] = useState()
   
   const columns = useMemo(() => [
@@ -91,8 +91,8 @@ export default function CompanyIncome() {
 
   return (
     <Wrapper
-      title='Приход средств компаний'
-      breadcrumbs={[ { title: 'Приход средств компании' } ]}
+      title='Расход средств компаний'
+      breadcrumbs={[ { title: 'Расход средств компании' } ]}
       buttons={[
         <Button
           type='primary'

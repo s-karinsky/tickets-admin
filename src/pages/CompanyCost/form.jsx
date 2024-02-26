@@ -7,16 +7,16 @@ import MakePaymentModal from '../../components/MakePaymentModal'
 import SelectUser from '../../components/SelectUser'
 import FormField from '../../components/FormField'
 import Wrapper from '../../components/Wrapper'
-import { useCompanyIncome } from '../../utils/hooks'
+import { useCompanyCost } from '../../utils/hooks'
 import { NEW_ID, VALIDATION_MESSAGES, PAY_TYPES } from '../../consts'
 import { ROOT_PATH } from '.'
 
-export default function CompanyIncomeItem() {
+export default function CompanyCostItem() {
   const [ modal, setModal ] = useState()
   const [ messageApi, contextHolder ] = message.useMessage()
   const navigate = useNavigate()
   const { id } = useParams()
-  const { data, isLoading, refetch } = useCompanyIncome(id)
+  const { data, isLoading, refetch } = useCompanyCost(id)
   const [ form ] = Form.useForm()
   const isInner = Form.useWatch('inner', form)
 
@@ -41,12 +41,12 @@ export default function CompanyIncomeItem() {
   }
   
   const isNew = id === NEW_ID
-  const title = isNew ? 'Новый приход средств' : `Приход средств №${data.number}`
+  const title = isNew ? 'Новый расход средств' : `Расход средств №${data.number}`
 
   return (
     <Wrapper
       title={title}
-      breadcrumbs={[ { title: <Link to={ROOT_PATH}>Приход средств компании</Link> }, { title } ]}
+      breadcrumbs={[ { title: <Link to={ROOT_PATH}>Расход средств компании</Link> }, { title } ]}
       buttons={[
         !isNew && <Button
           style={{ marginRight: 20 }}
@@ -89,7 +89,7 @@ export default function CompanyIncomeItem() {
         size='large'
         style={{ margin: '0 20px' }}
         onFinish={async (values) => {
-          const response = await axios.insert('dataset', { tip: 'com-income', status: 0, pole: JSON.stringify(values) })
+          const response = await axios.insert('dataset', { tip: 'com-cost', status: 0, pole: JSON.stringify(values) })
           const id = response.data?.data?.id
           if (id) {
             navigate(`${ROOT_PATH}/${id}`)
@@ -155,8 +155,8 @@ export default function CompanyIncomeItem() {
           <Col span={4}>
             <FormField
               type='date'
-              name='income_date'
-              label='Дата прихода'
+              name='cost_date'
+              label='Дата расхода'
               rules={[{ required: true }]}
               width='100%'
             />
