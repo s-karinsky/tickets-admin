@@ -99,3 +99,14 @@ export const COLUMNS = {
     ...getColumnSearchProps('email')
   }
 }
+
+export const NEW_ID = 'create'
+
+export const PAY_TYPES = [
+  {
+    value: 'Безналичный'
+  },
+  {
+    value: 'Наличный'
+  }
+]

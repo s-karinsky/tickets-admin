@@ -80,6 +80,16 @@ const MENU_ITEMS = {
           getItem(<Link to='/drivers-payments'>Оплаты перевозчику</Link>, 'drivers-payments'),
           getItem(<Link to='/drivers-balance'>Баланс по перевозчикам</Link>, 'drivers-balance')
         ]
+      ),
+      getItem(
+        'Компании',
+        'company-finances',
+        null,
+        [
+          getItem(<Link to='/company-income'>Приход средств</Link>, 'company-income'),
+          getItem(<Link to='/company-cost'>Расход средств</Link>, 'company-cost'),
+          getItem(<Link to='/company-balance'>Баланс компании</Link>, 'company-balance')
+        ]
       )
     ]
   )
