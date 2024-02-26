@@ -89,13 +89,18 @@ export default function CompanyCostItem() {
         size='large'
         style={{ margin: '0 20px' }}
         onFinish={async (values) => {
-          const response = await axios.insert('dataset', { tip: 'com-cost', status: 0, pole: JSON.stringify(values) })
-          const id = response.data?.data?.id
-          if (id) {
-            navigate(`${ROOT_PATH}/${id}`)
-            messageApi.success('Запись успешно добавлена')
+          if (isNew) {
+            const response = await axios.insert('dataset', { tip: 'com-cost', status: 0, pole: JSON.stringify(values) })
+            const id = response.data?.data?.id
+            if (id) {
+              navigate(`${ROOT_PATH}/${id}`)
+              messageApi.success('Запись успешно добавлена')
+            } else {
+              messageApi.error(response.data?.message)
+            }
           } else {
-            messageApi.error(response.data?.message)
+            await axios.update('dataset', { pole: JSON.stringify({ ...data.pole, ...values }) }, `id=${id}`)
+            messageApi.success('Запись успешно обновлена')
           }
         }}
       >

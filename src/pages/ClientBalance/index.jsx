@@ -189,7 +189,7 @@ export default function ClientBalance() {
                 </Table.Summary.Cell>
               </Table.Summary.Row>
             </>
-          );
+          )
         }}
       />
     </>

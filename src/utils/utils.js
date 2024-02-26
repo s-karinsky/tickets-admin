@@ -90,8 +90,10 @@ export const getMaxNumber = async (tableName, fieldName, where) => {
   if (fieldName[0] === '$') {
     const parts = fieldName.split('.')
     fieldName = `JSON_EXTRACT(${parts[1]}, "$.${parts.slice(2).join('.')}")`
+  } else {
+    fieldName = `\`${fieldName}\``
   }
-  const maxNum = await axios.select(tableName, `max(cast(\`${fieldName}\` as decimal)) as max`, { where })
+  const maxNum = await axios.select(tableName, `max(cast(${fieldName} as decimal)) as max`, { where })
   return parseInt(get(maxNum, ['data', 'data', 0, 'max'])) || 0
 }
 

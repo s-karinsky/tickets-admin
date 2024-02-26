@@ -19,6 +19,7 @@ import CurrencyRate from './pages/Dictionary/currencyRate'
 import Templates from './pages/Templates'
 import Template from './pages/Template'
 import Place from './pages/Place'
+import CompanyBalance from './pages/CompanyBalance'
 import CompanyCost from './pages/CompanyCost'
 import CompanyCostItem from './pages/CompanyCost/form'
 import CompanyIncome from './pages/CompanyIncome'
@@ -116,6 +117,7 @@ function App() {
           <Route path='/company-income/:id' element={<CompanyIncomeItem />} />
           <Route path='/company-cost' element={<CompanyCost />} />
           <Route path='/company-cost/:id' element={<CompanyCostItem />} />
+          <Route path='/company-balance' element={<CompanyBalance />} />
         </Route>
         <Route path='/login' element={<PageLogin />} />
       </Routes>

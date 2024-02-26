@@ -68,3 +68,20 @@ export const useCompanyCost = (id) => useQuery(['company-cost', id], async () =>
 
   return id ? result[0] : result
 })
+
+export const useCompanyBalance = () => useQuery(['company-balance'], async () => {
+  const response = await axios.select('dataset', '*', {
+    where: '(tip="com-income" OR tip="com-cost" OR tip="cl-payment" OR tip="dr-payment") AND status=0 AND JSON_EXTRACT(pole, "$.done")=true'
+  })
+  const list = (response.data?.data || [])
+  return list.map(item => {
+    const pole = parseJSON(item.pole)
+    pole.date = dayjs(pole.date)
+    pole.done_date = dayjs(pole.done_date)
+    return {
+      ...item,
+      ...pole,
+      pole
+    }
+  })
+})
