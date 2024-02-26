@@ -29,7 +29,7 @@ const getColumns = ({ refetch, navigate, driversMap, setModal }) => [
     title: 'Перевозчик',
     dataIndex: 'driver',
     sorter: (a, b) => localeCompare(driversMap[a.driver], driversMap[b.driver]),
-    render: (driver) => `${driversMap[driver]?.value} (${driversMap[driver]?.name})`,
+    render: (driver) => `${driversMap[driver]}`,
     ...getColumnSearchProps(driver => driversMap[driver])
   },
   {
@@ -152,6 +152,15 @@ export default function DriversInvoices() {
   }, [location.state?.refetch])
 
   const drivers = useDictionary('drivers')
+  const [ driversOptions, driversMap ] = useMemo(() => {
+    if (!Array.isArray(drivers.data?.list)) return [[], {}]
+    const options = drivers.data.list.map(({ pole = {}, ...item }) => ({
+      value: item.id,
+      label: item.label
+    }))
+    const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
+    return [ options, map ]
+  }, [drivers.data])
 
   return (
     <>
@@ -174,7 +183,7 @@ export default function DriversInvoices() {
         columns={getColumns({
           refetch,
           navigate,
-          driversMap: drivers.data?.map || {},
+          driversMap: driversMap || {},
           setModal
         })}
         dataSource={data}

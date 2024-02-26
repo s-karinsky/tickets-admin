@@ -46,7 +46,17 @@ export default function Sending() {
   const copy = searchParams.get('copy')
 
   const clients = useUsersWithRole(1)
-  const { data: { list: driverOptions, map: driverMap } = {} } = useDictionary('drivers')
+  const drivers = useDictionary('drivers')
+
+  const [ driverOptions, driverMap ] = useMemo(() => {
+    if (!Array.isArray(drivers.data?.list)) return [[], {}]
+    const options = drivers.data.list.map(({ pole = {}, ...item }) => ({
+      value: item.id,
+      label: item.label
+    }))
+    const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
+    return [ options, map ]
+  }, [drivers.data])
 
   const [ { isLoading, data, refetch }, places ] = useQueries([
     {
@@ -533,7 +543,7 @@ export default function Sending() {
                   name={['json', 'transporter']}
                   isEdit={isEditPage}
                   options={driverOptions}
-                  text={driverMap && driverMap[data.json?.transporter]?.label}
+                  text={driverMap && driverMap[data.json?.transporter]}
                   rules={required()}
                   filterOption={filterOption}
                   showSearch

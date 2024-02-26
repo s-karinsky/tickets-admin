@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Button, Row, Table, Typography, Switch, Modal, DatePicker, Select } from 'antd'
 import { ExclamationCircleFilled, CopyOutlined, DownloadOutlined } from '@ant-design/icons'
@@ -33,7 +33,16 @@ export default function Sendings() {
   const [ statusModalItem, setStatusModalItem ] = useState()
   const [ activeRow, setActiveRow ] = useState()
   const { isLoading, data, refetch } = useQuery(['sendings', { isAir }], getSendings(isAir))
-  const { data: { map: driverMap } = {} } = useDictionary('drivers')
+  const drivers = useDictionary('drivers')
+  const [ driverOptions, driverMap ] = useMemo(() => {
+    if (!Array.isArray(drivers.data?.list)) return [[], {}]
+    const options = drivers.data.list.map(({ pole = {}, ...item }) => ({
+      value: item.id,
+      label: item.label
+    }))
+    const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
+    return [ options, map ]
+  }, [drivers.data])
 
   let sendings = (data || [])
     .filter(item => activeOnly ? item.status !== 2 : item.status === 2)
@@ -128,7 +137,7 @@ export default function Sendings() {
       title: 'Перевозчик',
       dataIndex: 'transporter',
       key: 'transporter',
-      render: val => driverMap && driverMap[val]?.label,
+      render: val => driverMap && driverMap[val],
       sorter: (a, b) => a.transporter.localeCompare(b.transporter),
       ...getColumnSearchProps('transporter')
     },

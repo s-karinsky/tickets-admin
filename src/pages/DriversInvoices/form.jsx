@@ -28,9 +28,10 @@ export default function DriversInvoicesForm() {
     if (!Array.isArray(drivers.data?.list)) return [[], {}]
     const options = drivers.data.list.map(({ pole = {}, ...item }) => ({
       value: item.id,
-      label: `${item.value} (${[item.family, item.name, item.middle].filter(Boolean).join(' ')})`
+      label: item.label
     }))
-    return [ options, drivers.data.map ]
+    const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
+    return [ options, map ]
   }, [drivers.data])
 
   const discountRub = Form.useWatch('discount_rub', form)
