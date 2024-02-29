@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Row, Col, Button, Table, Typography, Modal, DatePicker } from 'antd'
+import { Switch, Row, Col, Button, Table, Typography, Modal, DatePicker } from 'antd'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { ExclamationCircleFilled } from '@ant-design/icons'
 import dayjs from 'dayjs'
@@ -146,6 +146,7 @@ const getColumns = ({ refetch, navigate, clientsMap, inclientMap, setModal }) =>
 ]
 
 export default function ClientInvoices() {
+  const [ isCash, setIsCash ] = useState()
   const [ modal, setModal ] = useState()
   const [ doneDate, setDoneDate ] = useState(dayjs())
   const { data, isLoading, refetch } = useClientInvoices()
@@ -172,6 +173,11 @@ export default function ClientInvoices() {
     return [ options, map ]
   }, [clients.data])
 
+  const filteredData = useMemo(() => (data || []).filter(item => {
+    const payType = isCash ? 'Наличный' : 'Безналичный'
+    return item.pay_type === payType
+  }), [data, isCash])
+
   const inclient = useDictionary('inclient')
   const [ inclientOptions, inclientMap ] = useMemo(() => {
     if (!Array.isArray(inclient.data?.list)) return [[], {}]
@@ -185,11 +191,22 @@ export default function ClientInvoices() {
 
   return (
     <>
-      <Row align='middle' style={{ padding: '0 40px' }}>
+      <Row align='middle' style={{ padding: '0 40px', marginBottom: 40 }}>
         <Col span={12}>
           <Typography.Title style={{ fontWeight: 'bold' }}>Счета на оплату клиентам</Typography.Title>
         </Col>
         <Col span={12} style={{ textAlign: 'right' }}>
+          <Switch
+            style={{
+              margin: '20px 20px 20px 0',
+              transform: 'scale(140%)'
+            }}
+            checkedChildren='Наличные'
+            unCheckedChildren='Безналичные'
+            checked={isCash}
+            onChange={setIsCash}
+          />
+          <br />
           <Button
             type='primary'
             size='large'
@@ -208,7 +225,7 @@ export default function ClientInvoices() {
           inclientMap,
           setModal
         })}
-        dataSource={data}
+        dataSource={filteredData}
         isLoading={isLoading}
         rowKey={({ id }) => id}
         onRow={(record, index) => ({

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Row, Col, Button, Table, Typography, Modal, DatePicker } from 'antd'
+import { Switch, Row, Col, Button, Table, Typography, Modal, DatePicker } from 'antd'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { ExclamationCircleFilled } from '@ant-design/icons'
 import dayjs from 'dayjs'
@@ -139,6 +139,7 @@ const getColumns = ({ refetch, navigate, driversMap, setModal }) => [
 ]
 
 export default function DriversInvoices() {
+  const [ isCash, setIsCash ] = useState()
   const [ modal, setModal ] = useState()
   const [ doneDate, setDoneDate ] = useState(dayjs())
   const { data, isLoading, refetch } = useDriversInvoices()
@@ -150,6 +151,11 @@ export default function DriversInvoices() {
       refetch()
     }
   }, [location.state?.refetch])
+
+  const filteredData = useMemo(() => (data || []).filter(item => {
+    const payType = isCash ? 'Наличный' : 'Безналичный'
+    return item.pay_type === payType
+  }), [data, isCash])
 
   const drivers = useDictionary('drivers')
   const [ driversOptions, driversMap ] = useMemo(() => {
@@ -164,11 +170,22 @@ export default function DriversInvoices() {
 
   return (
     <>
-      <Row align='middle' style={{ padding: '0 40px' }}>
+      <Row align='middle' style={{ padding: '0 40px', marginBottom: 40 }}>
         <Col span={12}>
           <Typography.Title style={{ fontWeight: 'bold' }}>Счета перевозчиков</Typography.Title>
         </Col>
         <Col span={12} style={{ textAlign: 'right' }}>
+          <Switch
+            style={{
+              margin: '20px 20px 20px 0',
+              transform: 'scale(140%)'
+            }}
+            checkedChildren='Наличные'
+            unCheckedChildren='Безналичные'
+            checked={isCash}
+            onChange={setIsCash}
+          />
+          <br />
           <Button
             type='primary'
             size='large'
@@ -186,7 +203,7 @@ export default function DriversInvoices() {
           driversMap: driversMap || {},
           setModal
         })}
-        dataSource={data}
+        dataSource={filteredData}
         isLoading={isLoading}
         rowKey={({ id }) => id}
         onRow={(record, index) => ({

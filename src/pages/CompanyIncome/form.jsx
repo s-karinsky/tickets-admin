@@ -151,6 +151,7 @@ export default function CompanyIncomeItem() {
           </Col>
           <Col span={4}>
             <FormField
+              name='pay_type'
               label='Тип средств'
               type='select'
               options={PAY_TYPES}

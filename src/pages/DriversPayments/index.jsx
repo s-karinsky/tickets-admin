@@ -1,5 +1,5 @@
-import { useMemo } from 'react'
-import { Row, Col, Button, Table, Typography, Modal } from 'antd'
+import { useMemo, useState } from 'react'
+import { Switch, Row, Col, Button, Table, Typography, Modal } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { BsTrash } from 'react-icons/bs'
@@ -118,6 +118,7 @@ const getColumns = ({ refetch, navigate, driversMap }) => ([
 ])
 
 export default function DriversPayments() {
+  const [ isCash, setIsCash ] = useState()
   const { data, isLoading, refetch } = useDriversPayments()
   const navigate = useNavigate()
   const drivers = useDictionary('drivers')
@@ -131,6 +132,11 @@ export default function DriversPayments() {
     return [ options, map ]
   }, [drivers.data])
 
+  const filteredData = useMemo(() => (data || []).filter(item => {
+    const payType = isCash ? 'Наличный' : 'Безналичный'
+    return item.pay_type === payType
+  }), [data, isCash])
+
   return (
     <>
       <Row align='middle' style={{ padding: '0 40px' }}>
@@ -138,6 +144,17 @@ export default function DriversPayments() {
           <Typography.Title style={{ fontWeight: 'bold' }}>Оплаты перевозчиков</Typography.Title>
         </Col>
         <Col span={12} style={{ textAlign: 'right' }}>
+          <Switch
+            style={{
+              margin: '20px 20px 20px 0',
+              transform: 'scale(140%)'
+            }}
+            checkedChildren='Наличные'
+            unCheckedChildren='Безналичные'
+            checked={isCash}
+            onChange={setIsCash}
+          />
+          <br />
           <Button
             type='primary'
             size='large'
@@ -150,7 +167,7 @@ export default function DriversPayments() {
       <Table
         size='small'
         columns={getColumns({ refetch, navigate, driversMap })}
-        dataSource={data}
+        dataSource={filteredData}
         isLoading={isLoading}
         rowKey={({ id }) => id}
         onRow={(record, index) => ({

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
-import { Button, Table, Modal } from 'antd'
+import { Switch, Button, Table, Modal } from 'antd'
 import { useNavigate } from 'react-router-dom'
+import dayjs from 'dayjs'
 import { BsTrash } from 'react-icons/bs'
 import { ExclamationCircleFilled } from '@ant-design/icons'
 import axios from '../../utils/axios'
@@ -8,11 +9,13 @@ import MakePaymentModal from '../../components/MakePaymentModal'
 import Wrapper from '../../components/Wrapper'
 import { useCompanyIncome } from '../../utils/hooks'
 import { getColumnSearchProps } from '../../utils/components'
+import { localeCompare, localeNumber } from '../../utils/utils'
 import { NEW_ID } from '../../consts'
 
 export const ROOT_PATH = '/company-income'
 
 export default function CompanyIncome() {
+  const [ isCash, setIsCash ] = useState()
   const navigate = useNavigate()
   const { data, isLoading, refetch } = useCompanyIncome()
   const [ modal, setModal ] = useState()
@@ -21,19 +24,58 @@ export default function CompanyIncome() {
     {
       title: 'Номер',
       dataIndex: 'number',
+      sorter: (a, b) => a.number - b.value,
       ...getColumnSearchProps('number')
     },
     {
       title: 'Дата',
       dataIndex: 'date',
-      render: date => date?.format('DD.MM.YYYY'),
+      align: 'center',
+      sorter: (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+      render: (date) => date?.format('DD.MM.YYYY'),
       ...getColumnSearchProps('date', { type: 'date' })
     },
     {
-      title: 'Дата проведения',
+      title: 'Тип оплаты',
+      dataIndex: 'pay_type',
+      sorter: (a, b) => localeCompare(a.pay_type, b.pay_type),
+      ...getColumnSearchProps('pay_type', { options: [{ value: 'Наличный' }, { value: 'Безналичный' }] })
+    },
+    {
+      title: 'К оплате ($)',
+      dataIndex: 'pay_usd',
+      align: 'right',
+      render: pay => localeNumber(pay),
+      sorter: (a, b) => localeCompare(a.pay_usd - b.pay_usd),
+      ...getColumnSearchProps('pay_usd', { type: 'number' })
+    },
+    {
+      title: 'К оплате (₽)',
+      dataIndex: 'pay_rub',
+      align: 'right',
+      render: pay => localeNumber(pay),
+      sorter: (a, b) => a.pay_rub - b.pay_rub,
+      ...getColumnSearchProps('pay_rub', { type: 'number' })
+    },
+    {
+      title: 'Дата учета',
       dataIndex: 'done_date',
-      render: date => date && date?.format('DD.MM.YYYY'),
-      ...getColumnSearchProps('date', { type: 'date' })
+      align: 'center',
+      sorter: (a, b) => new Date(a.done_date).getTime() - new Date(b.done_date).getTime(),
+      render: (date) => date && dayjs(date).format('DD.MM.YYYY'),
+      ...getColumnSearchProps('done_date', { type: 'date' })
+    },
+    {
+      title: 'Наименование',
+      dataIndex: 'name',
+      sorter: (a, b) => localeCompare(a.name, b.name),
+      ...getColumnSearchProps('name')
+    },
+    {
+      title: 'Примечание',
+      dataIndex: 'note',
+      sorter: (a, b) => localeCompare(a.note, b.note),
+      ...getColumnSearchProps('note')
     },
     {
       title: '',
@@ -89,15 +131,32 @@ export default function CompanyIncome() {
     }
   ], [])
 
+  const filteredData = useMemo(() => (data || []).filter(item => {
+    const payType = isCash ? 'Наличный' : 'Безналичный'
+    return item.pay_type === payType
+  }), [data, isCash])
+
   return (
     <Wrapper
       title='Приход средств компаний'
       breadcrumbs={[ { title: 'Приход средств компании' } ]}
       buttons={[
+        <Switch
+          style={{
+            margin: '20px 20px 20px 0',
+            transform: 'scale(140%)'
+          }}
+          checkedChildren='Наличные'
+          unCheckedChildren='Безналичные'
+          checked={isCash}
+          onChange={setIsCash}
+        />,
+        <br />,
         <Button
           type='primary'
           size='large'
           onClick={() => navigate(`${ROOT_PATH}/${NEW_ID}`)}
+          style={{ margin: '20px 0' }}
         >
           Создать
         </Button>
@@ -105,7 +164,7 @@ export default function CompanyIncome() {
     >
       <Table
         columns={columns}
-        dataSource={data}
+        dataSource={filteredData}
         loading={isLoading}
         onRow={record => ({
           onClick: (e) => {
