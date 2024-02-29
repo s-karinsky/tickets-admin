@@ -42,12 +42,6 @@ export default function CompanyCost() {
       ...getColumnSearchProps('invoice_number')
     },
     {
-      title: 'Тип оплаты',
-      dataIndex: 'pay_type',
-      sorter: (a, b) => localeCompare(a.pay_type, b.pay_type),
-      ...getColumnSearchProps('pay_type', { options: [{ value: 'Наличный' }, { value: 'Безналичный' }] })
-    },
-    {
       title: 'К оплате ($)',
       dataIndex: 'pay_usd',
       align: 'right',

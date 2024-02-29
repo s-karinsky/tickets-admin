@@ -46,12 +46,6 @@ const getColumns = ({ refetch, navigate, clientsMap, inclientMap, employeMap, se
     ...getColumnSearchProps('invoice_number')
   },
   {
-    title: 'Тип оплаты',
-    dataIndex: 'pay_type',
-    sorter: (a, b) => localeCompare(a.pay_type, b.pay_type),
-    ...getColumnSearchProps('pay_type', { options: [{ value: 'Наличный' }, { value: 'Безналичный' }] })
-  },
-  {
     title: 'Получил',
     dataIndex: 'get_employe',
     render: id => employeMap[id],
