@@ -304,7 +304,7 @@ export default function Sending() {
     const valuesMap = {
       from: values.from,
       create_datetime: dayjs(values.create_datetime).format('YYYY-MM-DD'),
-      json: JSON.stringify(values.json)
+      json: JSON.stringify({ ...data.json, ...values.json })
     }
     if (sendingId === 'create') {
       valuesMap.to = isAir ? '1' : '0'
@@ -320,7 +320,7 @@ export default function Sending() {
       await refetch()
       setSearchParams({})
     }
-  }, [sendingId, isAir, navigate, refetch, setSearchParams])
+  }, [sendingId, isAir, data, navigate, refetch, setSearchParams])
 
   return (
     <>
@@ -379,23 +379,6 @@ export default function Sending() {
               </Button>
             </form>
             {' '}
-            {!isNotSending &&
-              <Button
-                icon={<SaveOutlined />}
-                style={{
-                  gap: 10,
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
-                type='primary'
-                size='large'
-                onClick={() => {
-                  form.submit()
-                }}
-              >
-                Сохранить
-              </Button>
-            }
             {isEditPage ? (
               <>
                 <Button

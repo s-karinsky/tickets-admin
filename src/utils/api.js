@@ -639,7 +639,7 @@ export const useClientInvoices = (id, initial = {}, params) => useQuery(['client
         rest.pay_type = placeLikeInGroup?.pay_type
         rest.client = placeLikeInGroup?.client
         rest.inclient = placeLikeInGroup?.inclient
-        rest.name += ` Вес брутто: ${localeNumber(weight.toFixed(3))} кг.`
+        rest.name += ` Вес брутто: ${weight.toFixed(3)} кг.`
       }
       if (['delivery', 'fullfillment', 'storage'].includes(type)) {
         const delivery = await axios.select('dataset', '*', { where: { id } })

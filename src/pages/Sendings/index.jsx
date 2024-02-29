@@ -174,7 +174,7 @@ export default function Sendings() {
       dataIndex: 'departure',
       key: 'departure',
       align: 'center',
-      render: (date, item) => item.json?.status > 0 && dayjs(item.json?.status_date_1).format('DD.MM.YYYY'),
+      render: (date, item) => item.json?.status > 0 && !!item.json?.status_date_1 && dayjs(item.json?.status_date_1).format('DD.MM.YYYY'),
       sorter: (a, b) => new Date(a.departure).getTime() - new Date(b.departure).getTime(),
       ...getColumnSearchProps('departure', { type: 'date' })
     },
@@ -183,7 +183,7 @@ export default function Sendings() {
       dataIndex: 'delivery',
       key: 'delivery',
       align: 'center',
-      render: (date, item) => item.json?.status > 1 && dayjs(item.json?.status_date_2).format('DD.MM.YYYY'),
+      render: (date, item) => item.json?.status > 1 && !!item.json?.status_date_2 && dayjs(item.json?.status_date_2).format('DD.MM.YYYY'),
       sorter: (a, b) => new Date(a.delivery).getTime() - new Date(b.delivery).getTime(),
       ...getColumnSearchProps('delivery', { type: 'date' })
     },
