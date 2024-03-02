@@ -5,6 +5,7 @@ import Cookies from 'universal-cookie'
 import axios from './axios'
 import { parseJSON, toFormData, localeNumber } from './utils'
 import { sqlUpdate, sqlInsert } from './sql'
+import { SERVICE_STATUS } from '../consts'
 
 const sendingSummaryFields = [
   'id_trip',
@@ -545,6 +546,9 @@ export const useService = (name, id, params) => useQuery(['dataset', name, id], 
     if (pole.start_date) pole.start_date = dayjs(pole.start_date)
     if (pole.end_date) pole.end_date = dayjs(pole.end_date)
     const placeData = (pole.places || []).map(id => placeMap[id])
+    if (!pole.is_finished) {
+      pole[`date_status_${SERVICE_STATUS[name]?.length - 1}`] = null
+    }
     return {
       ...item,
       ...pole,
@@ -833,7 +837,7 @@ export const useDriversInvoices = (id, initial = {}, params) => useQuery(['drive
         rest.name = `За отправку № ${sData.from} от ${dayjs(sData.create_datetime).format('DD.MM.YYYY')}, Мест: ${(places.data?.data || []).length}`
         let list = (places.data?.data || []).map(place => ({ ...place, ...parseJSON(place.pole) }))
         list.forEach(place => {
-          weight += Number(place.gross_weight)
+          weight += (Number(place.gross_weight) || 0)
         })
         rest.driver = sData.transporter
         rest.inclient = sData.inclient
