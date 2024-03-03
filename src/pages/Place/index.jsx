@@ -8,8 +8,9 @@ import { SaveOutlined, CopyOutlined, ExclamationCircleFilled, LoadingOutlined, C
 import { PropertyGap } from '../Sendings'
 import CreateProductModal from './СreateProductModal'
 import FormField from '../../components/FormField'
-import { useDictionary, useUsersWithRole, getLastId, getCount, getSendingById, getPlaceById, deletePlaceById, updateDatasetById, createDataset, getProductsByPlaceId, deleteProductById } from '../../utils/api'
-import { SENDING_STATUS, SERVICE_NAME } from '../../consts'
+import SelectRate from '../../components/SelectRate'
+import { useUsersWithRole, getLastId, getCount, getSendingById, getPlaceById, deletePlaceById, updateDatasetById, createDataset, getProductsByPlaceId, deleteProductById } from '../../utils/api'
+import { SENDING_STATUS, SERVICE_NAME, PAY_TYPES } from '../../consts'
 import { getColumnSearchProps } from '../../utils/components'
 import { required, numberRange } from '../../utils/validationRules'
 import { declOfNum, numberFormatter, getPaginationSettings, filterOption, localeNumber, getSurnameWithInitials } from '../../utils/utils'
@@ -48,17 +49,6 @@ export default function Place({ user }) {
     }
   ])
   const clients = useUsersWithRole(1)
-  const tarifs = useDictionary('rates')
-
-  const rate = Form.useWatch('tarif', form)
-  
-  useEffect(() => {
-    const item = (tarifs.data?.list || []).find(item => item.value === rate)
-    if (!item) return
-
-    form.setFieldValue('pay_type', item.pay_type)
-    form.setFieldValue('pay_kg', item.price_kg)
-  }, [rate, tarifs.data?.list])
 
   const [ clientsOptions, clientsMap ] = useMemo(() => {
     if (!Array.isArray(clients.data)) return [[], {}]
@@ -95,6 +85,12 @@ export default function Place({ user }) {
   useEffect(() => {
     if (initialPlace.pay_type !== 'Безналичный') setIsSumDisabled(true)
   }, [initialPlace.pay_type])
+
+  const payType = Form.useWatch('pay_type', form)
+
+  useEffect(() => {
+    setIsSumDisabled(payType !== 'Безналичный')
+  }, [payType])
 
   const maxNum = (productsData.data || []).reduce((max, item) => Math.max(item.number, max), 0)
 
@@ -428,13 +424,6 @@ export default function Place({ user }) {
               size='large'
               initialValues={initialPlace}
               onFinish={handleSubmit}
-              onValuesChange={(values, allValues) => {
-                if (values.pay_type) setIsSumDisabled(values.pay_type !== 'Безналичный')
-                if (values.pay_kg || values.gross_weight) {
-                  const sum = (allValues.pay_kg || 0) * (allValues.gross_weight || 0)
-                  form.setFieldValue('pay_sum', sum)
-                }
-              }}
               form={form}
             >
               <div
@@ -529,26 +518,25 @@ export default function Place({ user }) {
                   rules={[...required(), ...numberRange({ min: 1 })]}
                   addonAfter={'см'}
                 />
-                <FormField 
-                  type='select'
-                  label='Тариф'
-                  name='tarif'
-                  style={{ width: 200 }}
-                  options={tarifs.data?.list || []}
-                  text={(tarifs.data?.map || {})[initialPlace.tarif]?.label}
+                <SelectRate
+                  defaultRate={initialPlace.rate}
+                  defaultCategory={initialPlace.tarif}
                   isEdit={isEditPage}
-                  rules={required()}
-                  showSearch
+                  form={form}
+                  onChange={item => {
+                    form.setFieldValue('pay_type', item.pay_type)
+                    const countField = item.price_type === '2' ? 'count' : 'gross_weight'
+                    const count = Number(form.getFieldValue(countField)) || 0
+                    form.setFieldValue('pay_sum', item.price_kg * count)
+                  }}
+                  showPrice
                 />
                 <FormField
                   type='select'
                   label='Тип оплаты'
                   name='pay_type'
                   style={{ width: 200 }}
-                  options={[
-                    { value: 'Наличный', title: '' },
-                    { value: 'Безналичный', title: '' },
-                  ].concat(customPay ? { value: customPay } : [])}
+                  options={PAY_TYPES.concat(customPay ? { value: customPay } : [])}
                   text={initialPlace.pay_type}
                   isEdit={isEditPage}
                   rules={required()}
@@ -566,7 +554,7 @@ export default function Place({ user }) {
                     </>
                   )}
                 />
-                <FormField
+                {/* <FormField
                   type='number'
                   label='Цена за 1 кг'
                   name='pay_kg'
@@ -574,7 +562,7 @@ export default function Place({ user }) {
                   style={{ width: 200 }}
                   isEdit={isEditPage}
                   formatter={numberFormatter(2)}
-                />
+                /> */}
                 <FormField
                   type='number'
                   label='Сумма товара'

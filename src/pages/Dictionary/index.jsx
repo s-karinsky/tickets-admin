@@ -100,17 +100,8 @@ const getColumns = (name, params = {
           ...getColumnSearchProps('label')
         },
         {
-          title: 'Тип оплаты',
-          dataIndex: 'pay_type',
-          sorter: (a, b) => localeCompare(a.pay_type, b.pay_type),
-          ...getColumnSearchProps('pay_type')
-        },
-        {
-          title: 'Цена за 1 кг',
-          dataIndex: 'price_kg',
-          align: 'right',
-          sorter: (a, b) => parseInt(a.price_kg || 0) - parseInt(b.price_kg || 0),
-          ...getColumnSearchProps('price_kg')
+          title: 'Примечание',
+          dataIndex: 'note'
         },
         buttonsColumn
       ]

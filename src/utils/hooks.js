@@ -5,6 +5,30 @@ import axios from './axios'
 import { getLastCurrencyRate } from './api'
 import { NEW_ID } from '../consts'
 
+export const useProductsCategory = (id, params) => useQuery(['products-category', id], async () => {
+  const tip = 'prod-cat'
+  if (id === NEW_ID) {
+    return {}
+  }
+  let where = {}
+  if (typeof id === 'object') {
+    where = id
+  } else {
+    where.id = id
+  }
+  const response = await axios.select('sprset', '*', { where: { tip, status: 0, ...where } })
+  const list = response.data?.data || []
+  const result = list.map(item => {
+    const pole = parseJSON(item.pole)
+    return {
+      ...item,
+      ...pole,
+      pole
+    }
+  })
+  return typeof id === 'string' ? result[0] : result
+}, params)
+
 export const useCompanyIncome = (id) => useQuery(['company-income', id], async () => {
   const tip = 'com-income'
   if (id === NEW_ID) {

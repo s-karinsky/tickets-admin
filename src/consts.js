@@ -110,3 +110,13 @@ export const PAY_TYPES = [
     value: 'Наличный'
   }
 ]
+
+export const RATE_PRICE_TYPES = [
+  {
+    value: '1',
+    label: 'кг.'
+  }, {
+    value: '2',
+    label: 'ед.'
+  }
+]

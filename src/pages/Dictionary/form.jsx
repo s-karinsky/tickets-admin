@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react'
-import { Row, Col, Typography, Form, Button, Divider } from 'antd'
+import { Row, Col, Typography, Form, Button, Divider, Table } from 'antd'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons'
 import { get as _get } from 'lodash'
 import FormField from '../../components/FormField'
 import CreateCityModal from '../../components/CreateCityModal'
 import { useDictionary, useCities, useCountries } from '../../utils/api'
+import { useProductsCategory } from '../../utils/hooks'
 import axios from '../../utils/axios'
 import { numberRange, emailRule } from '../../utils/validationRules'
 import { sqlInsert, sqlUpdate } from '../../utils/sql'
-import { VALIDATION_MESSAGES } from '../../consts'
+import { VALIDATION_MESSAGES, RATE_PRICE_TYPES } from '../../consts'
 
 const getTitle = (name, value, isNew) => {
   switch (name) {
@@ -30,6 +31,29 @@ const getTitle = (name, value, isNew) => {
   }
 }
 
+const productCategoryColumns = [
+  {
+    title: 'Код',
+    dataIndex: 'value'
+  }, {
+    title: 'Наименование',
+    dataIndex: 'label'
+  }, {
+    title: 'Тип оплаты',
+    dataIndex: 'pay_type'
+  }, {
+    title: 'Цена',
+    dataIndex: 'price_kg'
+  }, {
+    title: 'Цена за',
+    dataIndex: 'price_type',
+    render: val => RATE_PRICE_TYPES.find(item => item.value === val)?.label
+  }, {
+    title: 'Примечание',
+    dataIndex: 'note'
+  }
+]
+
 export default function DictionaryForm() {
   const [ isUpdating, setIsUpdating ] = useState(false)
   const [ isAddCity, setIsAddCity ] = useState()
@@ -40,6 +64,7 @@ export default function DictionaryForm() {
   const navigate = useNavigate()
   const isNew = id === 'create'
   const { data = {}, isLoading } = useDictionary(name, { id })
+  const productCategory = useProductsCategory({ id_ref: id }, { enabled: name === 'rates' })
   const countries = useCountries()
   const cities = useCities(country)
 
@@ -125,24 +150,6 @@ export default function DictionaryForm() {
                     label='Наименование'
                     name='label'
                     rules={[{ required: true }]}
-                  />
-                </Col>
-                <Col span={4}>
-                  <FormField
-                    label='Тип оплаты'
-                    name='pay_type'
-                    type='select'
-                    options={[ { value: 'Наличный' }, { value: 'Безналичный' }]}
-                    rules={[{ required: true }]}
-                  />
-                </Col>
-                <Col span={4}>
-                  <FormField
-                    label='Цена за 1 кг'
-                    addonAfter='$'
-                    name='price_kg'
-                    type='number'
-                    rules={[{ required: true }, ...numberRange({ min: 1 })]}
                   />
                 </Col>
                 <Col span={24}>
@@ -415,6 +422,39 @@ export default function DictionaryForm() {
           </Col>
         </Row>
       </Form>
+      {name === 'rates' && <>
+        <Row justify='space-between' align='bottom' style={{ margin: '20px 40px' }}>
+          <Col>
+            <Typography.Title
+              level={1}
+              style={{ fontWeight: '700', marginBottom: '0' }}
+            >
+              Категории товаров
+            </Typography.Title>
+          </Col>
+          <Col>
+            <Button
+              type='primary'
+              size='large'
+              onClick={() => navigate(`/dictionary/rates/${id}/create`)}
+            >
+              Создать
+            </Button>
+          </Col>
+        </Row>
+        <Table
+          columns={productCategoryColumns}
+          dataSource={productCategory.data}
+          loading={productCategory.isLoading}
+          onRow={record => ({
+            onClick: (e) => {
+              if (e.detail === 2) {
+                navigate(`/dictionary/rates/${id}/${record.id}`)
+              }
+            },
+          })}
+        />
+      </>}
       <CreateCityModal
         isOpen={isAddCity}
         onOk={values => {

@@ -475,8 +475,9 @@ export const useDictionary = (name, where, params) => useQuery(['dictionary', na
       json.label = `${json.value} (${[json.family, json.name, json.middle].filter(Boolean).join(' ')})`
     }
 
-    if (name === 'rates') {
+    if (name === 'rates' || name === 'prod-cat') {
       json.label = `${json.value} (${json.label})`
+      json.value = item.id
     }
 
     return {

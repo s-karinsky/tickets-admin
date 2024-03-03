@@ -34,6 +34,7 @@ import DriversInvoicesForm from './pages/DriversInvoices/form'
 import DriversPayments from './pages/DriversPayments'
 import DriversPaymentsForm from './pages/DriversPayments/form'
 import DriversBalance from './pages/DriversBalance'
+import ProductsCategory from './pages/Dictionary/products-category'
 
 import Layout from './components/Layout'
 import { useAuthorization } from './utils/api'
@@ -98,6 +99,7 @@ function App() {
             <Route path='clients/:id' element={<UserForm name='clients' />} />
             <Route path='employees' element={<PageUsers role='2' />} />
             <Route path='employees/:id' element={<UserForm name='employees' />} />
+            <Route path='rates/:id/:categoryId' element={<ProductsCategory />} />
             <Route path=':name' element={<Dictionary />} />
             <Route path=':name/:id' element={<DictionaryForm />} />
           </Route>
