@@ -89,7 +89,7 @@ const getColumns = (name, params = {
       return [
         {
           title: 'Код',
-          dataIndex: 'value',
+          dataIndex: 'code',
           sorter: (a, b) => localeCompare(a.value, b.value),
           ...getColumnSearchProps('value')
         },

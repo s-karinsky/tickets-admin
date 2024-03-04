@@ -140,7 +140,7 @@ export default function DictionaryForm() {
               <Col span={name === 'inclient' ? 3 : 4}>
                 <FormField
                   label='Код'
-                  name='value'
+                  name={name === 'rates' ? 'code' : 'value'}
                   rules={[{ required: true }]}
                 />
               </Col>
@@ -422,7 +422,7 @@ export default function DictionaryForm() {
           </Col>
         </Row>
       </Form>
-      {name === 'rates' && <>
+      {name === 'rates' && !isNew && <>
         <Row justify='space-between' align='bottom' style={{ margin: '20px 40px' }}>
           <Col>
             <Typography.Title

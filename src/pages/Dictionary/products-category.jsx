@@ -51,9 +51,9 @@ export default function ProductsCategory() {
         style={{ margin: '0 20px' }}
         onFinish={async (values) => {
           if (isNew) {
-            const response = await axios.insert('sprset', { tip: 'prod-cat', status: 0, pole: JSON.stringify(values) })
-            const id = response.data?.data?.id
-            if (id) {
+            const response = await axios.insert('sprset', { tip: 'prod-cat', id_ref: id, ref_tip: 'rate', status: 0, pole: JSON.stringify(values) })
+            const newId = response.data?.data?.id
+            if (newId) {
               messageApi.success('Запись успешно добавлена')
             } else {
               messageApi.error(response.data?.message)
