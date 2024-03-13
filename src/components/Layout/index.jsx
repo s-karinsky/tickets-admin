@@ -43,6 +43,7 @@ const MENU_ITEMS = {
     getItem(<Link to='/dictionary/currency'>Валюта и курс</Link>, 'dictionary-currency')
   ]),
   settings: getItem('Настройки', 'settings', <SettingOutlined />, [
+    getItem(<Link to='/roles'>Роли</Link>, 'roles'),
     getItem(<Link to='/templates'>Шаблоны</Link>, 'templates'),
     getItem(<Link to='/users'>Пользователи</Link>, 'users'),
     getItem(<Link to='/dictionary/config'>Параметры учёта</Link>, 'dictionary-config'),

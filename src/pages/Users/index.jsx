@@ -1,9 +1,12 @@
+import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { keyBy } from 'lodash'
 import { Table, Tag, Row, Button, Col, Typography } from 'antd'
 import { getColumnSearchProps } from '../../utils/components'
 import DeleteButton from '../../components/DeleteButton'
 import axios from '../../utils/axios'
 import { useUsers, useCountries, useAllCities } from '../../utils/api'
+import { useRoles } from '../../utils/hooks'
 import { getPaginationSettings, localeCompare } from '../../utils/utils'
 import { USER_ROLES, USER_ROLES_COLOR } from '../../consts'
 
@@ -13,12 +16,12 @@ const TITLE = {
   2: 'Сотрудники'
 }
 
-export const getColumns = ({ name, role, countries = {}, cities = {}, noButtons, codeIndex = ['json', 'code'], refetch = () => {}, deleteUser }) => ([
+export const getColumns = ({ rolesMap, name, role, countries = {}, cities = {}, noButtons, codeIndex = ['json', 'code'], refetch = () => {}, deleteUser }) => ([
   {
     title: 'Роль',
     dataIndex: 'id_role',
     key: 'id_role',
-    render: text => (<Tag color={USER_ROLES_COLOR[text]}>{USER_ROLES[text]}</Tag>),
+    render: text => (<Tag color={USER_ROLES_COLOR[text]}>{rolesMap[text]?.name_ru}</Tag>),
     filters: Object.keys(USER_ROLES).filter(key => key !== '3').map(id => ({
       text: USER_ROLES[id],
       value: id
@@ -103,8 +106,11 @@ export const getColumns = ({ name, role, countries = {}, cities = {}, noButtons,
 export default function PageUsers({ role, balance }) {
   const navigate = useNavigate()
   const users = useUsers({ id_role: role })
+  const roles = useRoles()
   const countries = useCountries()
   const cities = useAllCities()
+
+  const rolesMap = useMemo(() => keyBy(roles.data, 'id_role'), [roles.data])
 
   return (
     <>
@@ -124,7 +130,7 @@ export default function PageUsers({ role, balance }) {
       </Row>
       <Table
         size='small'
-        columns={getColumns({ role, refetch: users.refetch, countries: countries.data, cities: cities.data, noButtons: balance }).slice(role ? 1 : 0)}
+        columns={getColumns({ rolesMap, role, refetch: users.refetch, countries: countries.data, cities: cities.data, noButtons: balance }).slice(role ? 1 : 0)}
         dataSource={users.data}
         loading={users.isLoading}
         rowKey={({ id_user }) => id_user}

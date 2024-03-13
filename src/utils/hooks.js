@@ -109,3 +109,9 @@ export const useCompanyBalance = () => useQuery(['company-balance'], async () =>
     }
   })
 })
+
+export const useRoles = (id) => useQuery(['roles', id], async () => {
+  const response = await axios.select('users_roles', '*', { where: { id_role: id, active: 1 } })
+  const list = (response.data?.data || [])
+  return id ? list[0] : list
+})

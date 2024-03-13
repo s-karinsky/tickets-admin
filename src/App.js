@@ -35,6 +35,8 @@ import DriversPayments from './pages/DriversPayments'
 import DriversPaymentsForm from './pages/DriversPayments/form'
 import DriversBalance from './pages/DriversBalance'
 import ProductsCategory from './pages/Dictionary/products-category'
+import Roles from './pages/Roles'
+import RolesForm from './pages/Roles/form'
 
 import Layout from './components/Layout'
 import { useAuthorization } from './utils/api'
@@ -120,6 +122,8 @@ function App() {
           <Route path='/company-cost' element={<CompanyCost />} />
           <Route path='/company-cost/:id' element={<CompanyCostItem />} />
           <Route path='/company-balance' element={<CompanyBalance />} />
+          <Route path='/roles' element={<Roles />} />
+          <Route path='/roles/:id' element={<RolesForm />} />
         </Route>
         <Route path='/login' element={<PageLogin />} />
       </Routes>
