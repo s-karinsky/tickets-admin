@@ -110,11 +110,11 @@ export const useCompanyBalance = () => useQuery(['company-balance'], async () =>
   })
 })
 
-export const useRoles = (id) => useQuery(['roles', id], async () => {
+export const useRoles = (id, params = {}) => useQuery(['roles', id], async () => {
   const response = await axios.select('users_roles', '*', { where: { id_role: id, active: 1 } })
   const list = (response.data?.data || []).map(item => ({
     ...item,
     json: parseJSON(item.json) || {}
   }))
   return id ? list[0] : list
-})
+}, params)

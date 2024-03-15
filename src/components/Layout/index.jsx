@@ -12,6 +12,7 @@ import {
 import { Avatar, Button, Dropdown, Menu, Space, Layout, Row, Col } from 'antd'
 import { Outlet, Link, useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
+import { useRoles } from '../../utils/hooks'
 import styles from './styles.module.scss'
 
 const { Header, Sider, Content } = Layout
@@ -108,19 +109,34 @@ const getMenuKeys = items => items.map(item => {
 
 export const menuKeys = getMenuKeys(Object.values(MENU_ITEMS))
 
+const filterMenu = (items, access) => {
+  let newItems = items.filter(item => access[item.key])
+  newItems.map(item => {
+    if (item.children) {
+      item.children = filterMenu(item.children, access)
+    }
+    return item
+  })
+  return newItems
+}
+
 export default function PageLayout({ user }) {
   const [ collapsed, setCollapsed ] = useState(false)
   const navigate = useNavigate()
+  const role = useRoles(user.u_role, { enabled: !!user.u_role })
 
   const items = useMemo(() => {
-    return [
+    const access = role.data?.json
+    if (!access) return []
+    const menuList = [
       MENU_ITEMS.settings,
       MENU_ITEMS.dictionary,
       MENU_ITEMS.sendings,
       MENU_ITEMS.services,
       MENU_ITEMS.finances
     ]
-  }, [user.u_role])
+    return filterMenu(menuList, access)
+  }, [role.data])
 
   const toggleCollapsed = () => setCollapsed(!collapsed)
 

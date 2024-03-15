@@ -51,7 +51,7 @@ export default function RolesForm() {
   const [ messageApi, contextHolder ] = message.useMessage()
   const navigate = useNavigate()
   const { id } = useParams()
-  const { data, isLoading } = useRoles(id)
+  const { data, isLoading, refetch } = useRoles(id)
   const [ form ] = Form.useForm()
 
 
@@ -115,6 +115,7 @@ export default function RolesForm() {
           } else {
             await axios.update('users_roles', values, `id_role=${id}`)
             messageApi.success('Запись успешно обновлена')
+            refetch()
           }
         }}
       >

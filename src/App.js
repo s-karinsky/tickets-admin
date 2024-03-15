@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Row } from 'antd'
 import { LoadingOutlined } from '@ant-design/icons'
 import { Route, Routes, useNavigate, useLocation } from 'react-router-dom'
@@ -38,6 +38,7 @@ import ProductsCategory from './pages/Dictionary/products-category'
 import Roles from './pages/Roles'
 import RolesForm from './pages/Roles/form'
 
+import { useRoles } from './utils/hooks'
 import Layout from './components/Layout'
 import { useAuthorization } from './utils/api'
 import './App.css'
@@ -52,6 +53,7 @@ function App() {
   const token = cookies.get('token')
   const u_hash = cookies.get('u_hash')
   const user = useAuthorization({ token, u_hash })
+  const role = useRoles(user.data?.u_role, { enabled: !!user.data?.u_role })
 
   useEffect(() => {
     if (user.isLoading) return
@@ -62,6 +64,20 @@ function App() {
       navigate('/', { replace: true })
     }
   }, [user.isLoading, user.data?.u_role, isLoginPage, navigate])
+
+  const haveAccess = useMemo(() => {
+    const access = role.data?.json
+    if (!access) return
+    return Object.keys(access).some(key => access[key] && key.startsWith(location.pathname))
+  }, [role.data, location])
+
+  if (haveAccess === false && !role.isLoading) {
+    return (
+      <Row style={{ height: '100vh' }} justify='center' align='middle'>
+        Доступ к странице ограничен
+      </Row>
+    )
+  }
 
   if ((user.isLoading || !user.data?.authorized) && !isLoginPage) {
     return (
