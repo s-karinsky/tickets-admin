@@ -2,7 +2,7 @@ import { emailRule } from '../../utils/validationRules'
 import { USER_ROLES_OPTIONS, USER_ROLES } from '../../consts'
 import axios from '../../utils/axios'
 
-export const getCommonFields = (initialValues, isNew) => [
+export const getCommonFields = (initialValues, isNew, roles) => [
   {
     name: ['json', 'code'],
     label: 'Код',
@@ -24,7 +24,7 @@ export const getCommonFields = (initialValues, isNew) => [
     name: 'id_role',
     label: 'Роль',
     type: 'select',
-    options: USER_ROLES_OPTIONS.filter(item => item !== '3').map(value => ({ value, label: USER_ROLES[value] })),
+    options: roles,
     required: true,
     span: 5
   }

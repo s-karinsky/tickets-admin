@@ -2,7 +2,9 @@ import { useMemo } from 'react'
 import { Button, Table } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import { useRoles } from '../../utils/hooks'
+import axios from '../../utils/axios'
 import Wrapper from '../../components/Wrapper'
+import DeleteButton from '../../components/DeleteButton'
 import { NEW_ID } from '../../consts'
 
 export const ROOT_PATH = '/roles'
@@ -19,6 +21,19 @@ export default function Roles() {
     {
       title: 'Роль',
       dataIndex: 'name_ru'
+    },
+    {
+      title: '',
+      render: item => (
+        <DeleteButton
+          title='Удалить роль'
+          confirm='Вы действительно хотите удалить эту роль?'
+          onOk={async () => {
+            await axios.postWithAuth('/query/update', { sql: `UPDATE users_roles SET active=0 WHERE id_role=${item.id_role}` })
+            roles.refetch()
+          }}
+        />
+      )
     }
   ], [])
 

@@ -1,21 +1,59 @@
 import { useEffect, useState } from 'react'
-import { Button, Form, Row, Col, Checkbox, Modal, message } from 'antd'
+import { Button, Form, Row, Col, Checkbox, message } from 'antd'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { LoadingOutlined, ExclamationCircleFilled } from '@ant-design/icons'
+import { LoadingOutlined } from '@ant-design/icons'
 import axios from '../../utils/axios'
 import FormField from '../../components/FormField'
 import Wrapper from '../../components/Wrapper'
 import { useRoles } from '../../utils/hooks'
-import { NEW_ID, VALIDATION_MESSAGES, PAY_TYPES } from '../../consts'
+import { NEW_ID, VALIDATION_MESSAGES } from '../../consts'
+import { menuKeys } from '../../components/Layout'
 import { ROOT_PATH } from '.'
 
+const getItemsValue = (items, val, current = {}) => {
+  if (!items) return current
+  return items.reduce((acc, item) => ({
+    ...acc,
+    [item.key]: val,
+    ...getItemsValue(item.items, val, acc)
+  }), current)
+}
+
+function CheckboxTree({ form, items = [] }) {
+  return (
+    <div style={{ paddingLeft: 20 }}>
+      {items.map(item => (
+        <div key={item.key}>
+          <Form.Item
+            name={['json', item.key]}
+            valuePropName='checked'
+          >
+            <Checkbox
+              onChange={e => {
+                if (!item.items) return
+                const values = getItemsValue(item.items, e.target.checked)
+                Object.keys(values).forEach(key => {
+                  form.setFieldValue(['json', key], values[key])
+                })
+              }}
+            >
+              {item.name}
+            </Checkbox>
+          </Form.Item>
+          {!!item.items && <CheckboxTree form={form} items={item.items} />}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export default function RolesForm() {
-  const [ modal, setModal ] = useState()
   const [ messageApi, contextHolder ] = message.useMessage()
   const navigate = useNavigate()
   const { id } = useParams()
-  const { data, isLoading, refetch } = useRoles(id)
+  const { data, isLoading } = useRoles(id)
   const [ form ] = Form.useForm()
+
 
   if (isLoading) {
     return (
@@ -59,6 +97,12 @@ export default function RolesForm() {
         size='large'
         style={{ margin: '0 20px' }}
         onFinish={async (values) => {
+          values.json = JSON.stringify(
+              Object.keys(values.json).reduce((acc, key) => ({
+              ...acc,
+              [key]: values.json[key] || false
+            }), {})
+          )
           if (isNew) {
             const response = await axios.insert('users_roles', values)
             const id = response.data?.data?.id
@@ -83,6 +127,32 @@ export default function RolesForm() {
               width='100%'
             />
           </Col>
+        </Row>
+        <Row gutter={[10, 20]} style={{ marginTop: 30 }}>
+          <Col span={24}>
+            <b>Доступные разделы</b>
+          </Col>
+          {menuKeys.map(menu => (
+            <Col span={4} key={menu.key}>
+              <Form.Item
+                name={['json', menu.key]}
+                valuePropName='checked'
+              >
+                <Checkbox
+                  onChange={e => {
+                    if (!menu.items) return
+                    const values = getItemsValue(menu.items, e.target.checked)
+                    Object.keys(values).forEach(key => {
+                      form.setFieldValue(['json', key], values[key])
+                    })
+                  }}
+                >
+                  {menu.name}
+                </Checkbox>
+              </Form.Item>
+              {!!menu.items && <CheckboxTree form={form} items={menu.items} />}
+            </Col>
+          ))}
         </Row>
       </Form>
       {contextHolder}

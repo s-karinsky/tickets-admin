@@ -28,33 +28,33 @@ function getItem(label, key, icon, children, type) {
 
 const MENU_ITEMS = {
   services: getItem('Услуги', 'services', <UnorderedListOutlined />, [
-    getItem(<Link to='/services/issuance'>Выдача со склада</Link>, 'services-issuance'),
-    getItem(<Link to='/services/delivery'>Доставка</Link>, 'services-delivery'),
-    getItem(<Link to='/services/fullfillment'>Фулфилмент</Link>, 'services-fullfillment'),
-    getItem(<Link to='/services/storage'>Хранение</Link>, 'services-storage'),
-    getItem(<Link to='/services/repack'>Переупаковка</Link>, 'services-repack')
+    getItem(<Link to='/services/issuance'>Выдача со склада</Link>, '/services/issuance'),
+    getItem(<Link to='/services/delivery'>Доставка</Link>, '/services/delivery'),
+    getItem(<Link to='/services/fullfillment'>Фулфилмент</Link>, '/services/fullfillment'),
+    getItem(<Link to='/services/storage'>Хранение</Link>, '/services/storage'),
+    getItem(<Link to='/services/repack'>Переупаковка</Link>, '/services/repack')
   ]),
   dictionary: getItem('Справочники', 'dictionaries', <FormOutlined />, [
     // getItem(<Link to='/dictionary/config'>Параметры учета</Link>, 'dictionary-config'),
-    getItem(<Link to='/dictionary/employees'>Сотрудники</Link>, 'dictionary-employees'),
-    getItem(<Link to='/dictionary/clients'>Клиенты</Link>, 'dictionary-clients'),
-    getItem(<Link to='/dictionary/drivers'>Перевозчики</Link>, 'dictionary-drivers'),
-    getItem(<Link to='/dictionary/rates'>Тарифы перевозок</Link>, 'dictionary-rates'),
-    getItem(<Link to='/dictionary/currency'>Валюта и курс</Link>, 'dictionary-currency')
+    getItem(<Link to='/dictionary/employees'>Сотрудники</Link>, '/dictionary/employees'),
+    getItem(<Link to='/dictionary/clients'>Клиенты</Link>, '/dictionary/clients'),
+    getItem(<Link to='/dictionary/drivers'>Перевозчики</Link>, '/dictionary/drivers'),
+    getItem(<Link to='/dictionary/rates'>Тарифы перевозок</Link>, '/dictionary/rates'),
+    getItem(<Link to='/dictionary/currency'>Валюта и курс</Link>, '/dictionary/currency')
   ]),
   settings: getItem('Настройки', 'settings', <SettingOutlined />, [
-    getItem(<Link to='/roles'>Роли</Link>, 'roles'),
-    getItem(<Link to='/templates'>Шаблоны</Link>, 'templates'),
-    getItem(<Link to='/users'>Пользователи</Link>, 'users'),
-    getItem(<Link to='/dictionary/config'>Параметры учёта</Link>, 'dictionary-config'),
+    getItem(<Link to='/roles'>Роли</Link>, '/roles'),
+    getItem(<Link to='/templates'>Шаблоны</Link>, '/templates'),
+    getItem(<Link to='/users'>Пользователи</Link>, '/users'),
+    getItem(<Link to='/dictionary/config'>Параметры учёта</Link>, '/dictionary/config'),
   ]),
   sendings: getItem(
     'Отправки',
     'sendings',
     <CarOutlined />,
     [
-      getItem(<Link to='/sendings'>Авто</Link>, 'sendings-auto'),
-      getItem(<Link to='/sendings?air'>Авиа</Link>, 'sendings-air')
+      getItem(<Link to='/sendings'>Авто</Link>, '/sendings'),
+      getItem(<Link to='/sendings?air'>Авиа</Link>, '/sendings?air')
     ]
   ),
   finances: getItem(
@@ -67,9 +67,9 @@ const MENU_ITEMS = {
         'client-finances',
         null,
         [
-          getItem(<Link to='/client-invoices'>Счета на оплату</Link>, 'client-invoices'),
-          getItem(<Link to='/client-payments'>Оплаты</Link>, 'client-payments'),
-          getItem(<Link to='/client-balance'>Баланс по клиентам</Link>, 'client-balance')
+          getItem(<Link to='/client-invoices'>Счета на оплату</Link>, '/client-invoices'),
+          getItem(<Link to='/client-payments'>Оплаты</Link>, '/client-payments'),
+          getItem(<Link to='/client-balance'>Баланс по клиентам</Link>, '/client-balance')
         ]
       ),
       getItem(
@@ -77,9 +77,9 @@ const MENU_ITEMS = {
         'drivers-finances',
         null,
         [
-          getItem(<Link to='/drivers-invoices'>Счета перевозчика</Link>, 'drivers-invoices'),
-          getItem(<Link to='/drivers-payments'>Оплаты перевозчику</Link>, 'drivers-payments'),
-          getItem(<Link to='/drivers-balance'>Баланс по перевозчикам</Link>, 'drivers-balance')
+          getItem(<Link to='/drivers-invoices'>Счета перевозчика</Link>, '/drivers-invoices'),
+          getItem(<Link to='/drivers-payments'>Оплаты перевозчику</Link>, '/drivers-payments'),
+          getItem(<Link to='/drivers-balance'>Баланс по перевозчикам</Link>, '/drivers-balance')
         ]
       ),
       getItem(
@@ -87,14 +87,26 @@ const MENU_ITEMS = {
         'company-finances',
         null,
         [
-          getItem(<Link to='/company-income'>Приход средств</Link>, 'company-income'),
-          getItem(<Link to='/company-cost'>Расход средств</Link>, 'company-cost'),
-          getItem(<Link to='/company-balance'>Баланс компании</Link>, 'company-balance')
+          getItem(<Link to='/company-income'>Приход средств</Link>, '/company-income'),
+          getItem(<Link to='/company-cost'>Расход средств</Link>, '/company-cost'),
+          getItem(<Link to='/company-balance'>Баланс компании</Link>, '/company-balance')
         ]
       )
     ]
   )
 }
+
+const getMenuKeys = items => items.map(item => {
+  const newItem = {}
+  if (item.children) newItem.items = getMenuKeys(item.children)
+  newItem.key = item.key
+  if (item.label) {
+    newItem.name = typeof item.label === 'string' ? item.label : item.label?.props?.children
+  }
+  return newItem
+})
+
+export const menuKeys = getMenuKeys(Object.values(MENU_ITEMS))
 
 export default function PageLayout({ user }) {
   const [ collapsed, setCollapsed ] = useState(false)

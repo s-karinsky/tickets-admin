@@ -9,6 +9,7 @@ import DeleteButton from '../../components/DeleteButton'
 import SelectCity from '../../components/SelectCity'
 import FormField from '../../components/FormField'
 import axios from '../../utils/axios'
+import { useRoles } from '../../utils/hooks'
 import { useUsers, createUser, updateUserById } from '../../utils/api'
 import { getKeyFromName } from '../../utils/utils'
 import { VALIDATION_MESSAGES, COLUMNS, USER_ROLES, USER_ROLES_PLURAL } from '../../consts'
@@ -38,17 +39,21 @@ export default function PageUser() {
   const [ isSending, setIsSending ] = useState()
   const initialRole = location.state?.role || '1'
   const users = useUsers(id, initialRole)
+  const roles = useRoles()
   const profile = users.data || EMPTY_OBJECT
+
+  const rolesOptions = useMemo(() => roles.data.map(role => ({ ...role, value: role.id_role, label: role.name_ru })) || [], [roles.data])
+  const rolesMap = useMemo(() => roles.data.reduce((acc, role) => ({ ...acc, [role.id_role]: role.name_ru }), {}) || {}, [roles.data])
 
   const isNew = id === 'create'
   const role = Form.useWatch('id_role', form)
   const inclients = useUsers({ id_role: '3', create_user: id }, '', { enabled: role === '1' })
-  const title = isNew ? 'Новый пользователь' : `${USER_ROLES[profile.id_role]} ${profile.json?.code}`
+  const title = isNew ? 'Новый пользователь' : `${rolesMap[profile.id_role]} ${profile.json?.code}`
 
   const breadcrumbs = useMemo(() => {
-    const crumbs = [{ title: <Link to={USER_LINK[profile.id_role]}>{USER_ROLES_PLURAL[profile.id_role]}</Link> }]
+    const crumbs = [{ title: <Link to={USER_LINK[profile.id_role]}>{rolesMap[profile.id_role]}</Link> }]
     if (isNew) {
-      crumbs.push({ title: `Новый ${USER_ROLES[profile.id_role]?.toLowerCase()}` })
+      crumbs.push({ title: `Новый ${rolesMap[profile.id_role]?.toLowerCase()}` })
     } else {
       crumbs.push({ title })
     }
@@ -141,7 +146,7 @@ export default function PageUser() {
           gutter={16}
           style={{ margin: 10 }}
         >
-          {getCommonFields(profile, isNew).map(({ span, ...field }) => (
+          {getCommonFields(profile, isNew, rolesOptions).map(({ span, ...field }) => (
             <Col span={span} key={getKeyFromName(field.name)}>
               <FormField
                 {...field}
