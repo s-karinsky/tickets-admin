@@ -68,6 +68,7 @@ function App() {
   const haveAccess = useMemo(() => {
     const access = role.data?.json
     if (!access) return
+    if (location.pathname === '/') return true
     return Object.keys(access).some(key => access[key] && location.pathname.startsWith(key))
   }, [role.data, location])
 
