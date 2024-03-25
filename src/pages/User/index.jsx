@@ -42,8 +42,8 @@ export default function PageUser() {
   const roles = useRoles()
   const profile = users.data || EMPTY_OBJECT
 
-  const rolesOptions = useMemo(() => roles.data.map(role => ({ ...role, value: role.id_role, label: role.name_ru })) || [], [roles.data])
-  const rolesMap = useMemo(() => roles.data.reduce((acc, role) => ({ ...acc, [role.id_role]: role.name_ru }), {}) || {}, [roles.data])
+  const rolesOptions = useMemo(() => (roles.data || []).map(role => ({ ...role, value: role.id_role, label: role.name_ru })) || [], [roles.data])
+  const rolesMap = useMemo(() => (roles.data || []).reduce((acc, role) => ({ ...acc, [role.id_role]: role.name_ru }), {}) || {}, [roles.data])
 
   const isNew = id === 'create'
   const role = Form.useWatch('id_role', form)

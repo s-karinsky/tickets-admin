@@ -12,7 +12,7 @@ const columns = [
     title: 'Дата',
     dataIndex: 'date',
     align: 'center',
-    sorder: (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+    sorter: (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
     ...getColumnSearchProps('date', { type: 'date' })
   },
   {

@@ -69,7 +69,8 @@ export default function Sending() {
       queryFn: getPlacesBySendingId(sendingId)
     }
   ])
-  const tarifs = useDictionary('rates')
+  const rates = useDictionary('rates')
+  const tarifs = useDictionary('prod-cat')
 
   const isNotSending = data?.json?.status === 0
 
@@ -89,20 +90,26 @@ export default function Sending() {
   const groupPlaces = useMemo(() => {
     if (!places.data || !Array.isArray(places.data)) return []
     return places.data.reduce((acc, place) => {
-      const index = acc.findIndex(item => item.tarif === place.tarif && item.client === place.client)
+      const index = acc.findIndex(item => item.rate === place.rate && item.client === place.client)
+      const size = place.size || {}
+      const value = ((size.width * size.height * size.length) / 1000000).toFixed(3)
       if (index === -1) {
         acc.push({
           id: place.id,
-          tarif: place.tarif,
+          rate: place.rate,
           client: place.client,
           gross_weight: place.gross_weight,
           count: 1,
           invoice: place.invoice,
-          invoiceId: place.invoice_id
+          invoiceId: place.invoice_id,
+          pay_sum: place.pay_sum,
+          value
         })
       } else {
         acc[index].count++
         acc[index].gross_weight += place.gross_weight
+        acc[index].pay_sum += place.pay_sum
+        acc[index].value = (parseFloat(acc[index].value) + parseFloat(value)).toFixed(3)
       }
       return acc
     }, [])
@@ -119,24 +126,34 @@ export default function Sending() {
     },
     {
       title: 'Тариф',
-      dataIndex: 'tarif',
-      key: 'tarif',
-      render: item => tarifs.data?.map[item]?.label,
-      sorter: (a, b) => (a.tarif || '').localeCompare(b.tarif || ''),
-      ...getColumnSearchProps('tarif', { options: tarifs.data?.label })
+      dataIndex: 'rate',
+      key: 'rate',
+      render: item => rates.data?.map[item]?.label,
+      sorter: (a, b) => (a.rate || '').localeCompare(b.rate || ''),
+      ...getColumnSearchProps('rate', { options: rates.data?.label })
     },
     {
-      title: 'Количество мест',
+      title: <>м<sup>3</sup></>,
+      dataIndex: 'value'
+    },
+    {
+      title: 'Мест',
       dataIndex: 'count',
       align: 'right',
       sorter: (a, b) => a.count - b.count
     },
     {
-      title: 'Вес брутто',
+      title: 'Брутто',
       dataIndex: 'gross_weight',
       align: 'right',
       render: weight => Number(weight) ? Number(weight).toFixed(3) : '',
       sorter: (a, b) => a.gross_weight - b.gross_weight
+    },
+    {
+      title: 'Сумма',
+      dataIndex: 'pay_sum',
+      align: 'right',
+      render: val => Number(val) ? Number(val).toFixed(1) : ''
     },
     {
       title: 'Счет',
@@ -188,7 +205,7 @@ export default function Sending() {
     let newSelectedRows = []
     selectedGroups.forEach(group => {
       const place = placesData.find(item => item.id === group)
-      const items = placesData.filter(item => item.client === place.client && item.tarif === place.tarif).map(item => item.id)
+      const items = placesData.filter(item => item.client === place.client && item.rate === place.rate).map(item => item.id)
       newSelectedRows = newSelectedRows.concat(items)
     })
     setSelectedRows(newSelectedRows)
@@ -218,20 +235,7 @@ export default function Sending() {
       ...getColumnSearchProps('place', { type: 'number' })
     },
     {
-      title: 'Клиент',
-      dataIndex: 'client',
-      key: 'client',
-      render: id => clientsMap[id],
-      sorter: (a, b) => (clientsMap[a.client] || '').localeCompare(clientsMap[b.client] || ''),
-      ...getColumnSearchProps('client', { options: clientsOptions })
-    },
-    {
-      title: 'ЧЗ',
-      dataIndex: 'hasMark',
-      render: hasMark => hasMark ? <CheckOutlined /> : ''
-    },
-    {
-      title: 'Вес брутто',
+      title: 'Брутто',
       dataIndex: 'gross_weight',
       key: 'gross_weight',
       align: 'right',
@@ -240,7 +244,12 @@ export default function Sending() {
       ...getColumnSearchProps('gross_weight', { type: 'number' })
     },
     {
-      title: 'Длина',
+      title: 'ЧЗ',
+      dataIndex: 'hasMark',
+      render: hasMark => hasMark ? <CheckOutlined /> : ''
+    },
+    {
+      title: 'Д',
       dataIndex: 'size',
       key: 'length',
       align: 'right',
@@ -248,7 +257,7 @@ export default function Sending() {
       sorter: (a, b) => a.size?.length - b.size?.length
     },
     {
-      title: 'Ширина',
+      title: 'Ш',
       dataIndex: 'size',
       key: 'width',
       align: 'right',
@@ -256,7 +265,7 @@ export default function Sending() {
       sorter: (a, b) => a.size?.width - b.size?.width
     },
     {
-      title: 'Высота',
+      title: 'В',
       dataIndex: 'size',
       key: 'height',
       align: 'right',
@@ -264,7 +273,7 @@ export default function Sending() {
       sorter: (a, b) => a.size?.height - b.size?.height
     },
     {
-      title: 'Тариф',
+      title: 'Категория',
       dataIndex: 'tarif',
       key: 'tarif',
       render: item => tarifs.data?.map[item]?.label,
@@ -272,7 +281,7 @@ export default function Sending() {
       ...getColumnSearchProps('tarif', { options: tarifs.data?.label })
     },
     {
-      title: 'Количество товара',
+      title: 'Кол. товара',
       dataIndex: 'count',
       key: 'count',
       align: 'right',
@@ -280,7 +289,19 @@ export default function Sending() {
       ...getColumnSearchProps('count', { type: 'number' })
     },
     {
-      title: 'Статус услуги',
+      title: 'Цена',
+      dataIndex: 'items_sum',
+      align: 'right',
+      render: val => Number(val) ? Number(val).toFixed(1) : ''
+    },
+    {
+      title: 'Сумма',
+      dataIndex: 'pay_sum',
+      align: 'right',
+      render: val => Number(val) ? Number(val).toFixed(1) : ''
+    },
+    {
+      title: 'Статус',
       dataIndex: 'service',
       key: 'service_status',
       render: (service, item) => _get(SERVICE_STATUS, [item.service?.type, service?.status]),
@@ -694,13 +715,13 @@ export default function Sending() {
                     const number = parseInt(_get(numberData, [0, 'max'])) || 0
                     create = create.map(id => placesData.find(place => place.id === id))
                     const vals = await Promise.all(create.map(async (item, i) => {
-                      const places = placesData.filter(place => item.client === place.client && item.tarif === place.tarif)
+                      const places = placesData.filter(place => item.client === place.client && item.rate === place.rate)
                       let weight = 0
                       places.forEach(place => {
                         weight += Number(place.gross_weight)
                       })
                       const placeLikeInGroup = places[0]
-                      const tarifRate = await axios.select('sprset', 'JSON_EXTRACT(pole, "$.price_kg") as price_kg', { where: { '$.pole.value': placeLikeInGroup?.tarif } })
+                      const tarifRate = await axios.select('sprset', 'JSON_EXTRACT(pole, "$.price_kg") as price_kg', { where: { '$.pole.value': placeLikeInGroup?.rate } })
                       const tarif = (tarifRate.data?.data || [])[0]?.price_kg
                       const pole = {
                         number: number + i + 1,
@@ -816,7 +837,7 @@ export default function Sending() {
                     size='small'
                     columns={columns}
                     isLoading={places.isLoading}
-                    dataSource={placesData.filter(item => item.client === record.client && item.tarif === record.tarif)}
+                    dataSource={placesData.filter(item => item.client === record.client && item.rate === record.rate)}
                     rowClassName={(r, index) => index === activeRow ? 'active-row' : ''}
                     rowKey={({ id }) => id}
                     onRow={(record, index) => ({

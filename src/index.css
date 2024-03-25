@@ -23,3 +23,8 @@ code {
 .ant-input-number-readonly .ant-input-number-input {
   padding-right: 5px !important;
 }
+
+.ant-picker-cell.ant-picker-cell-in-view:nth-child(6),
+.ant-picker-cell.ant-picker-cell-in-view:nth-child(7) {
+  color: red;
+}

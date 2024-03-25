@@ -118,28 +118,29 @@ export default function Sendings() {
 
   const columns = [
     {
-      title: 'Номер',
+      title: '№',
       dataIndex: 'code',
       key: 'code',
       align: 'right',
       sorter: (a, b) => a.code - b.code,
     },
     {
-      title: 'Дата',
-      dataIndex: 'date',
-      key: 'date',
+      title: 'Отправка',
+      dataIndex: 'departure',
+      key: 'departure',
       align: 'center',
-      render: date => dayjs(date).format('DD.MM.YYYY'),
-      sorter: (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
-      ...getColumnSearchProps('date', { type: 'date' })
+      render: (date, item) => item.json?.status > 0 && !!item.json?.status_date_1 && dayjs(item.json?.status_date_1).format('DD.MM.YYYY'),
+      sorter: (a, b) => new Date(a.departure).getTime() - new Date(b.departure).getTime(),
+      ...getColumnSearchProps('departure', { type: 'date' })
     },
     {
-      title: 'Перевозчик',
-      dataIndex: 'transporter',
-      key: 'transporter',
-      render: val => driverMap && driverMap[val],
-      sorter: (a, b) => a.transporter.localeCompare(b.transporter),
-      ...getColumnSearchProps('transporter')
+      title: 'Поступление',
+      dataIndex: 'delivery',
+      key: 'delivery',
+      align: 'center',
+      render: (date, item) => item.json?.status > 1 && !!item.json?.status_date_2 && dayjs(item.json?.status_date_2).format('DD.MM.YYYY'),
+      sorter: (a, b) => new Date(a.delivery).getTime() - new Date(b.delivery).getTime(),
+      ...getColumnSearchProps('delivery', { type: 'date' })
     },
     {
       title: 'Статус',
@@ -161,7 +162,7 @@ export default function Sendings() {
       ...getColumnSearchProps('places_count', { type: 'number' })
     },
     {
-      title: 'Вес брутто',
+      title: 'Брутто',
       dataIndex: 'gross_weight',
       key: 'gross_weight',
       align: 'right',
@@ -170,22 +171,12 @@ export default function Sendings() {
       ...getColumnSearchProps('gross-weight', { type: 'number' })
     },
     {
-      title: 'Дата отправки',
-      dataIndex: 'departure',
-      key: 'departure',
-      align: 'center',
-      render: (date, item) => item.json?.status > 0 && !!item.json?.status_date_1 && dayjs(item.json?.status_date_1).format('DD.MM.YYYY'),
-      sorter: (a, b) => new Date(a.departure).getTime() - new Date(b.departure).getTime(),
-      ...getColumnSearchProps('departure', { type: 'date' })
-    },
-    {
-      title: 'Дата поступления',
-      dataIndex: 'delivery',
-      key: 'delivery',
-      align: 'center',
-      render: (date, item) => item.json?.status > 1 && !!item.json?.status_date_2 && dayjs(item.json?.status_date_2).format('DD.MM.YYYY'),
-      sorter: (a, b) => new Date(a.delivery).getTime() - new Date(b.delivery).getTime(),
-      ...getColumnSearchProps('delivery', { type: 'date' })
+      title: 'Перевозчик',
+      dataIndex: 'transporter',
+      key: 'transporter',
+      render: val => driverMap && driverMap[val],
+      sorter: (a, b) => a.transporter.localeCompare(b.transporter),
+      ...getColumnSearchProps('transporter')
     },
     {
       title: 'Примечание',
