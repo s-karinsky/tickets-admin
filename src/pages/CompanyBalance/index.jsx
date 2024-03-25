@@ -46,7 +46,7 @@ export default function CompanyBalance() {
       title: 'Сумма расхода (₽)',
       dataIndex: 'pay_rub',
       align: 'right',
-      render: (pay, item) => ['com-cost', 'dr-payment'].includes(item.tip) ? localeNumber(pay) : '',
+      render: (pay, item) => ['com-cost', 'dr-payment'].includes(item.tip) ? localeNumber(Math.round(pay)) : '',
       sorter: (a, b) => {
         const aVal = ['com-cost', 'dr-payment'].includes(a.tip) ? a.pay_rub : 0
         const bVal = ['com-cost', 'dr-payment'].includes(b.tip) ? b.pay_rub : 0
@@ -68,7 +68,7 @@ export default function CompanyBalance() {
       title: 'Сумма прихода (₽)',
       dataIndex: 'pay_rub',
       align: 'right',
-      render: (pay, item) => ['com-income', 'cl-payment'].includes(item.tip) ? localeNumber(pay) : '',
+      render: (pay, item) => ['com-income', 'cl-payment'].includes(item.tip) ? localeNumber(Math.round(pay)) : '',
       sorter: (a, b) => {
         const aVal = ['com-income', 'cl-payment'].includes(a.tip) ? a.pay_rub : 0
         const bVal = ['com-income', 'cl-payment'].includes(b.tip) ? b.pay_rub : 0
@@ -116,13 +116,13 @@ export default function CompanyBalance() {
                   {localeNumber(totalInvoiceUsd)}
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={2} align='right'>
-                  {localeNumber(totalInvoiceRub)}
+                  {localeNumber(Math.round(totalInvoiceRub))}
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={3} align='right'>
                   {localeNumber(totalPaymentUsd)}
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={4} align='right'>
-                  {localeNumber(totalPaymentRub)}
+                  {localeNumber(Math.round(totalPaymentRub))}
                 </Table.Summary.Cell>
               </Table.Summary.Row>
               <Table.Summary.Row>
@@ -131,7 +131,7 @@ export default function CompanyBalance() {
                   <nobr>Приход - Расход = <b>{localeNumber((totalPaymentUsd - totalInvoiceUsd).toFixed(2))}$</b></nobr>
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={1} colSpan={2}>
-                  <nobr>Приход - Расход = <b>{localeNumber((totalPaymentRub - totalInvoiceRub).toFixed())}₽</b></nobr>
+                  <nobr>Приход - Расход = <b>{localeNumber(Math.round(totalPaymentRub - totalInvoiceRub).toFixed())}₽</b></nobr>
                 </Table.Summary.Cell>
               </Table.Summary.Row>
             </>

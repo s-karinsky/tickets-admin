@@ -49,7 +49,7 @@ const getColumns = ({ refetch, navigate, driversMap }) => ([
     title: 'К оплате (₽)',
     dataIndex: 'pay_rub',
     align: 'right',
-    render: pay => localeNumber(pay),
+    render: pay => localeNumber(Math.round(pay)),
     sorter: (a, b) => a.pay_rub - b.pay_rub,
     ...getColumnSearchProps('pay_rub', { type: 'number' })
   },

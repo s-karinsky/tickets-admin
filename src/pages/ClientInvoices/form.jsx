@@ -60,7 +60,7 @@ export default function ClientInvoicesForm() {
     if (typeof pay === 'string') {
       pay = pay.replaceAll(' ', '').replaceAll(',', '.')
     }
-    form.setFieldValue('pay_rub', Number(pay) * Number(rate))
+    form.setFieldValue('pay_rub', Math.round(Number(pay) * Number(rate)))
   }, [payUsd, rate])
 
   return isLoading || isRefetching ?
@@ -78,7 +78,7 @@ export default function ClientInvoicesForm() {
           const { date, ...params } = values
           setIsUpdating(true)
           params.total_usd = params.pay_usd - params.discount_usd
-          params.total_rub = params.pay_rub - params.discount_rub
+          params.total_rub = Math.round(params.pay_rub - params.discount_rub)
           if (location.state?.id) {
             params.parent_trip = location.state?.id
           }
@@ -300,7 +300,7 @@ export default function ClientInvoicesForm() {
                         labelType='calc'
                         addonAfter='₽'
                         type='number'
-                        value={pay - discount}
+                        value={Math.round(pay - discount)}
                         disabled
                       />
                     )

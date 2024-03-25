@@ -29,7 +29,7 @@ export default function CompanyIncomeItem() {
       pay = pay.replaceAll(' ', '').replaceAll(',', '.')
     }
     if (!(Number(pay) * Number(rate))) return
-    form.setFieldValue('pay_rub', Number(pay) * Number(rate))
+    form.setFieldValue('pay_rub', Math.round(Number(pay) * Number(rate)))
   }, [payUsd, rate])
   
   if (isLoading) {

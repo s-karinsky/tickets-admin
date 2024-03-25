@@ -682,7 +682,7 @@ export const useClientInvoices = (id, initial = {}, params) => useQuery(['client
         rest.inclient = placeLikeInGroup?.inclient
         rest.pay_type = sData.pay_type
         rest.pay_usd = sData.price_usd
-        rest.pay_rub = sData.price_rub
+        rest.pay_rub = Math.round(sData.price_rub)
       }
       if (type === 'payment') {
         const invoice = await axios.select('dataset', '*', { where: { status: 0, tip: 'cl-payment', id } })
@@ -695,7 +695,7 @@ export const useClientInvoices = (id, initial = {}, params) => useQuery(['client
         rest.invoice_number = sData.number
         rest.name = sData.name
         rest.pay_type = sData.pay_type
-        rest.pay_rub = sData.pay_rub
+        rest.pay_rub = Math.round(sData.pay_rub)
         rest.pay_usd = sData.pay_usd
       }
     }
@@ -757,7 +757,7 @@ export const useClientPayments = (id, initial = {}, params) => useQuery(['client
       rest.invoice_date = dayjs(sData.date)
       rest.name = sData.name
       rest.pay_type = sData.pay_type
-      rest.pay_rub = sData.pay_rub
+      rest.pay_rub = Math.round(sData.pay_rub)
       rest.pay_usd = sData.pay_usd
     }
 
@@ -857,7 +857,7 @@ export const useDriversInvoices = (id, initial = {}, params) => useQuery(['drive
         rest.invoice_number = sData.number
         rest.name = sData.name
         rest.pay_type = sData.pay_type
-        rest.pay_rub = sData.pay_rub
+        rest.pay_rub = Math.round(sData.pay_rub)
         rest.pay_usd = sData.pay_usd
       }
     }
@@ -919,7 +919,7 @@ export const useDriversPayments = (id, initial = {}, params) => useQuery(['drive
       rest.invoice_date = dayjs(sData.date)
       rest.name = sData.name
       rest.pay_type = sData.pay_type
-      rest.pay_rub = sData.pay_rub
+      rest.pay_rub = Math.round(sData.pay_rub)
       rest.pay_usd = sData.pay_usd
     }
 

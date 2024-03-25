@@ -76,7 +76,7 @@ export default function DriversBalance() {
       title: 'Начислено (₽)',
       dataIndex: 'pay_rub',
       align: 'right',
-      render: (val, item) => item.tip === 'dr-invoice' ? localeNumber(val) : '',
+      render: (val, item) => item.tip === 'dr-invoice' ? localeNumber(Math.round(val)) : '',
       sorter: (a, b) => a.tip === 'dr-invoice' ? (a.pay_rub > b.pay_rub ? 1 : -1) : -1,
       ...getColumnSearchProps(item => item.tip === 'dr-invoice' ? item.pay_rub : 0, { type: 'number' })
     },
@@ -94,7 +94,7 @@ export default function DriversBalance() {
       dataIndex: 'pay_rub',
       key: 'payment_rub',
       align: 'right',
-      render: (val, item) => item.tip === 'dr-payment' ? localeNumber(val) : '',
+      render: (val, item) => item.tip === 'dr-payment' ? localeNumber(Math.round(val)) : '',
       sorter: (a, b) => a.tip === 'dr-payment' ? (a.pay_rub > b.pay_rub ? 1 : -1) : -1,
       ...getColumnSearchProps(item => item.tip === 'dr-invoice' ? item.pay_rub : 0, { type: 'number' })
     },
@@ -150,13 +150,13 @@ export default function DriversBalance() {
                   {localeNumber(totalInvoiceUsd)}
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={2}>
-                  {localeNumber(totalInvoiceRub)}
+                  {localeNumber(Math.round(totalInvoiceRub))}
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={3}>
                   {localeNumber(totalPaymentUsd)}
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={4}>
-                  {localeNumber(totalPaymentRub)}
+                  {localeNumber(Math.round(totalPaymentRub))}
                 </Table.Summary.Cell>
               </Table.Summary.Row>
               <Table.Summary.Row>
@@ -165,7 +165,7 @@ export default function DriversBalance() {
                   <nobr>Оплачено - Начислено = <b>{localeNumber((totalPaymentUsd - totalInvoiceUsd).toFixed(2))}$</b></nobr>
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={1} colSpan={2}>
-                  <nobr>Оплачено - Начислено = <b>{localeNumber((totalPaymentRub - totalInvoiceRub).toFixed(2))}₽</b></nobr>
+                  <nobr>Оплачено - Начислено = <b>{localeNumber(Math.round(totalPaymentRub - totalInvoiceRub).toFixed(2))}₽</b></nobr>
                 </Table.Summary.Cell>
               </Table.Summary.Row>
             </>
