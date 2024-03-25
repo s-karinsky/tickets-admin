@@ -103,12 +103,14 @@ export default function Sending() {
           invoice: place.invoice,
           invoiceId: place.invoice_id,
           pay_sum: place.pay_sum,
+          hasMark: place.hasMark,
           value
         })
       } else {
         acc[index].count++
         acc[index].gross_weight += place.gross_weight
         acc[index].pay_sum += place.pay_sum
+        acc[index].hasMark = acc[index].hasMark || place.hasMark
         acc[index].value = (parseFloat(acc[index].value) + parseFloat(value)).toFixed(3)
       }
       return acc
@@ -120,27 +122,20 @@ export default function Sending() {
       title: 'Клиент',
       dataIndex: 'client',
       key: 'client',
-      render: id => clientsMap[id],
+      render: id => <RouterLink to={`/users/${id}`}>{clientsMap[id]}</RouterLink>,
       sorter: (a, b) => (clientsMap[a.client] || '').localeCompare(clientsMap[b.client] || ''),
       ...getColumnSearchProps('client', { options: clientsOptions })
-    },
-    {
-      title: 'Тариф',
-      dataIndex: 'rate',
-      key: 'rate',
-      render: item => rates.data?.map[item]?.label,
-      sorter: (a, b) => (a.rate || '').localeCompare(b.rate || ''),
-      ...getColumnSearchProps('rate', { options: rates.data?.label })
-    },
-    {
-      title: <>м<sup>3</sup></>,
-      dataIndex: 'value'
     },
     {
       title: 'Мест',
       dataIndex: 'count',
       align: 'right',
       sorter: (a, b) => a.count - b.count
+    },
+    {
+      title: 'ЧЗ',
+      dataIndex: 'hasMark',
+      render: hasMark => hasMark ? <CheckOutlined /> : ''
     },
     {
       title: 'Брутто',
@@ -150,10 +145,22 @@ export default function Sending() {
       sorter: (a, b) => a.gross_weight - b.gross_weight
     },
     {
+      title: <>м<sup>3</sup></>,
+      dataIndex: 'value'
+    },
+    {
       title: 'Сумма',
       dataIndex: 'pay_sum',
       align: 'right',
       render: val => Number(val) ? Number(val).toFixed(1) : ''
+    },
+    {
+      title: 'Тариф',
+      dataIndex: 'rate',
+      key: 'rate',
+      render: item => rates.data?.map[item]?.label,
+      sorter: (a, b) => (a.rate || '').localeCompare(b.rate || ''),
+      ...getColumnSearchProps('rate', { options: rates.data?.label })
     },
     {
       title: 'Счет',
@@ -290,9 +297,10 @@ export default function Sending() {
     },
     {
       title: 'Цена',
-      dataIndex: 'items_sum',
+      dataIndex: 'tarif',
+      key: 'tarifPrice',
       align: 'right',
-      render: val => Number(val) ? Number(val).toFixed(1) : ''
+      render: t => (tarifs.data?.list || []).find(item => item.id === t)?.price_kg
     },
     {
       title: 'Сумма',

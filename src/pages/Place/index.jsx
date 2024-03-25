@@ -134,7 +134,7 @@ export default function Place({ user }) {
 
   const columns = [
     {
-      title: 'Номер',
+      title: '№',
       dataIndex: 'number',
       key: 'number',
       align: 'right',
@@ -153,13 +153,28 @@ export default function Place({ user }) {
       render: mark => mark ? <CheckOutlined /> : ''
     },
     {
-      title: 'Вес нетто',
-      dataIndex: 'net_weight',
-      key: 'net_weight',
-      align: 'right',
-      render: weight => localeNumber(weight),
-      sorter: (a, b) => a.net_weight - b.net_weight,
-      ...getColumnSearchProps('net_weight', { type: 'number' })
+      title: 'Марка',
+      dataIndex: 'label',
+      sorter: (a, b) => a.label?.localeCompare(b.label),
+      ...getColumnSearchProps('label')
+    },
+    {
+      title: 'Артикул',
+      dataIndex: 'article',
+      sorter: (a, b) => a.article?.localeCompare(b.article),
+      ...getColumnSearchProps('article')
+    },
+    {
+      title: 'Размер',
+      dataIndex: 'size',
+      sorter: (a, b) => a.size?.localeCompare(b.size),
+      ...getColumnSearchProps('size')
+    },
+    {
+      title: 'Цвет',
+      dataIndex: 'color',
+      sorter: (a, b) => a.color?.localeCompare(b.color),
+      ...getColumnSearchProps('color')
     },
     {
       title: 'Количество',
@@ -170,23 +185,18 @@ export default function Place({ user }) {
       ...getColumnSearchProps('count', { type: 'number' })
     },
     {
-      title: 'Цена',
-      dataIndex: 'price',
-      key: 'price',
-      align: 'right',
-      sorter: (a, b) => a.price - b.price,
-      render: val => Number(val) ? localeNumber(Number(val).toFixed(2)) : null,
-      ...getColumnSearchProps('price', { type: 'number' })
+      title: 'ТН ВЭД',
+      dataIndex: 'tn_code'
     },
-    {
-      title: 'Сумма',
-      dataIndex: 'sum',
-      key: 'sum',
-      align: 'right',
-      sorter: (a, b) => a.sum - b.sum,
-      render: val => Number(val) ? localeNumber(Number(val).toFixed(2)) : null,
-      ...getColumnSearchProps('sum', { type: 'number' })
-    },
+    // {
+    //   title: 'Цена',
+    //   dataIndex: 'price',
+    //   key: 'price',
+    //   align: 'right',
+    //   sorter: (a, b) => a.price - b.price,
+    //   render: val => Number(val) ? localeNumber(Number(val).toFixed(2)) : null,
+    //   ...getColumnSearchProps('price', { type: 'number' })
+    // },
     {
       title: 'Примечание',
       dataIndex: 'note',

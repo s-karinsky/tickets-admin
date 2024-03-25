@@ -27,7 +27,7 @@ export const USER_ROLES_PLURAL = {
 
 export const USER_ROLES_OPTIONS = ['1', '2', '3', '4']
 
-export const SENDING_STATUS = ['Формирование', 'В пути', 'Поступила', 'Приостановлен']
+export const SENDING_STATUS = ['Формирование', 'В пути', 'Поступила', 'Завершенная', 'Приостановлен']
 
 export const SERVICE_NAME = {
   issuance: 'Выдача со склада',

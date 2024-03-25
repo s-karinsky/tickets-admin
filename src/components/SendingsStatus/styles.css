@@ -70,18 +70,26 @@
 }
 .sending-status_progress:hover .sending-status__progress-line {
   width: 100%;
-  background-color: #009650;
+  background-color: #4D89FF;
 }
 
-.sending-status_done .sending-status__car {
+.sending-status_done .sending-status__car,
+.sending-status_finished .sending-status__car {
   right: 15px;
 }
-.sending-status_done .sending-status__text {
+.sending-status_finished .sending-status__text {
   color: #009650;
+}
+.sending-status_finished .sending-status__progress-line {
+  width: 100%;
+  background-color: #009650;
+}
+.sending-status_finished:hover .sending-status__progress-line {
+  background-color: #4D89FF;
 }
 .sending-status_done .sending-status__progress-line {
   width: 100%;
-  background-color: #009650;
+  background-color: #4D89FF;
 }
 .sending-status_done:hover .sending-status__progress-line {
   width: 50%;

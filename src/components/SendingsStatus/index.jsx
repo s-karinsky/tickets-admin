@@ -4,8 +4,8 @@ import { BiHomeAlt } from 'react-icons/bi'
 import './styles.css'
 
 export const SendingsStatus = ({ status = 0, onClick = () => false }) => {
-  const text = ['Формирование', 'В пути', 'Поступила', 'Приостановлен']
-  const statusClasses = ['creating', 'progress', 'done', 'pause']
+  const text = ['Формирование', 'В пути', 'Поступила', 'Завевршен', 'Приостановлен']
+  const statusClasses = ['creating', 'progress', 'done', 'finished', 'pause']
 
   return (
     <div

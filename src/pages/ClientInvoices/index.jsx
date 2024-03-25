@@ -7,12 +7,12 @@ import { BsTrash } from 'react-icons/bs'
 import axios from '../../utils/axios'
 import { sqlUpdate } from '../../utils/sql'
 import { getColumnSearchProps } from '../../utils/components'
-import { useClientInvoices, useUsersWithRole, useDictionary } from '../../utils/api'
-import { localeCompare, localeNumber, getSurnameWithInitials } from '../../utils/utils'
+import { useClientInvoices, useUsersWithRole, useUsers } from '../../utils/api'
+import { localeCompare, localeNumber, getSurnameWithInitials, getPaginationSettings } from '../../utils/utils'
 
 const getColumns = ({ refetch, navigate, clientsMap, inclientMap, setModal }) => [
   {
-    title: 'Номер',
+    title: '№',
     dataIndex: 'number',
     sorter: (a, b) => a.number - b.value,
     ...getColumnSearchProps('number')
@@ -33,7 +33,7 @@ const getColumns = ({ refetch, navigate, clientsMap, inclientMap, setModal }) =>
     ...getColumnSearchProps(client => clientsMap[client])
   },
   {
-    title: 'Внутренний клиент',
+    title: 'Вн. клиент',
     dataIndex: 'inclient',
     sorter: (a, b) => localeCompare(inclientMap[a.inclient], inclientMap[b.inclient]),
     render: (inclient) => inclientMap[inclient],
@@ -56,7 +56,7 @@ const getColumns = ({ refetch, navigate, clientsMap, inclientMap, setModal }) =>
     ...getColumnSearchProps('pay_rub', { type: 'number' })
   },
   {
-    title: 'Дата учета',
+    title: 'Учет',
     dataIndex: 'done_date',
     align: 'center',
     sorter: (a, b) => new Date(a.done_date).getTime() - new Date(b.done_date).getTime(),
@@ -78,6 +78,17 @@ const getColumns = ({ refetch, navigate, clientsMap, inclientMap, setModal }) =>
   {
     title: '',
     key: 'buttons',
+    filters: [
+      {
+        text: 'Проведенные',
+        value: 1
+      },
+      {
+        text: 'Непроведенные',
+        value: 0
+      }
+    ],
+    onFilter: (value, record) => Number(record.pole?.done || false) === value,
     render: (_, item) => {
       return (
         <div style={{ whiteSpace: 'nowrap' }}>
@@ -116,10 +127,11 @@ const getColumns = ({ refetch, navigate, clientsMap, inclientMap, setModal }) =>
             Оплатить
           </Button>
           <BsTrash
-            style={{ marginLeft: 15, cursor: 'pointer' }}
+            style={{ marginLeft: 15, cursor: item.pole?.done ? 'auto' : 'pointer' }}
             size={17}
-            color='red'
+            color={item.pole?.done ? 'gray' : 'red'}
             onClick={() => {
+              if (item.pole?.done) return
               Modal.confirm({
                 title: 'Вы действительно хотите удалить этот счет?',
                 icon: <ExclamationCircleFilled />,
@@ -172,13 +184,16 @@ export default function ClientInvoices() {
     return item.pay_type === payType
   }), [data, isCash])
 
-  const inclient = useDictionary('inclient')
+  const inclient = useUsers({ id_role: '3' })
   const [ inclientOptions, inclientMap ] = useMemo(() => {
-    if (!Array.isArray(inclient.data?.list)) return [[], {}]
-    const options = inclient.data.list.map((item) => ({
-      value: item.id,
-      label: [item.family, item.name, item.middle].filter(Boolean).join(' ')
-    }))
+    if (!Array.isArray(inclient.data)) return [[], {}]
+    const options = inclient.data.map(({ json = {}, ...item }) => {
+      const fullname = getSurnameWithInitials(item.family, item.name, item.middle)
+      return {
+        value: item.id_user,
+        label: `${json.code}${fullname ? ` (${fullname})` : ''}`
+      }
+    })
     const map = options.reduce((acc, item) => ({ ...acc, [item.value]: item.label }), {})
     return [ options, map ]
   }, [inclient.data])
@@ -229,6 +244,7 @@ export default function ClientInvoices() {
             }
           },
         })}
+        pagination={getPaginationSettings('client-invoice')}
       />
       {!!modal &&
         <Modal

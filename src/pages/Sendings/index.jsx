@@ -45,7 +45,7 @@ export default function Sendings() {
   }, [drivers.data])
 
   let sendings = (data || [])
-    .filter(item => activeOnly ? item.status !== 2 : item.status === 2)
+    .filter(item => activeOnly ? item.status !== 3 : item.status === 3)
     .map(item => {
       const isMaking = item.status === 0
       return {
