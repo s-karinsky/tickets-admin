@@ -300,7 +300,13 @@ export default function Sending() {
       dataIndex: 'tarif',
       key: 'tarifPrice',
       align: 'right',
-      render: t => (tarifs.data?.list || []).find(item => item.id === t)?.price_kg
+      render: (t, item) => {
+        const tarif = (tarifs.data?.list || []).find(item => item.id === t)
+        if (!tarif) return ''
+        const isForKs = tarif.price_type === '1'
+        const count = isForKs ? item.gross_weight : item.count
+        return tarif.price_kg * count
+      }
     },
     {
       title: 'Сумма',
