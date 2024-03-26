@@ -3,11 +3,15 @@ import { Form, Select } from 'antd'
 import { useUsersWithRole } from '../../utils/api'
 import { getSurnameWithInitials } from '../../utils/utils'
 
-export default function SelectUser({ role, ...rest }) {
+export default function SelectUser({ role, ids = [], placeholder, clearable, onChange, ...rest }) {
   const users = useUsersWithRole(role)
   const options = useMemo(() => {
     if (!Array.isArray(users.data)) return []
-    return users.data.map(item => ({
+    let data = users.data
+    if (ids.length > 0) {
+      data = data.filter(item => ids.includes(item.id_user))
+    }
+    return data.map(item => ({
       value: item.id_user,
       label: `${item.json?.code} (${getSurnameWithInitials(item.family, item.middle, item.name)})`
     }))
@@ -23,6 +27,9 @@ export default function SelectUser({ role, ...rest }) {
         filterOption={(inputValue, option) => {
           return String(option.label).toLowerCase().includes(inputValue.toLowerCase())
         }}
+        placeholder={placeholder}
+        onChange={!onChange ? undefined : onChange}
+        allowClear={clearable}
         showSearch
       />
     </Form.Item>

@@ -7,15 +7,21 @@ import FormField from '../FormField'
 export default function SelectRate({
   nameRate = 'rate',
   nameCategory = 'tarif',
+  ids = [],
   span = 4,
   rulesRate,
   rulesCategory,
   defaultRate,
   defaultCategory,
   onChange = () => {},
+  onChangeRate = () => {},
+  placeholder,
+  withLabel = true,
+  showTarif = true,
   showPrice = false,
   form,
-  isEdit
+  isEdit,
+  clearable
 }) {
   const [ rate, setRate ] = useState(defaultRate)
   const [ category, setCategory ] = useState(defaultCategory)
@@ -36,17 +42,22 @@ export default function SelectRate({
       <Col span={span[0] || span}>
         <FormField
           type='select'
-          label='Тариф'
+          label={withLabel && 'Тариф'}
+          placeholder={placeholder}
           name={nameRate}
-          options={tarifs.data?.list || []}
+          options={(tarifs.data?.list || []).filter(item => ids.length === 0 || ids.includes(item.value))}
           text={(tarifs.data?.map || {})[rate]?.label}
           isEdit={isEdit}
           rules={rulesRate}
-          onChange={value => setRate(value)}
+          onChange={value => {
+            setRate(value)
+            onChangeRate(value)
+          }}
+          allowClear={clearable}
           showSearch
         />
       </Col>
-      <Col span={span[1] || span}>
+      {showTarif && <Col span={span[1] || span}>
         <FormField
           type='select'
           label='Категория товаров'
@@ -61,7 +72,7 @@ export default function SelectRate({
           }}
           showSearch
         />
-      </Col>
+      </Col>}
       {showPrice && <Col span={span[2] || span[1] || span}>
         <FormField
           type='number'

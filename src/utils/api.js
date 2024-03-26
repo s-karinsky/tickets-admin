@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import { get as _get, keyBy } from 'lodash'
+import { get as _get, keyBy, uniq } from 'lodash'
 import { useQuery } from 'react-query'
 import Cookies from 'universal-cookie'
 import axios from './axios'
@@ -58,13 +58,14 @@ export const getLastId = async (table, id = 'id') => {
 }
 
 export const getSendings = isAir => async () => {
-  const [ response, responseProducts ] = await Promise.all([
+  const [ response, responsePlaces, responseProducts ] = await Promise.all([
     axios.select('trip', '*', { where: { to: `${Number(isAir)}`, canceled: 0 } }),
     axios.select('trip t',
       [
         'id_trip',
         'm.id as place_id',
-        'JSON_EXTRACT(m.pole,"$.gross_weight") as gross_weight',
+        'JSON_EXTRACT(m.pole,"$.rate") as rate',
+        'JSON_EXTRACT(m.pole,"$.client") as client'
       ],
       {
         where: {
@@ -73,20 +74,65 @@ export const getSendings = isAir => async () => {
           'm.status': 0
         },
         leftJoin: {
-          'dataset m': 'm.id_ref=t.id_trip'
+          'dataset m': 'm.id_ref=t.id_trip AND m.tip="place"'
+        }
+      }
+    ),
+    axios.select('trip t',
+      [
+        'id_trip',
+        'p.id as product_id',
+        'JSON_EXTRACT(p.pole,"$.label") as label',
+        'JSON_EXTRACT(p .pole,"$.article") as article'
+      ],
+      {
+        where: {
+          canceled: 0,
+          to: `${Number(isAir)}`,
+          'm.status': 0,
+          'p.status': 0
+        },
+        leftJoin: {
+          'dataset m': 'm.id_ref=t.id_trip AND m.tip="place"',
+          'dataset p': 'p.id_ref=m.id AND p.tip="product"'
         }
       }
     )
   ])
-
-  const productsMap = (responseProducts.data?.data || []).reduce((acc, item) => {
+  
+  const placesMap = (responsePlaces.data?.data || []).reduce((acc, item) => {
     const id = item.id_trip
+    const rate = item.rate ? parseJSON(item.rate) : null
+    const client = item.client ? parseJSON(item.client) : null
     const gross_weight = Number(item.gross_weight)
     if (!acc[id]) {
-      acc[id] = { places_count: 1, gross_weight }
+      acc[id] = {
+        places_count: 1,
+        gross_weight,
+        rate: [rate].filter(Boolean),
+        client: [client].filter(Boolean)
+      }
     } else {
       acc[id].gross_weight += gross_weight
       acc[id].places_count++
+      if (rate) acc[id].rate.push(rate)
+      if (client) acc[id].client.push(client)
+    }
+    return acc
+  }, {})
+  
+  const productsMap = (responseProducts.data?.data || []).reduce((acc, item) => {
+    const id = item.id_trip
+    const label = item.label ? parseJSON(item.label) : null
+    const article = item.article ? parseJSON(item.article) : null
+    if (!acc[id]) {
+      acc[id] = {
+        label: [label].filter(Boolean),
+        article: [article].filter(Boolean)
+      }
+    } else {
+      if (label) acc[id].label.push(label)
+      if (article) acc[id].article.push(article)
     }
     return acc
   }, {})
@@ -101,8 +147,12 @@ export const getSendings = isAir => async () => {
       date: item.create_datetime,
       transporter: json.transporter,
       status: json.status,
-      places_count: productsMap[item.id_trip]?.places_count || 0,
-      gross_weight: productsMap[item.id_trip]?.gross_weight || 0,
+      places_count: placesMap[item.id_trip]?.places_count || 0,
+      gross_weight: placesMap[item.id_trip]?.gross_weight || 0,
+      clients: uniq(placesMap[item.id_trip]?.client || []),
+      rates: uniq(placesMap[item.id_trip]?.rate || []),
+      labels: uniq(productsMap[item.id_trip]?.label || []),
+      articles: uniq(productsMap[item.id_trip]?.article || []),
       departure: item.start_datetime,
       delivery: item.complete_datetime,
       json

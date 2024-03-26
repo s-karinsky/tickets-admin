@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Button, Row, Table, Typography, Switch, Modal, DatePicker, Select } from 'antd'
+import { Button, Row, Col, Table, Typography, Switch, Modal, DatePicker, Select, Input } from 'antd'
 import { ExclamationCircleFilled, CopyOutlined, DownloadOutlined } from '@ant-design/icons'
 import { useSearchParams } from 'react-router-dom'
 import { useQuery } from 'react-query'
 import Cookies from 'universal-cookie'
 import dayjs from 'dayjs'
+import { filter, uniq } from 'lodash'
 import { BsTrash } from 'react-icons/bs'
 import { API_URL } from '../../consts'
 import { SendingsStatus } from '../../components/SendingsStatus'
@@ -14,6 +15,8 @@ import { getCount, getSendings, deleteSendingById, updateSendingById, useDiction
 import { declOfNum, getPaginationSettings, localeNumber, copySending } from '../../utils/utils'
 import { getColumnSearchProps } from '../../utils/components'
 import { SENDING_STATUS } from '../../consts'
+import SelectUser from '../../components/SelectUser'
+import SelectRate from '../../components/SelectRate'
 
 const { Title, Link } = Typography
 export let PropertyGap = 10
@@ -24,6 +27,7 @@ export default function Sendings() {
   const navigate = useNavigate()
   const location = useLocation()
   const [ searchParams ] = useSearchParams()
+  const [ filters, setFilters ] = useState({})
   const [ activeOnly, setActiveOnly ] = useState(true)
   const isAir = searchParams.get('air') !== null
 
@@ -33,6 +37,19 @@ export default function Sendings() {
   const [ statusModalItem, setStatusModalItem ] = useState()
   const [ activeRow, setActiveRow ] = useState()
   const { isLoading, data, refetch } = useQuery(['sendings', { isAir }], getSendings(isAir))
+  
+  const filterOptions = useMemo(() => {
+    if (!data) return {}
+    return data.reduce((acc, item) => {
+      acc.clients = uniq([...acc.clients, ...item.clients])
+      acc.rates = uniq([...acc.rates, ...item.rates])
+      return acc
+    }, {
+      clients: [],
+      rates: []
+    })
+  }, [data])
+
   const drivers = useDictionary('drivers')
   const [ , driverMap ] = useMemo(() => {
     if (!Array.isArray(drivers.data?.list)) return [[], {}]
@@ -46,6 +63,15 @@ export default function Sendings() {
 
   let sendings = (data || [])
     .filter(item => activeOnly ? item.status !== 3 : item.status === 3)
+    .filter(item => {
+      let res = true
+      if (filters.client) res = (item.clients || []).includes(filters.client)
+      if (filters.rate) res = res && (item.rates || []).includes(filters.rate)
+      console.log(filters.mark, item.marks)
+      if (filters.mark) res = res && (item.labels || []).some(item => (item || '').toLowerCase().includes(filters.mark.toLowerCase()))
+      if (filters.article) res = res && (item.articles || []).some(item => (item || '').toLowerCase().includes(filters.article.toLowerCase()))
+      return res
+    })
     .map(item => {
       const isMaking = item.status === 0
       return {
@@ -237,11 +263,46 @@ export default function Sendings() {
         <div
           style={{
             display: 'flex',
-            justifyContent: 'flex-end',
+            alignItems: 'flex-end',
+            justifyContent: 'space-between',
             gap: '20px',
             width: '100%',
           }}
         >
+          <Row style={{ width: 800 }} gutter={10}>
+            <Col span={6}>
+              <SelectUser
+                role='1'
+                ids={filterOptions.clients}
+                placeholder='Клиент'
+                onChange={val => setFilters({ ...filters, client: val })}
+                clearable
+              />
+            </Col>
+            <SelectRate
+              span={6}
+              placeholder='Тариф'
+              ids={filterOptions.rates}
+              onChangeRate={val => setFilters({ ...filters, rate: val })}
+              showTarif={false}
+              withLabel={false}
+              clearable
+            />
+            <Col span={6}>
+              <Input
+                placeholder='Марка'
+                size='large'
+                onChange={(e) => setFilters({ ...filters, mark: e.target.value })}
+              />
+            </Col>
+            <Col span={6}>
+              <Input
+                placeholder='Артикул'
+                size='large'
+                onChange={(e) => setFilters({ ...filters, article: e.target.value })}
+              />
+            </Col>
+          </Row>
           <Button
             type='primary'
             onClick={() => {
